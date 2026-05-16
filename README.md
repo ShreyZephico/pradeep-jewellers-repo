@@ -1,4 +1,4 @@
-# Zephico Jewellery Website
+# Pradeep Jewellers Ecom
 
 Headless jewellery storefront built with Next.js and Shopify, backed by a PostgreSQL catalog system for structured products, variants, SKUs, sync logging, and Shopify reconciliation.
 
