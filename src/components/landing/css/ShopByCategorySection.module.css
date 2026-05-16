@@ -1,0 +1,463 @@
+/* ShopByCategorySection.module.css */
+
+.section {
+  position: relative;
+  padding: 100px 0;
+  background: linear-gradient(180deg, var(--color-warm-ivory) 0%, var(--color-pure-white) 100%);
+  overflow: hidden;
+}
+
+/* Animated background elements */
+.section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgb(var(--color-soft-gold-rgb) / 0.05), transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: floatBg 20s ease-in-out infinite;
+}
+
+.section::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgb(var(--color-rose-gold-rgb) / 0.05), transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: floatBg 25s ease-in-out infinite reverse;
+}
+
+@keyframes floatBg {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+}
+
+.container {
+  position: relative;
+  width: min(1280px, calc(100% - 48px));
+  margin: 0 auto;
+  z-index: 1;
+}
+
+/* Header Styles */
+.header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 70px;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.eyebrow {
+  margin: 0 0 16px;
+  color: var(--color-soft-gold);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  position: relative;
+  display: inline-block;
+}
+
+.eyebrow::before,
+.eyebrow::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 1px;
+  background: var(--color-soft-gold);
+  opacity: 0.5;
+}
+
+.eyebrow::before {
+  right: calc(100% + 15px);
+}
+
+.eyebrow::after {
+  left: calc(100% + 15px);
+}
+
+.title {
+  margin: 0 0 20px;
+  color: var(--color-deep-teal);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  font-family: var(--font-cormorant), 'Cormorant Garamond', serif;
+}
+
+.text {
+  margin: 0;
+  color: var(--color-charcoal);
+  font-size: 1rem;
+  line-height: 1.7;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  opacity: 0.8;
+}
+
+/* Grid Layout */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 20px;
+}
+
+/* Card Styles */
+.card {
+  position: relative;
+  background: var(--color-pure-white);
+  border-radius: 28px;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.8s ease-out forwards;
+  animation-delay: calc(var(--card-index, 0) * 0.15s);
+}
+
+.card:nth-child(1) {
+  --card-index: 1;
+}
+
+.card:nth-child(2) {
+  --card-index: 2;
+}
+
+.card:nth-child(3) {
+  --card-index: 3;
+}
+
+.card:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 30px 50px -20px rgb(var(--color-deep-teal-rgb) / 0.25);
+}
+
+/* Image Wrapper */
+.imageWrap {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  overflow: hidden;
+  background: var(--color-off-white);
+}
+
+.image {
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.card:hover .image {
+  transform: scale(1.08);
+}
+
+/* Overlay effect on image */
+.imageWrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgb(var(--color-deep-teal-rgb) / 0.3) 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.card:hover .imageWrap::after {
+  opacity: 1;
+}
+
+/* Content Styles */
+.content {
+  padding: 28px 24px 32px;
+  background: var(--color-pure-white);
+  position: relative;
+  z-index: 2;
+}
+
+.content h3 {
+  margin: 0 0 12px;
+  color: var(--color-deep-teal);
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-family: var(--font-cormorant), 'Cormorant Garamond', serif;
+  transition: color 0.3s ease;
+}
+
+.card:hover .content h3 {
+  color: var(--color-soft-gold);
+}
+
+.content p {
+  margin: 0 0 20px;
+  color: var(--color-charcoal);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  opacity: 0.8;
+}
+
+/* Link Styles */
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-deep-teal);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  position: relative;
+  padding-bottom: 2px;
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-soft-gold);
+  transition: width 0.3s ease;
+}
+
+.link:hover::after {
+  width: 100%;
+}
+
+.link:hover {
+  color: var(--color-soft-gold);
+  gap: 12px;
+}
+
+.link svg {
+  transition: transform 0.3s ease;
+}
+
+.link:hover svg {
+  transform: translateX(4px);
+}
+
+/* Decorative elements */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgb(var(--color-soft-gold-rgb) / 0.3);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.4s ease;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.card:hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.card::after {
+  content: '✦';
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  color: var(--color-soft-gold);
+  font-size: 1rem;
+  opacity: 0;
+  transform: translate(10px, -10px);
+  transition: all 0.4s ease;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.card:hover::after {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .section {
+    padding: 80px 0;
+  }
+
+  .grid {
+    gap: 24px;
+  }
+
+  .content {
+    padding: 24px 20px 28px;
+  }
+
+  .content h3 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 60px 0;
+  }
+
+  .header {
+    margin-bottom: 50px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .eyebrow::before,
+  .eyebrow::after {
+    width: 30px;
+  }
+
+  .eyebrow::before {
+    right: calc(100% + 10px);
+  }
+
+  .eyebrow::after {
+    left: calc(100% + 10px);
+  }
+
+  .title {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+  }
+
+  .text {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: 50px 0;
+  }
+
+  .container {
+    width: calc(100% - 32px);
+  }
+
+  .content {
+    padding: 20px 16px 24px;
+  }
+
+  .content h3 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+  }
+
+  .content p {
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+  }
+
+  .eyebrow {
+    font-size: 0.75rem;
+  }
+
+  .eyebrow::before,
+  .eyebrow::after {
+    display: none;
+  }
+}
+
+/* Hover effect for better interaction on touch devices */
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-12px);
+  }
+}
+
+@media (hover: none) {
+  .card:active {
+    transform: translateY(-5px);
+  }
+
+  .card:active .image {
+    transform: scale(1.05);
+  }
+}
+
+/* Optional: Add a subtle gradient border on cards */
+.card {
+  position: relative;
+  background: var(--color-pure-white);
+  border: 1px solid rgb(var(--color-soft-grey-rgb) / 0.5);
+}
+
+.card:hover {
+  border-color: rgb(var(--color-soft-gold-rgb) / 0.3);
+}
+
+/* Loading animation for images */
+.image {
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+/* Smooth scroll behavior for anchor links */
+.link {
+  cursor: pointer;
+}
+
+

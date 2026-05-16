@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: zephico-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: zephico_jewels
+      POSTGRES_USER: zephico
+      POSTGRES_PASSWORD: zephico_password
+    ports:
+      - "5435:5432"
+    volumes:
+      - zephico-postgres-data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+
+volumes:
+  zephico-postgres-data:

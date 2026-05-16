@@ -1,0 +1,749 @@
+/* BestSellerSection.module.css */
+
+.section {
+  position: relative;
+  padding: 100px 0;
+  background: linear-gradient(135deg, var(--color-warm-ivory) 0%, var(--color-off-white) 50%, var(--color-pure-white) 100%);
+  overflow: hidden;
+}
+
+/* Premium Background Elements Container */
+.bgElements {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Gold Dust Particles */
+.goldDust {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgb(var(--color-soft-gold-rgb) / 0.15) 1px, transparent 1px),
+    radial-gradient(circle at 85% 45%, rgb(var(--color-soft-gold-rgb) / 0.12) 1px, transparent 1px),
+    radial-gradient(circle at 30% 75%, rgb(var(--color-soft-gold-rgb) / 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 70% 15%, rgb(var(--color-soft-gold-rgb) / 0.08) 1px, transparent 1px);
+  background-size: 60px 60px, 80px 80px, 100px 100px, 120px 120px;
+  animation: floatGold 15s ease-in-out infinite;
+}
+
+@keyframes floatGold {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+
+  66% {
+    transform: translateY(5px) rotate(-1deg);
+  }
+}
+
+/* Diamond Sparkles Effect */
+.diamondSparkles {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(45deg,
+      transparent,
+      transparent 100px,
+      rgb(var(--color-rose-gold-rgb) / 0.08) 100px,
+      rgb(var(--color-rose-gold-rgb) / 0.08) 102px),
+    repeating-linear-gradient(-45deg,
+      transparent,
+      transparent 100px,
+      rgb(var(--color-soft-gold-rgb) / 0.05) 100px,
+      rgb(var(--color-soft-gold-rgb) / 0.05) 102px);
+  animation: sparkle 3s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Luxury Geometric Pattern */
+.luxuryPattern {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(90deg,
+      rgb(var(--color-soft-gold-rgb) / 0.03) 0px,
+      rgb(var(--color-soft-gold-rgb) / 0.03) 1px,
+      transparent 1px,
+      transparent 40px),
+    repeating-linear-gradient(0deg,
+      rgb(var(--color-soft-gold-rgb) / 0.03) 0px,
+      rgb(var(--color-soft-gold-rgb) / 0.03) 1px,
+      transparent 1px,
+      transparent 40px);
+}
+
+/* Marble Texture */
+.marbleTexture {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 30%, rgb(var(--color-pure-white-rgb) / 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgb(var(--color-soft-gold-rgb) / 0.05) 0%, transparent 50%);
+  opacity: 0.5;
+}
+
+/* Gold Line Pattern */
+.goldLinePattern {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(to bottom,
+      transparent,
+      transparent 50px,
+      rgb(var(--color-soft-gold-rgb) / 0.04) 50px,
+      rgb(var(--color-soft-gold-rgb) / 0.04) 52px),
+    repeating-linear-gradient(to right,
+      transparent,
+      transparent 50px,
+      rgb(var(--color-soft-gold-rgb) / 0.04) 50px,
+      rgb(var(--color-soft-gold-rgb) / 0.04) 52px);
+}
+
+/* Floating Diamonds */
+.floatingDiamonds {
+  position: absolute;
+  inset: 0;
+}
+
+.floatingDiamonds::before,
+.floatingDiamonds::after,
+.floatingDiamonds div {
+  content: '✦';
+  position: absolute;
+  color: rgb(var(--color-soft-gold-rgb) / 0.15);
+  font-size: 20px;
+  animation: floatDiamond 8s ease-in-out infinite;
+}
+
+.floatingDiamonds::before {
+  top: 15%;
+  left: 5%;
+  animation-delay: 0s;
+  font-size: 30px;
+}
+
+.floatingDiamonds::after {
+  top: 70%;
+  right: 8%;
+  animation-delay: 2s;
+  font-size: 25px;
+}
+
+.floatingDiamonds div:nth-child(1) {
+  top: 40%;
+  left: 90%;
+  animation-delay: 1s;
+}
+
+.floatingDiamonds div:nth-child(2) {
+  top: 85%;
+  left: 15%;
+  animation-delay: 3s;
+}
+
+.floatingDiamonds div:nth-child(3) {
+  top: 10%;
+  right: 20%;
+  animation-delay: 1.5s;
+}
+
+@keyframes floatDiamond {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.15;
+  }
+
+  33% {
+    transform: translateY(-20px) rotate(10deg);
+    opacity: 0.25;
+  }
+
+  66% {
+    transform: translateY(10px) rotate(-5deg);
+    opacity: 0.1;
+  }
+}
+
+/* Animated Gradient Orbs */
+.section {
+  position: relative;
+  isolation: isolate;
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgb(var(--color-soft-gold-rgb) / 0.08), transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: floatBg1 20s ease-in-out infinite;
+  z-index: 0;
+}
+
+.section::after {
+  content: '';
+  position: absolute;
+  bottom: -20%;
+  left: -10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgb(var(--color-rose-gold-rgb) / 0.08), transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: floatBg2 25s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes floatBg1 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+}
+
+@keyframes floatBg2 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(-25px, 35px) scale(1.05);
+  }
+
+  66% {
+    transform: translate(20px, -25px) scale(0.98);
+  }
+}
+
+/* Container */
+.container {
+  position: relative;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+  z-index: 2;
+}
+
+/* Header Styles */
+.header {
+  margin-bottom: 60px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+.header.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.headerContent {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  color: var(--color-soft-gold);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+}
+
+.eyebrowLine {
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-soft-gold), var(--color-soft-gold), transparent);
+}
+
+.title {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 500;
+  color: var(--color-deep-teal);
+  margin-bottom: 20px;
+  line-height: 1.2;
+  font-family: var(--font-cormorant), 'Cormorant Garamond', serif;
+}
+
+.goldText {
+  color: var(--color-soft-gold);
+  position: relative;
+  display: inline-block;
+}
+
+.goldText::before {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-soft-gold), var(--color-soft-gold), transparent);
+  transform: scaleX(0);
+  transition: transform 0.6s ease;
+}
+
+.header.visible .goldText::before {
+  transform: scaleX(1);
+}
+
+.description {
+  font-size: 1rem;
+  color: var(--color-charcoal);
+  line-height: 1.6;
+  margin-bottom: 30px;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  opacity: 0.8;
+}
+
+.headerAccent {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-soft-gold), var(--color-rose-gold));
+  margin: 0 auto;
+  border-radius: 2px;
+  position: relative;
+}
+
+.headerAccent::before,
+.headerAccent::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--color-soft-gold);
+  border-radius: 50%;
+  top: -1px;
+}
+
+.headerAccent::before {
+  left: -10px;
+}
+
+.headerAccent::after {
+  right: -10px;
+}
+
+/* Grid Layout */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) 0.2s;
+}
+
+.grid.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Card Styles */
+.card {
+  background: rgb(var(--color-pure-white-rgb) / 0.95);
+  backdrop-filter: blur(5px);
+  border-radius: 24px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  border: 1px solid rgb(var(--color-soft-gold-rgb) / 0.15);
+  opacity: 0;
+  animation: fadeInUp 0.6s ease-out forwards;
+  position: relative;
+  box-shadow: 0 10px 30px rgb(var(--color-black-rgb) / 0.05);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-soft-gold), var(--color-rose-gold), var(--color-soft-gold));
+  transform: translateY(-100%);
+  transition: transform 0.4s ease;
+  z-index: 3;
+}
+
+.card:hover::before {
+  transform: translateY(0);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px rgb(var(--color-soft-gold-rgb) / 0.12);
+  border-color: rgb(var(--color-soft-gold-rgb) / 0.3);
+}
+
+/* Image Wrapper */
+.imageWrap {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-off-white) 0%, var(--color-warm-ivory) 100%);
+}
+
+.image {
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.card:hover .image {
+  transform: scale(1.08);
+}
+
+.imageOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgb(var(--color-soft-gold-rgb) / 0.2) 0%, transparent 50%, rgb(var(--color-deep-teal-rgb) / 0.2) 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.card:hover .imageOverlay {
+  opacity: 1;
+}
+
+/* Badge */
+.badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, var(--color-soft-gold) 0%, var(--color-soft-gold-alt) 100%);
+  color: var(--color-deep-teal);
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 20px;
+  z-index: 2;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgb(var(--color-black-rgb) / 0.1);
+}
+
+/* Quick View Button */
+.quickView {
+  position: absolute;
+  bottom: -50px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  transition: bottom 0.3s ease;
+  z-index: 2;
+}
+
+.card:hover .quickView {
+  bottom: 20px;
+}
+
+.quickViewBtn {
+  background: rgb(var(--color-deep-teal-rgb) / 0.95);
+  backdrop-filter: blur(10px);
+  color: var(--color-pure-white);
+  border: 1px solid rgb(var(--color-soft-gold-rgb) / 0.3);
+  padding: 8px 20px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+}
+
+.quickViewBtn:hover {
+  background: var(--color-soft-gold);
+  color: var(--color-deep-teal);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(var(--color-soft-gold-rgb) / 0.3);
+}
+
+/* Card Body */
+.body {
+  padding: 24px;
+}
+
+.productType {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.7rem;
+  color: var(--color-soft-gold);
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+}
+
+.typeDot {
+  width: 4px;
+  height: 4px;
+  background: var(--color-soft-gold);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.productName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-deep-teal);
+  margin-bottom: 12px;
+  line-height: 1.4;
+  font-family: var(--font-cormorant), 'Cormorant Garamond', serif;
+  transition: color 0.3s ease;
+}
+
+.card:hover .productName {
+  color: var(--color-soft-gold);
+}
+
+.copy {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-charcoal);
+  margin-bottom: 20px;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  opacity: 0.8;
+}
+
+/* Price Row */
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.currentPrice {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-deep-teal);
+  font-family: var(--font-playfair), 'Playfair Display', serif;
+}
+
+.originalPrice {
+  font-size: 0.9rem;
+  color: var(--color-soft-grey);
+  text-decoration: line-through;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+}
+
+/* Action Button */
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 20px;
+  background: transparent;
+  color: var(--color-deep-teal);
+  text-decoration: none;
+  border: 1px solid var(--color-soft-grey);
+  border-radius: 40px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.action::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgb(var(--color-soft-gold-rgb) / 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.action:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.action:hover {
+  background: var(--color-deep-teal);
+  border-color: var(--color-deep-teal);
+  color: var(--color-pure-white);
+  gap: 12px;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgb(var(--color-deep-teal-rgb) / 0.2);
+}
+
+.action svg {
+  transition: transform 0.3s ease;
+}
+
+.action:hover svg {
+  transform: translateX(4px);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .grid {
+    gap: 24px;
+  }
+
+  .body {
+    padding: 20px;
+  }
+
+  .productName {
+    font-size: 1rem;
+  }
+
+  .copy {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+
+  .section {
+    padding: 80px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 60px 0;
+  }
+
+  .container {
+    padding: 0 24px;
+  }
+
+  .header {
+    margin-bottom: 40px;
+  }
+
+  .title {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+  }
+
+  .description {
+    font-size: 0.9rem;
+  }
+
+  .eyebrowLine {
+    width: 30px;
+  }
+
+  .floatingDiamonds::before,
+  .floatingDiamonds::after {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .section {
+    padding: 50px 0;
+  }
+
+  .body {
+    padding: 20px;
+  }
+
+  .productName {
+    font-size: 1.1rem;
+  }
+
+  .copy {
+    font-size: 0.85rem;
+  }
+
+  .currentPrice {
+    font-size: 1.1rem;
+  }
+}
+
+/* Performance Optimizations */
+@media (prefers-reduced-motion: no-preference) {
+
+  .card,
+  .action,
+  .quickViewBtn {
+    will-change: transform;
+  }
+}
+
+

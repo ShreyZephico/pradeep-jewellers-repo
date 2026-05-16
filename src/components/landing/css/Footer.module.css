@@ -1,0 +1,608 @@
+/* Footer.module.css */
+
+.footer {
+  position: relative;
+  background: linear-gradient(135deg, var(--color-deep-teal) 0%, var(--color-deep-teal-accent) 50%, var(--color-deep-teal) 100%);
+  color: var(--color-pure-white);
+  overflow: hidden;
+  margin-top: 80px;
+}
+
+/* Animated Background Elements */
+.bgElements {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.goldParticles {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 15% 30%, rgb(var(--color-soft-gold-rgb) / 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 85% 55%, rgb(var(--color-soft-gold-rgb) / 0.06) 1px, transparent 1px),
+    radial-gradient(circle at 45% 85%, rgb(var(--color-rose-gold-rgb) / 0.05) 1px, transparent 1px);
+  background-size: 60px 60px, 80px 80px, 100px 100px;
+  animation: floatParticles 20s ease-in-out infinite;
+}
+
+@keyframes floatParticles {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  33% {
+    transform: translateY(-10px);
+  }
+
+  66% {
+    transform: translateY(5px);
+  }
+}
+
+.glowOrb1 {
+  position: absolute;
+  top: -30%;
+  right: -15%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgb(var(--color-soft-gold-rgb) / 0.08), transparent 70%);
+  border-radius: 50%;
+  animation: floatOrb1 20s ease-in-out infinite;
+}
+
+.glowOrb2 {
+  position: absolute;
+  bottom: -30%;
+  left: -15%;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgb(var(--color-rose-gold-rgb) / 0.06), transparent 70%);
+  border-radius: 50%;
+  animation: floatOrb2 25s ease-in-out infinite;
+}
+
+@keyframes floatOrb1 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -20px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 15px) scale(0.95);
+  }
+}
+
+@keyframes floatOrb2 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(-25px, 30px) scale(1.05);
+  }
+
+  66% {
+    transform: translate(20px, -20px) scale(0.98);
+  }
+}
+
+.goldLinePattern {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg,
+      transparent,
+      transparent 100px,
+      rgb(var(--color-soft-gold-rgb) / 0.03) 100px,
+      rgb(var(--color-soft-gold-rgb) / 0.03) 102px);
+}
+
+.container {
+  position: relative;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 60px 48px 30px;
+  z-index: 2;
+}
+
+/* Main Content Grid */
+.mainContent {
+  display: grid;
+  grid-template-columns: 1.5fr 0.8fr 0.8fr 1.2fr;
+  gap: 40px;
+  margin-bottom: 50px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgb(var(--color-soft-gold-rgb) / 0.2);
+}
+
+/* Brand Section */
+.brandSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logoWrapper {
+  margin-bottom: 8px;
+}
+
+.logo {
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.brandDescription {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: rgb(var(--color-pure-white-rgb) / 0.8);
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Montserrat', sans-serif;
+}
+
+.tagline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--color-soft-gold);
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-style: italic;
+}
+
+.taglineIcon {
+  font-size: 0.9rem;
+}
+
+.trustBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.trustBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: rgb(var(--color-pure-white-rgb) / 0.7);
+  background: rgb(var(--color-pure-white-rgb) / 0.05);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Montserrat', sans-serif;
+}
+
+.trustIcon {
+  color: var(--color-soft-gold);
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+/* Links Sections */
+.linksSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-soft-gold);
+  margin: 0;
+  font-family: 'Georgia', 'Times New Roman', 'Cormorant Garamond', serif;
+  letter-spacing: 1px;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 8px;
+}
+
+.sectionTitle::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: var(--color-soft-gold);
+}
+
+.linkList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.linkList li {
+  margin: 0;
+}
+
+.link {
+  color: rgb(var(--color-pure-white-rgb) / 0.7);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Montserrat', sans-serif;
+  display: inline-block;
+}
+
+.link:hover {
+  color: var(--color-soft-gold);
+  transform: translateX(5px);
+}
+
+/* Contact Section */
+.contactSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: rgb(var(--color-pure-white-rgb) / 0.8);
+  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Montserrat', sans-serif;
+}
+
+.contactIcon {
+  font-size: 1rem;
+  min-width: 24px;
+}
+
+.contactLink {
+  color: rgb(var(--color-pure-white-rgb) / 0.8);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.contactLink:hover {
+  color: var(--color-soft-gold);
+}
+
+/* Newsletter Section */
+.newsletterSection {
+  margin-bottom: 40px;
+  padding: 30px 0;
+  border-bottom: 1px solid rgb(var(--color-soft-gold-rgb) / 0.2);
+}
+
+.newsletterContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.newsletterText h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: var(--color-pure-white);
+  font-family: 'Georgia', 'Times New Roman', 'Cormorant Garamond', serif;
+}
+
+.newsletterText p {
+  font-size: 0.85rem;
+  color: rgb(var(--color-pure-white-rgb) / 0.7);
+  margin: 0;
+}
+
+.newsletterForm {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  max-width: 450px;
+}
+
+.newsletterInput {
+  flex: 1;
+  padding: 12px 18px;
+  border: 1px solid rgb(var(--color-soft-gold-rgb) / 0.3);
+  border-radius: 50px;
+  background: rgb(var(--color-pure-white-rgb) / 0.1);
+  color: var(--color-pure-white);
+  font-size: 0.85rem;
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Montserrat', sans-serif;
+}
+
+.newsletterInput::placeholder {
+  color: rgb(var(--color-pure-white-rgb) / 0.5);
+}
+
+.newsletterInput:focus {
+  border-color: var(--color-soft-gold);
+  background: rgb(var(--color-pure-white-rgb) / 0.15);
+}
+
+.newsletterButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, var(--color-soft-gold) 0%, var(--color-soft-gold-alt) 100%);
+  color: var(--color-deep-teal);
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Montserrat', sans-serif;
+  white-space: nowrap;
+}
+
+.newsletterButton:hover {
+  transform: translateY(-2px);
+  gap: 12px;
+  box-shadow: 0 5px 15px rgb(var(--color-soft-gold-rgb) / 0.3);
+}
+
+/* Bottom Bar */
+.bottomBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding-top: 30px;
+}
+
+.socialLinks {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgb(var(--color-pure-white-rgb) / 0.7);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  padding: 6px 12px;
+  border-radius: 30px;
+  background: rgb(var(--color-pure-white-rgb) / 0.05);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Montserrat', sans-serif;
+}
+
+.socialLink:hover {
+  color: var(--color-soft-gold);
+  transform: translateY(-2px);
+  background: rgb(var(--color-soft-gold-rgb) / 0.1);
+}
+
+.socialIcon {
+  font-size: 1rem;
+}
+
+.socialName {
+  font-size: 0.8rem;
+}
+
+.copyright {
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgb(var(--color-pure-white-rgb) / 0.5);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Montserrat', sans-serif;
+}
+
+.copyright p {
+  margin: 0 0 8px 0;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.footerLinks a {
+  color: rgb(var(--color-pure-white-rgb) / 0.5);
+  text-decoration: none;
+  font-size: 0.7rem;
+  transition: color 0.3s ease;
+}
+
+.footerLinks a:hover {
+  color: var(--color-soft-gold);
+}
+
+.separator {
+  color: rgb(var(--color-pure-white-rgb) / 0.3);
+}
+
+.paymentMethods {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgb(var(--color-pure-white-rgb) / 0.05);
+  padding: 8px 16px;
+  border-radius: 50px;
+}
+
+.paymentIcon {
+  font-size: 1.1rem;
+}
+
+.paymentText {
+  font-size: 0.75rem;
+  color: rgb(var(--color-pure-white-rgb) / 0.7);
+  font-weight: 500;
+}
+
+/* Back to Top Button */
+.backToTop {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 45px;
+  height: 45px;
+  background: var(--color-soft-gold);
+  color: var(--color-deep-teal);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 100;
+  box-shadow: 0 4px 15px rgb(var(--color-soft-gold-rgb) / 0.3);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.backToTop:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgb(var(--color-soft-gold-rgb) / 0.4);
+}
+
+/* Show back to top button on scroll (add in component) */
+.backToTop.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .mainContent {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+  }
+
+  .container {
+    padding: 50px 32px 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+    gap: 35px;
+  }
+
+  .container {
+    padding: 40px 24px 30px;
+  }
+
+  .newsletterContent {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .newsletterForm {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .bottomBar {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .socialLinks {
+    justify-content: center;
+  }
+
+  .paymentMethods {
+    justify-content: center;
+  }
+
+  .sectionTitle::after {
+    left: 0;
+    right: auto;
+  }
+
+  .linksSection {
+    text-align: center;
+  }
+
+  .sectionTitle::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .contactItem {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 30px 20px 20px;
+  }
+
+  .newsletterForm {
+    flex-direction: column;
+  }
+
+  .newsletterButton {
+    justify-content: center;
+  }
+
+  .trustBadges {
+    justify-content: center;
+  }
+
+  .brandSection {
+    text-align: center;
+  }
+
+  .logoWrapper {
+    display: flex;
+    justify-content: center;
+  }
+
+  .tagline {
+    justify-content: center;
+  }
+
+  .footerLinks {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .separator {
+    display: none;
+  }
+
+  .socialLink {
+    padding: 6px 10px;
+  }
+
+  .socialName {
+    font-size: 0.75rem;
+  }
+}
+
+

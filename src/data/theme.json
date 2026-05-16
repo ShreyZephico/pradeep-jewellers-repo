@@ -1,0 +1,44 @@
+{
+  "colors": {
+    "deepTeal": "#0A2B2E",
+    "deepTealAlt": "#153D41",
+    "deepTealAccent": "#0D3639",
+    "softGold": "#D4AF37",
+    "softGoldAlt": "#C5A336",
+    "softGoldDeep": "#B8960C",
+    "warmIvory": "#FDF8F0",
+    "charcoal": "#2C2C2C",
+    "offWhite": "#F9F6EE",
+    "roseGold": "#E8B4B8",
+    "pureWhite": "#FFFFFF",
+    "softGrey": "#E2DFD7",
+    "black": "#000000",
+    "muted": "#999999",
+    "mutedDark": "#666666",
+    "success": "#4CAF50",
+    "successDark": "#2E7D32",
+    "error": "#F44336",
+    "errorDark": "#C62828"
+  },
+  "rgb": {
+    "deepTeal": "10 43 46",
+    "deepTealAlt": "21 61 65",
+    "deepTealAccent": "13 54 57",
+    "softGold": "212 175 55",
+    "softGoldAlt": "197 163 54",
+    "softGoldDeep": "184 150 12",
+    "warmIvory": "253 248 240",
+    "charcoal": "44 44 44",
+    "offWhite": "249 246 238",
+    "roseGold": "232 180 184",
+    "pureWhite": "255 255 255",
+    "softGrey": "226 223 215",
+    "black": "0 0 0",
+    "success": "76 175 80",
+    "error": "244 67 54"
+  },
+  "usage": {
+    "liveThemeSource": "src/app/globals.css",
+    "note": "Update the CSS variables in globals.css to change the landing theme in one place."
+  }
+}

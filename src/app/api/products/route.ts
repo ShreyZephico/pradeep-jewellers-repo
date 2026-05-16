@@ -1,0 +1,58 @@
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+import { getProductsPage } from "@/lib/shopify";
+
+const DEFAULT_LIMIT = 10;
+const MAX_LIMIT = 50;
+
+/** Commas break Shopify search parsing; normalize for search. */
+function sanitizeSearchInput(value: string): string {
+  return value.replace(/,/g, " ").trim();
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
+    const limitRaw =
+      parseInt(searchParams.get("limit") || String(DEFAULT_LIMIT), 10) ||
+      DEFAULT_LIMIT;
+    const limit = Math.min(MAX_LIMIT, Math.max(1, limitRaw));
+    const q = sanitizeSearchInput(searchParams.get("q") ?? "");
+    const category = searchParams.get("category") ?? "all";
+
+    const { products, total, totalPages } = await getProductsPage({
+      page,
+      limit,
+      q,
+      category,
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        total,
+        page,
+        limit,
+        totalPages,
+        products,
+      },
+      {
+        headers: {
+          "Cache-Control": "private, s-maxage=30, stale-while-revalidate=120",
+        },
+      }
+    );
+  } catch (error: unknown) {
+    console.error("Products API Error:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Internal Server Error",
+      },
+      { status: 500 }
+    );
+  }
+}

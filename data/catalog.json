@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "defaults": {
+    "vendor": "Pradeep Jewellery",
+    "category_code": "RING",
+    "making_charge": 15,
+    "status": "active",
+    "customizable": false,
+    "sizes": ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"],
+    "metals": ["YGLD", "RGLD", "WGLD"],
+    "diamond_qualities": ["IJSI", "GHVS", "EFVV"],
+    "carats": ["18K", "22K"]
+  },
+  "categories": [
+    {
+      "name": "Ring",
+      "code": "RING",
+      "description": "Diamond and gold ring designs for daily wear and occasion styling.",
+      "active": true
+    },
+    {
+      "name": "Necklace",
+      "code": "NECK",
+      "description": "Reserved for future necklace catalog expansion.",
+      "active": true
+    },
+    {
+      "name": "Nose Pin",
+      "code": "NOSE",
+      "description": "Reserved for future nose pin catalog expansion.",
+      "active": true
+    },
+    {
+      "name": "Earring",
+      "code": "EARR",
+      "description": "Reserved for future earring catalog expansion.",
+      "active": true
+    },
+    {
+      "name": "Bracelet",
+      "code": "BRAC",
+      "description": "Reserved for future bracelet catalog expansion.",
+      "active": true
+    }
+  ],
+  "sizes": [
+    { "label": "5", "mm_value": "45.0 mm", "display_order": 1, "active": true },
+    { "label": "6", "mm_value": "46.1 mm", "display_order": 2, "active": true },
+    { "label": "7", "mm_value": "47.1 mm", "display_order": 3, "active": true },
+    { "label": "8", "mm_value": "48.0 mm", "display_order": 4, "active": true },
+    { "label": "9", "mm_value": "49.0 mm", "display_order": 5, "active": true },
+    { "label": "10", "mm_value": "50.0 mm", "display_order": 6, "active": true },
+    { "label": "11", "mm_value": "50.9 mm", "display_order": 7, "active": true },
+    { "label": "12", "mm_value": "51.8 mm", "display_order": 8, "active": true },
+    { "label": "13", "mm_value": "52.8 mm", "display_order": 9, "active": true },
+    { "label": "14", "mm_value": "53.8 mm", "display_order": 10, "active": true },
+    { "label": "15", "mm_value": "54.7 mm", "display_order": 11, "active": true },
+    { "label": "16", "mm_value": "55.7 mm", "display_order": 12, "active": true },
+    { "label": "17", "mm_value": "56.8 mm", "display_order": 13, "active": true },
+    { "label": "18", "mm_value": "57.8 mm", "display_order": 14, "active": true },
+    { "label": "19", "mm_value": "58.8 mm", "display_order": 15, "active": true },
+    { "label": "20", "mm_value": "59.7 mm", "display_order": 16, "active": true },
+    { "label": "21", "mm_value": "60.7 mm", "display_order": 17, "active": true },
+    { "label": "22", "mm_value": "61.6 mm", "display_order": 18, "active": true },
+    { "label": "23", "mm_value": "62.6 mm", "display_order": 19, "active": true },
+    { "label": "24", "mm_value": "63.5 mm", "display_order": 20, "active": true },
+    { "label": "25", "mm_value": "64.4 mm", "display_order": 21, "active": true }
+  ],
+  "metals": [
+    { "name": "Yellow Gold", "code": "YGLD", "price_adjustment": 0, "active": true },
+    { "name": "Rose Gold", "code": "RGLD", "price_adjustment": 450, "active": true },
+    { "name": "White Gold", "code": "WGLD", "price_adjustment": 950, "active": true }
+  ],
+  "diamond_qualities": [
+    { "name": "IJ-SI", "code": "IJSI", "price_adjustment": 0, "active": true },
+    { "name": "GH-VS", "code": "GHVS", "price_adjustment": 4200, "active": true },
+    { "name": "EF-VVS", "code": "EFVV", "price_adjustment": 8900, "active": true }
+  ],
+  "carats": [
+    { "name": "18K", "code": "18K", "price_adjustment": 0, "active": true },
+    { "name": "22K", "code": "22K", "price_adjustment": 5200, "active": true }
+  ],
+  "colors": [],
+  "products": [
+    { "product_code": "RING001", "name": "Aurora Weave Diamond Ring", "slug": "aurora-weave-diamond-ring", "description": "Aurora Weave Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Aurora Weave Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 12800, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=1" },
+    { "product_code": "RING002", "name": "Celeste Bloom Diamond Ring", "slug": "celeste-bloom-diamond-ring", "description": "Celeste Bloom Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Celeste Bloom Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 14280, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=2" },
+    { "product_code": "RING003", "name": "Noor Halo Gold Ring", "slug": "noor-halo-gold-ring", "description": "Noor Halo Gold Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Noor Halo Gold Ring with certified diamonds and made-to-order sizing.", "base_price": 15760, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=3" },
+    { "product_code": "RING004", "name": "Solstice Knot Diamond Ring", "slug": "solstice-knot-diamond-ring", "description": "Solstice Knot Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Solstice Knot Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 17240, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=4" },
+    { "product_code": "RING005", "name": "Marigold Whisper Ring", "slug": "marigold-whisper-ring", "description": "Marigold Whisper Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Marigold Whisper Ring with certified diamonds and made-to-order sizing.", "base_price": 18720, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=5" },
+    { "product_code": "RING006", "name": "Luna Crest Diamond Ring", "slug": "luna-crest-diamond-ring", "description": "Luna Crest Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Luna Crest Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 16950, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=6" },
+    { "product_code": "RING007", "name": "Iris Leaf Gold Ring", "slug": "iris-leaf-gold-ring", "description": "Iris Leaf Gold Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Iris Leaf Gold Ring with certified diamonds and made-to-order sizing.", "base_price": 18430, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=7" },
+    { "product_code": "RING008", "name": "Aster Wave Diamond Ring", "slug": "aster-wave-diamond-ring", "description": "Aster Wave Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Aster Wave Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 19910, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=8" },
+    { "product_code": "RING009", "name": "Elara Twirl Gold Ring", "slug": "elara-twirl-gold-ring", "description": "Elara Twirl Gold Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Elara Twirl Gold Ring with certified diamonds and made-to-order sizing.", "base_price": 21390, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=9" },
+    { "product_code": "RING010", "name": "Mira Crown Diamond Ring", "slug": "mira-crown-diamond-ring", "description": "Mira Crown Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Mira Crown Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 22870, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=10" },
+    { "product_code": "RING011", "name": "Saanvi Cluster Diamond Ring", "slug": "saanvi-cluster-diamond-ring", "description": "Saanvi Cluster Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Saanvi Cluster Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 21100, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=11" },
+    { "product_code": "RING012", "name": "Zaria Loop Gold Ring", "slug": "zaria-loop-gold-ring", "description": "Zaria Loop Gold Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Zaria Loop Gold Ring with certified diamonds and made-to-order sizing.", "base_price": 22580, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=12" },
+    { "product_code": "RING013", "name": "Anika Grace Diamond Ring", "slug": "anika-grace-diamond-ring", "description": "Anika Grace Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Anika Grace Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 24060, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=13" },
+    { "product_code": "RING014", "name": "Tara Dew Diamond Ring", "slug": "tara-dew-diamond-ring", "description": "Tara Dew Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Tara Dew Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 25540, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=14" },
+    { "product_code": "RING015", "name": "Kiara Orbit Gold Ring", "slug": "kiara-orbit-gold-ring", "description": "Kiara Orbit Gold Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Kiara Orbit Gold Ring with certified diamonds and made-to-order sizing.", "base_price": 27020, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=15" },
+    { "product_code": "RING016", "name": "Myra Vine Diamond Ring", "slug": "myra-vine-diamond-ring", "description": "Myra Vine Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Myra Vine Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 25250, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=16" },
+    { "product_code": "RING017", "name": "Veda Bloom Gold Ring", "slug": "veda-bloom-gold-ring", "description": "Veda Bloom Gold Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Veda Bloom Gold Ring with certified diamonds and made-to-order sizing.", "base_price": 26730, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=17" },
+    { "product_code": "RING018", "name": "Rhea Spark Diamond Ring", "slug": "rhea-spark-diamond-ring", "description": "Rhea Spark Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Rhea Spark Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 28210, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=18" },
+    { "product_code": "RING019", "name": "Alina Drift Gold Ring", "slug": "alina-drift-gold-ring", "description": "Alina Drift Gold Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Alina Drift Gold Ring with certified diamonds and made-to-order sizing.", "base_price": 29690, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=19" },
+    { "product_code": "RING020", "name": "Nyra Charm Diamond Ring", "slug": "nyra-charm-diamond-ring", "description": "Nyra Charm Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Nyra Charm Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 31170, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=20" },
+    { "product_code": "RING021", "name": "Eesha Petal Gold Ring", "slug": "eesha-petal-gold-ring", "description": "Eesha Petal Gold Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Eesha Petal Gold Ring with certified diamonds and made-to-order sizing.", "base_price": 29400, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=21" },
+    { "product_code": "RING022", "name": "Samaira Arc Diamond Ring", "slug": "samaira-arc-diamond-ring", "description": "Samaira Arc Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Samaira Arc Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 30880, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=22" },
+    { "product_code": "RING023", "name": "Ira Gleam Ring", "slug": "ira-gleam-ring", "description": "Ira Gleam Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Ira Gleam Ring with certified diamonds and made-to-order sizing.", "base_price": 32360, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=23" },
+    { "product_code": "RING024", "name": "Kavya Meadow Diamond Ring", "slug": "kavya-meadow-diamond-ring", "description": "Kavya Meadow Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Kavya Meadow Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 33840, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=24" },
+    { "product_code": "RING025", "name": "Avni Twist Gold Ring", "slug": "avni-twist-gold-ring", "description": "Avni Twist Gold Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Avni Twist Gold Ring with certified diamonds and made-to-order sizing.", "base_price": 35320, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=25" },
+    { "product_code": "RING026", "name": "Tiana Cascade Diamond Ring", "slug": "tiana-cascade-diamond-ring", "description": "Tiana Cascade Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Tiana Cascade Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 33550, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=26" },
+    { "product_code": "RING027", "name": "Reya Heartline Ring", "slug": "reya-heartline-ring", "description": "Reya Heartline Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Reya Heartline Ring with certified diamonds and made-to-order sizing.", "base_price": 35030, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=27" },
+    { "product_code": "RING028", "name": "Diya Mist Diamond Ring", "slug": "diya-mist-diamond-ring", "description": "Diya Mist Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Diya Mist Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 36510, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=28" },
+    { "product_code": "RING029", "name": "Amaira Petiole Gold Ring", "slug": "amaira-petiole-gold-ring", "description": "Amaira Petiole Gold Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Amaira Petiole Gold Ring with certified diamonds and made-to-order sizing.", "base_price": 37990, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=29" },
+    { "product_code": "RING030", "name": "Meher Silhouette Diamond Ring", "slug": "meher-silhouette-diamond-ring", "description": "Meher Silhouette Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Meher Silhouette Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 39470, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=30" },
+    { "product_code": "RING031", "name": "Aarya Glow Ring", "slug": "aarya-glow-ring", "description": "Aarya Glow Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Aarya Glow Ring with certified diamonds and made-to-order sizing.", "base_price": 37700, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=31" },
+    { "product_code": "RING032", "name": "Sia Willow Diamond Ring", "slug": "sia-willow-diamond-ring", "description": "Sia Willow Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Sia Willow Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 39180, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=32" },
+    { "product_code": "RING033", "name": "Oorja Velvet Ring", "slug": "oorja-velvet-ring", "description": "Oorja Velvet Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Oorja Velvet Ring with certified diamonds and made-to-order sizing.", "base_price": 40660, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=33" },
+    { "product_code": "RING034", "name": "Charvi Link Diamond Ring", "slug": "charvi-link-diamond-ring", "description": "Charvi Link Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Charvi Link Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 42140, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=34" },
+    { "product_code": "RING035", "name": "Inaaya Flora Ring", "slug": "inaaya-flora-ring", "description": "Inaaya Flora Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Inaaya Flora Ring with certified diamonds and made-to-order sizing.", "base_price": 43620, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=35" },
+    { "product_code": "RING036", "name": "Prisha Lattice Diamond Ring", "slug": "prisha-lattice-diamond-ring", "description": "Prisha Lattice Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Prisha Lattice Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 41850, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=36" },
+    { "product_code": "RING037", "name": "Mahika Zeal Ring", "slug": "mahika-zeal-ring", "description": "Mahika Zeal Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Mahika Zeal Ring with certified diamonds and made-to-order sizing.", "base_price": 43330, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=37" },
+    { "product_code": "RING038", "name": "Yana Serenade Diamond Ring", "slug": "yana-serenade-diamond-ring", "description": "Yana Serenade Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Yana Serenade Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 44810, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=38" },
+    { "product_code": "RING039", "name": "Pari Ripple Ring", "slug": "pari-ripple-ring", "description": "Pari Ripple Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Pari Ripple Ring with certified diamonds and made-to-order sizing.", "base_price": 46290, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=39" },
+    { "product_code": "RING040", "name": "Vanya Radiance Diamond Ring", "slug": "vanya-radiance-diamond-ring", "description": "Vanya Radiance Diamond Ring is designed as a modern daily-wear ring with a refined profile, certified diamonds, and yellow, rose, and white gold finishing options.", "short_description": "Vanya Radiance Diamond Ring with certified diamonds and made-to-order sizing.", "base_price": 47770, "default_image_url": "https://loremflickr.com/1200/1200/ring,jewellery?lock=40" }
+  ]
+}

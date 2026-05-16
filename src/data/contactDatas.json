@@ -1,0 +1,766 @@
+{
+  "brand": {
+    "name": "Pradeep Jewellers",
+    "tagline": "Crafting Dreams Since 1972",
+    "logo": "f9f2640b-0d54-4585-8cb2-4f234cadd88c_rhemp2"
+  },
+
+  "header": {
+    "promoText": "✨ 20% off diamond price on your chosen design",
+    "recentlyViewed": "ANNIVERSARY SCHEME ✨",
+    "videoCallText": "Video Call Consultation"
+  },
+
+  "contact": {
+    "phone": "+91 9265075114",
+    "email": "hello@pradeepjewellers.com"
+  },
+
+  "social": {
+    "instagram": "https://instagram.com/pradeepjewellers",
+    "facebook": "https://facebook.com/pradeepjewellers",
+    "youtube": "https://youtube.com/pradeepjewellers",
+    "whatsapp": "https://wa.me/919265075114"
+  },
+
+  "navigation": [
+    { "label": "Home", "href": "/" },
+    { "label": "Shop", "href": "/products" },
+    { "label": "Bespoke", "href": "/bespoke" },
+    { "label": "Rates", "href": "/rates" },
+    { "label": "Astrology", "href": "/astrology" },
+    { "label": "About", "href": "/about" }
+  ],
+
+  "heroSection": {
+    "heroImages": [
+      "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1603974372039-adc49044b6bd?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=1600&auto=format&fit=crop"
+    ],
+
+    "rates": {
+      "gold22k": {
+        "label": "22K GOLD"
+      },
+      "gold24k": {
+        "label": "24K GOLD"
+      },
+      "silver": {
+        "label": "SILVER"
+      },
+      "location": "LIVE • AHMEDABAD",
+      "city": "Ahmedabad",
+      "chartLink": "/rates",
+      "refreshIntervalMinutes": 5
+    }
+  },
+
+  "legacySection": {
+    "badge": "OUR HERITAGE",
+
+    "title": "Four decades of trust, weighed in pure gold.",
+
+    "highlightText": "pure gold.",
+
+    "description": "From a single workshop to thousands of families across India — every Pradeep Jewellers piece carries the legacy of generations.",
+
+    "astroCard": {
+      "tag": "TODAY'S READING",
+      "name": "Pandit Aditya Sharma",
+      "experience": "Vedic astrologer • 25 years",
+
+      "image": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop",
+
+      "luckyGem": "Yellow Sapphire",
+      "luckyMetal": "22K Gold",
+
+      "prediction": "Jupiter favours new beginnings today — an auspicious moment to commission heirloom pieces.",
+
+      "buttonText": "READ FULL HOROSCOPE",
+      "buttonLink": "/astrology"
+    },
+
+    "stats": [
+      {
+        "number": 1984,
+        "suffix": "",
+        "label": "ESTABLISHED"
+      },
+
+      {
+        "number": 40,
+        "suffix": "+",
+        "label": "YEARS OF CRAFT"
+      },
+
+      {
+        "number": 10000,
+        "suffix": "+",
+        "label": "FAMILIES SERVED"
+      },
+
+      {
+        "number": 100,
+        "suffix": "%",
+        "label": "BIS HALLMARKED"
+      }
+    ]
+  },
+
+
+  "collectionSection": {
+    "badge": "THE COLLECTIONS",
+
+    "title": "Find what speaks to you.",
+
+    "buttonText": "VIEW ALL",
+    "buttonLink": "/shop",
+
+    "collections": [
+      {
+        "id": "01",
+        "title": "Gold Jewellery",
+        "subtitle": "84 designs",
+        "image": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=1200&auto=format&fit=crop",
+        "link": "/collections/gold"
+      },
+
+      {
+        "id": "02",
+        "title": "Diamond Jewellery",
+        "subtitle": "61 designs",
+        "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=1200&auto=format&fit=crop",
+        "link": "/collections/diamond"
+      },
+
+      {
+        "id": "03",
+        "title": "Silver",
+        "subtitle": "120 designs",
+        "image": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=1200&auto=format&fit=crop",
+        "link": "/collections/silver"
+      },
+
+      {
+        "id": "04",
+        "title": "Gemstones",
+        "subtitle": "Astrological & fashion",
+        "image": "https://images.unsplash.com/photo-1611085583191-a3b181a88401?q=80&w=1200&auto=format&fit=crop",
+        "link": "/collections/gemstones"
+      },
+
+      {
+        "id": "05",
+        "title": "Bespoke",
+        "subtitle": "Made to order",
+        "image": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1200&auto=format&fit=crop",
+        "link": "/collections/bespoke"
+      },
+
+      {
+        "id": "06",
+        "title": "Spiritual",
+        "subtitle": "Sacred adornments",
+        "image": "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?q=80&w=1200&auto=format&fit=crop",
+        "link": "/collections/spiritual"
+      }
+    ]
+  },
+
+  "curatedSection": {
+    "badge": "THE ATELIER",
+    "title": "Curated for you.",
+    "tabs": [
+      { "id": "new-arrivals", "label": "NEW ARRIVALS" },
+      { "id": "bestsellers", "label": "BESTSELLERS" },
+      { "id": "on-sale", "label": "ON SALE" }
+    ],
+    "buttonText": "BROWSE FULL COLLECTION",
+    "buttonLink": "/shop",
+    "products": [
+      {
+        "id": "curated-na-1",
+        "category": "new-arrivals",
+        "tag": "NEW",
+        "type": "18K WHITE GOLD",
+        "name": "Neelam Sapphire Pendant",
+        "priceDisplay": "₹89,000",
+        "makingCharges": "10%",
+        "image": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-na-2",
+        "category": "new-arrivals",
+        "tag": "NEW",
+        "type": "22K ANTIQUE GOLD",
+        "name": "Lakshmi Temple Haar",
+        "priceDisplay": "₹2,45,000",
+        "makingCharges": "9%",
+        "image": "https://images.unsplash.com/photo-1603974372039-adc49044b6bd?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-na-3",
+        "category": "new-arrivals",
+        "tag": "NEW",
+        "type": "22K GOLD",
+        "name": "Riva Filigree Bangle",
+        "priceDisplay": "₹1,56,000",
+        "makingCharges": "8%",
+        "image": "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-na-4",
+        "category": "new-arrivals",
+        "tag": "NEW",
+        "type": "22K GOLD",
+        "name": "Aanya Bridal Kada",
+        "priceDisplay": "₹1,28,000",
+        "makingCharges": "9%",
+        "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-na-5",
+        "category": "new-arrivals",
+        "tag": "NEW",
+        "type": "22K GOLD",
+        "name": "Kalki Mangalsutra",
+        "priceDisplay": "₹84,500",
+        "makingCharges": "8%",
+        "image": "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-na-6",
+        "category": "new-arrivals",
+        "tag": "BESTSELLER",
+        "type": "18K - VVS DIAMOND",
+        "name": "Stellar Solitaire Studs",
+        "priceDisplay": "₹62,000",
+        "makingCharges": "12%",
+        "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=800&auto=format&fit=crop"
+      },
+
+      {
+        "id": "curated-bs-1",
+        "category": "bestsellers",
+        "tag": "BESTSELLER",
+        "type": "18K - VVS DIAMOND",
+        "name": "Stellar Solitaire Studs",
+        "priceDisplay": "₹62,000",
+        "makingCharges": "12%",
+        "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-bs-2",
+        "category": "bestsellers",
+        "tag": "BESTSELLER",
+        "type": "22K GOLD",
+        "name": "Zumurrud Emerald Ring",
+        "priceDisplay": "₹96,500",
+        "makingCharges": "10%",
+        "image": "https://images.unsplash.com/photo-1611085583191-a3b181a88401?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-bs-3",
+        "category": "bestsellers",
+        "tag": "BESTSELLER",
+        "type": "92.5 SILVER",
+        "name": "Payal Whisper Anklet",
+        "priceDisplay": "₹6,800",
+        "makingCharges": "15%",
+        "image": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-bs-4",
+        "category": "bestsellers",
+        "tag": "BESTSELLER",
+        "type": "22K ANTIQUE GOLD",
+        "name": "Temple Coin Necklace",
+        "priceDisplay": "₹1,89,000",
+        "makingCharges": "9%",
+        "image": "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-bs-5",
+        "category": "bestsellers",
+        "tag": "BESTSELLER",
+        "type": "18K ROSE GOLD",
+        "name": "Meera Polki Choker",
+        "priceDisplay": "₹2,12,000",
+        "makingCharges": "11%",
+        "image": "https://images.unsplash.com/photo-1603974372039-adc49044b6bd?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-bs-6",
+        "category": "bestsellers",
+        "tag": "BESTSELLER",
+        "type": "22K GOLD",
+        "name": "Heritage Jhumka Set",
+        "priceDisplay": "₹78,900",
+        "makingCharges": "8%",
+        "image": "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=800&auto=format&fit=crop"
+      },
+
+      {
+        "id": "curated-os-1",
+        "category": "on-sale",
+        "tag": "SALE",
+        "type": "22K GOLD",
+        "name": "Classic Chain Bracelet",
+        "priceDisplay": "₹42,000",
+        "makingCharges": "7%",
+        "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-os-2",
+        "category": "on-sale",
+        "tag": "SALE",
+        "type": "18K WHITE GOLD",
+        "name": "Nova Diamond Band",
+        "priceDisplay": "₹38,500",
+        "makingCharges": "10%",
+        "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-os-3",
+        "category": "on-sale",
+        "tag": "SALE",
+        "type": "22K GOLD",
+        "name": "Lotus Stud Earrings",
+        "priceDisplay": "₹24,900",
+        "makingCharges": "8%",
+        "image": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-os-4",
+        "category": "on-sale",
+        "tag": "SALE",
+        "type": "92.5 SILVER",
+        "name": "Monsoon Toe Ring Pair",
+        "priceDisplay": "₹2,400",
+        "makingCharges": "12%",
+        "image": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-os-5",
+        "category": "on-sale",
+        "tag": "SALE",
+        "type": "22K ANTIQUE GOLD",
+        "name": "Mini Haram Layer",
+        "priceDisplay": "₹1,05,000",
+        "makingCharges": "9%",
+        "image": "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=800&auto=format&fit=crop"
+      },
+      {
+        "id": "curated-os-6",
+        "category": "on-sale",
+        "tag": "SALE",
+        "type": "18K GOLD",
+        "name": "Celeste Tennis Line",
+        "priceDisplay": "₹55,000",
+        "makingCharges": "11%",
+        "image": "https://images.unsplash.com/photo-1611085583191-a3b181a88401?q=80&w=800&auto=format&fit=crop"
+      }
+    ]
+  },
+
+  "bespokeSection": {
+    "subtitle": "BESPOKE ATELIER",
+    "titleLine1": "Your vision,",
+    "titleLine2": "our craft.",
+    "description": "From sketch to sacred heirloom in 21 days. Transparent pricing — pay only for the gold weight plus a flat 12% making charge on bespoke orders.",
+    "backgroundImage": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=2400&auto=format&fit=crop",
+    "ctaPrimary": {
+      "text": "START YOUR DESIGN",
+      "link": "/bespoke"
+    },
+    "ctaSecondary": {
+      "text": "WHATSAPP CONSULT",
+      "link": "https://wa.me/919876543210"
+    },
+    "ctaTertiary": {
+      "text": "WATCH THE CRAFT",
+      "link": "/bespoke#craft"
+    }
+  },
+
+  "giftingSection": {
+    "badge": "THE GIFTING EDIT",
+    "title": "Select your perfect gift.",
+    "subheading": "Curated by occasion and budget — every piece arrives in a signature Pradeep keepsake box.",
+    "personalStylistLink": {
+      "label": "PERSONAL STYLIST",
+      "href": "/stylist"
+    },
+    "budgetCards": [
+      {
+        "id": "01",
+        "label": "GIFTS UNDER",
+        "priceDisplay": "₹30K",
+        "description": "Pendants, studs & charms",
+        "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=600&auto=format&fit=crop",
+        "exploreHref": "/shop?budget=30k"
+      },
+      {
+        "id": "02",
+        "label": "GIFTS UNDER",
+        "priceDisplay": "₹50K",
+        "description": "Solitaires & statement sets",
+        "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=600&auto=format&fit=crop",
+        "exploreHref": "/shop?budget=50k"
+      },
+      {
+        "id": "03",
+        "label": "GIFTS UNDER",
+        "priceDisplay": "₹1L",
+        "description": "Rings, jhumkas & bracelets",
+        "image": "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=600&auto=format&fit=crop",
+        "exploreHref": "/shop?budget=1l"
+      },
+      {
+        "id": "04",
+        "label": "GIFTS ABOVE",
+        "priceDisplay": "₹2L",
+        "description": "Bridal & heirloom pieces",
+        "image": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=600&auto=format&fit=crop",
+        "exploreHref": "/shop?budget=2l"
+      }
+    ],
+    "occasionLabel": "EXPLORE BY OCCASION",
+    "occasions": [
+      { "label": "Engagement", "href": "/gifts/engagement" },
+      { "label": "Birthday", "href": "/gifts/birthday" },
+      { "label": "Anniversary", "href": "/gifts/anniversary" },
+      { "label": "Valentine's", "href": "/gifts/valentines" },
+      { "label": "Festival", "href": "/gifts/festival" },
+      { "label": "Wedding", "href": "/gifts/wedding" }
+    ],
+    "featuredSlides": [
+      {
+        "eyebrowGold": "FOR HER",
+        "eyebrowWhite": "GIFTS FOR",
+        "headline": "Anniversary",
+        "description": "Handpicked pieces that turn moments into memories.",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=900&auto=format&fit=crop",
+        "primaryCta": {
+          "text": "SHOP ANNIVERSARY",
+          "href": "/gifts/anniversary"
+        },
+        "secondaryCta": {
+          "text": "ASK STYLIST",
+          "href": "/stylist"
+        }
+      },
+      {
+        "eyebrowGold": "FOR HER",
+        "eyebrowWhite": "GIFTS FOR",
+        "headline": "Birthday",
+        "description": "Celebrate another year with sparkle she will remember.",
+        "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=900&auto=format&fit=crop",
+        "primaryCta": {
+          "text": "SHOP BIRTHDAY",
+          "href": "/gifts/birthday"
+        },
+        "secondaryCta": {
+          "text": "ASK STYLIST",
+          "href": "/stylist"
+        }
+      },
+      {
+        "eyebrowGold": "FOR HIM",
+        "eyebrowWhite": "GIFTS FOR",
+        "headline": "Wedding",
+        "description": "Timeless bands and chains for the big day and beyond.",
+        "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=900&auto=format&fit=crop",
+        "primaryCta": {
+          "text": "SHOP WEDDING",
+          "href": "/gifts/wedding"
+        },
+        "secondaryCta": {
+          "text": "ASK STYLIST",
+          "href": "/stylist"
+        }
+      }
+    ]
+  },
+
+  "pricingSection": {
+    "badge": "TRANSPARENT PRICING",
+    "titlePrefix": "Making charges starting at just ",
+    "titleHighlight": "7%",
+    "titleSuffix": ".",
+    "description": "No hidden costs. No inflated wastage. Every invoice itemises metal, craft and finish — exactly as it should be.",
+    "features": [
+      {
+        "icon": "diamond",
+        "title": "Design",
+        "description": "Original CAD by senior designers",
+        "percentage": "+ 2%"
+      },
+      {
+        "icon": "hammer",
+        "title": "Craft",
+        "description": "Kolkata's master carvers",
+        "percentage": "+ 4%"
+      },
+      {
+        "icon": "sparkles",
+        "title": "Finish",
+        "description": "Polish, hallmark & QC",
+        "percentage": "+ 1%"
+      }
+    ],
+    "marketCompare": {
+      "label": "MARKET AVERAGE",
+      "headline": "14–22% making + wastage",
+      "subtext": "You save up to 60% with Pradeep Jewellers."
+    },
+    "calculator": {
+      "headerTitle": "LIVE ESTIMATE CALCULATOR",
+      "weightLabel": "Weight",
+      "weightUnit": "g",
+      "weightMin": 1,
+      "weightMax": 50,
+      "weightStep": 0.5,
+      "defaultWeight": 2,
+      "purityLabel": "Purity",
+      "purityOptions": [
+        { "id": "22k", "label": "22K", "pricePerGram": 7180 },
+        { "id": "24k", "label": "24K", "pricePerGram": 7842 }
+      ],
+      "defaultPurityId": "22k",
+      "makingLabel": "Making %",
+      "makingPercents": [7, 10, 12],
+      "defaultMakingPercent": 7,
+      "gstPercent": 5,
+      "goldLineTemplate": "{purity} Gold ({weight}g)",
+      "makingLineTemplate": "Making ({making}%)",
+      "gstLineTemplate": "GST ({gst}%)",
+      "yourPriceLabel": "Your price",
+      "marketAverageLabel": "Market average",
+      "marketMultiplier": 1.179485655250853
+    }
+  },
+
+  "goldSchemeSection": {
+    "schemeCard": {
+      "badge": "11 + 1 GOLD SCHEME",
+      "title": "Pay 11. Get 12.",
+      "description": "Choose your monthly contribution. We add the final month — in pure gold value.",
+      "paidMonthsCount": 11,
+      "monthPrefix": "M",
+      "sliderLabel": "Monthly contribution",
+      "contributionMin": 5000,
+      "contributionMax": 100000,
+      "contributionStep": 1000,
+      "defaultContribution": 25000,
+      "youPayCaption": "YOU PAY (11 MO)",
+      "weAddCaption": "WE ADD",
+      "totalCaption": "TOTAL VALUE",
+      "whatsappCta": {
+        "text": "JOIN VIA WHATSAPP",
+        "href": "https://wa.me/919876543210"
+      }
+    },
+    "clearancePanel": {
+      "headerText": "STOCK CLEARANCE ENDS IN",
+      "endsAt": "2026-05-21T18:00:00+05:30",
+      "daysLabel": "DAYS",
+      "hoursLabel": "HRS",
+      "minutesLabel": "MIN",
+      "secondsLabel": "SEC",
+      "products": [
+        {
+          "name": "Zumurrud Emerald Ring",
+          "priceDisplay": "₹96,500",
+          "image": "https://images.unsplash.com/photo-1611085583191-a3b181a88401?q=80&w=600&auto=format&fit=crop",
+          "tileBg": "light"
+        },
+        {
+          "name": "Devi Temple Jhumka",
+          "priceDisplay": "₹54,200",
+          "image": "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=600&auto=format&fit=crop",
+          "tileBg": "light"
+        },
+        {
+          "name": "Rajkumari Ruby Ring",
+          "priceDisplay": "₹2,10,000",
+          "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=600&auto=format&fit=crop",
+          "tileBg": "dark"
+        }
+      ],
+      "viewAll": {
+        "text": "View all clearance",
+        "href": "/shop/clearance"
+      }
+    }
+  },
+
+  "learnSection": {
+    "badge": "LEARN WITH US",
+    "title": "Buy with knowledge, cherish for generations.",
+    "readPrefix": "Read",
+    "learnMoreLabel": "Learn more",
+    "articles": [
+      {
+        "icon": "gem",
+        "category": "ASTROLOGY",
+        "title": "How do I choose the right gemstone?",
+        "summary": "A quick guide to birth-stone logic, durability, and the questions that keep you from buyer's regret.",
+        "readTime": "5 min",
+        "href": "/learn/gemstones"
+      },
+      {
+        "icon": "diamond",
+        "category": "DIAMONDS",
+        "title": "What are the 4Cs of diamonds?",
+        "summary": "Cut, colour, clarity, and carat — how jewellers grade them and how to read a certificate at a glance.",
+        "readTime": "7 min",
+        "href": "/learn/diamonds-4cs"
+      },
+      {
+        "icon": "ruler",
+        "category": "SIZING",
+        "title": "Which ring size will fit perfectly?",
+        "summary": "Measure at home, when to resize, and why half-sizes matter for comfort on the hand you use every day.",
+        "readTime": "3 min",
+        "href": "/learn/ring-sizing"
+      },
+      {
+        "icon": "sparkles",
+        "category": "SILVER",
+        "title": "How is sterling silver (925) tested?",
+        "summary": "Hallmarks, magnet tests, and how to spot plated pieces so you pay for real sterling, not costume.",
+        "readTime": "4 min",
+        "href": "/learn/silver-925"
+      }
+    ]
+  },
+
+  "founderSection": {
+    "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=900&auto=format&fit=crop",
+    "imageAlt": "Portrait of the founder",
+    "establishedYear": "1984",
+    "establishedText": "THE FIRST HAMMER FELL",
+    "sectionLabel": "THE FOUNDER",
+    "heading": "A goldsmith's son. A father's promise.",
+    "quote": "We don't sell jewellery. We hand over a piece of someone's wedding day, their daughter's first earrings, their grandmother's memory.",
+    "description": "Ramesh Agarwal opened a single bench in Bowbazar in 1984 with three karigars and one promise: every gram, weighed honestly. Forty years on, his sons run the same bench — and the same promise.",
+    "linkText": "READ OUR FULL STORY",
+    "linkHref": "/about"
+  },
+
+  "testimonialsSection": {
+    "badge": "IN THEIR WORDS",
+    "title": "Loved by ten thousand families.",
+    "rating": {
+      "score": "4.9",
+      "outOf": "5",
+      "starCount": 5,
+      "reviewsLabel": "2,418 GOOGLE REVIEWS"
+    },
+    "items": [
+      {
+        "quote": "The temple choker they crafted for my wedding was beyond what I sketched. Every aunt asked which family heirloom it was.",
+        "author": "Priya Banerjee",
+        "tags": ["BRIDAL SET", "CUSTOM BRIDAL SET", "22K"],
+        "image": "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=200&auto=format&fit=crop",
+        "imageAlt": "Priya Banerjee"
+      },
+      {
+        "quote": "Three generations of my family have bought from Pradeep Jewellers. The trust is in every gram — exactly what's billed is exactly what you wear.",
+        "author": "Mrs. Sengupta",
+        "tags": ["ANNIVERSARY", "DIAMOND SOLITAIRE", "18K"],
+        "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop",
+        "imageAlt": "Mrs. Sengupta"
+      },
+      {
+        "quote": "From design call on WhatsApp to delivery in 19 days. The making charges were a third of what we were quoted elsewhere.",
+        "author": "Riya & Arjun",
+        "tags": ["WEDDING", "MANGALSUTRA", "22K"],
+        "image": "https://images.unsplash.com/photo-1522673607260-14d3b7361e9a?q=80&w=200&auto=format&fit=crop",
+        "imageAlt": "Riya and Arjun"
+      }
+    ]
+  },
+
+  "socialSection": {
+    "handle": "@pradeepjewellers",
+    "title": "Follow the journey of every piece.",
+    "description": "Behind-the-bench reels, festive lookbooks, and first looks at new collections — across Instagram and our WhatsApp Broadcast.",
+    "gridImages": [
+      {
+        "src": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=600&auto=format&fit=crop",
+        "alt": "Gold necklace"
+      },
+      {
+        "src": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=600&auto=format&fit=crop",
+        "alt": "Diamond stud earrings"
+      },
+      {
+        "src": "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=600&auto=format&fit=crop",
+        "alt": "Gold bangle"
+      },
+      {
+        "src": "https://images.unsplash.com/photo-1611085583191-a3b181a88401?q=80&w=600&auto=format&fit=crop",
+        "alt": "Emerald ring"
+      },
+      {
+        "src": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=600&auto=format&fit=crop",
+        "alt": "Diamond bracelet"
+      },
+      {
+        "src": "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=600&auto=format&fit=crop",
+        "alt": "Gold jhumka earrings"
+      }
+    ],
+    "broadcast": {
+      "title": "Join our WhatsApp Broadcast",
+      "subtitle": "First access to schemes, festive drops & private viewings.",
+      "inputPlaceholder": "WhatsApp number",
+      "buttonText": "Subscribe",
+      "whatsappMessageTemplate": "Please add my number to the WhatsApp broadcast: {phone}"
+    }
+  },
+
+  "footerSection": {
+    "brandDescription": "Heirloom jewellery, hand-finished in India since 1972. BIS hallmarked. Every gram weighed honestly — the way Pradeep Jewellers has always done it.",
+    "complianceLine": "BIS Hallmark Reg. HM/CHE/000000 · GST 33AAAAA0000A1Z5",
+    "newsletter": {
+      "placeholder": "Your email",
+      "mailtoSubject": "Newsletter signup"
+    },
+    "shopLinks": [
+      { "label": "Gold", "href": "/collections/gold" },
+      { "label": "Diamond", "href": "/collections/diamond" },
+      { "label": "Silver", "href": "/collections/silver" },
+      { "label": "Gemstones", "href": "/collections/gemstones" },
+      { "label": "Bespoke", "href": "/collections/bespoke" },
+      { "label": "Spiritual", "href": "/collections/spiritual" }
+    ],
+    "discoverLinks": [
+      { "label": "About", "href": "/about" },
+      { "label": "Founder Story", "href": "/about#founder" },
+      { "label": "Schemes", "href": "/rates" },
+      { "label": "Astrology", "href": "/astrology" },
+      { "label": "Education", "href": "/learn" },
+      { "label": "Reviews", "href": "/reviews" }
+    ],
+    "visit": {
+      "address": "24, Ranganathan Street, T. Nagar, Chennai 600017",
+      "mapLabel": "VIEW ON MAP",
+      "mapHref": "https://www.google.com/maps/search/?api=1&query=Pradeep+Jewellers+T+Nagar+Chennai",
+      "hours": "Mon-Sat · 11 AM – 8 PM"
+    },
+    "copyrightBrand": "Pradeep Jewellers",
+    "copyrightExtras": "BIS Hallmark Reg. HM/CHE/000000 · GST 33AAAAA0000A1Z5",
+    "legalLinks": [
+      { "label": "Privacy", "href": "/privacy" },
+      { "label": "Terms", "href": "/terms" },
+      { "label": "Returns", "href": "/returns" }
+    ]
+  }
+}
+

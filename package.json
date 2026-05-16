@@ -1,0 +1,52 @@
+{
+  "name": "jewellery-website",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "db:reset": "docker compose down -v && docker compose up -d",
+    "catalog:sync": "node scripts/seed-catalog-db.mjs",
+    "seed:catalog": "node scripts/seed-catalog-db.mjs",
+    "catalog:rebuild": "npm run db:reset && npm run seed:catalog",
+    "sync:db": "node scripts/sync-shopify-products-to-db.mjs",
+    "sync:shopify": "node scripts/sync-db-products-to-shopify.mjs",
+    "sync:shopify:apply": "node scripts/sync-db-products-to-shopify.mjs --apply",
+    "sync:shopify:reset": "node scripts/sync-db-products-to-shopify.mjs --apply --reset-store"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@supabase/supabase-js": "^2.105.4",
+    "@types/nodemailer": "^8.0.0",
+    "@types/socket.io-client": "^1.4.36",
+    "cheerio": "^1.2.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.8.0",
+    "next": "16.2.4",
+    "nodemailer": "^8.0.6",
+    "pg": "^8.20.0",
+    "react": "19.2.4",
+    "react-countup": "^6.5.3",
+    "react-dom": "19.2.4",
+    "react-google-recaptcha": "^3.1.0",
+    "react-intersection-observer": "^10.0.3",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/pg": "^8.20.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/react-google-recaptcha": "^2.1.9",
+    "concurrently": "^9.2.1",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.4",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  }
+}

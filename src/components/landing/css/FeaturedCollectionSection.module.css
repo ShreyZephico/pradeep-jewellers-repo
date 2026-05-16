@@ -1,0 +1,420 @@
+/* FeaturedCollectionSection.module.css */
+
+.section {
+  position: relative;
+  padding: 100px 0;
+  background: linear-gradient(135deg, var(--color-deep-teal) 0%, var(--color-deep-teal-accent) 100%);
+  overflow: hidden;
+}
+
+/* Subtle Background Pattern */
+.section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle at 20% 40%, rgb(var(--color-soft-gold-rgb) / 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.container {
+  position: relative;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+  z-index: 2;
+}
+
+/* Header Styles */
+.header {
+  margin-bottom: 70px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+.header.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.headerContent {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  display: inline-block;
+  color: var(--color-soft-gold);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+}
+
+.title {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 500;
+  color: var(--color-pure-white);
+  margin-bottom: 20px;
+  line-height: 1.2;
+  font-family: var(--font-cormorant), 'Cormorant Garamond', serif;
+}
+
+.goldText {
+  color: var(--color-soft-gold);
+  position: relative;
+  display: inline-block;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: rgb(var(--color-pure-white-rgb) / 0.7);
+  margin-bottom: 30px;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+}
+
+.headerLine {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-soft-gold), transparent);
+  margin: 0 auto;
+}
+
+/* Layout */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  align-items: start;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) 0.2s;
+}
+
+.layout.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Main Feature Section */
+.mainFeature {
+  background: rgb(var(--color-pure-white-rgb) / 0.03);
+  backdrop-filter: blur(10px);
+  border-radius: 28px;
+  padding: 48px;
+  border: 1px solid rgb(var(--color-soft-gold-rgb) / 0.15);
+  transition: all 0.4s ease;
+}
+
+.mainFeature:hover {
+  transform: translateY(-5px);
+  border-color: rgb(var(--color-soft-gold-rgb) / 0.3);
+  box-shadow: 0 20px 40px rgb(var(--color-black-rgb) / 0.3);
+}
+
+.featureBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px;
+  background: rgb(var(--color-soft-gold-rgb) / 0.1);
+  border: 1px solid rgb(var(--color-soft-gold-rgb) / 0.3);
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--color-soft-gold);
+  margin-bottom: 28px;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-soft-gold);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+.featureHeading {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 500;
+  color: var(--color-pure-white);
+  margin-bottom: 24px;
+  line-height: 1.3;
+  font-family: var(--font-cormorant), 'Cormorant Garamond', serif;
+}
+
+.featureDescription {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: rgb(var(--color-pure-white-rgb) / 0.8);
+  margin-bottom: 32px;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+}
+
+/* Primary Button */
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 32px;
+  background: linear-gradient(135deg, var(--color-soft-gold) 0%, var(--color-soft-gold-deep) 100%);
+  color: var(--color-deep-teal);
+  text-decoration: none;
+  border-radius: 40px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+  margin-bottom: 48px;
+}
+
+.primaryButton:hover {
+  transform: translateY(-2px);
+  gap: 16px;
+  box-shadow: 0 10px 25px rgb(var(--color-soft-gold-rgb) / 0.3);
+}
+
+.primaryButton svg {
+  transition: transform 0.3s ease;
+}
+
+.primaryButton:hover svg {
+  transform: translateX(4px);
+}
+
+/* Trust Section */
+.trustSection {
+  display: flex;
+  gap: 32px;
+  padding-top: 32px;
+  border-top: 1px solid rgb(var(--color-soft-gold-rgb) / 0.15);
+}
+
+.trustItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgb(var(--color-pure-white-rgb) / 0.7);
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+}
+
+.goldDot {
+  width: 4px;
+  height: 4px;
+  background: var(--color-soft-gold);
+  border-radius: 50%;
+}
+
+/* Right Side Collections Grid */
+.collectionsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.collectionItem {
+  background: rgb(var(--color-pure-white-rgb) / 0.03);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgb(var(--color-soft-gold-rgb) / 0.1);
+  transition: all 0.4s ease;
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+}
+
+.collectionItem:hover {
+  transform: translateX(8px);
+  border-color: rgb(var(--color-soft-gold-rgb) / 0.3);
+  box-shadow: 0 15px 30px rgb(var(--color-black-rgb) / 0.2);
+}
+
+.collectionImageContainer {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.collectionImage {
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.collectionItem:hover .collectionImage {
+  transform: scale(1.08);
+}
+
+.imageGradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 50%, rgb(var(--color-deep-teal-rgb) / 0.5) 100%);
+}
+
+.collectionInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.collectionTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--color-soft-gold);
+  margin-bottom: 10px;
+  font-family: var(--font-cormorant), 'Cormorant Garamond', serif;
+}
+
+.collectionDescription {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgb(var(--color-pure-white-rgb) / 0.7);
+  margin-bottom: 16px;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+}
+
+/* Secondary Button */
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-soft-gold);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+}
+
+.secondaryButton:hover {
+  gap: 12px;
+  color: var(--color-rose-gold);
+}
+
+.secondaryButton svg {
+  transition: transform 0.3s ease;
+}
+
+.secondaryButton:hover svg {
+  transform: translateX(4px);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .mainFeature {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .collectionsGrid {
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 60px 0;
+  }
+
+  .container {
+    padding: 0 24px;
+  }
+
+  .mainFeature {
+    padding: 32px;
+  }
+
+  .trustSection {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .collectionItem {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .collectionImageContainer {
+    width: 100%;
+    height: 200px;
+  }
+
+  .header {
+    margin-bottom: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: 50px 0;
+  }
+
+  .mainFeature {
+    padding: 24px;
+  }
+
+  .featureHeading {
+    font-size: 1.3rem;
+  }
+
+  .featureDescription {
+    font-size: 0.85rem;
+  }
+
+  .primaryButton {
+    padding: 10px 24px;
+    font-size: 0.85rem;
+    margin-bottom: 32px;
+  }
+
+  .trustSection {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .collectionTitle {
+    font-size: 1.1rem;
+  }
+
+  .collectionDescription {
+    font-size: 0.8rem;
+  }
+}
+
+

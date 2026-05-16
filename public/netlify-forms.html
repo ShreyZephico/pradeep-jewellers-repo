@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Netlify Form Detection</title>
+  </head>
+  <body>
+    <form
+      name="consultation"
+      method="POST"
+      data-netlify="true"
+      data-netlify-honeypot="bot-field"
+      style="display: none"
+    >
+      <input type="hidden" name="form-name" value="consultation" />
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="tel" name="phone" />
+      <textarea name="message"></textarea>
+      <input type="text" name="bot-field" />
+    </form>
+  </body>
+</html>

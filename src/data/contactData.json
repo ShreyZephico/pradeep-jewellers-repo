@@ -1,0 +1,60 @@
+{
+  "brand": {
+    "name": "Pradeep Jewellers",
+    "tagline": "Crafting Dreams Since 1972",
+    "description": "Experience the pinnacle of fine jewellery craftsmanship with personalized attention and timeless designs."
+  },
+  "contact": {
+    "phone": "+91 98765 43210",
+    "email": "hello@pradeepjewellers.com",
+    "studio": "Nadiad, Gujarat - 387001",
+    "hours": "Mon - Sat: 11:00 AM - 8:00 PM",
+    "sunday": "Sunday: By Appointment Only"
+  },
+  "social": {
+    "instagram": "https://instagram.com/pradeepjewellers",
+    "facebook": "https://facebook.com/pradeepjewellers",
+    "youtube": "https://youtube.com/pradeepjewellers",
+    "whatsapp": "https://wa.me/919876543210"
+  },
+  "appointment": {
+    "available": true,
+    "notice": "24 hours prior notice required for private consultations"
+  },
+  "map": {
+    "address": "Nadiad, Gujarat",
+    "latitude": 22.695814,
+    "longitude": 72.858726,
+    "zoom": 15,
+    "embedUrl": "https://maps.google.com/maps?q=22.695814,72.858726&z=15&output=embed"
+  },
+  "businessHours": [
+    { "day": "Monday - Saturday", "hours": "11:00 AM - 8:00 PM" },
+    { "day": "Sunday", "hours": "Closed (Video consultations available)" }
+  ],
+  "footer": {
+    "quickLinks": [
+      { "label": "Home", "url": "/landing#home" },
+      { "label": "Collections", "url": "/landing#collections" },
+      { "label": "Shop", "url": "/products" },
+      { "label": "Testimonials", "url": "/landing#testimonials" },
+      { "label": "Contact Us", "url": "/landing#contact" }
+    ],
+    "collections": [
+      { "label": "Engagement Rings", "url": "/collections/engagement-rings" },
+      { "label": "Bridal Bands", "url": "/collections/bridal-bands" },
+      { "label": "Diamond Necklaces", "url": "/collections/diamond-necklaces" },
+      { "label": "Gold Earrings", "url": "/collections/gold-earrings" },
+      { "label": "Bracelets & Bangles", "url": "/collections/bracelets" },
+      { "label": "Men's Collection", "url": "/collections/mens-collection" }
+    ],
+    "trustBadges": [
+      "BIS Hallmarked",
+      "GIA Certified",
+      "Lifetime Exchange",
+      "Free Shipping"
+    ],
+    "paymentMethods": ["💳", "🔒", "✨"],
+    "copyright": "All rights reserved."
+  }
+}
