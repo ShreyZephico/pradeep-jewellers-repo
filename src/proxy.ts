@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const token = request.cookies.get('customerAccessToken');
   const { pathname } = request.nextUrl;
 
@@ -17,18 +17,16 @@ export function middleware(request: NextRequest) {
     '/api/verify-otp',
     '/api/products',
     '/api/product',
-    
     '/api/price',
     '/api/variants',
     '/api/test',
-    "/api/gold-rate"
-    
+    '/api/gold-rate',
   ];
   const publicPages = ['/', '/landing', '/products', '/home'];
   const isPublicPath =
     publicPages.includes(pathname) ||
     pathname.startsWith('/products/') ||
-    publicPaths.some(path => pathname.startsWith(path));
+    publicPaths.some((path) => pathname.startsWith(path));
 
   // If no token and trying to access private page → redirect to login
   if (!token && !isPublicPath) {
@@ -48,7 +46,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };

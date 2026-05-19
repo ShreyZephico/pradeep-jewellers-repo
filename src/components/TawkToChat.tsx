@@ -249,7 +249,7 @@ export default function TawkToChat() {
       </Script>
       <Script
         id="tawk-to"
-        src="https://embed.tawk.to/6a043a506a19e61c35985f46/1jog87ivq"
+        src={`https://embed.tawk.to/${process.env.NEXT_TAWK_PROPERTY_ID}/${process.env.NEXT_TAWK_WIDGET_ID}`}
         strategy="afterInteractive"
         crossOrigin="anonymous"
       />

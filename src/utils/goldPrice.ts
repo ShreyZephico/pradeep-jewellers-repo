@@ -5,7 +5,7 @@ let supabase: SupabaseClient | null = null;
 /** Reuse one client; gold price is fetched on the server only. */
 function getSupabase(): SupabaseClient {
   if (!supabase) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+    const url = process.env.NEXT_SUPABASE_URL?.trim();
     const key = process.env.SUPABASE_SERVICE_KEY?.trim();
     if (!url || !key) {
       throw new Error("Supabase credentials are not configured");

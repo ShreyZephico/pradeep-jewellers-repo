@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_CLOUDINARY_CLOUD_NAME: process.env.NEXT_CLOUDINARY_CLOUD_NAME,
+    NEXT_TAWK_PROPERTY_ID: process.env.NEXT_TAWK_PROPERTY_ID,
+    NEXT_TAWK_WIDGET_ID: process.env.NEXT_TAWK_WIDGET_ID,
+  },
   images: {
     remotePatterns: [
       {

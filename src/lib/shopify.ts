@@ -20,18 +20,17 @@ function normalizeStoreDomain(raw?: string): string {
     .replace(/\/+$/, "");
 }
 
-/** Store + Storefront token from `.env` (NEXT_PUBLIC_* preferred, server fallback). */
+/** Store + Storefront token from `.env` (NEXT_* preferred, server fallback). */
 function getStorefrontCredentials() {
   const domain = normalizeStoreDomain(
-    process.env.NEXT_PUBLIC_SHOPIFY_STORE ?? process.env.SHOPIFY_STORE_DOMAIN
+    process.env.NEXT_SHOPIFY_STORE ?? process.env.SHOPIFY_STORE_DOMAIN
   );
 
   const apiVersion =
-    process.env.NEXT_PUBLIC_SHOPIFY_API_VERSION ??
     process.env.SHOPIFY_STOREFRONT_API_VERSION ??
     "2025-04";
 
-  const publicToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_TOKEN?.trim();
+  const publicToken = process.env.NEXT_SHOPIFY_STOREFRONT_TOKEN?.trim();
   const serverToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN?.trim();
 
   // `shpat_*` is an Admin API token — Storefront GraphQL needs a Storefront access token.
@@ -261,7 +260,7 @@ async function shopifyFetch<T>(
 
   if (!domain || !token) {
     throw new Error(
-      "Missing Shopify Storefront credentials. Set NEXT_PUBLIC_SHOPIFY_STORE and a Storefront access token (not Admin shpat_) in .env."
+      "Missing Shopify Storefront credentials. Set NEXT_SHOPIFY_STORE and a Storefront access token (not Admin shpat_) in .env."
     );
   }
 

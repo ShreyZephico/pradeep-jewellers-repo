@@ -1,0 +1,156 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import type { Product } from "@/types/product";
+import ProductCommerceActions from "@/components/ProductCommerceActions";
+import productContent, { formatProductCopy } from "@/lib/productContent";
+import {
+  handleCheckoutAuthFailure,
+  resolveDefaultVariant,
+  startProductCheckout,
+} from "@/lib/productCheckout";
+import { getProductHref } from "@/utils/productUrl";
+
+type ProductListCardProps = {
+  product: Product;
+  imageSrc: string;
+  onImageError: () => void;
+  animationIndex?: number;
+};
+
+const copy = productContent.list;
+const detailCopy = productContent.detail;
+
+const formatPrice = (price: number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(price);
+
+export default function ProductListCard({
+  product,
+  imageSrc,
+  onImageError,
+  animationIndex = 0,
+}: ProductListCardProps) {
+  const [buyLoading, setBuyLoading] = useState(false);
+  const [cartLoading, setCartLoading] = useState(false);
+  const [toast, setToast] = useState("");
+
+  const list = product.compareAtPrice ?? 0;
+  const href = getProductHref(product);
+  const delayStyle = { animationDelay: `${Math.min(animationIndex, 8) * 60}ms` };
+
+  const runCheckout = async (redirect: boolean) => {
+    const { variantId, catalogVariantId, price } = resolveDefaultVariant(product);
+    if (!variantId) {
+      window.location.href = `${href}${product.customizable ? "?customize=1" : ""}`;
+      return;
+    }
+
+    if (product.customizable && redirect) {
+      window.location.href = `${href}?buy=1`;
+      return;
+    }
+
+    const setLoading = redirect ? setBuyLoading : setCartLoading;
+    setLoading(true);
+    setToast("");
+
+    const result = await startProductCheckout({
+      product,
+      variantId,
+      catalogVariantId,
+      customPrice: price,
+      redirect,
+      checkoutFlow: "storefront-cart",
+    });
+
+    setLoading(false);
+
+    if (!result.ok) {
+      handleCheckoutAuthFailure(result);
+      if (!result.needsLogin) {
+        setToast(result.error);
+      }
+      return;
+    }
+
+    if (!redirect) {
+      setToast(detailCopy.addedToCart);
+      window.setTimeout(() => setToast(""), 3200);
+    }
+  };
+
+  return (
+    <article className="product-card product-card--animated" style={delayStyle}>
+      <Link href={href} className="product-card-media">
+        {imageSrc !== "/placeholder.jpg" ? (
+          <Image
+            src={imageSrc}
+            alt={product.name}
+            fill
+            className="product-card-img"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            onError={onImageError}
+          />
+        ) : (
+          <div className="product-detail-placeholder" aria-hidden>
+            {copy.placeholderSymbol}
+          </div>
+        )}
+
+        {list > product.price ? (
+          <span className="product-card-badge-sale">{copy.saleBadge}</span>
+        ) : null}
+
+        {(product.variantCount ?? product.variants?.length ?? 0) > 1 ? (
+          <span className="product-card-badge-options">
+            {formatProductCopy(copy.optionsBadge, {
+              count: product.variantCount ?? product.variants?.length ?? 0,
+            })}
+          </span>
+        ) : null}
+      </Link>
+
+      <div className="product-card-body">
+        <Link href={href} className="product-card-title-link">
+          <h3 className="product-item-title product-item-title--card">{product.name}</h3>
+        </Link>
+
+        <ProductCommerceActions
+          layout="stack"
+          buyLoading={buyLoading}
+          cartLoading={cartLoading}
+          onBuyNow={() => void runCheckout(true)}
+          onAddToCart={() => void runCheckout(false)}
+        />
+
+        {toast ? (
+          <p className="product-card-toast product-animate-in" role="status">
+            {toast}
+          </p>
+        ) : null}
+
+        <p className="product-card-desc">{product.description}</p>
+
+        <div className="product-card-footer">
+          <div>
+            <span className="product-card-price">{formatPrice(product.price)}</span>
+            {list > product.price ? (
+              <span className="product-card-compare">{formatPrice(list)}</span>
+            ) : null}
+          </div>
+          <Link href={href} className="product-card-cta">
+            {copy.viewProduct}
+          </Link>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+
