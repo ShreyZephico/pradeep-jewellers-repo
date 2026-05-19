@@ -53,15 +53,18 @@ export function useModalChromeInsets(active: boolean) {
     window.addEventListener("resize", onChange);
     window.addEventListener("scroll", onChange, { passive: true });
 
-    const observed = [
-      document.querySelector("header"),
-      document.querySelector("footer"),
-    ].filter((node): node is Element => node instanceof Element);
+    const observed: HTMLElement[] = [];
+    const headerEl = document.querySelector("header");
+    const footerEl = document.querySelector("footer");
+    if (headerEl instanceof HTMLElement) observed.push(headerEl);
+    if (footerEl instanceof HTMLElement) observed.push(footerEl);
 
     const resizeObserver =
       observed.length > 0 ? new ResizeObserver(onChange) : null;
-    for (const node of observed) {
-      resizeObserver?.observe(node);
+    if (resizeObserver) {
+      for (const node of observed) {
+        resizeObserver.observe(node);
+      }
     }
 
     return () => {

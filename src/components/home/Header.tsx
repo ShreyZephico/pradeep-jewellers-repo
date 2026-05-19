@@ -10,14 +10,20 @@ import {
   Phone,
   LogIn,
   Menu,
+  ShoppingBag,
   X,
 } from "lucide-react";
 
+import { useCart } from "@/contexts/CartContext";
 import contactData from "@/data/contactDatas.json";
+import productContent from "@/lib/productContent";
 import { getImageUrl } from "@/utils/cloudinary";
+
+const cartCopy = productContent.cart;
 
 export default function Header() {
   const router = useRouter();
+  const { cart, goToCart, setAuthenticated } = useCart();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -35,6 +41,7 @@ export default function Header() {
       .then((data) => {
         if (!data.isAuthenticated) {
           setIsLoggedIn(false);
+          setAuthenticated(false);
           return;
         }
 
@@ -47,9 +54,11 @@ export default function Header() {
 
         setUserName(name);
         setIsLoggedIn(true);
+        setAuthenticated(true);
       })
       .catch(() => {
         setIsLoggedIn(false);
+        setAuthenticated(false);
       });
   }, []);
 
@@ -81,8 +90,17 @@ export default function Header() {
     localStorage.removeItem("customerEmail");
 
     setIsLoggedIn(false);
+    setAuthenticated(false);
 
     router.push("/");
+  };
+
+  const openCart = () => {
+    if (!isLoggedIn) {
+      router.push("/login");
+      return;
+    }
+    goToCart();
   };
 
   const getInitial = () => {
@@ -190,6 +208,27 @@ export default function Header() {
 
             <button type="button" suppressHydrationWarning>
               <Search size={20} />
+            </button>
+
+            <button
+              type="button"
+              className="header-cart-btn"
+              onClick={openCart}
+              aria-label={
+                isLoggedIn && cart.totalQuantity > 0
+                  ? `${cartCopy.openCart} (${cart.totalQuantity} items)`
+                  : cartCopy.openCart
+              }
+              suppressHydrationWarning
+            >
+              <span className="header-cart-icon-wrap">
+                <ShoppingBag size={22} strokeWidth={1.75} aria-hidden />
+                {isLoggedIn && cart.totalQuantity > 0 ? (
+                  <span className="header-cart-badge" aria-hidden>
+                    {cart.totalQuantity > 99 ? "99+" : cart.totalQuantity}
+                  </span>
+                ) : null}
+              </span>
             </button>
 
             {/* LOGIN / PROFILE */}
@@ -332,6 +371,21 @@ export default function Header() {
             >
               {contactData.header.videoCallText}
             </Link>
+
+            <button
+              type="button"
+              className="flex items-center justify-between py-2 text-left"
+              onClick={() => {
+                setIsMenuOpen(false);
+                openCart();
+              }}
+              suppressHydrationWarning
+            >
+              <span>{cartCopy.pageTitle}</span>
+              {isLoggedIn && cart.totalQuantity > 0 ? (
+                <span className="header-cart-badge">{cart.totalQuantity}</span>
+              ) : null}
+            </button>
 
             {!isLoggedIn ? (
               <>

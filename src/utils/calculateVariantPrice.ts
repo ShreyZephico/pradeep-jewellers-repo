@@ -14,19 +14,6 @@ export type VariantPriceBreakdown = {
   finalPrice: number;
 };
 
-export type VariantPriceBreakdown = {
-  purity: number;
-  karat: number;
-  base24KGoldPrice: number;
-  adjustedGoldPrice: number;
-  perGramRate: number;
-  actualGoldPrice: number;
-  makingCharge: number;
-  subtotal: number;
-  gst: number;
-  finalPrice: number;
-};
-
 type CalculateVariantPriceProps = {
   weight: number;
   carat?: string | null;

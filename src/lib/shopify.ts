@@ -393,15 +393,33 @@ async function mapShopifyProductListItem(
     );
     const weight = resolveVariantWeight(gramsFromApi);
     const carat = extractCaratFromSelectedOptions(variant.selectedOptions);
-    const pricing = await calculateVariantPrice({ weight, carat });
-    if (price === 0 || pricing.finalPrice < price) {
-      price = pricing.finalPrice;
-      variantId = variant.id;
+    const shopifyVariantPrice = Number(variant.price?.amount ?? 0);
+
+    try {
+      const pricing = await calculateVariantPrice({ weight, carat });
+      if (price === 0 || pricing.finalPrice < price) {
+        price = pricing.finalPrice;
+        variantId = variant.id;
+      }
+    } catch (error) {
+      console.warn(
+        "[shopify] Gold price unavailable for listing; using Shopify variant price:",
+        node.handle,
+        error
+      );
+      if (
+        shopifyVariantPrice > 0 &&
+        (price === 0 || shopifyVariantPrice < price)
+      ) {
+        price = Math.round(shopifyVariantPrice);
+        variantId = variant.id;
+      }
     }
   }
 
   if (price === 0) {
-    price = fallback.price;
+    price =
+      shopifyListPrice > 0 ? Math.round(shopifyListPrice) : fallback.price;
   }
 
   return {
@@ -866,6 +884,14 @@ type CreateDraftCheckoutInput = {
   customerEmail?: string;
 };
 
+export type DraftCheckoutLineItem = {
+  productName: string;
+  variantId: string;
+  price: number;
+  quantity: number;
+  attributes: CheckoutAttribute[];
+};
+
 export async function createDraftCheckout({
   productName,
   variantId,
@@ -873,44 +899,85 @@ export async function createDraftCheckout({
   attributes,
   customerEmail,
 }: CreateDraftCheckoutInput): Promise<string> {
-  const cleanedAttributes = cleanAttributes(attributes);
-  const customizationTags = buildOrderTags(cleanedAttributes);
-  const email = customerEmail?.trim();
+  return createDraftCheckoutFromLines({
+    customerEmail,
+    lines: [
+      {
+        productName,
+        variantId,
+        price,
+        quantity: 1,
+        attributes,
+      },
+    ],
+  });
+}
 
+/** Draft invoice for cart lines at gold-calculated INR prices (requires Admin API). */
+export async function createDraftCheckoutFromLines({
+  lines,
+  customerEmail,
+}: {
+  lines: DraftCheckoutLineItem[];
+  customerEmail?: string;
+}): Promise<string> {
+  if (!lines.length) {
+    throw new Error("Cart is empty.");
+  }
+  if (!adminToken) {
+    throw new Error(
+      "Custom price checkout requires SHOPIFY_ADMIN_ACCESS_TOKEN."
+    );
+  }
+
+  const tagSet = new Set<string>([
+    "custom-jewellery",
+    "zephico",
+    "cart-checkout",
+  ]);
+  const noteParts = [
+    "Custom jewellery order from Pradeep Jewellers website.",
+  ];
+
+  const lineItems = lines.map((line) => {
+    const cleanedAttributes = cleanAttributes(line.attributes);
+    for (const tag of buildOrderTags(cleanedAttributes)) {
+      tagSet.add(tag);
+    }
+    const lineNote = buildOrderNote(cleanedAttributes);
+    if (lineNote) noteParts.push(lineNote);
+
+    return {
+      variantId: line.variantId,
+      title: line.productName,
+      quantity: Math.max(1, line.quantity),
+      priceOverride: {
+        amount: String(Math.max(0, Math.round(line.price))),
+        currencyCode: "INR",
+      },
+      customAttributes: cleanedAttributes,
+    };
+  });
+
+  const email = customerEmail?.trim();
   const data = await shopifyAdminFetch<DraftOrderCreateResponse>(
     DRAFT_ORDER_CREATE_MUTATION,
     {
       input: {
         visibleToCustomer: true,
         ...(email ? { email } : {}),
-        note: buildOrderNote(cleanedAttributes),
-        tags: ["custom-jewellery", "zephico", ...customizationTags],
-        customAttributes: cleanedAttributes,
-        lineItems: [
-          {
-            variantId,
-            title: productName,
-            quantity: 1,
-            priceOverride: {
-              amount: String(price),
-              currencyCode: "INR",
-            },
-            customAttributes: cleanedAttributes,
-          },
-        ],
+        note: noteParts.join("\n"),
+        tags: Array.from(tagSet),
+        lineItems,
       },
     }
   );
+
   const error = data.draftOrderCreate.userErrors[0];
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
+  if (error) throw new Error(error.message);
   if (!data.draftOrderCreate.draftOrder?.invoiceUrl) {
     throw new Error("Shopify did not return a draft order payment URL.");
   }
-
   return data.draftOrderCreate.draftOrder.invoiceUrl;
 }
 
@@ -1032,25 +1099,11 @@ export async function getProductsPage(options: {
   const page = Math.max(1, options.page);
   const limit = Math.max(1, options.limit);
 
-  try {
-    const nodes = await fetchShopifyProductNodes({
-      q: options.q,
-      category: options.category,
-    });
-
-    const total = nodes.length;
-    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
-    const from = (page - 1) * limit;
-    const pageNodes = nodes.slice(from, from + limit);
-
-    await getGoldPrice();
-    const products = await Promise.all(
-      pageNodes.map((node, index) => mapShopifyProductListItem(node, from + index))
+  const { domain, token } = getStorefrontCredentials();
+  if (!domain || !token) {
+    console.warn(
+      "Shopify Storefront credentials missing — using static catalog fallback."
     );
-
-    return { products, total, page, limit, totalPages };
-  } catch (error) {
-    console.warn("Shopify products fetch failed:", error);
     const fallback = fallbackProducts;
     const total = fallback.length;
     const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
@@ -1062,6 +1115,27 @@ export async function getProductsPage(options: {
       limit,
       totalPages,
     };
+  }
+
+  try {
+    const nodes = await fetchShopifyProductNodes({
+      q: options.q,
+      category: options.category,
+    });
+
+    const total = nodes.length;
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+    const from = (page - 1) * limit;
+    const pageNodes = nodes.slice(from, from + limit);
+
+    const products = await Promise.all(
+      pageNodes.map((node, index) => mapShopifyProductListItem(node, from + index))
+    );
+
+    return { products, total, page, limit, totalPages };
+  } catch (error) {
+    console.error("Shopify Storefront products fetch failed:", error);
+    throw error;
   }
 }
 

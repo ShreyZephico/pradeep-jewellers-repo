@@ -9,11 +9,14 @@ import { findBestMatchingVariant } from "@/utils/variantOptionMatch";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
 import ProductCommerceActions from "@/components/ProductCommerceActions";
 import PriceCalculationBreakdown from "@/components/PriceCalculationBreakdown";
+import { useCart } from "@/contexts/CartContext";
 import {
+  addProductToCart,
   handleCheckoutAuthFailure,
   startProductCheckout,
 } from "@/lib/productCheckout";
 import productContent from "@/lib/productContent";
+import { getCustomizationValidationError } from "@/utils/productCustomization";
 
 export { formatProductPrice };
 
@@ -50,8 +53,8 @@ export default function ProductPurchasePanel({
   priceHeaderVariant = "modal",
   onClose,
   checkoutButtonLabel,
-  checkoutFlow = "customer-session",
 }: ProductPurchasePanelProps) {
+  const { refreshCart, goToCart } = useCart();
   const [buyLoading, setBuyLoading] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
@@ -66,23 +69,10 @@ export default function ProductPurchasePanel({
   const metalPickerOptions =
     product.metalOptions?.filter((o) => !isKaratLabel(o.label)) ?? [];
 
-  const initialKarat =
-    product.caratOptions?.[0]?.label ??
-    product.metalOptions?.find((o) => isKaratLabel(o.label))?.label ??
-    "";
-
-  const [selectedMetal, setSelectedMetal] = useState(
-    metalPickerOptions[0]?.label ??
-      product.metalOptions?.find((o) => isKaratLabel(o.label))?.label ??
-      ""
-  );
-  const [selectedCarat, setSelectedCarat] = useState(initialKarat);
-  const [selectedQuality, setSelectedQuality] = useState(
-    product.diamondQualities?.[0]?.label ?? ""
-  );
-  const [selectedSize, setSelectedSize] = useState(
-    product.sizeOptions?.[0]?.size ?? ""
-  );
+  const [selectedMetal, setSelectedMetal] = useState("");
+  const [selectedCarat, setSelectedCarat] = useState("");
+  const [selectedQuality, setSelectedQuality] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
   const hasMetalOptions = metalPickerOptions.length > 0;
   const hasCaratOptions = karatPickerOptions.length > 0;
 
@@ -227,6 +217,17 @@ export default function ProductPurchasePanel({
   };
 
   const handleCheckout = async (redirect: boolean) => {
+    const optionsError = getCustomizationValidationError(product, {
+      metal: selectedMetal,
+      carat: selectedCarat,
+      quality: selectedQuality,
+      size: selectedSize,
+    });
+    if (optionsError) {
+      setCheckoutError(optionsError);
+      return;
+    }
+
     if (!selectedVariantId) {
       setCheckoutError(copy.selectOptionsError);
       return;
@@ -237,30 +238,47 @@ export default function ProductPurchasePanel({
     const setLoading = redirect ? setBuyLoading : setCartLoading;
     setLoading(true);
 
-    const result = await startProductCheckout({
+    if (redirect) {
+      const result = await startProductCheckout({
+        product,
+        variantId: selectedVariantId,
+        catalogVariantId: catalogVariantIdForCheckout,
+        customPrice: estimatedPrice,
+        attributes: buildLineAttributes(),
+        redirect: true,
+      });
+      setLoading(false);
+      if (!result.ok) {
+        handleCheckoutAuthFailure(result);
+        if (!result.needsLogin) setCheckoutError(result.error);
+      }
+      return;
+    }
+
+    const result = await addProductToCart({
       product,
       variantId: selectedVariantId,
       catalogVariantId: catalogVariantIdForCheckout,
       customPrice: estimatedPrice,
       attributes: buildLineAttributes(),
-      redirect,
-      checkoutFlow,
+      priceBreakdown: priceBreakdown ?? undefined,
+      weightGrams: baseWeight,
+      karatLabel,
+      optionAdjustments,
     });
 
     setLoading(false);
 
     if (!result.ok) {
       handleCheckoutAuthFailure(result);
-      if (!result.needsLogin) {
-        setCheckoutError(result.error);
-      }
+      if (!result.needsLogin) setCheckoutError(result.error);
       return;
     }
 
-    if (!redirect) {
-      setCartToast(productContent.detail.addedToCart);
-      window.setTimeout(() => setCartToast(""), 3200);
-    }
+    await refreshCart();
+    goToCart();
+    setCartToast(productContent.commerce.addedToCart);
+    window.setTimeout(() => setCartToast(""), 3200);
   };
 
   const isPage = priceHeaderVariant === "page";

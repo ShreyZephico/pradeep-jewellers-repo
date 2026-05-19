@@ -6,11 +6,17 @@ import Link from "next/link";
 import type { Product } from "@/types/product";
 import ProductCommerceActions from "@/components/ProductCommerceActions";
 import productContent, { formatProductCopy } from "@/lib/productContent";
+import { useCart } from "@/contexts/CartContext";
 import {
+  addProductToCart,
   handleCheckoutAuthFailure,
   resolveDefaultVariant,
   startProductCheckout,
 } from "@/lib/productCheckout";
+import {
+  getProductCustomizeHref,
+  productHasCustomizationOptions,
+} from "@/utils/productCustomization";
 import { getProductHref } from "@/utils/productUrl";
 
 type ProductListCardProps = {
@@ -36,6 +42,7 @@ export default function ProductListCard({
   onImageError,
   animationIndex = 0,
 }: ProductListCardProps) {
+  const { refreshCart, goToCart } = useCart();
   const [buyLoading, setBuyLoading] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
   const [toast, setToast] = useState("");
@@ -45,14 +52,16 @@ export default function ProductListCard({
   const delayStyle = { animationDelay: `${Math.min(animationIndex, 8) * 60}ms` };
 
   const runCheckout = async (redirect: boolean) => {
-    const { variantId, catalogVariantId, price } = resolveDefaultVariant(product);
-    if (!variantId) {
-      window.location.href = `${href}${product.customizable ? "?customize=1" : ""}`;
+    if (productHasCustomizationOptions(product)) {
+      window.location.href = redirect
+        ? `${href}?buy=1`
+        : getProductCustomizeHref(product);
       return;
     }
 
-    if (product.customizable && redirect) {
-      window.location.href = `${href}?buy=1`;
+    const { variantId, catalogVariantId, price } = resolveDefaultVariant(product);
+    if (!variantId) {
+      window.location.href = href;
       return;
     }
 
@@ -60,29 +69,42 @@ export default function ProductListCard({
     setLoading(true);
     setToast("");
 
-    const result = await startProductCheckout({
+    if (redirect) {
+      const result = await startProductCheckout({
+        product,
+        variantId,
+        catalogVariantId,
+        customPrice: price,
+        redirect: true,
+      });
+      setLoading(false);
+      if (!result.ok) {
+        handleCheckoutAuthFailure(result);
+        if (!result.needsLogin) setToast(result.error);
+      }
+      return;
+    }
+
+    const result = await addProductToCart({
       product,
       variantId,
       catalogVariantId,
       customPrice: price,
-      redirect,
-      checkoutFlow: "storefront-cart",
+      productImage: imageSrc,
     });
 
     setLoading(false);
 
     if (!result.ok) {
       handleCheckoutAuthFailure(result);
-      if (!result.needsLogin) {
-        setToast(result.error);
-      }
+      if (!result.needsLogin) setToast(result.error);
       return;
     }
 
-    if (!redirect) {
-      setToast(detailCopy.addedToCart);
-      window.setTimeout(() => setToast(""), 3200);
-    }
+    await refreshCart();
+    goToCart();
+    setToast(productContent.commerce.addedToCart);
+    window.setTimeout(() => setToast(""), 3200);
   };
 
   return (

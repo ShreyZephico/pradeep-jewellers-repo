@@ -7,7 +7,9 @@ import type { Product } from "@/types/product";
 import ProductCommerceActions from "@/components/ProductCommerceActions";
 import ProductContentModal from "@/components/ProductContentModal";
 import ProductModal from "@/components/ProductModal";
+import { useCart } from "@/contexts/CartContext";
 import {
+  addProductToCart,
   handleCheckoutAuthFailure,
   resolveDefaultVariant,
   startProductCheckout,
@@ -19,6 +21,7 @@ import {
 } from "@/hooks/useProductBasePrice";
 import { formatProductPrice } from "@/utils/formatPrice";
 import productContent from "@/lib/productContent";
+import { productHasCustomizationOptions } from "@/utils/productCustomization";
 
 type ProductDetailClientProps = {
   slug: string;
@@ -91,6 +94,7 @@ function ProductDetailSummary({
 }
 
 function ProductDetailLoaded({ product }: { product: Product }) {
+  const { refreshCart, goToCart } = useCart();
   const [activeImage, setActiveImage] = useState(
     product.images?.[0] ?? product.image ?? "/placeholder.jpg"
   );
@@ -110,8 +114,12 @@ function ProductDetailLoaded({ product }: { product: Product }) {
   }, []);
 
   const runQuickCheckout = async (redirect: boolean) => {
-    if (product.customizable && redirect) {
+    if (productHasCustomizationOptions(product)) {
       setCustomizeOpen(true);
+      if (!redirect) {
+        setCommerceToast(productContent.purchase.customizeBeforeCartError);
+        window.setTimeout(() => setCommerceToast(""), 4000);
+      }
       return;
     }
 
@@ -125,29 +133,41 @@ function ProductDetailLoaded({ product }: { product: Product }) {
     setLoading(true);
     setCommerceToast("");
 
-    const result = await startProductCheckout({
+    if (redirect) {
+      const result = await startProductCheckout({
+        product,
+        variantId,
+        catalogVariantId,
+        customPrice: pricing.estimatedPrice,
+        redirect: true,
+      });
+      setLoading(false);
+      if (!result.ok) {
+        handleCheckoutAuthFailure(result);
+        if (!result.needsLogin) setCommerceToast(result.error);
+      }
+      return;
+    }
+
+    const result = await addProductToCart({
       product,
       variantId,
       catalogVariantId,
       customPrice: pricing.estimatedPrice,
-      redirect,
-      checkoutFlow: "storefront-cart",
     });
 
     setLoading(false);
 
     if (!result.ok) {
       handleCheckoutAuthFailure(result);
-      if (!result.needsLogin) {
-        setCommerceToast(result.error);
-      }
+      if (!result.needsLogin) setCommerceToast(result.error);
       return;
     }
 
-    if (!redirect) {
-      setCommerceToast(copy.addedToCart);
-      window.setTimeout(() => setCommerceToast(""), 3200);
-    }
+    await refreshCart();
+    goToCart();
+    setCommerceToast(productContent.commerce.addedToCart);
+    window.setTimeout(() => setCommerceToast(""), 3200);
   };
 
   const gallery =

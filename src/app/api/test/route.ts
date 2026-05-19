@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
+import { getSupabaseServerClient } from "@/lib/supabaseServer";
 
 export async function GET() {
   try {
+    const supabase = getSupabaseServerClient();
     const { data, error } = await supabase
       .from("products")
       .select(`
@@ -29,11 +26,12 @@ export async function GET() {
       success: true,
       products: data,
     });
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       {
         success: false,
-        error: error.message,
+        error: message,
       },
       { status: 500 }
     );

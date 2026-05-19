@@ -5,9 +5,11 @@ import TawkToChat from "@/components/TawkToChat";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 
-// IMPORT PROVIDER
+import { CartProvider } from "@/contexts/CartContext";
 import { GoldRatesProvider } from "@/contexts/GoldRatesContext";
 
+import "@/styles/cart.css";
+import "@/styles/cart-page.css";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -45,17 +47,16 @@ export default function RootLayout({
       >
         {/* PROVIDER START */}
         <GoldRatesProvider>
-          
-          <Header />
+          <CartProvider>
+            <Header />
 
-          <div suppressHydrationWarning key="app-root">
-            {children}
-          </div>
+            <div suppressHydrationWarning key="app-root">
+              {children}
+            </div>
 
-          <Footer />
-
-          <TawkToChat />
-
+            <Footer />
+            <TawkToChat />
+          </CartProvider>
         </GoldRatesProvider>
         {/* PROVIDER END */}
       </body>
