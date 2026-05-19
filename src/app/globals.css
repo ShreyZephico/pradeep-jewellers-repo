@@ -40,6 +40,623 @@
   --shadow-soft: 0 18px 40px rgb(var(--color-deep-teal-rgb) / 0.08);
   --shadow-medium: 0 24px 50px rgb(var(--color-deep-teal-rgb) / 0.1);
   --shadow-strong: 0 32px 80px rgb(var(--color-deep-teal-rgb) / 0.12);
+
+  /* Site header — update palette here only */
+  --header-bg: #f9f8f6;
+  --header-bg-scrolled: var(--color-pure-white);
+  --header-accent: #a8813e;
+  --header-accent-hover: #8f6c32;
+  --header-nav-active: var(--header-accent);
+  --header-accent-rgb: 168 129 62;
+  --header-text: #1a1a1a;
+  --header-text-muted: #5c5c5c;
+  --header-text-subtle: #7a7a7a;
+  --header-border: #e8e4dc;
+  --header-promo-bg: #fff9e5;
+  --header-promo-text: #a6702e;
+  --header-recent-bg: #f5f4f2;
+  --header-recent-highlight: var(--header-accent);
+  --header-shadow: 0 4px 24px rgb(var(--color-deep-teal-rgb) / 0.08);
+  --header-icon-btn-hover: rgb(var(--header-accent-rgb) / 0.1);
+  --header-cart-badge-bg: var(--header-accent);
+  --header-cart-badge-text: var(--color-pure-white);
+  --header-btn-primary-bg: var(--header-accent);
+  --header-btn-primary-hover: var(--header-accent-hover);
+  --header-btn-primary-text: var(--color-pure-white);
+  --header-dropdown-shadow: 0 12px 40px rgb(var(--color-deep-teal-rgb) / 0.12);
+  --header-ticker-speed: 45s;
+  --header-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --header-recent-transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Hero section — uses shared palette above */
+  --hero-slider-height: clamp(22rem, 58svh, 36rem);
+  --hero-slider-height-mobile: clamp(16rem, 48svh, 28rem);
+  --hero-overlay: rgb(var(--color-black-rgb) / 0.4);
+  --hero-slide-duration: 1s;
+  --hero-rates-lift: -2.75rem;
+  --hero-rates-overlap: 2.75rem;
+  --hero-section-padding-bottom: 1.25rem;
+  --hero-rates-radius: 0.5rem;
+  --hero-rates-padding-y: 0.75rem;
+  --hero-rates-padding-x: 1rem;
+  --hero-rates-padding-y-md: 0.875rem;
+  --hero-rates-padding-x-md: 1.125rem;
+  --hero-rate-label-size: 0.625rem;
+  --hero-rate-label-tracking: 0.18em;
+  --hero-rate-price-size: clamp(1.0625rem, 2.2vw, 1.375rem);
+  --hero-rate-unit-size: 0.6875rem;
+  --hero-rate-was-size: 0.6875rem;
+  --hero-rate-badge-size: 0.6875rem;
+  --hero-panel-title-size: clamp(0.875rem, 1.8vw, 1.0625rem);
+  --hero-panel-hint-size: 0.6875rem;
+  --hero-panel-link-size: 0.8125rem;
+  --hero-card-bg: var(--color-pure-white);
+  --hero-card-border: var(--color-soft-grey);
+  --hero-card-shadow: var(--shadow-strong);
+  --hero-text: var(--color-charcoal);
+  --hero-text-muted: var(--color-muted-dark);
+  --hero-text-subtle: var(--color-muted);
+  --hero-panel-bg: #1f1a17;
+  --hero-panel-text: var(--color-pure-white);
+  --hero-panel-muted: rgb(var(--color-pure-white-rgb) / 0.55);
+  --hero-link: var(--color-soft-gold-alt);
+  --hero-link-hover: var(--color-soft-gold);
+  --hero-trend-up: var(--color-success-dark);
+  --hero-trend-down: var(--color-error-dark);
+  --hero-trend-neutral: var(--color-muted-dark);
+  --hero-badge-up-bg: rgb(var(--color-success-rgb) / 0.12);
+  --hero-badge-up-ring: rgb(var(--color-success-rgb) / 0.35);
+  --hero-badge-down-bg: rgb(var(--color-error-rgb) / 0.12);
+  --hero-badge-down-ring: rgb(var(--color-error-rgb) / 0.35);
+  --hero-badge-neutral-bg: rgb(var(--color-charcoal-rgb) / 0.06);
+  --hero-badge-neutral-ring: var(--color-soft-grey);
+  --hero-nav-bg: rgb(var(--color-pure-white-rgb) / 0.1);
+  --hero-nav-border: rgb(var(--color-pure-white-rgb) / 0.5);
+  --hero-nav-hover-bg: rgb(var(--color-pure-white-rgb) / 0.2);
+  --hero-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --hero-rates-enter: 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Collections section — shared palette */
+  --collections-bg: var(--color-off-white);
+  --collections-heading: var(--color-charcoal);
+  --collections-accent: var(--header-accent);
+  --collections-accent-muted: var(--header-promo-text);
+  --collections-accent-highlight: var(--color-soft-gold);
+  --collections-card-overlay: linear-gradient(
+    to top,
+    rgb(var(--color-black-rgb) / 0.72) 0%,
+    rgb(var(--color-black-rgb) / 0.12) 45%,
+    transparent 100%
+  );
+  --collections-padding-y: clamp(2.5rem, 5vh, 3.5rem);
+  --collections-header-gap: 1rem;
+  --collections-grid-gap: 1.5rem;
+  --collections-grid-gap-mobile: 0.75rem;
+  --collections-card-aspect: 4 / 5;
+  --collections-card-aspect-mobile: 3 / 4;
+  --collections-card-min-height: 18rem;
+  --collections-card-radius: 0.25rem;
+  --collections-title-size: clamp(1.5rem, 3vw, 2.25rem);
+  --collections-title-size-mobile: clamp(1.1rem, 4vw, 1.35rem);
+  --collections-card-title-size: clamp(1.5rem, 2.8vw, 2.25rem);
+  --collections-card-title-size-mobile: clamp(0.9rem, 3.4vw, 1.05rem);
+  --collections-card-subtitle-size: 0.875rem;
+  --collections-card-subtitle-size-mobile: 0.625rem;
+  --collections-badge-size: 0.625rem;
+  --collections-badge-tracking: 0.18em;
+  --collections-label-tracking: 0.2em;
+  --collections-transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --collections-stagger: 0.06s;
+
+  /* Home sections — shared ink & surfaces */
+  --home-section-bg: var(--header-bg);
+  --home-ink: #1a1410;
+  --home-ink-rgb: 26 20 16;
+  --home-ink-muted: #5c534c;
+  --home-ink-subtle: rgb(var(--home-ink-rgb) / 0.55);
+  --home-ink-faint: rgb(var(--home-ink-rgb) / 0.45);
+  --home-media-bg: #ede9e2;
+  --home-text-brown: #765f4a;
+  --home-cta-ink: #2a2018;
+  --home-border-gold: rgb(196 165 116 / 0.9);
+
+  /* Featured products section */
+  --featured-bg: var(--home-section-bg);
+  --featured-heading: var(--home-ink);
+  --featured-text-muted: var(--home-ink-muted);
+  --featured-text-brown: var(--home-text-brown);
+  --featured-accent: var(--collections-accent-highlight);
+  --featured-accent-label: var(--header-accent);
+  --featured-media-bg: var(--home-media-bg);
+  --featured-cta-ink: var(--home-cta-ink);
+  --featured-cta-border: var(--home-border-gold);
+  --featured-overlay: rgb(var(--home-ink-rgb) / 0.2);
+  --featured-padding-y: clamp(2.5rem, 6vh, 6rem);
+  --featured-header-gap: clamp(1.5rem, 3vh, 3.5rem);
+  --featured-grid-gap: 1.5rem;
+  --featured-grid-gap-mobile: 0.75rem;
+  --featured-grid-row-gap-mobile: 1.75rem;
+  --featured-title-size: clamp(1.5rem, 3vw, 2.25rem);
+  --featured-title-size-mobile: clamp(1.25rem, 4.5vw, 1.5rem);
+  --featured-desc-size: clamp(0.8125rem, 2vw, 1rem);
+  --featured-card-title-size: clamp(1rem, 2.2vw, 1.125rem);
+  --featured-card-title-size-mobile: clamp(0.9rem, 3.2vw, 1rem);
+  --featured-card-desc-size: 0.75rem;
+  --featured-card-desc-size-mobile: 0.6875rem;
+  --featured-price-size: 1rem;
+  --featured-price-size-mobile: 0.9375rem;
+  --featured-badge-size: 0.625rem;
+  --featured-label-size: 0.625rem;
+  --featured-type-size: 0.625rem;
+  --featured-type-size-mobile: 0.5625rem;
+  --featured-product-badge-size: 0.625rem;
+  --featured-hover-label-size: 0.625rem;
+  --featured-badge-tracking: 0.28em;
+  --featured-label-tracking: 0.22em;
+  --featured-type-tracking: 0.22em;
+  --featured-card-radius: 0.125rem;
+  --featured-transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --featured-image-transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --featured-overlay-transition: 0.25s ease;
+  --featured-stagger: 0.07s;
+  --featured-image-hover: 1.03;
+  --featured-enter-duration: 0.45s;
+  --featured-enter-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --featured-serif: Georgia, "Times New Roman", serif;
+
+  /* Curated section — reuses home + featured tokens */
+  --curated-bg: var(--featured-bg);
+  --curated-heading: var(--featured-heading);
+  --curated-badge-ink: var(--home-cta-ink);
+  --curated-badge-muted: rgb(var(--home-ink-rgb) / 0.8);
+  --curated-badge-line: rgb(var(--home-ink-rgb) / 0.7);
+  --curated-tab-inactive: rgb(var(--home-ink-rgb) / 0.45);
+  --curated-tab-hover: rgb(var(--home-ink-rgb) / 0.7);
+  --curated-media-bg: var(--featured-media-bg);
+  --curated-cta-ink: var(--featured-cta-ink);
+  --curated-cta-border: var(--featured-cta-border);
+  --curated-cta-hover-bg: var(--curated-heading);
+  --curated-cta-hover-text: var(--curated-bg);
+  --curated-padding-y: var(--featured-padding-y);
+  --curated-header-gap: clamp(1.5rem, 3vh, 3.5rem);
+  --curated-grid-gap: var(--featured-grid-gap);
+  --curated-grid-gap-mobile: var(--featured-grid-gap-mobile);
+  --curated-grid-row-gap-mobile: var(--featured-grid-row-gap-mobile);
+  --curated-title-size: clamp(1.75rem, 4vw, 2.75rem);
+  --curated-title-size-mobile: clamp(1.35rem, 5vw, 1.65rem);
+  --curated-badge-size: 0.6875rem;
+  --curated-badge-tracking: 0.28em;
+  --curated-tab-size: 0.6875rem;
+  --curated-tab-tracking: 0.2em;
+  --curated-type-size: var(--featured-type-size);
+  --curated-type-size-mobile: var(--featured-type-size-mobile);
+  --curated-card-title-size: clamp(1rem, 2.2vw, 1.25rem);
+  --curated-card-title-size-mobile: clamp(0.875rem, 3vw, 0.95rem);
+  --curated-price-size: clamp(1rem, 2vw, 1.125rem);
+  --curated-price-size-mobile: 0.9375rem;
+  --curated-making-size: 0.6875rem;
+  --curated-making-size-mobile: 0.5625rem;
+  --curated-product-tag-size: var(--featured-product-badge-size);
+  --curated-card-radius: var(--featured-card-radius);
+  --curated-transition: var(--featured-transition);
+  --curated-stagger: var(--featured-stagger);
+  --curated-image-hover: var(--featured-image-hover);
+
+  /* Bespoke hero section */
+  --bespoke-overlay-base: rgb(10 8 6 / 0.75);
+  --bespoke-gradient-top: rgb(var(--color-black-rgb) / 0.55);
+  --bespoke-gradient-mid: rgb(var(--color-black-rgb) / 0.4);
+  --bespoke-gradient-bottom: rgb(var(--color-black-rgb) / 0.8);
+  --bespoke-accent: #b88e4f;
+  --bespoke-accent-hover: #c49a56;
+  --bespoke-accent-italic: var(--bespoke-accent);
+  --bespoke-text: var(--color-pure-white);
+  --bespoke-text-muted: rgb(var(--color-pure-white-rgb) / 0.9);
+  --bespoke-border-light: rgb(var(--color-pure-white-rgb) / 0.9);
+  --bespoke-border-hover-bg: rgb(var(--color-pure-white-rgb) / 0.1);
+  --bespoke-min-height: min(100svh, 52rem);
+  --bespoke-padding-y: clamp(4rem, 12vh, 9rem);
+  --bespoke-inner-max: 56rem;
+  --bespoke-subtitle-size: 0.6875rem;
+  --bespoke-subtitle-tracking: 0.35em;
+  --bespoke-badge-line-width: 2.5rem;
+  --bespoke-title-size: clamp(2.25rem, 6vw, 3.75rem);
+  --bespoke-desc-size: clamp(1rem, 2.2vw, 1.125rem);
+  --bespoke-cta-size: 0.6875rem;
+  --bespoke-cta-tracking: 0.2em;
+  --bespoke-cta-tracking-secondary: 0.18em;
+  --bespoke-cta-min-height: 3rem;
+  --bespoke-actions-gap: 1rem;
+  --bespoke-actions-gap-mobile: 0.75rem;
+  --bespoke-transition: var(--featured-transition);
+  --bespoke-enter-duration: 0.6s;
+  --bespoke-enter-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --bespoke-stagger: 0.1s;
+  --bespoke-serif: var(--featured-serif);
+  --bespoke-blur: 2px;
+
+  /* Gifting section */
+  --gifting-bg: var(--color-warm-ivory);
+  --gifting-text: var(--color-pure-white);
+  --gifting-heading: var(--home-ink);
+  --gifting-text-muted: rgb(var(--home-ink-rgb) / 0.55);
+  --gifting-text-faint: rgb(var(--home-ink-rgb) / 0.45);
+  --gifting-text-subtle: rgb(var(--home-ink-rgb) / 0.35);
+  --gifting-accent: var(--bespoke-accent);
+  --gifting-accent-hover: #9a7a3a;
+  --gifting-badge-muted: rgb(var(--home-ink-rgb) / 0.8);
+  --gifting-card-bg: var(--color-pure-white);
+  --gifting-card-border: rgb(var(--home-ink-rgb) / 0.12);
+  --gifting-card-border-hover: rgb(var(--gifting-accent) / 0.6);
+  --gifting-card-shadow-active: 0 0 0 1px var(--gifting-accent);
+  --gifting-media-bg: #f0ebe3;
+  --gifting-ribbon-opacity: 0.88;
+  --gifting-ribbon-bar: clamp(16px, 13%, 30px);
+  --gifting-ribbon-span: 102%;
+  --gifting-tag-bg: rgb(var(--color-pure-white-rgb) / 0.5);
+  --gifting-tag-border: rgb(var(--home-ink-rgb) / 0.18);
+  --gifting-feature-overlay: linear-gradient(
+    to top,
+    rgb(var(--color-black-rgb) / 0.85) 0%,
+    rgb(var(--color-black-rgb) / 0.35) 45%,
+    rgb(var(--color-black-rgb) / 0.25) 100%
+  );
+  --gifting-feature-nav-bg: rgb(var(--color-black-rgb) / 0.25);
+  --gifting-feature-nav-border: rgb(var(--color-pure-white-rgb) / 0.5);
+  --gifting-padding-y: clamp(2rem, 4vh, 3rem);
+  --gifting-grid-gap: 0.75rem;
+  --gifting-grid-gap-mobile: 0.625rem;
+  --gifting-layout-gap: 1.5rem;
+  --gifting-title-size: clamp(1.625rem, 2.8vw, 2.25rem);
+  --gifting-title-size-mobile: clamp(1.375rem, 5vw, 1.625rem);
+  --gifting-subheading-size: 0.875rem;
+  --gifting-card-price-size: clamp(1.125rem, 1.6vw, 1.375rem);
+  --gifting-card-price-size-mobile: clamp(1rem, 3.5vw, 1.125rem);
+  --gifting-badge-size: 0.6875rem;
+  --gifting-label-size: 0.625rem;
+  --gifting-explore-size: 0.625rem;
+  --gifting-occasion-size: 0.6875rem;
+  --gifting-badge-tracking: 0.28em;
+  --gifting-label-tracking: 0.2em;
+  --gifting-stylist-tracking: 0.22em;
+  --gifting-feature-title-size: clamp(1.75rem, 3vw, 2.25rem);
+  --gifting-feature-min-height: 20rem;
+  --gifting-feature-min-height-lg: 0;
+  --gifting-transition: var(--featured-transition);
+  --gifting-image-transition: var(--featured-image-transition);
+  --gifting-stagger: var(--featured-stagger);
+  --gifting-image-hover: var(--featured-image-hover);
+  --gifting-serif: var(--featured-serif);
+
+  /* Pricing section */
+  --pricing-bg: var(--header-bg);
+  --pricing-ink: var(--color-charcoal);
+  --pricing-ink-rgb: var(--color-charcoal-rgb);
+  --pricing-text-muted: rgb(var(--pricing-ink-rgb) / 0.65);
+  --pricing-text-faint: rgb(var(--pricing-ink-rgb) / 0.55);
+  --pricing-text-subtle: rgb(var(--pricing-ink-rgb) / 0.5);
+  --pricing-accent: var(--header-accent);
+  --pricing-accent-hover: var(--header-accent-hover);
+  --pricing-accent-on: var(--color-pure-white);
+  --pricing-card-bg: var(--color-pure-white);
+  --pricing-card-border: rgb(var(--pricing-ink-rgb) / 0.14);
+  --pricing-card-shadow: 0 1px 3px rgb(var(--pricing-ink-rgb) / 0.06);
+  --pricing-compare-border: var(--pricing-accent);
+  --pricing-calc-header-bg: var(--pricing-ink);
+  --pricing-calc-shadow: 0 20px 48px rgb(var(--pricing-ink-rgb) / 0.1);
+  --pricing-calc-radius: 0.375rem;
+  --pricing-compare-bg: rgb(var(--color-pure-white-rgb) / 0.85);
+  --pricing-chip-border: rgb(var(--pricing-ink-rgb) / 0.14);
+  --pricing-chip-hover-border: rgb(var(--pricing-accent) / 0.5);
+  --pricing-divider: rgb(var(--pricing-ink-rgb) / 0.22);
+  --pricing-range-track: var(--color-soft-grey);
+  --pricing-padding-y: clamp(2rem, 4vh, 3rem);
+  --pricing-layout-gap: clamp(1.5rem, 3vh, 2.5rem);
+  --pricing-features-gap: 0.75rem;
+  --pricing-features-gap-mobile: 0.625rem;
+  --pricing-title-size: clamp(1.75rem, 3vw, 2.5rem);
+  --pricing-title-size-mobile: clamp(1.5rem, 5vw, 1.75rem);
+  --pricing-enter-duration: 0.6s;
+  --pricing-enter-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --pricing-desc-size: clamp(0.8125rem, 2vw, 1rem);
+  --pricing-badge-size: 0.6875rem;
+  --pricing-badge-tracking: 0.28em;
+  --pricing-compare-label-size: 0.625rem;
+  --pricing-compare-label-tracking: 0.22em;
+  --pricing-feature-title-size: 0.875rem;
+  --pricing-feature-desc-size: 0.75rem;
+  --pricing-feature-pct-size: 0.875rem;
+  --pricing-calc-header-size: 0.6875rem;
+  --pricing-calc-header-tracking: 0.22em;
+  --pricing-total-size: clamp(1.75rem, 4vw, 2rem);
+  --pricing-transition: var(--featured-transition);
+  --pricing-stagger: var(--featured-stagger);
+  --pricing-serif: var(--featured-serif);
+
+  /* Gold scheme section */
+  --gold-scheme-bg: var(--gifting-bg);
+  --gold-scheme-ink: #1a1a1a;
+  --gold-scheme-ink-rgb: 26 26 26;
+  --gold-scheme-panel-bg: var(--color-pure-white);
+  --gold-scheme-panel-border: rgb(var(--gold-scheme-ink-rgb) / 0.14);
+  --gold-scheme-panel-shadow: 0 1px 3px rgb(var(--gold-scheme-ink-rgb) / 0.06);
+  --gold-scheme-scheme-bg: var(--gold-scheme-ink);
+  --gold-scheme-scheme-shadow: 0 28px 80px rgb(var(--color-black-rgb) / 0.28);
+  --gold-scheme-scheme-surface: #2a2a2a;
+  --gold-scheme-stat-bg: #242424;
+  --gold-scheme-stat-highlight-bg: #1f1f1f;
+  --gold-scheme-scheme-text: var(--color-pure-white);
+  --gold-scheme-scheme-text-muted: rgb(var(--color-pure-white-rgb) / 0.75);
+  --gold-scheme-scheme-text-faint: rgb(var(--color-pure-white-rgb) / 0.45);
+  --gold-scheme-scheme-border: rgb(var(--color-pure-white-rgb) / 0.12);
+  --gold-scheme-accent: #c5a059;
+  --gold-scheme-accent-deep: #b8860b;
+  --gold-scheme-accent-inset: rgb(197 160 89 / 0.35);
+  --gold-scheme-range-track: rgb(var(--color-pure-white-rgb) / 0.15);
+  --gold-scheme-whatsapp: #25d366;
+  --gold-scheme-whatsapp-hover: #1ebe57;
+  --gold-scheme-urgency: #c2410c;
+  --gold-scheme-flame-primary: #ea580c;
+  --gold-scheme-flame-secondary: #fbbf24;
+  --gold-scheme-countdown-bg: #f5f0e8;
+  --gold-scheme-countdown-border: rgb(var(--gold-scheme-ink-rgb) / 0.12);
+  --gold-scheme-product-bg-light: var(--gifting-media-bg);
+  --gold-scheme-product-bg-dark: var(--color-black);
+  --gold-scheme-price: var(--pricing-accent);
+  --gold-scheme-view-border: var(--gold-scheme-accent-deep);
+  --gold-scheme-view-text: #6b4f1e;
+  --gold-scheme-view-hover-bg: rgb(184 134 11 / 0.1);
+  --gold-scheme-padding-y: clamp(2.5rem, 6vh, 7rem);
+  --gold-scheme-layout-gap: clamp(2rem, 4vh, 2.5rem);
+  --gold-scheme-radius: 0.75rem;
+  --gold-scheme-grid-gap: 0.75rem;
+  --gold-scheme-grid-gap-mobile: 0.5rem;
+  --gold-scheme-title-size: clamp(2rem, 4.5vw, 3rem);
+  --gold-scheme-desc-size: clamp(0.8125rem, 2vw, 0.9375rem);
+  --gold-scheme-badge-size: 0.625rem;
+  --gold-scheme-badge-size-md: 0.6875rem;
+  --gold-scheme-badge-tracking: 0.32em;
+  --gold-scheme-stat-size: clamp(1.15rem, 2.5vw, 1.5rem);
+  --gold-scheme-stat-label-size: 0.625rem;
+  --gold-scheme-clearance-header-size: 0.6875rem;
+  --gold-scheme-clearance-header-tracking: 0.22em;
+  --gold-scheme-countdown-size: clamp(1.35rem, 3vw, 1.875rem);
+  --gold-scheme-countdown-label-size: 0.5625rem;
+  --gold-scheme-product-name-size: 0.6875rem;
+  --gold-scheme-cta-size: 0.6875rem;
+  --gold-scheme-cta-tracking: 0.2em;
+  --gold-scheme-view-cta-tracking: 0.18em;
+  --gold-scheme-transition: var(--featured-transition);
+  --gold-scheme-stagger: var(--featured-stagger);
+  --gold-scheme-serif: var(--featured-serif);
+
+  /* Callback lead section */
+  --callback-bg: var(--pricing-bg);
+  --callback-ink: var(--home-cta-ink);
+  --callback-ink-rgb: var(--home-ink-rgb);
+  --callback-text-muted: var(--home-ink-muted);
+  --callback-text-placeholder: var(--home-text-brown);
+  --callback-accent: var(--pricing-accent);
+  --callback-accent-hover: var(--pricing-accent-hover);
+  --callback-accent-soft: rgb(var(--header-accent-rgb) / 0.1);
+  --callback-form-bg: var(--color-pure-white);
+  --callback-form-border: var(--color-soft-grey);
+  --callback-form-shadow: 0 4px 24px rgb(var(--callback-ink-rgb) / 0.06);
+  --callback-input-border: var(--callback-form-border);
+  --callback-input-focus-ring: rgb(var(--header-accent-rgb) / 0.3);
+  --callback-phone-prefix-bg: var(--callback-bg);
+  --callback-error-bg: rgb(var(--color-error-rgb) / 0.08);
+  --callback-error-border: rgb(var(--color-error-rgb) / 0.25);
+  --callback-error-text: var(--color-error-dark);
+  --callback-padding-y: clamp(2.5rem, 6vh, 6rem);
+  --callback-layout-gap: clamp(2rem, 4vh, 4rem);
+  --callback-form-gap: 1.25rem;
+  --callback-fields-gap: 1rem;
+  --callback-benefits-gap: 0.75rem;
+  --callback-title-size: clamp(1.75rem, 4vw, 2.75rem);
+  --callback-desc-size: clamp(0.8125rem, 2vw, 1rem);
+  --callback-badge-size: 0.6875rem;
+  --callback-badge-tracking: 0.28em;
+  --callback-label-size: 0.75rem;
+  --callback-label-tracking: 0.15em;
+  --callback-input-size: 0.875rem;
+  --callback-hint-size: 0.75rem;
+  --callback-submit-tracking: 0.12em;
+  --callback-form-radius: 0.75rem;
+  --callback-input-radius: 0.375rem;
+  --callback-transition: var(--featured-transition);
+  --callback-stagger: 0.07s;
+  --callback-enter-duration: 0.55s;
+  --callback-enter-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --callback-serif: var(--featured-serif);
+
+  /* Learn section */
+  --learn-bg: var(--header-bg);
+  --learn-ink: #2d2d2d;
+  --learn-ink-rgb: 45 45 45;
+  --learn-text-muted: rgb(var(--learn-ink-rgb) / 0.6);
+  --learn-text-faint: rgb(var(--learn-ink-rgb) / 0.45);
+  --learn-accent: var(--gold-scheme-accent);
+  --learn-accent-border: rgb(197 160 89 / 0.25);
+  --learn-accent-bg: rgb(197 160 89 / 0.1);
+  --learn-card-bg: var(--color-pure-white);
+  --learn-card-border: rgb(var(--learn-ink-rgb) / 0.12);
+  --learn-card-border-hover: rgb(197 160 89 / 0.35);
+  --learn-card-shadow: 0 2px 24px rgb(var(--learn-ink-rgb) / 0.04);
+  --learn-card-shadow-hover: 0 12px 40px rgb(var(--learn-ink-rgb) / 0.08);
+  --learn-card-footer-border: rgb(var(--learn-ink-rgb) / 0.06);
+  --learn-padding-y: clamp(2.5rem, 6vh, 7rem);
+  --learn-header-gap: clamp(2.5rem, 5vh, 4rem);
+  --learn-grid-gap: 1.5rem;
+  --learn-grid-gap-mobile: 0.75rem;
+  --learn-title-size: clamp(1.75rem, 4vw, 2.65rem);
+  --learn-card-title-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  --learn-summary-size: 0.875rem;
+  --learn-badge-size: 0.6875rem;
+  --learn-badge-tracking: 0.32em;
+  --learn-category-size: 0.625rem;
+  --learn-category-tracking: 0.22em;
+  --learn-meta-size: 0.75rem;
+  --learn-cta-size: 0.6875rem;
+  --learn-cta-tracking: 0.14em;
+  --learn-badge-line-width: 2.5rem;
+  --learn-badge-line-width-md: 3.5rem;
+  --learn-transition: var(--featured-transition);
+  --learn-stagger: var(--featured-stagger);
+  --learn-image-hover: var(--featured-image-hover);
+  --learn-serif: var(--featured-serif);
+
+  /* Founder section */
+  --founder-bg: #fdfcf8;
+  --founder-ink: #333333;
+  --founder-ink-rgb: 51 51 51;
+  --founder-text-muted: rgb(var(--founder-ink-rgb) / 0.75);
+  --founder-quote: rgb(var(--founder-ink-rgb) / 0.85);
+  --founder-accent: var(--header-accent);
+  --founder-accent-hover: var(--header-accent-hover);
+  --founder-accent-soft: rgb(176 141 68 / 0.9);
+  --founder-badge-bg: var(--founder-accent);
+  --founder-badge-text: var(--color-pure-white);
+  --founder-image-shadow: 0 28px 60px rgb(var(--color-black-rgb) / 0.12);
+  --founder-badge-shadow: 0 10px 28px rgb(var(--color-black-rgb) / 0.18);
+  --founder-image-filter: sepia(0.12) saturate(0.92);
+  --founder-padding-y: clamp(2.5rem, 6vh, 7rem);
+  --founder-layout-gap: clamp(2rem, 4vh, 5rem);
+  --founder-media-aspect: 4 / 5;
+  --founder-media-max-width: 22.5rem;
+  --founder-media-max-width-lg: 26rem;
+  --founder-title-size: clamp(1.75rem, 4vw, 2.65rem);
+  --founder-quote-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  --founder-desc-size: clamp(0.8125rem, 2vw, 1rem);
+  --founder-year-size: clamp(2rem, 5vw, 2.75rem);
+  --founder-badge-label-size: 0.625rem;
+  --founder-label-size: 0.6875rem;
+  --founder-label-tracking: 0.28em;
+  --founder-badge-tracking: 0.2em;
+  --founder-link-tracking: 0.22em;
+  --founder-transition: var(--featured-transition);
+  --founder-enter-duration: 0.65s;
+  --founder-enter-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --founder-stagger: 0.1s;
+  --founder-serif: var(--featured-serif);
+
+  /* Testimonials section */
+  --testimonials-bg: #1a1614;
+  --testimonials-bg-rgb: 26 22 20;
+  --testimonials-card-bg: #25211e;
+  --testimonials-card-border: rgb(var(--color-pure-white-rgb) / 0.06);
+  --testimonials-accent: var(--gold-scheme-accent);
+  --testimonials-accent-muted: rgb(197 160 89 / 0.9);
+  --testimonials-text: var(--color-pure-white);
+  --testimonials-text-muted: #a0a0a0;
+  --testimonials-text-faint: rgb(var(--color-pure-white-rgb) / 0.5);
+  --testimonials-rating-bg: var(--testimonials-card-bg);
+  --testimonials-rating-border: rgb(var(--color-pure-white-rgb) / 0.1);
+  --testimonials-divider: rgb(var(--color-pure-white-rgb) / 0.1);
+  --testimonials-avatar-bg: var(--testimonials-bg);
+  --testimonials-avatar-border: rgb(var(--color-pure-white-rgb) / 0.1);
+  --testimonials-padding-y: clamp(2.5rem, 6vh, 7rem);
+  --testimonials-header-gap: clamp(2rem, 4vh, 4rem);
+  --testimonials-grid-gap: 1.5rem;
+  --testimonials-grid-gap-mobile: 0.75rem;
+  --testimonials-title-size: clamp(1.75rem, 4vw, 2.65rem);
+  --testimonials-badge-size: 0.6875rem;
+  --testimonials-badge-tracking: 0.28em;
+  --testimonials-quote-size: clamp(0.9375rem, 2vw, 1.0625rem);
+  --testimonials-rating-size: clamp(1rem, 2vw, 1.25rem);
+  --testimonials-reviews-label-size: 0.625rem;
+  --testimonials-tag-size: 0.625rem;
+  --testimonials-tag-tracking: 0.12em;
+  --testimonials-cta-size: 0.6875rem;
+  --testimonials-cta-tracking: 0.18em;
+  --testimonials-transition: var(--featured-transition);
+  --testimonials-stagger: var(--featured-stagger);
+  --testimonials-enter-duration: 0.6s;
+  --testimonials-enter-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --testimonials-serif: var(--featured-serif);
+
+  /* Social section */
+  --social-bg: #f9f8f3;
+  --social-ink: var(--home-ink);
+  --social-ink-rgb: var(--home-ink-rgb);
+  --social-text-muted: rgb(var(--social-ink-rgb) / 0.65);
+  --social-text-placeholder: rgb(var(--social-ink-rgb) / 0.35);
+  --social-accent: var(--pricing-accent);
+  --social-accent-hover: var(--pricing-accent-hover);
+  --social-icon-border: rgb(var(--social-ink-rgb) / 0.12);
+  --social-icon-bg: var(--color-pure-white);
+  --social-icon-hover-border: rgb(var(--header-accent-rgb) / 0.4);
+  --social-broadcast-bg: #f5f0e8;
+  --social-broadcast-border: rgb(var(--social-ink-rgb) / 0.06);
+  --social-broadcast-shadow: 0 1px 3px rgb(var(--social-ink-rgb) / 0.04);
+  --social-whatsapp: var(--gold-scheme-whatsapp);
+  --social-media-bg: var(--home-media-bg);
+  --social-overlay: rgb(var(--color-black-rgb) / 0.55);
+  --social-padding-y: clamp(2.5rem, 6vh, 7rem);
+  --social-layout-gap: clamp(2.5rem, 4vh, 5rem);
+  --social-grid-gap: 0.5rem;
+  --social-grid-gap-md: 0.75rem;
+  --social-grid-gap-lg: 1rem;
+  --social-handle-size: 0.6875rem;
+  --social-handle-tracking: 0.28em;
+  --social-title-size: clamp(1.75rem, 4vw, 2.5rem);
+  --social-desc-size: clamp(0.8125rem, 2vw, 1rem);
+  --social-broadcast-title-size: 0.9375rem;
+  --social-broadcast-subtitle-size: 0.875rem;
+  --social-input-size: 0.875rem;
+  --social-btn-tracking: 0.16em;
+  --social-transition: var(--featured-transition);
+  --social-image-transition: var(--featured-image-transition);
+  --social-stagger: 0.06s;
+  --social-enter-duration: 0.6s;
+  --social-enter-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --social-serif: var(--featured-serif);
+
+  /* Site footer */
+  --footer-bg: var(--testimonials-bg);
+  --footer-ticker-bg: #221e1b;
+  --footer-accent: var(--testimonials-accent);
+  --footer-accent-muted: var(--testimonials-accent-muted);
+  --footer-text: var(--color-pure-white);
+  --footer-text-muted: rgb(255 255 255 / 0.8);
+  --footer-text-subtle: rgb(255 255 255 / 0.55);
+  --footer-text-faint: rgb(255 255 255 / 0.35);
+  --footer-border: rgb(255 255 255 / 0.1);
+  --footer-border-light: rgb(255 255 255 / 0.06);
+  --footer-ticker-border: var(--footer-border-light);
+  --footer-icon-border: rgb(255 255 255 / 0.35);
+  --footer-icon-hover-border: var(--footer-accent);
+  --footer-newsletter-bg: rgb(0 0 0 / 0.25);
+  --footer-newsletter-border: rgb(255 255 255 / 0.15);
+  --footer-logo-border: rgb(197 160 89 / 0.4);
+  --footer-logo-bg: rgb(197 160 89 / 0.15);
+  --footer-logo-fallback-border: rgb(197 160 89 / 0.5);
+  --footer-ticker-speed: var(--header-ticker-speed);
+  --footer-padding-y: clamp(3rem, 6vh, 4rem);
+  --footer-grid-gap: clamp(2rem, 4vw, 3rem);
+  --footer-column-heading-size: 0.6875rem;
+  --footer-column-heading-tracking: 0.22em;
+  --footer-link-size: 0.875rem;
+  --footer-brand-name-size: 1.5rem;
+  --footer-desc-size: 0.875rem;
+  --footer-compliance-size: 0.75rem;
+  --footer-map-size: 0.6875rem;
+  --footer-map-tracking: 0.18em;
+  --footer-legal-size: 0.75rem;
+  --footer-ticker-size: 0.875rem;
+  --footer-ticker-size-md: 1rem;
+  --footer-transition: var(--featured-transition);
+  --footer-enter-duration: 0.6s;
+  --footer-enter-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --footer-stagger: 0.08s;
+  --footer-serif: var(--featured-serif);
+
+  /* Live chat launcher (custom Tawk bubble + side tab) */
+  --live-chat-tab-bg: #6b1a2d;
+  --live-chat-tab-bg-hover: #842238;
+  --live-chat-tab-text: #ffffff;
+  --live-chat-teaser-color: #1aa3a8;
+  --live-chat-focus: #1aa3a8;
 }
 
 @theme inline {
@@ -60,4 +677,138 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Google One Tap — top-right anchor (native iframe) */
+.google-one-tap-anchor {
+  position: fixed;
+  top: 5.25rem;
+  right: 1rem;
+  z-index: 9999;
+  width: min(400px, calc(100vw - 2rem));
+  min-height: 1px;
+  pointer-events: none;
+}
+
+.google-one-tap-anchor iframe {
+  pointer-events: auto;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Fallback card — matches Google One Tap dark UI (Stack Overflow style) */
+.google-one-tap-fallback {
+  position: fixed;
+  top: 5.25rem;
+  right: 1rem;
+  z-index: 9998;
+  width: min(400px, calc(100vw - 2rem));
+  padding: 1rem 1rem 0.875rem;
+  border-radius: 8px;
+  background: #303134;
+  color: #e8eaed;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  font-family: "Google Sans", Roboto, Arial, sans-serif;
+}
+
+.google-one-tap-fallback__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.google-one-tap-fallback__header svg {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.google-one-tap-fallback__title {
+  flex: 1;
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: #e8eaed;
+  font-weight: 400;
+}
+
+.google-one-tap-fallback__close {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  background: transparent;
+  color: #9aa0a6;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.google-one-tap-fallback__close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e8eaed;
+}
+
+.google-one-tap-fallback__body {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.google-one-tap-fallback__avatar {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8e24aa, #e91e63);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.google-one-tap-fallback__label {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.google-one-tap-fallback__hint {
+  margin: 0.125rem 0 0;
+  font-size: 0.8125rem;
+  color: #9aa0a6;
+}
+
+.google-one-tap-fallback__cta {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background: #1a73e8;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.google-one-tap-fallback__cta:hover:not(:disabled) {
+  background: #1765cc;
+}
+
+.google-one-tap-fallback__cta:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.google-one-tap-fallback__legal {
+  margin: 0.75rem 0 0;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: #9aa0a6;
 }

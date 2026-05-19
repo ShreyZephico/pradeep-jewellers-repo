@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Product } from '@/types/product';
@@ -45,6 +46,7 @@ const formatPrice = (price: number) => {
 };
 
 export default function ProductsPageClient() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -68,6 +70,14 @@ export default function ProductsPageClient() {
     { id: 'earrings', name: 'Earrings' },
     { id: 'bracelets', name: 'Bracelets' },
   ];
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) {
+      setSearchTerm(q);
+      setDebouncedQ(q.trim());
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {

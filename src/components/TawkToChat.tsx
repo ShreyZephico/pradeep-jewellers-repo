@@ -2,6 +2,7 @@
 
 import Script from 'next/script';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
+import LiveChatLauncher from '@/components/LiveChatLauncher';
 
 type VisitorProfile = {
   name: string;
@@ -13,6 +14,8 @@ type VisitorProfile = {
 type TawkApi = {
   onLoad?: () => void;
   onChatMaximized?: () => void;
+  onChatMinimized?: () => void;
+  onChatHidden?: () => void;
   setAttributes?: (
     attributes: Record<string, string>,
     callback?: (error?: unknown) => void
@@ -24,6 +27,8 @@ type TawkApi = {
   ) => void;
   minimize?: () => void;
   maximize?: () => void;
+  hideWidget?: () => void;
+  showWidget?: () => void;
 };
 
 declare global {
@@ -34,6 +39,7 @@ declare global {
 }
 
 const TAWK_PROFILE_STORAGE_KEY = 'tawkVisitorProfile';
+const TAWK_LAUNCHER_COLLAPSED_KEY = 'tawkLauncherCollapsed';
 
 function normalizePhone(value: string) {
   const trimmed = value.trim();
@@ -84,6 +90,20 @@ export default function TawkToChat() {
   const hasLoadedProfile = useRef(false);
   const profileRef = useRef<VisitorProfile | null>(null);
   const needsProfileRef = useRef(false);
+  const [launcherCollapsed, setLauncherCollapsed] = useState(false);
+  const [launcherHydrated, setLauncherHydrated] = useState(false);
+  const launcherCollapsedRef = useRef(false);
+  const tawkReadyRef = useRef(false);
+  const [chatOpen, setChatOpen] = useState(false);
+
+  const setTawkChatOpen = useCallback((open: boolean) => {
+    setChatOpen(open);
+    document.body.classList.toggle('tawk-chat-open', open);
+  }, []);
+
+  const hideNativeTawkBubble = useCallback(() => {
+    window.Tawk_API?.hideWidget?.();
+  }, []);
 
   const updateProfile = useCallback((nextProfile: VisitorProfile | null) => {
     profileRef.current = nextProfile;
@@ -173,18 +193,79 @@ export default function TawkToChat() {
     }
   }, [applyTawkProfile, updateProfile]);
 
+  const openChatFromLauncher = useCallback(() => {
+    const currentProfile = profileRef.current;
+
+    if (!currentProfile?.phone) {
+      shouldOpenAfterProfile.current = true;
+      requestProfileBeforeChat();
+      return;
+    }
+
+    applyTawkProfile(currentProfile);
+    window.Tawk_API?.showWidget?.();
+    window.Tawk_API?.maximize?.();
+    setTawkChatOpen(true);
+  }, [applyTawkProfile, requestProfileBeforeChat, setTawkChatOpen]);
+
+  const handleLauncherCollapse = useCallback(() => {
+    launcherCollapsedRef.current = true;
+    setLauncherCollapsed(true);
+
+    try {
+      sessionStorage.setItem(TAWK_LAUNCHER_COLLAPSED_KEY, '1');
+    } catch {
+      /* ignore */
+    }
+
+    window.Tawk_API?.minimize?.();
+    setTawkChatOpen(false);
+    hideNativeTawkBubble();
+  }, [hideNativeTawkBubble, setTawkChatOpen]);
+
+  const handleLauncherExpand = useCallback(() => {
+    launcherCollapsedRef.current = false;
+    setLauncherCollapsed(false);
+
+    try {
+      sessionStorage.removeItem(TAWK_LAUNCHER_COLLAPSED_KEY);
+    } catch {
+      /* ignore */
+    }
+
+    hideNativeTawkBubble();
+  }, [hideNativeTawkBubble]);
+
   const configureTawk = useCallback(() => {
     window.Tawk_API = window.Tawk_API || {};
     window.Tawk_LoadStart = new Date();
 
     window.Tawk_API.onLoad = () => {
+      tawkReadyRef.current = true;
       loadCustomerProfile();
+      hideNativeTawkBubble();
     };
 
     window.Tawk_API.onChatMaximized = () => {
       requestProfileBeforeChat();
+
+      if (profileRef.current?.phone) {
+        setTawkChatOpen(true);
+      } else {
+        setTawkChatOpen(false);
+      }
     };
-  }, [loadCustomerProfile, requestProfileBeforeChat]);
+
+    window.Tawk_API.onChatMinimized = () => {
+      setTawkChatOpen(false);
+      hideNativeTawkBubble();
+    };
+
+    window.Tawk_API.onChatHidden = () => {
+      setTawkChatOpen(false);
+      hideNativeTawkBubble();
+    };
+  }, [hideNativeTawkBubble, loadCustomerProfile, requestProfileBeforeChat, setTawkChatOpen]);
 
   useEffect(() => {
     configureTawk();
@@ -194,6 +275,41 @@ export default function TawkToChat() {
       loadCustomerProfile();
     }
   }, [configureTawk, loadCustomerProfile]);
+
+  useEffect(() => {
+    try {
+      const storedCollapsed =
+        sessionStorage.getItem(TAWK_LAUNCHER_COLLAPSED_KEY) === '1';
+      launcherCollapsedRef.current = storedCollapsed;
+      setLauncherCollapsed(storedCollapsed);
+    } catch {
+      launcherCollapsedRef.current = false;
+      setLauncherCollapsed(false);
+    }
+
+    setLauncherHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    launcherCollapsedRef.current = launcherCollapsed;
+  }, [launcherCollapsed]);
+
+  useEffect(() => {
+    document.body.classList.add('tawk-custom-launcher');
+
+    return () => {
+      document.body.classList.remove('tawk-custom-launcher');
+      document.body.classList.remove('tawk-chat-open');
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!tawkReadyRef.current) {
+      return;
+    }
+
+    hideNativeTawkBubble();
+  }, [hideNativeTawkBubble, launcherCollapsed]);
 
   useEffect(() => {
     profileRef.current = profile;
@@ -235,7 +351,10 @@ export default function TawkToChat() {
 
     if (shouldOpenAfterProfile.current) {
       shouldOpenAfterProfile.current = false;
-      window.setTimeout(() => window.Tawk_API?.maximize?.(), 100);
+      window.setTimeout(() => {
+        window.Tawk_API?.showWidget?.();
+        window.Tawk_API?.maximize?.();
+      }, 100);
     }
   };
 
@@ -310,6 +429,15 @@ export default function TawkToChat() {
             </div>
           </form>
         </div>
+      ) : null}
+
+      {launcherHydrated && !chatOpen && !needsProfile ? (
+        <LiveChatLauncher
+          collapsed={launcherCollapsed}
+          onCollapse={handleLauncherCollapse}
+          onExpand={handleLauncherExpand}
+          onOpenChat={openChatFromLauncher}
+        />
       ) : null}
     </>
   );

@@ -4,6 +4,18 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+import { notifyAuthChanged } from '@/contexts/CustomerAuthContext';
+import {
+  consumeReturnPath,
+  getReturnPathFromSearch,
+  saveReturnPath,
+} from '@/lib/authRedirect';
+
+function completeSignup(router: ReturnType<typeof useRouter>) {
+  notifyAuthChanged();
+  router.replace(consumeReturnPath());
+}
+
 export default function SignupPage() {
   const router = useRouter();
   const [step, setStep] = useState<'form' | 'otp'>('form');
@@ -18,13 +30,19 @@ export default function SignupPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
 
-  // Check if already logged in
   useEffect(() => {
-    fetch('/api/auth/check')
+    const returnTo = getReturnPathFromSearch(
+      new URLSearchParams(window.location.search)
+    );
+    if (returnTo) {
+      saveReturnPath(returnTo);
+    }
+
+    fetch('/api/auth/check', { credentials: 'include' })
       .then((response) => response.json())
       .then((data) => {
         if (data.isAuthenticated) {
-          router.push('/');
+          completeSignup(router);
         }
       })
       .catch(() => null);
@@ -53,7 +71,7 @@ export default function SignupPage() {
         setGoogleLoading(false);
         
         setTimeout(() => {
-          router.push('/');
+          completeSignup(router);
         }, 1000);
         
       } else if (event.data.type === 'GOOGLE_SIGNUP_ERROR' || event.data.type === 'GOOGLE_LOGIN_ERROR') {
@@ -207,9 +225,9 @@ export default function SignupPage() {
       if (signupResponse.ok) {
         localStorage.setItem('customerEmail', signupData.email ?? email);
         localStorage.setItem('loginMethod', signupData.loginMethod ?? 'email');
-        setMessage('✅ Account created successfully! Redirecting to login...');
+        setMessage('✅ Account created successfully! Redirecting...');
         setTimeout(() => {
-          router.push('/');
+          completeSignup(router);
         }, 700);
       } else {
         setError(signupData.error || 'Signup failed');

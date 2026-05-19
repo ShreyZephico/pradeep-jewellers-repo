@@ -21,13 +21,26 @@ export function middleware(request: NextRequest) {
     '/api/price',
     '/api/variants',
     '/api/test',
-    "/api/gold-rate"
-    
+    '/api/gold-rate',
+    '/api/callback-lead',
   ];
-  const publicPages = ['/', '/landing', '/products', '/home'];
+  const publicPages = [
+    '/',
+    '/landing',
+    '/products',
+    '/home',
+    '/cart',
+    '/about',
+    '/learn',
+    '/rates',
+    '/privacy',
+    '/terms',
+    '/returns',
+  ];
   const isPublicPath =
     publicPages.includes(pathname) ||
     pathname.startsWith('/products/') ||
+    pathname.startsWith('/collections/') ||
     publicPaths.some(path => pathname.startsWith(path));
 
   // If no token and trying to access private page → redirect to login
@@ -36,12 +49,27 @@ export function middleware(request: NextRequest) {
       return NextResponse.json({ error: 'Please login before continuing.' }, { status: 401 });
     }
 
-    return NextResponse.redirect(new URL('/login', request.url));
+    const loginUrl = new URL('/login', request.url);
+    const returnTo = `${pathname}${request.nextUrl.search}`;
+    if (returnTo && returnTo !== '/login') {
+      loginUrl.searchParams.set('returnTo', returnTo);
+    }
+    return NextResponse.redirect(loginUrl);
   }
 
-  // If has token and trying to access login → redirect to landing
-  if (token && pathname === '/login') {
-    return NextResponse.redirect(new URL('/landing', request.url));
+  if (token && (pathname === '/login' || pathname === '/signup')) {
+    const returnTo = request.nextUrl.searchParams.get('returnTo');
+    const safeReturn =
+      returnTo &&
+      returnTo.startsWith('/') &&
+      !returnTo.startsWith('//') &&
+      !returnTo.startsWith('/login') &&
+      !returnTo.startsWith('/signup');
+
+    if (safeReturn) {
+      return NextResponse.redirect(new URL(returnTo, request.url));
+    }
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   return NextResponse.next();
