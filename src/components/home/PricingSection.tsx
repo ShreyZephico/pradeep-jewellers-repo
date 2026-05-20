@@ -1,8 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 
 import data from "@/data/contactDatas.json";
+
+import "./css/pricing.css";
 
 function formatInr(amount: number): string {
   const rounded = Math.round(amount);
@@ -27,11 +35,11 @@ function applyTemplate(
 }
 
 function FeatureIcon({ name }: { name: string }) {
-  const common = "h-7 w-7 text-[#A67C37]";
+  const iconClass = "pricing-section__feature-icon";
   switch (name) {
     case "diamond":
       return (
-        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+        <svg className={iconClass} viewBox="0 0 24 24" fill="none" aria-hidden>
           <path
             d="M12 2l2.5 4h5L12 22 4.5 6h5L12 2Z"
             stroke="currentColor"
@@ -48,7 +56,7 @@ function FeatureIcon({ name }: { name: string }) {
       );
     case "hammer":
       return (
-        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+        <svg className={iconClass} viewBox="0 0 24 24" fill="none" aria-hidden>
           <path
             d="M4 20l5-5M14 6l4 4-7 7-4-4 7-7Z"
             stroke="currentColor"
@@ -65,7 +73,7 @@ function FeatureIcon({ name }: { name: string }) {
       );
     case "sparkles":
       return (
-        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden>
+        <svg className={iconClass} viewBox="0 0 24 24" fill="none" aria-hidden>
           <path
             d="M12 3v3M12 18v3M3 12h3M18 12h3"
             stroke="currentColor"
@@ -82,7 +90,7 @@ function FeatureIcon({ name }: { name: string }) {
         </svg>
       );
     default:
-      return <div className={common} />;
+      return <span className={iconClass} aria-hidden />;
   }
 }
 
@@ -108,6 +116,8 @@ function DocumentIcon({ className }: { className?: string }) {
 export default function PricingSection() {
   const s = data.pricingSection;
   const calc = s.calculator;
+  const sectionRef = useRef<HTMLElement>(null);
+  const [visible, setVisible] = useState(false);
 
   const [weight, setWeight] = useState(calc.defaultWeight);
   const [purityId, setPurityId] = useState(calc.defaultPurityId);
@@ -134,76 +144,108 @@ export default function PricingSection() {
   const makingLine = applyTemplate(calc.makingLineTemplate, { making: makingPct });
   const gstLine = applyTemplate(calc.gstLineTemplate, { gst: calc.gstPercent });
 
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const reveal = () => setVisible(true);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          reveal();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(el);
+
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      reveal();
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const sectionClass = `pricing-section${
+    visible ? " pricing-section--visible" : ""
+  }`;
+
   return (
-    <section className="bg-[#F9F7F2] py-16 md:py-24 lg:py-28">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid grid-cols-1 gap-14 lg:grid-cols-2 lg:gap-16 xl:gap-20">
-          {/* Left */}
-          <div>
-            <div className="mb-5 flex items-center gap-4">
-              <span className="h-px w-10 shrink-0 bg-[#A67C37]" aria-hidden />
-              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#2D2926]/75">
-                {s.badge}
-              </p>
+    <section
+      ref={sectionRef}
+      className={sectionClass}
+      aria-labelledby="pricing-section-heading"
+    >
+      <div className="pricing-section__inner">
+        <div className="pricing-section__layout">
+          <div className="pricing-section__intro">
+            <div className="pricing-section__badge-row">
+              <span className="pricing-section__badge-line" aria-hidden />
+              <p className="pricing-section__badge">{s.badge}</p>
             </div>
 
-            <h2 className="font-serif text-4xl font-light leading-tight tracking-tight text-[#2D2926] md:text-[2.65rem] lg:text-5xl">
+            <h2
+              id="pricing-section-heading"
+              className="pricing-section__title"
+            >
               {s.titlePrefix}
-              <span className="text-[#A67C37]">{s.titleHighlight}</span>
+              <span className="pricing-section__title-accent">
+                {s.titleHighlight}
+              </span>
               {s.titleSuffix}
             </h2>
 
-            <p className="mt-6 max-w-lg text-sm leading-relaxed text-[#2D2926]/65 md:text-base">
-              {s.description}
-            </p>
+            <p className="pricing-section__description">{s.description}</p>
 
-            <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {s.features.map((f) => (
-                <div
+            <div className="pricing-section__features">
+              {s.features.map((f, index) => (
+                <article
                   key={f.title}
-                  className="flex flex-col border border-neutral-200/90 bg-white p-5 shadow-sm"
+                  className="pricing-section__feature-card"
+                  style={{ "--card-index": index } as CSSProperties}
                 >
                   <FeatureIcon name={f.icon} />
-                  <h3 className="mt-4 text-sm font-semibold text-[#2D2926]">
-                    {f.title}
-                  </h3>
-                  <p className="mt-2 flex-1 text-xs leading-relaxed text-[#2D2926]/55">
+                  <h3 className="pricing-section__feature-title">{f.title}</h3>
+                  <p className="pricing-section__feature-desc">
                     {f.description}
                   </p>
-                  <p className="mt-4 text-sm font-semibold text-[#A67C37]">
-                    {f.percentage}
-                  </p>
-                </div>
+                  <p className="pricing-section__feature-pct">{f.percentage}</p>
+                </article>
               ))}
             </div>
 
-            <div className="mt-10 border border-neutral-200/80 border-l-[3px] border-l-[#A67C37] bg-white/90 px-6 py-6 shadow-sm">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#2D2926]/50">
+            <aside className="pricing-section__compare">
+              <p className="pricing-section__compare-label">
                 {s.marketCompare.label}
               </p>
-              <p className="mt-2 font-serif text-lg text-[#2D2926] md:text-xl">
+              <p className="pricing-section__compare-headline">
                 {s.marketCompare.headline}
               </p>
-              <p className="mt-2 text-sm font-medium text-[#A67C37]">
+              <p className="pricing-section__compare-subtext">
                 {s.marketCompare.subtext}
               </p>
-            </div>
+            </aside>
           </div>
 
-          {/* Calculator */}
-          <div className="overflow-hidden rounded-lg border border-neutral-200/80 bg-white shadow-[0_24px_60px_rgba(45,41,38,0.08)]">
-            <div className="flex items-center gap-3 bg-[#2D2926] px-5 py-4 md:px-6">
-              <DocumentIcon className="shrink-0 text-white/90" />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white">
+          <div className="pricing-section__calc">
+            <div className="pricing-section__calc-header">
+              <DocumentIcon className="pricing-section__calc-header-icon" />
+              <p className="pricing-section__calc-header-title">
                 {calc.headerTitle}
               </p>
             </div>
 
-            <div className="space-y-7 p-6 md:p-8">
+            <div className="pricing-section__calc-body">
               <div>
-                <div className="mb-3 flex items-center justify-between text-sm text-[#2D2926]">
-                  <span className="font-medium">{calc.weightLabel}</span>
-                  <span className="font-medium tabular-nums text-[#2D2926]">
+                <div className="pricing-section__field-label-row">
+                  <span className="pricing-section__field-label">
+                    {calc.weightLabel}
+                  </span>
+                  <span className="pricing-section__field-value">
                     {wDisplay} {calc.weightUnit}
                   </span>
                 </div>
@@ -215,15 +257,19 @@ export default function PricingSection() {
                   value={weight}
                   suppressHydrationWarning
                   onChange={(e) => setWeight(parseFloat(e.target.value))}
-                  className="h-2 w-full cursor-pointer appearance-none rounded-full bg-neutral-200 accent-[#A67C37]"
+                  className="pricing-section__range"
+                  aria-valuemin={calc.weightMin}
+                  aria-valuemax={calc.weightMax}
+                  aria-valuenow={weight}
+                  aria-label={calc.weightLabel}
                 />
               </div>
 
               <div>
-                <p className="mb-3 text-sm font-medium text-[#2D2926]">
+                <p className="pricing-section__field-heading">
                   {calc.purityLabel}
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="pricing-section__chips">
                   {calc.purityOptions.map((opt) => {
                     const on = opt.id === purityId;
                     return (
@@ -232,10 +278,8 @@ export default function PricingSection() {
                         type="button"
                         suppressHydrationWarning
                         onClick={() => setPurityId(opt.id)}
-                        className={`min-h-[44px] min-w-[4.5rem] rounded-md border px-5 text-sm font-semibold transition ${
-                          on
-                            ? "border-[#A67C37] bg-[#A67C37] text-white"
-                            : "border-neutral-200 bg-white text-[#2D2926] hover:border-[#A67C37]/50"
+                        className={`pricing-section__chip${
+                          on ? " pricing-section__chip--active" : ""
                         }`}
                       >
                         {opt.label}
@@ -246,10 +290,10 @@ export default function PricingSection() {
               </div>
 
               <div>
-                <p className="mb-3 text-sm font-medium text-[#2D2926]">
+                <p className="pricing-section__field-heading">
                   {calc.makingLabel}
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="pricing-section__chips">
                   {calc.makingPercents.map((pct) => {
                     const on = pct === makingPct;
                     return (
@@ -258,10 +302,8 @@ export default function PricingSection() {
                         type="button"
                         suppressHydrationWarning
                         onClick={() => setMakingPct(pct)}
-                        className={`min-h-[44px] min-w-[4.5rem] rounded-md border px-5 text-sm font-semibold transition ${
-                          on
-                            ? "border-[#A67C37] bg-[#A67C37] text-white"
-                            : "border-neutral-200 bg-white text-[#2D2926] hover:border-[#A67C37]/50"
+                        className={`pricing-section__chip${
+                          on ? " pricing-section__chip--active" : ""
                         }`}
                       >
                         {pct}%
@@ -271,39 +313,39 @@ export default function PricingSection() {
                 </div>
               </div>
 
-              <div className="space-y-3 border-t border-dotted border-neutral-300/90 pt-6 text-sm">
-                <div className="flex justify-between gap-4 text-[#2D2926]/80">
+              <div className="pricing-section__breakdown">
+                <div className="pricing-section__breakdown-row">
                   <span>{goldLine}</span>
-                  <span className="shrink-0 tabular-nums font-medium text-[#2D2926]">
+                  <span className="pricing-section__breakdown-value">
                     {formatInr(goldValue)}
                   </span>
                 </div>
-                <div className="flex justify-between gap-4 text-[#2D2926]/80">
+                <div className="pricing-section__breakdown-row">
                   <span>{makingLine}</span>
-                  <span className="shrink-0 tabular-nums font-medium text-[#2D2926]">
+                  <span className="pricing-section__breakdown-value">
                     {formatInr(makingValue)}
                   </span>
                 </div>
-                <div className="flex justify-between gap-4 text-[#2D2926]/80">
+                <div className="pricing-section__breakdown-row">
                   <span>{gstLine}</span>
-                  <span className="shrink-0 tabular-nums font-medium text-[#2D2926]">
+                  <span className="pricing-section__breakdown-value">
                     {formatInr(gst)}
                   </span>
                 </div>
               </div>
 
-              <div className="border-t border-dotted border-neutral-300/90 pt-5">
-                <div className="flex items-end justify-between gap-4">
-                  <span className="text-sm font-semibold text-[#2D2926]">
+              <div className="pricing-section__total-block">
+                <div className="pricing-section__total-row">
+                  <span className="pricing-section__total-label">
                     {calc.yourPriceLabel}
                   </span>
-                  <span className="font-serif text-3xl font-medium tabular-nums text-[#A67C37] md:text-[2rem]">
+                  <span className="pricing-section__total-value">
                     {formatInr(total)}
                   </span>
                 </div>
-                <div className="mt-4 flex justify-between gap-4 text-sm text-[#2D2926]/50">
+                <div className="pricing-section__market-row">
                   <span>{calc.marketAverageLabel}</span>
-                  <span className="tabular-nums line-through">
+                  <span className="pricing-section__market-value">
                     {formatInr(marketAvg)}
                   </span>
                 </div>

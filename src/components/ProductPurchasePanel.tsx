@@ -8,6 +8,7 @@ import { isKaratLabel, resolveKaratFromSelection } from "@/utils/karat";
 import { findBestMatchingVariant } from "@/utils/variantOptionMatch";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
 import PriceCalculationBreakdown from "@/components/PriceCalculationBreakdown";
+import { saveReturnPath } from "@/lib/authRedirect";
 
 export { formatProductPrice };
 
@@ -190,10 +191,7 @@ export default function ProductPurchasePanel({
   const listPrice = product.compareAtPrice ?? 0;
 
   const redirectToLogin = () => {
-    localStorage.setItem(
-      "redirectAfterLogin",
-      `${window.location.pathname}${window.location.search}`
-    );
+    saveReturnPath();
     window.location.href = "/login";
   };
 

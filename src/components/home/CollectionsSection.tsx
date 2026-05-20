@@ -2,89 +2,84 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import type { CSSProperties } from "react";
 
 import data from "@/data/contactDatas.json";
 
+import "./css/collections.css";
+
+const PRODUCTS_PATH = "/products";
+
+/** Products page with optional search from collection name (e.g. Gold, Diamond). */
+function productsHrefForCollection(title: string): string {
+  const query = title
+    .replace(/\s*jewellery\s*/gi, " ")
+    .replace(/\(.*\)/g, "")
+    .trim();
+
+  if (!query) {
+    return PRODUCTS_PATH;
+  }
+
+  return `${PRODUCTS_PATH}?q=${encodeURIComponent(query)}`;
+}
+
 export default function CollectionSection() {
   const collectionData = data.collectionSection;
+  const productsPage = PRODUCTS_PATH;
 
   return (
-    <section className="bg-[#F7F4EF] py-20 md:py-28">
-      <div className="mx-auto max-w-7xl px-6">
-        
-        {/* Header */}
-        <div className="mb-14 flex items-end justify-between">
+    <section className="collections-section">
+      <div className="collections-section__inner">
+        <header className="collections-section__header">
           <div>
-            <div className="mb-4 flex items-center gap-4">
-              <div className="h-[1px] w-12 bg-amber-500"></div>
-
-              <p className="text-xs uppercase tracking-[4px] text-amber-700">
-                {collectionData.badge}
-              </p>
+            <div className="collections-section__badge-row">
+              <span className="collections-section__badge-line" aria-hidden />
+              <p className="collections-section__badge">{collectionData.badge}</p>
             </div>
 
-            <h2 className="font-serif text-4xl md:text-6xl text-[#2A2018]">
+            <h2 className="collections-section__title">
               {collectionData.title}
             </h2>
           </div>
 
-          <Link
-            href={collectionData.buttonLink}
-            className="hidden md:flex items-center gap-2 text-xs uppercase tracking-[4px] text-[#2A2018] transition hover:gap-4"
-          >
+          <Link href={productsPage} className="collections-section__cta">
             {collectionData.buttonText}
-            <span>↗</span>
+            <span className="collections-section__cta-arrow" aria-hidden>
+              ↗
+            </span>
           </Link>
-        </div>
+        </header>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="collections-section__grid">
           {collectionData.collections.map((item, index) => (
             <Link
-              key={index}
-              href={item.link}
-              className="group relative block overflow-hidden"
+              key={item.id}
+              href={productsHrefForCollection(item.title)}
+              className="collections-section__card"
+              style={{ "--card-index": index } as CSSProperties}
+              aria-label={`${item.title} — ${item.subtitle}, shop on products page`}
             >
-              {/* Image */}
-              <div className="relative h-[500px] overflow-hidden">
+              <div className="collections-section__card-media">
                 <Image
                   src={item.image}
                   alt={item.title}
                   fill
-                  className="object-cover transition duration-700 group-hover:scale-105"
+                  sizes="(max-width: 1024px) 50vw, 33vw"
+                  className="collections-section__card-image"
                 />
-
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+                <div className="collections-section__card-overlay" aria-hidden />
               </div>
 
-              {/* Content */}
-              <div className="absolute bottom-0 left-0 z-10 p-6 text-white">
-                <p className="mb-3 text-xs tracking-[3px] text-amber-300">
-                  {item.id}
-                </p>
-
-                <h3 className="font-serif text-4xl leading-tight">
-                  {item.title}
-                </h3>
-
-                <p className="mt-2 text-sm text-gray-300">
+              <div className="collections-section__card-body">
+                <p className="collections-section__card-id">{item.id}</p>
+                <h3 className="collections-section__card-title">{item.title}</h3>
+                <p className="collections-section__card-subtitle">
                   {item.subtitle}
                 </p>
               </div>
             </Link>
           ))}
-        </div>
-
-        {/* Mobile Button */}
-        <div className="mt-10 flex justify-center md:hidden">
-          <Link
-            href={collectionData.buttonLink}
-            className="flex items-center gap-2 text-xs uppercase tracking-[4px] text-[#2A2018]"
-          >
-            {collectionData.buttonText}
-            <span>↗</span>
-          </Link>
         </div>
       </div>
     </section>

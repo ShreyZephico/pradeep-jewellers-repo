@@ -1,20 +1,21 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import data from "@/data/contactDatas.json";
 
-const gold = "#D4AF37";
+import "./css/testimonials.css";
 
 function StarRow({ count }: { count: number }) {
   return (
-    <div className="flex gap-0.5" aria-hidden>
+    <div className="testimonials-section__stars" aria-hidden>
       {Array.from({ length: count }).map((_, i) => (
         <svg
           key={i}
-          width="16"
-          height="16"
+          className="testimonials-section__star"
           viewBox="0 0 24 24"
-          fill={gold}
-          className="shrink-0"
+          aria-hidden
         >
           <path d="M12 2l2.9 6.26L22 9.27l-5 4.9 1.18 6.88L12 17.77l-6.18 3.28L7 14.17 2 9.27l7.1-1.01L12 2z" />
         </svg>
@@ -26,81 +27,141 @@ function StarRow({ count }: { count: number }) {
 export default function TestimonialsSection() {
   const s = data.testimonialsSection;
   const r = s.rating;
+  const sectionRef = useRef<HTMLElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const initialCount = s.initialVisibleCount ?? 3;
+  const hasMore = s.items.length > initialCount;
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const reveal = () => setVisible(true);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          reveal();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(el);
+
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      reveal();
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const displayedItems = useMemo(
+    () => (expanded ? s.items : s.items.slice(0, initialCount)),
+    [expanded, initialCount, s.items]
+  );
+
+  const sectionClass = `testimonials-section${
+    visible ? " testimonials-section--visible" : ""
+  }`;
+
+  const gridClass = `testimonials-section__grid${
+    expanded ? " testimonials-section__grid--expanded" : ""
+  }`;
 
   return (
-    <section className="bg-[#1A1614] py-16 md:py-24 lg:py-28">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-12 flex flex-col gap-10 lg:mb-16 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
-            <div className="mb-5 h-px w-10 bg-[#D4AF37] md:w-12" aria-hidden />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#D4AF37]">
-              {s.badge}
-            </p>
-            <h2 className="mt-4 font-serif text-3xl font-light leading-tight tracking-tight text-white md:text-4xl lg:text-[2.65rem]">
+    <section
+      ref={sectionRef}
+      className={sectionClass}
+      aria-labelledby="testimonials-section-heading"
+    >
+      <div className="testimonials-section__inner">
+        <header className="testimonials-section__header">
+          <div className="testimonials-section__intro">
+            <div className="testimonials-section__badge-row">
+              <span className="testimonials-section__badge-line" aria-hidden />
+              <p className="testimonials-section__badge">{s.badge}</p>
+            </div>
+            <h2
+              id="testimonials-section-heading"
+              className="testimonials-section__title"
+            >
               {s.title}
             </h2>
           </div>
 
-          <div className="flex shrink-0 flex-col gap-3 rounded-md border border-white/10 bg-[#262220] px-5 py-4 shadow-inner md:flex-row md:items-center md:gap-5 md:px-6 md:py-5">
+          <div className="testimonials-section__rating-card">
             <StarRow count={r.starCount} />
             <div>
-              <p className="text-lg font-medium tabular-nums text-white md:text-xl">
+              <p className="testimonials-section__rating-score">
                 {r.score}{" "}
-                <span className="text-sm font-normal text-white/50">
+                <span className="testimonials-section__rating-out-of">
                   / {r.outOf}
                 </span>
               </p>
-              <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.18em] text-[#A0A0A0]">
+              <p className="testimonials-section__rating-label">
                 {r.reviewsLabel}
               </p>
             </div>
           </div>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-          {s.items.map((item) => (
+        <div className={gridClass}>
+          {displayedItems.map((item, index) => (
             <article
               key={item.author}
-              className="flex flex-col border border-white/[0.06] bg-[#262220] p-6 md:p-8"
+              className="testimonials-section__card"
+              style={{ "--card-index": index } as CSSProperties}
             >
-              <span
-                className="font-serif text-4xl leading-none text-[#D4AF37]/90"
-                aria-hidden
-              >
+              <span className="testimonials-section__quote-mark" aria-hidden>
                 &ldquo;
               </span>
-              <blockquote className="mt-2 flex-1">
-                <p className="font-serif text-base italic leading-relaxed text-white md:text-[17px]">
-                  {item.quote}
-                </p>
+              <blockquote className="testimonials-section__quote">
+                {item.quote}
               </blockquote>
 
-              <div className="my-6 h-px w-full bg-white/10" aria-hidden />
+              <hr className="testimonials-section__divider" />
 
-              <div className="flex items-center gap-4">
-                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-white/10 bg-[#1A1614]">
+              <div className="testimonials-section__author-row">
+                <div className="testimonials-section__avatar">
                   <Image
                     src={item.image}
                     alt={item.imageAlt}
                     fill
-                    className="object-cover"
+                    className="testimonials-section__avatar-image"
                     sizes="48px"
                   />
                 </div>
-                <div className="min-w-0">
-                  <p className="font-serif text-base font-medium text-white">
+                <div className="testimonials-section__author-meta">
+                  <p className="testimonials-section__author-name">
                     {item.author}
                   </p>
-                  <p className="mt-1 text-[10px] font-medium uppercase leading-snug tracking-[0.12em] text-[#A0A0A0]">
-                    {item.tags.join(" • ")}
+                  <p className="testimonials-section__author-tags">
+                    {item.tags.join(" · ")}
                   </p>
                 </div>
               </div>
             </article>
           ))}
         </div>
+
+        {hasMore ? (
+          <div className="testimonials-section__actions">
+            <button
+              type="button"
+              className="testimonials-section__toggle"
+              aria-expanded={expanded}
+              onClick={() => setExpanded((prev) => !prev)}
+            >
+              {expanded ? s.viewLessLabel : s.viewMoreLabel}
+            </button>
+          </div>
+        ) : null}
       </div>
     </section>
   );
 }
- 

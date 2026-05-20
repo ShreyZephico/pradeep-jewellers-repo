@@ -1,0 +1,562 @@
+/* Gold scheme section — tokens from globals.css :root */
+
+.gold-scheme-section {
+  background: var(--gold-scheme-bg);
+  padding: var(--gold-scheme-padding-y) 0;
+}
+
+.gold-scheme-section__inner {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 1.5rem);
+}
+
+.gold-scheme-section__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gold-scheme-layout-gap);
+}
+
+/* ── Scheme card (dark) ── */
+
+.gold-scheme-section__scheme-wrap {
+  animation: gold-scheme-fade-up 0.55s ease-out both;
+}
+
+.gold-scheme-section__scheme {
+  overflow: hidden;
+  border-radius: var(--gold-scheme-radius);
+  background: var(--gold-scheme-scheme-bg);
+  box-shadow: var(--gold-scheme-scheme-shadow);
+}
+
+.gold-scheme-section__scheme-body {
+  padding: 2.5rem 1.5rem 2rem;
+}
+
+@media (min-width: 768px) {
+  .gold-scheme-section__scheme-body {
+    padding: 3rem 2.5rem 2.5rem;
+  }
+}
+
+.gold-scheme-section__scheme-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.gold-scheme-section__scheme-badge-line {
+  width: 2rem;
+  height: 1px;
+  flex-shrink: 0;
+  background: var(--gold-scheme-accent);
+  transform-origin: center;
+  animation: gold-scheme-line-grow 0.6s ease-out 0.1s both;
+}
+
+@media (min-width: 768px) {
+  .gold-scheme-section__scheme-badge-line {
+    width: 3rem;
+  }
+}
+
+.gold-scheme-section__scheme-badge {
+  margin: 0;
+  text-align: center;
+  font-size: var(--gold-scheme-badge-size);
+  font-weight: 600;
+  letter-spacing: var(--gold-scheme-badge-tracking);
+  text-transform: uppercase;
+  color: var(--gold-scheme-accent);
+}
+
+@media (min-width: 768px) {
+  .gold-scheme-section__scheme-badge {
+    font-size: var(--gold-scheme-badge-size-md);
+  }
+}
+
+.gold-scheme-section__scheme-title {
+  margin: 0;
+  text-align: center;
+  font-family: var(--gold-scheme-serif);
+  font-size: var(--gold-scheme-title-size);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: var(--gold-scheme-scheme-text);
+}
+
+.gold-scheme-section__scheme-desc {
+  max-width: 28rem;
+  margin: 1.25rem auto 0;
+  text-align: center;
+  font-size: var(--gold-scheme-desc-size);
+  line-height: 1.65;
+  color: var(--gold-scheme-scheme-text-muted);
+}
+
+/* Month grid */
+
+.gold-scheme-section__months {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.5rem;
+  max-width: 36rem;
+  margin: 2.5rem auto 0;
+}
+
+@media (min-width: 768px) {
+  .gold-scheme-section__months {
+    gap: 0.625rem;
+  }
+}
+
+.gold-scheme-section__month-cell {
+  display: flex;
+  aspect-ratio: 1;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--gold-scheme-scheme-border);
+  background: var(--gold-scheme-scheme-surface);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: rgb(var(--color-pure-white-rgb) / 0.85);
+  animation: gold-scheme-fade-up 0.4s ease-out both;
+  animation-delay: calc(var(--cell-index, 0) * 0.03s + 0.2s);
+}
+
+@media (min-width: 768px) {
+  .gold-scheme-section__month-cell {
+    font-size: 0.75rem;
+  }
+}
+
+.gold-scheme-section__month-cell--bonus {
+  border-color: transparent;
+  background: var(--gold-scheme-accent-deep);
+  color: var(--gold-scheme-scheme-text);
+  box-shadow: inset 0 0 12px rgb(0 0 0 / 0.15);
+}
+
+.gold-scheme-section__month-check {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+/* Slider */
+
+.gold-scheme-section__slider-wrap {
+  max-width: 36rem;
+  margin: 2.5rem auto 0;
+}
+
+.gold-scheme-section__slider-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: var(--gold-scheme-desc-size);
+  color: rgb(var(--color-pure-white-rgb) / 0.8);
+}
+
+.gold-scheme-section__slider-value {
+  font-family: var(--gold-scheme-serif);
+  font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+  font-weight: 500;
+  color: var(--gold-scheme-accent);
+}
+
+.gold-scheme-section__range {
+  width: 100%;
+  height: 0.5rem;
+  cursor: pointer;
+  appearance: none;
+  border-radius: 999px;
+  background: var(--gold-scheme-range-track);
+}
+
+.gold-scheme-section__range::-webkit-slider-thumb {
+  appearance: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 2px solid var(--gold-scheme-scheme-text);
+  border-radius: 50%;
+  background: var(--gold-scheme-accent);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+}
+
+.gold-scheme-section__range::-moz-range-thumb {
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 2px solid var(--gold-scheme-scheme-text);
+  border-radius: 50%;
+  background: var(--gold-scheme-accent);
+}
+
+/* Stat cards — 2 per row on mobile */
+
+.gold-scheme-section__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  max-width: 36rem;
+  margin: 2.5rem auto 0;
+}
+
+.gold-scheme-section__stat {
+  padding: 1.25rem 1rem;
+  border: 1px solid var(--gold-scheme-scheme-border);
+  background: var(--gold-scheme-stat-bg);
+  text-align: center;
+  animation: gold-scheme-fade-up 0.45s ease-out both;
+  animation-delay: calc(var(--card-index, 0) * var(--gold-scheme-stagger) + 0.25s);
+}
+
+.gold-scheme-section__stat--highlight {
+  border-color: var(--gold-scheme-accent);
+  background: var(--gold-scheme-stat-highlight-bg);
+  box-shadow: inset 0 0 0 1px var(--gold-scheme-accent-inset);
+}
+
+.gold-scheme-section__stat-value {
+  margin: 0;
+  font-family: var(--gold-scheme-serif);
+  font-size: var(--gold-scheme-stat-size);
+  color: var(--gold-scheme-scheme-text);
+}
+
+.gold-scheme-section__stat--highlight .gold-scheme-section__stat-value {
+  color: var(--gold-scheme-accent);
+}
+
+.gold-scheme-section__stat-label {
+  margin: 0.5rem 0 0;
+  font-size: var(--gold-scheme-stat-label-size);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-scheme-scheme-text-faint);
+}
+
+.gold-scheme-section__stat--highlight .gold-scheme-section__stat-label {
+  letter-spacing: 0.18em;
+  color: var(--gold-scheme-accent);
+}
+
+.gold-scheme-section__whatsapp {
+  display: flex;
+  max-width: 36rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 2.5rem auto 0;
+  padding: 1rem 1.5rem;
+  border-radius: 0.375rem;
+  background: var(--gold-scheme-whatsapp);
+  font-size: var(--gold-scheme-cta-size);
+  font-weight: 700;
+  letter-spacing: var(--gold-scheme-cta-tracking);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--gold-scheme-scheme-text);
+  transition: background var(--gold-scheme-transition);
+  animation: gold-scheme-fade-up 0.5s ease-out 0.4s both;
+}
+
+.gold-scheme-section__whatsapp:hover {
+  background: var(--gold-scheme-whatsapp-hover);
+}
+
+.gold-scheme-section__whatsapp-icon {
+  flex-shrink: 0;
+  color: var(--gold-scheme-scheme-text);
+}
+
+/* ── Clearance panel ── */
+
+.gold-scheme-section__clearance {
+  padding: 2rem 1.25rem;
+  border: 1px solid var(--gold-scheme-panel-border);
+  border-radius: var(--gold-scheme-radius);
+  background: var(--gold-scheme-panel-bg);
+  box-shadow: var(--gold-scheme-panel-shadow);
+  animation: gold-scheme-fade-up 0.6s ease-out 0.15s both;
+}
+
+@media (min-width: 768px) {
+  .gold-scheme-section__clearance {
+    padding: 2.5rem 1.75rem;
+  }
+}
+
+.gold-scheme-section__clearance-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.gold-scheme-section__flame {
+  flex-shrink: 0;
+}
+
+.gold-scheme-section__flame path:first-child {
+  fill: var(--gold-scheme-flame-primary);
+  fill-opacity: 0.9;
+}
+
+.gold-scheme-section__flame path:last-child {
+  fill: var(--gold-scheme-flame-secondary);
+  fill-opacity: 0.35;
+}
+
+.gold-scheme-section__clearance-title {
+  margin: 0;
+  font-size: var(--gold-scheme-clearance-header-size);
+  font-weight: 600;
+  letter-spacing: var(--gold-scheme-clearance-header-tracking);
+  text-transform: uppercase;
+  color: var(--gold-scheme-urgency);
+}
+
+/* Countdown — 2x2 mobile, 4-col sm+ */
+
+.gold-scheme-section__countdown {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gold-scheme-grid-gap-mobile);
+}
+
+@media (min-width: 480px) {
+  .gold-scheme-section__countdown {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--gold-scheme-grid-gap);
+  }
+}
+
+.gold-scheme-section__countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0.25rem;
+  border: 1px solid var(--gold-scheme-countdown-border);
+  background: var(--gold-scheme-countdown-bg);
+  animation: gold-scheme-fade-up 0.45s ease-out both;
+  animation-delay: calc(var(--unit-index, 0) * 0.05s + 0.2s);
+}
+
+@media (min-width: 768px) {
+  .gold-scheme-section__countdown-unit {
+    padding: 1.25rem 0.25rem;
+  }
+}
+
+.gold-scheme-section__countdown-value {
+  font-family: var(--gold-scheme-serif);
+  font-size: var(--gold-scheme-countdown-size);
+  font-variant-numeric: tabular-nums;
+  color: var(--gold-scheme-ink);
+}
+
+.gold-scheme-section__countdown-label {
+  margin-top: 0.25rem;
+  font-size: var(--gold-scheme-countdown-label-size);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(var(--gold-scheme-ink-rgb) / 0.5);
+}
+
+@media (min-width: 768px) {
+  .gold-scheme-section__countdown-label {
+    font-size: 0.625rem;
+  }
+}
+
+/* Products — 2 per row mobile */
+
+.gold-scheme-section__products {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gold-scheme-grid-gap);
+  margin-top: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .gold-scheme-section__products {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+.gold-scheme-section__product {
+  text-align: center;
+  animation: gold-scheme-fade-up 0.5s ease-out both;
+  animation-delay: calc(var(--card-index, 0) * var(--gold-scheme-stagger) + 0.28s);
+}
+
+.gold-scheme-section__product-media {
+  position: relative;
+  aspect-ratio: 1;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+.gold-scheme-section__product-media--light {
+  background: var(--gold-scheme-product-bg-light);
+}
+
+.gold-scheme-section__product-media--dark {
+  background: var(--gold-scheme-product-bg-dark);
+}
+
+.gold-scheme-section__product-image {
+  object-fit: cover;
+  transition: transform var(--gold-scheme-transition);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .gold-scheme-section__product:hover .gold-scheme-section__product-image {
+    transform: scale(1.04);
+  }
+}
+
+.gold-scheme-section__product-name {
+  margin: 0;
+  font-size: var(--gold-scheme-product-name-size);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--gold-scheme-ink);
+}
+
+@media (min-width: 768px) {
+  .gold-scheme-section__product-name {
+    font-size: 0.75rem;
+  }
+}
+
+.gold-scheme-section__product-price {
+  margin: 0.25rem 0 0;
+  font-size: var(--gold-scheme-product-name-size);
+  font-weight: 600;
+  color: var(--gold-scheme-price);
+}
+
+@media (min-width: 768px) {
+  .gold-scheme-section__product-price {
+    font-size: 0.75rem;
+  }
+}
+
+.gold-scheme-section__view-all-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 2.5rem;
+}
+
+.gold-scheme-section__view-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  border: 1px solid var(--gold-scheme-view-border);
+  background: transparent;
+  font-size: var(--gold-scheme-cta-size);
+  font-weight: 600;
+  letter-spacing: var(--gold-scheme-view-cta-tracking);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--gold-scheme-view-text);
+  transition:
+    background var(--gold-scheme-transition),
+    color var(--gold-scheme-transition);
+}
+
+.gold-scheme-section__view-all:hover {
+  background: var(--gold-scheme-view-hover-bg);
+}
+
+/* Third stat spans full width on mobile when 2-col */
+
+@media (max-width: 639px) {
+  .gold-scheme-section__stat:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Third product centered on mobile when 2-col */
+
+@media (max-width: 767px) {
+  .gold-scheme-section__product:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    max-width: 50%;
+    margin-inline: auto;
+  }
+}
+
+@media (min-width: 640px) {
+  .gold-scheme-section__stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .gold-scheme-section__stat:last-child {
+    grid-column: auto;
+  }
+}
+
+/* ── Animations ── */
+
+@keyframes gold-scheme-line-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes gold-scheme-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Desktop layout ── */
+
+@media (min-width: 1024px) {
+  .gold-scheme-section__layout {
+    grid-template-columns: 7fr 5fr;
+    align-items: start;
+    gap: 2.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gold-scheme-section__scheme-wrap,
+  .gold-scheme-section__clearance,
+  .gold-scheme-section__scheme-badge-line,
+  .gold-scheme-section__month-cell,
+  .gold-scheme-section__stat,
+  .gold-scheme-section__whatsapp,
+  .gold-scheme-section__countdown-unit,
+  .gold-scheme-section__product {
+    animation: none;
+  }
+
+  .gold-scheme-section__product:hover .gold-scheme-section__product-image {
+    transform: none;
+  }
+}

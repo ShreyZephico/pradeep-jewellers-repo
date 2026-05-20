@@ -1,0 +1,367 @@
+/* Social section — tokens from globals.css :root */
+
+.social-section {
+  background: var(--social-bg);
+  padding: var(--social-padding-y) 0;
+}
+
+.social-section__inner {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 1.5rem);
+}
+
+.social-section__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--social-layout-gap);
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .social-section__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: clamp(2.5rem, 4vw, 5rem);
+  }
+}
+
+/* ── Copy column ── */
+
+.social-section__content {
+  max-width: 28rem;
+}
+
+.social-section--visible .social-section__content {
+  animation: social-fade-up var(--social-enter-duration)
+    var(--social-enter-ease) both;
+}
+
+.social-section__handle-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.social-section__handle-line {
+  width: 2.5rem;
+  height: 1px;
+  flex-shrink: 0;
+  background: var(--social-accent);
+  transform-origin: left center;
+}
+
+.social-section--visible .social-section__handle-line {
+  animation: social-line-grow 0.65s var(--social-enter-ease) 0.08s both;
+}
+
+@media (min-width: 768px) {
+  .social-section__handle-line {
+    width: 3rem;
+  }
+}
+
+.social-section__handle {
+  margin: 0;
+  font-size: var(--social-handle-size);
+  font-weight: 600;
+  letter-spacing: var(--social-handle-tracking);
+  text-transform: uppercase;
+  color: var(--social-accent);
+}
+
+.social-section__title {
+  margin: 0;
+  font-family: var(--social-serif);
+  font-size: var(--social-title-size);
+  font-weight: 300;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--social-ink);
+}
+
+.social-section--visible .social-section__title {
+  animation: social-fade-up 0.55s var(--social-enter-ease) 0.15s both;
+}
+
+.social-section__description {
+  margin: 1.25rem 0 0;
+  font-size: var(--social-desc-size);
+  line-height: 1.65;
+  color: var(--social-text-muted);
+}
+
+.social-section--visible .social-section__description {
+  animation: social-fade-up 0.55s var(--social-enter-ease) 0.22s both;
+}
+
+/* Social icon circles */
+
+.social-section__icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.social-section--visible .social-section__icons {
+  animation: social-fade-up 0.55s var(--social-enter-ease) 0.28s both;
+}
+
+.social-section__icon-link {
+  display: flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--social-icon-border);
+  border-radius: 50%;
+  background: var(--social-icon-bg);
+  color: var(--social-ink);
+  text-decoration: none;
+  transition:
+    border-color var(--social-transition),
+    color var(--social-transition),
+    transform var(--social-transition);
+}
+
+.social-section__icon-link:hover {
+  border-color: var(--social-icon-hover-border);
+  color: var(--social-accent);
+  transform: translateY(-2px);
+}
+
+.social-section__icon-svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* WhatsApp broadcast card */
+
+.social-section__broadcast {
+  margin-top: 2.5rem;
+  max-width: 28rem;
+  padding: 1.5rem;
+  border: 1px solid var(--social-broadcast-border);
+  border-radius: 0.5rem;
+  background: var(--social-broadcast-bg);
+  box-shadow: var(--social-broadcast-shadow);
+}
+
+.social-section--visible .social-section__broadcast {
+  animation: social-fade-up 0.55s var(--social-enter-ease) 0.35s both;
+}
+
+.social-section__broadcast-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.social-section__broadcast-icon {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  color: var(--social-whatsapp);
+}
+
+.social-section__broadcast-icon svg {
+  display: block;
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+.social-section__broadcast-title {
+  margin: 0;
+  font-size: var(--social-broadcast-title-size);
+  font-weight: 600;
+  color: var(--social-ink);
+}
+
+.social-section__broadcast-subtitle {
+  margin: 0.25rem 0 0;
+  font-size: var(--social-broadcast-subtitle-size);
+  line-height: 1.5;
+  color: var(--social-text-muted);
+}
+
+.social-section__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .social-section__form {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.social-section__input {
+  min-height: 2.75rem;
+  flex: 1;
+  padding: 0 1rem;
+  border: 1px solid rgb(var(--social-ink-rgb) / 0.12);
+  border-radius: 0.375rem;
+  background: var(--color-pure-white);
+  font-size: var(--social-input-size);
+  color: var(--social-ink);
+  outline: none;
+  transition: border-color var(--social-transition);
+}
+
+.social-section__input::placeholder {
+  color: var(--social-text-placeholder);
+}
+
+.social-section__input:focus {
+  border-color: rgb(var(--header-accent-rgb) / 0.5);
+}
+
+.social-section__input--error {
+  border-color: #dc2626;
+}
+
+.social-section__form-error {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: #dc2626;
+}
+
+.social-section__submit {
+  min-height: 2.75rem;
+  flex-shrink: 0;
+  padding: 0 1.5rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: var(--social-accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: var(--social-btn-tracking);
+  text-transform: uppercase;
+  color: var(--color-pure-white);
+  cursor: pointer;
+  transition: background var(--social-transition);
+}
+
+.social-section__submit:hover:not(:disabled) {
+  background: var(--social-accent-hover);
+}
+
+.social-section__submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ── Image grid: 2-col mobile, 3-col desktop ── */
+
+.social-section__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--social-grid-gap);
+}
+
+@media (min-width: 640px) {
+  .social-section__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--social-grid-gap-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .social-section__grid {
+    gap: var(--social-grid-gap-lg);
+  }
+}
+
+.social-section__grid-item {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--social-media-bg);
+}
+
+.social-section--visible .social-section__grid-item {
+  animation: social-fade-up 0.5s var(--social-enter-ease) both;
+  animation-delay: calc(var(--card-index, 0) * var(--social-stagger) + 0.25s);
+}
+
+.social-section__grid-image {
+  object-fit: cover;
+  transition: transform var(--social-image-transition);
+}
+
+.social-section__grid-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--social-overlay);
+  opacity: 0;
+  transition: opacity var(--social-transition);
+}
+
+.social-section__grid-item:hover .social-section__grid-overlay {
+  opacity: 1;
+}
+
+.social-section__grid-item:hover .social-section__grid-image {
+  transform: scale(1.04);
+}
+
+.social-section__grid-overlay-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--color-pure-white);
+}
+
+@media (min-width: 768px) {
+  .social-section__grid-overlay-icon {
+    width: 3rem;
+    height: 3rem;
+  }
+}
+
+/* ── Animations ── */
+
+@keyframes social-line-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes social-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .social-section--visible .social-section__content,
+  .social-section--visible .social-section__handle-line,
+  .social-section--visible .social-section__title,
+  .social-section--visible .social-section__description,
+  .social-section--visible .social-section__icons,
+  .social-section--visible .social-section__broadcast,
+  .social-section--visible .social-section__grid-item {
+    animation: none;
+  }
+
+  .social-section__grid-item:hover .social-section__grid-image {
+    transform: none;
+  }
+
+  .social-section__icon-link:hover {
+    transform: none;
+  }
+}

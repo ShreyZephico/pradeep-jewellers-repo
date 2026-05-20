@@ -1,17 +1,19 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 
 import data from "@/data/contactDatas.json";
 
-const accent = "#C5A07A";
+import "./css/learn.css";
 
 function ArticleIcon({ name }: { name: string }) {
-  const box = "h-10 w-10 shrink-0 rounded-sm border border-[#C5A07A]/25 bg-[#C5A07A]/10 p-2";
-  const stroke = "text-[#C5A07A]";
+  const wrapClass = "learn-section__icon-wrap";
+  const svgClass = "learn-section__icon-svg";
+
   switch (name) {
     case "gem":
       return (
-        <div className={box} aria-hidden>
-          <svg className={stroke} viewBox="0 0 24 24" fill="none" width="100%" height="100%">
+        <div className={wrapClass} aria-hidden>
+          <svg className={svgClass} viewBox="0 0 24 24" fill="none">
             <path
               d="M12 2l2.5 4h5L12 22 4.5 6h5L12 2Z"
               stroke="currentColor"
@@ -29,22 +31,26 @@ function ArticleIcon({ name }: { name: string }) {
       );
     case "diamond":
       return (
-        <div className={box} aria-hidden>
-          <svg className={stroke} viewBox="0 0 24 24" fill="none" width="100%" height="100%">
+        <div className={wrapClass} aria-hidden>
+          <svg className={svgClass} viewBox="0 0 24 24" fill="none">
             <path
               d="M12 3 4 9l8 12 8-12-8-6Z"
               stroke="currentColor"
               strokeWidth="1.2"
               strokeLinejoin="round"
             />
-            <path d="M8 9h8M12 3v18" stroke="currentColor" strokeWidth="1.2" />
+            <path
+              d="M8 9h8M12 3v18"
+              stroke="currentColor"
+              strokeWidth="1.2"
+            />
           </svg>
         </div>
       );
     case "ruler":
       return (
-        <div className={box} aria-hidden>
-          <svg className={stroke} viewBox="0 0 24 24" fill="none" width="100%" height="100%">
+        <div className={wrapClass} aria-hidden>
+          <svg className={svgClass} viewBox="0 0 24 24" fill="none">
             <path
               d="M4 16 16 4l4 4-12 12-4-4Z"
               stroke="currentColor"
@@ -62,8 +68,8 @@ function ArticleIcon({ name }: { name: string }) {
       );
     case "sparkles":
       return (
-        <div className={box} aria-hidden>
-          <svg className={stroke} viewBox="0 0 24 24" fill="none" width="100%" height="100%">
+        <div className={wrapClass} aria-hidden>
+          <svg className={svgClass} viewBox="0 0 24 24" fill="none">
             <path
               d="M12 3v3M12 18v3M3 12h3M18 12h3"
               stroke="currentColor"
@@ -81,7 +87,7 @@ function ArticleIcon({ name }: { name: string }) {
         </div>
       );
     default:
-      return <div className={box} aria-hidden />;
+      return <div className={wrapClass} aria-hidden />;
   }
 }
 
@@ -89,62 +95,38 @@ export default function LearnSection() {
   const s = data.learnSection;
 
   return (
-    <section className="bg-[#FAF9F6] py-16 md:py-24 lg:py-28">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mx-auto mb-14 max-w-3xl text-center md:mb-16">
-          <div className="mb-6 flex items-center justify-center gap-4">
-            <span
-              className="h-px w-10 shrink-0 md:w-14"
-              style={{ backgroundColor: accent }}
-              aria-hidden
-            />
-            <p
-              className="text-[11px] font-medium uppercase tracking-[0.32em]"
-              style={{ color: accent }}
-            >
-              {s.badge}
-            </p>
-            <span
-              className="h-px w-10 shrink-0 md:w-14"
-              style={{ backgroundColor: accent }}
-              aria-hidden
-            />
+    <section className="learn-section" aria-labelledby="learn-section-heading">
+      <div className="learn-section__inner">
+        <header className="learn-section__header">
+          <div className="learn-section__badge-row">
+            <span className="learn-section__badge-line" aria-hidden />
+            <p className="learn-section__badge">{s.badge}</p>
+            <span className="learn-section__badge-line" aria-hidden />
           </div>
-          <h2 className="font-serif text-3xl font-light leading-tight tracking-tight text-[#2D2D2D] md:text-4xl lg:text-[2.65rem]">
+          <h2 id="learn-section-heading" className="learn-section__title">
             {s.title}
           </h2>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {s.articles.map((article) => (
+        <div className="learn-section__grid">
+          {s.articles.map((article, index) => (
             <Link
               key={article.href}
               href={article.href}
-              className="group flex h-full flex-col border border-neutral-200/80 bg-white p-6 shadow-[0_2px_24px_rgba(45,45,45,0.04)] transition hover:border-[#C5A07A]/35 hover:shadow-[0_12px_40px_rgba(45,45,45,0.08)]"
+              className="learn-section__card"
+              style={{ "--card-index": index } as CSSProperties}
             >
               <ArticleIcon name={article.icon} />
-              <p
-                className="mt-5 text-[10px] font-semibold uppercase tracking-[0.22em]"
-                style={{ color: accent }}
-              >
-                {article.category}
-              </p>
-              <h3 className="mt-3 font-serif text-lg font-normal leading-snug text-[#2D2D2D] transition group-hover:opacity-90 md:text-xl">
-                {article.title}
-              </h3>
-              <p className="mt-3 flex-1 text-sm leading-relaxed text-[#2D2D2D]/60">
-                {article.summary}
-              </p>
-              <div className="mt-6 flex items-end justify-between gap-3 border-t border-neutral-100 pt-5">
-                <span className="text-xs text-[#2D2D2D]/45">
+              <p className="learn-section__category">{article.category}</p>
+              <h3 className="learn-section__card-title">{article.title}</h3>
+              <p className="learn-section__summary">{article.summary}</p>
+              <div className="learn-section__footer">
+                <span className="learn-section__read-time">
                   {s.readPrefix} {article.readTime}
                 </span>
-                <span
-                  className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.14em] transition group-hover:gap-2"
-                  style={{ color: accent }}
-                >
+                <span className="learn-section__cta">
                   <span>{s.learnMoreLabel}</span>
-                  <span aria-hidden className="text-base leading-none">
+                  <span className="learn-section__cta-arrow" aria-hidden>
                     →
                   </span>
                 </span>

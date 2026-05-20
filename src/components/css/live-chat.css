@@ -1,0 +1,237 @@
+/* Hide native Tawk bubble — custom launcher replaces it (until chat opens) */
+body.tawk-custom-launcher:not(.tawk-chat-open) .tawk-min-container,
+body.tawk-custom-launcher:not(.tawk-chat-open) #tawk-bubble-container,
+body.tawk-custom-launcher:not(.tawk-chat-open) .tawk-button {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.live-chat {
+  position: fixed;
+  z-index: 999990;
+  font-family: var(--font-geist-sans, system-ui, sans-serif);
+  pointer-events: none;
+}
+
+.live-chat > * {
+  pointer-events: auto;
+}
+
+/* —— Expanded: bottom-right corner —— */
+.live-chat--expanded {
+  right: max(1rem, env(safe-area-inset-right, 0px));
+  bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+  left: auto;
+  top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  max-width: min(280px, calc(100vw - 2rem));
+}
+
+/* —— Collapsed: “Live Chat” tab on right edge, bottom —— */
+.live-chat--collapsed {
+  right: 0;
+  bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+  left: auto;
+  top: auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.live-chat__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.15rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.live-chat__close:hover {
+  background: rgba(0, 0, 0, 0.88);
+  transform: scale(1.06);
+}
+
+.live-chat__close:focus-visible {
+  outline: 2px solid var(--live-chat-focus, #1aa3a8);
+  outline-offset: 2px;
+}
+
+.live-chat__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.live-chat__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  text-align: right;
+}
+
+.live-chat__wave {
+  font-size: 1.65rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.12));
+  user-select: none;
+}
+
+.live-chat__teaser {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--live-chat-teaser-font, "Segoe Script", "Brush Script MT", cursive);
+  font-size: clamp(1.05rem, 3.2vw, 1.35rem);
+  font-weight: 600;
+  font-style: italic;
+  color: var(--live-chat-teaser-color, #1aa3a8);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.live-chat__teaser:hover {
+  opacity: 0.85;
+}
+
+.live-chat__avatar-btn {
+  flex-shrink: 0;
+  padding: 0;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.live-chat__avatar-btn:hover {
+  transform: scale(1.04);
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.live-chat__avatar-btn:focus-visible {
+  outline: 2px solid var(--live-chat-focus, #1aa3a8);
+  outline-offset: 3px;
+}
+
+.live-chat__avatar-wrap {
+  position: relative;
+  display: block;
+  width: 3.5rem;
+  height: 3.5rem;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.live-chat__logo {
+  object-fit: contain;
+  padding: 0.35rem;
+  background: #fff;
+}
+
+.live-chat__logo-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f5e6c8, #e8c98a);
+  color: #4a2c12;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.live-chat__tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  padding: 0.85rem 0.5rem;
+  border: none;
+  border-radius: 0.35rem 0 0 0;
+  background: var(--live-chat-tab-bg, #6b1a2d);
+  color: var(--live-chat-tab-text, #fff);
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: background 0.2s ease, padding-left 0.2s ease;
+}
+
+.live-chat__tab:hover {
+  background: var(--live-chat-tab-bg-hover, #842238);
+  padding-left: 0.65rem;
+}
+
+.live-chat__tab:focus-visible {
+  outline: 2px solid var(--live-chat-focus, #1aa3a8);
+  outline-offset: -2px;
+}
+
+.live-chat__tab-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .live-chat--expanded {
+    right: max(0.65rem, env(safe-area-inset-right, 0px));
+    bottom: max(0.85rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  .live-chat--collapsed {
+    bottom: max(0.85rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  .live-chat__avatar-wrap {
+    width: 3.1rem;
+    height: 3.1rem;
+  }
+
+  .live-chat__teaser {
+    font-size: 1rem;
+  }
+}
+
+/* Tawk chat panel: bottom-right, no clash with custom launcher */
+body.tawk-chat-open .tawk-max-container,
+body.tawk-chat-open .tawk-maximize {
+  right: max(0.75rem, env(safe-area-inset-right, 0px)) !important;
+  left: auto !important;
+  bottom: max(0.75rem, env(safe-area-inset-bottom, 0px)) !important;
+  top: auto !important;
+  margin: 0 !important;
+}
+
+body.tawk-custom-launcher.tawk-chat-open .tawk-min-container {
+  right: max(0.75rem, env(safe-area-inset-right, 0px)) !important;
+  left: auto !important;
+  bottom: max(0.75rem, env(safe-area-inset-bottom, 0px)) !important;
+  top: auto !important;
+}

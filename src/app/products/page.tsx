@@ -1,5 +1,11 @@
+import { Suspense } from "react";
+
 import ProductsPageClient from "@/components/ProductsPageClient";
 
 export default function ProductsPage() {
-  return <ProductsPageClient />;
+  return (
+    <Suspense fallback={null}>
+      <ProductsPageClient />
+    </Suspense>
+  );
 }

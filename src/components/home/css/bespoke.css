@@ -1,0 +1,288 @@
+/* Bespoke hero — tokens from globals.css :root */
+
+.bespoke-section {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: var(--bespoke-min-height);
+  align-items: center;
+  overflow: hidden;
+}
+
+/* ── Background ── */
+
+.bespoke-section__backdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.bespoke-section__image {
+  object-fit: cover;
+  object-position: center;
+  animation: bespoke-ken-burns 18s ease-in-out infinite alternate;
+}
+
+.bespoke-section__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bespoke-section__overlay--dim {
+  background: var(--bespoke-overlay-base);
+  backdrop-filter: blur(var(--bespoke-blur));
+}
+
+.bespoke-section__overlay--gradient {
+  background: linear-gradient(
+    to top,
+    var(--bespoke-gradient-bottom) 0%,
+    var(--bespoke-gradient-mid) 45%,
+    var(--bespoke-gradient-top) 100%
+  );
+}
+
+/* ── Content ── */
+
+.bespoke-section__inner {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: var(--bespoke-inner-max);
+  margin: 0 auto;
+  padding: var(--bespoke-padding-y) clamp(1rem, 3vw, 1.5rem);
+  text-align: center;
+}
+
+.bespoke-section__badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  animation: bespoke-fade-up var(--bespoke-enter-duration) var(--bespoke-enter-ease)
+    both;
+}
+
+.bespoke-section__badge-line {
+  width: var(--bespoke-badge-line-width);
+  height: 1px;
+  flex-shrink: 0;
+  background: var(--bespoke-accent);
+  transform-origin: center;
+  animation: bespoke-line-grow 0.65s var(--bespoke-enter-ease) 0.1s both;
+}
+
+.bespoke-section__subtitle {
+  margin: 0;
+  font-size: var(--bespoke-subtitle-size);
+  font-weight: 500;
+  letter-spacing: var(--bespoke-subtitle-tracking);
+  text-transform: uppercase;
+  color: var(--bespoke-accent);
+}
+
+.bespoke-section__title {
+  margin: 0;
+  font-family: var(--bespoke-serif);
+  font-size: var(--bespoke-title-size);
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--bespoke-text);
+  animation: bespoke-fade-up var(--bespoke-enter-duration) var(--bespoke-enter-ease)
+    0.15s both;
+}
+
+.bespoke-section__title-accent {
+  color: var(--bespoke-accent-italic);
+  font-style: italic;
+}
+
+.bespoke-section__description {
+  max-width: 42rem;
+  margin: 2rem auto 0;
+  font-size: var(--bespoke-desc-size);
+  line-height: 1.65;
+  color: var(--bespoke-text-muted);
+  animation: bespoke-fade-up var(--bespoke-enter-duration) var(--bespoke-enter-ease)
+    0.25s both;
+}
+
+/* ── CTAs (2-col mobile grid) ── */
+
+.bespoke-section__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--bespoke-actions-gap-mobile);
+  max-width: 36rem;
+  margin: 3rem auto 0;
+  animation: bespoke-fade-up var(--bespoke-enter-duration) var(--bespoke-enter-ease)
+    0.35s both;
+}
+
+.bespoke-section__cta {
+  display: inline-flex;
+  min-height: var(--bespoke-cta-min-height);
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  font-size: var(--bespoke-cta-size);
+  font-weight: 600;
+  letter-spacing: var(--bespoke-cta-tracking);
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    background var(--bespoke-transition),
+    color var(--bespoke-transition),
+    border-color var(--bespoke-transition),
+    transform var(--bespoke-transition);
+}
+
+.bespoke-section__cta--primary {
+  grid-column: 1;
+  background: var(--bespoke-accent);
+  color: var(--bespoke-text);
+}
+
+.bespoke-section__cta--primary:hover {
+  background: var(--bespoke-accent-hover);
+  transform: translateY(-1px);
+}
+
+.bespoke-section__cta--secondary {
+  grid-column: 2;
+  border: 1px solid var(--bespoke-border-light);
+  background: transparent;
+  color: var(--bespoke-text);
+  letter-spacing: var(--bespoke-cta-tracking-secondary);
+}
+
+.bespoke-section__cta--secondary:hover {
+  background: var(--bespoke-border-hover-bg);
+  transform: translateY(-1px);
+}
+
+.bespoke-section__cta--tertiary {
+  grid-column: 1 / -1;
+  justify-content: center;
+  padding-inline: 1rem;
+  color: var(--bespoke-text);
+  letter-spacing: var(--bespoke-cta-tracking-secondary);
+}
+
+.bespoke-section__cta--tertiary:hover {
+  color: var(--bespoke-accent);
+  transform: translateY(-1px);
+}
+
+.bespoke-section__cta-icon {
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+.bespoke-section__cta-play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+}
+
+.bespoke-section__cta-arrow {
+  font-size: 0.875rem;
+  line-height: 1;
+}
+
+/* ── Animations ── */
+
+@keyframes bespoke-ken-burns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes bespoke-line-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes bespoke-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Responsive ── */
+
+@media (min-width: 640px) {
+  .bespoke-section__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--bespoke-actions-gap);
+    max-width: none;
+  }
+
+  .bespoke-section__cta {
+    padding-inline: 2rem;
+  }
+
+  .bespoke-section__cta--primary,
+  .bespoke-section__cta--secondary,
+  .bespoke-section__cta--tertiary {
+    grid-column: auto;
+  }
+
+  .bespoke-section__badge-row {
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .bespoke-section__badge-line {
+    width: 3.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .bespoke-section__actions {
+    margin-top: 3.5rem;
+  }
+
+  .bespoke-section__description {
+    margin-top: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bespoke-section__image {
+    animation: none;
+  }
+
+  .bespoke-section__badge-row,
+  .bespoke-section__title,
+  .bespoke-section__description,
+  .bespoke-section__actions,
+  .bespoke-section__badge-line {
+    animation: none;
+  }
+
+  .bespoke-section__cta:hover {
+    transform: none;
+  }
+}
