@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import data from "@/data/contactDatas.json";
+import { normalizeIndianMobile } from "@/utils/indianPhone";
 
 import "./css/social.css";
 
@@ -67,6 +68,9 @@ export default function SocialSection() {
   const social = data.social;
   const sectionRef = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const instaUrl = social.instagram;
 
@@ -101,17 +105,43 @@ export default function SocialSection() {
     return () => observer.disconnect();
   }, []);
 
-  function handleBroadcast(e: FormEvent<HTMLFormElement>) {
+  async function handleBroadcast(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const raw = String(fd.get("phone") ?? "").replace(/\D/g, "");
-    if (!raw) return;
-    const msg = s.broadcast.whatsappMessageTemplate.replace("{phone}", raw);
-    window.open(
-      `https://wa.me/${waBase}?text=${encodeURIComponent(msg)}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
+    setError(null);
+
+    if (!phone.trim()) {
+      setError(s.broadcast.errors.phoneRequired);
+      return;
+    }
+
+    const national = normalizeIndianMobile(phone);
+    if (!national) {
+      setError(s.broadcast.errors.phoneInvalid);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/social-broadcast", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      const payload = (await res.json()) as { error?: string };
+
+      if (!res.ok) {
+        setError(payload.error ?? s.broadcast.errors.submitFailed);
+        return;
+      }
+
+      const msg = s.broadcast.whatsappMessageTemplate.replace("{phone}", national);
+      window.location.href = `https://wa.me/${waBase}?text=${encodeURIComponent(msg)}`;
+    } catch {
+      setError(s.broadcast.errors.submitFailed);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const sectionClass = `social-section${
@@ -185,16 +215,32 @@ export default function SocialSection() {
                   suppressHydrationWarning
                   autoComplete="tel"
                   placeholder={s.broadcast.inputPlaceholder}
-                  className="social-section__input"
+                  className={`social-section__input${
+                    error ? " social-section__input--error" : ""
+                  }`}
+                  value={phone}
+                  onChange={(event) => {
+                    setPhone(event.target.value);
+                    if (error) setError(null);
+                  }}
+                  maxLength={14}
+                  disabled={loading}
+                  aria-invalid={Boolean(error)}
                 />
                 <button
                   type="submit"
                   suppressHydrationWarning
                   className="social-section__submit"
+                  disabled={loading}
                 >
-                  {s.broadcast.buttonText}
+                  {loading ? s.broadcast.submittingText : s.broadcast.buttonText}
                 </button>
               </form>
+              {error ? (
+                <p className="social-section__form-error" role="alert">
+                  {error}
+                </p>
+              ) : null}
             </div>
           </div>
 

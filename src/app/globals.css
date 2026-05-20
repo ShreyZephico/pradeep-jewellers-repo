@@ -275,6 +275,27 @@
   --bespoke-serif: var(--featured-serif);
   --bespoke-blur: 2px;
 
+  /* Start your design page */
+  --design-bg: var(--color-warm-ivory);
+  --design-card-bg: var(--color-pure-white);
+  --design-input-bg: var(--color-pure-white);
+  --design-ink: var(--home-ink);
+  --design-ink-rgb: var(--home-ink-rgb);
+  --design-muted: rgb(var(--home-ink-rgb) / 0.62);
+  --design-accent: var(--header-accent);
+  --design-accent-hover: var(--header-accent-hover);
+  --design-accent-ink: var(--color-pure-white);
+  --design-accent-rgb: var(--header-accent-rgb);
+  --design-secondary-rgb: var(--gold-scheme-accent-rgb, var(--header-accent-rgb));
+  --design-radius: 0.9rem;
+  --design-shadow: 0 18px 50px rgb(var(--color-black-rgb) / 0.06);
+  --design-transition: var(--featured-transition);
+  --design-enter-duration: 0.6s;
+  --design-enter-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --design-stagger: 0.08s;
+  --design-serif: var(--featured-serif);
+  --design-page-max: 72rem;
+
   /* Gifting section */
   --gifting-bg: var(--color-warm-ivory);
   --gifting-text: var(--color-pure-white);

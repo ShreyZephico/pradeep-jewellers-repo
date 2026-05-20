@@ -219,6 +219,16 @@
   border-color: rgb(var(--header-accent-rgb) / 0.5);
 }
 
+.social-section__input--error {
+  border-color: #dc2626;
+}
+
+.social-section__form-error {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: #dc2626;
+}
+
 .social-section__submit {
   min-height: 2.75rem;
   flex-shrink: 0;
@@ -235,8 +245,13 @@
   transition: background var(--social-transition);
 }
 
-.social-section__submit:hover {
+.social-section__submit:hover:not(:disabled) {
   background: var(--social-accent-hover);
+}
+
+.social-section__submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 /* ── Image grid: 2-col mobile, 3-col desktop ── */

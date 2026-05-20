@@ -456,12 +456,12 @@ export default function Header() {
         </form>
       </div>
 
-      <div className={recentClass}>
+      {/* <div className={recentClass}>
         <span className="site-header__recent-label">Recently Viewed:</span>
         <span className="site-header__recent-value">
           {contactData.header.recentlyViewed}
         </span>
-      </div>
+      </div> */}
 
       {isMenuOpen ? (
         <div className="site-header__mobile">

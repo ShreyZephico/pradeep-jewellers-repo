@@ -70,7 +70,7 @@ export default function HomePageClient() {
 
       <LearnSection />
 
-      <FounderSection />
+      {/* <FounderSection /> */}
 
       <TestimonialsSection />
 
