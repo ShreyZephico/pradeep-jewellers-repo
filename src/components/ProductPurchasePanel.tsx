@@ -478,9 +478,14 @@ export default function ProductPurchasePanel({
               <h3 className="product-purchase-section-title">
                 {product.sizeOptionName ?? copy.sizeOptionDefault}
               </h3>
-              <button type="button" className="product-purchase-guide-link">
+              <a
+                href="https://workdrive.zohoexternal.in/external/80ca836e76f8383e2afda8491fcd9ded5ffe8cfa495029d905efa26a121f6c52/download"
+                className="product-purchase-guide-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {copy.sizeGuide}
-              </button>
+              </a>
             </div>
             <div className="product-purchase-options product-purchase-options--size">
               {product.sizeOptions?.map((option) => {

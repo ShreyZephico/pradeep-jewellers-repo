@@ -252,6 +252,21 @@ type ShopifyProductsListResponse = {
   };
 };
 
+type ShopifyPolicy = {
+  id: string;
+  title: string;
+  body: string;
+  handle?: string | null;
+  url?: string | null;
+};
+
+export type ShopifyShopPolicies = {
+  privacyPolicy: ShopifyPolicy | null;
+  termsOfService: ShopifyPolicy | null;
+  refundPolicy: ShopifyPolicy | null;
+  shippingPolicy?: ShopifyPolicy | null;
+};
+
 async function shopifyFetch<T>(
   query: string,
   variables?: Record<string, unknown>
@@ -283,6 +298,22 @@ async function shopifyFetch<T>(
   }
 
   return json.data as T;
+}
+
+const SHOP_POLICIES_QUERY = `
+  query ShopPolicies {
+    shop {
+      privacyPolicy { id title body handle url }
+      termsOfService { id title body handle url }
+      refundPolicy { id title body handle url }
+      shippingPolicy { id title body handle url }
+    }
+  }
+`;
+
+export async function getShopPolicies(): Promise<ShopifyShopPolicies> {
+  const data = await shopifyFetch<{ shop: ShopifyShopPolicies }>(SHOP_POLICIES_QUERY);
+  return data.shop;
 }
 
 async function shopifyAdminFetch<T>(
