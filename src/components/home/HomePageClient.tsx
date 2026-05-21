@@ -1,14 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { GoldRatesProvider } from "@/contexts/GoldRatesContext";
-
 
 import HeroSection from "@/components/home/HeroSection";
 import LegacySection from "@/components/home/LegacySection";
 import CollectionsSection from "@/components/home/CollectionsSection";
-
-import data from "@/data/contactDatas.json";
+import FeaturedProductsSection from "@/components/home/FeaturedProductsSection";
+import CallbackLeadSection from "@/components/home/CallbackLeadSection";
 
 const CuratedSection = dynamic(
   () => import("@/components/home/CuratedSection"),
@@ -47,27 +45,36 @@ const SocialSection = dynamic(
   { loading: () => null }
 );
 
-
 export default function HomePageClient() {
-  const refreshMs =
-    (data.heroSection.rates.refreshIntervalMinutes ?? 10) * 60 * 1000;
-
   return (
-    <GoldRatesProvider refreshMs={refreshMs}>
-      
+    <>
       <HeroSection />
-      <LegacySection />
+
+      {/* <LegacySection /> */}
+
       <CollectionsSection />
+
+      <FeaturedProductsSection />
+
       <CuratedSection />
+
       <BespokeSection />
+
       <GiftingSection />
+
       <PricingSection />
+
       <GoldSchemeSection />
+
+      <CallbackLeadSection />
+
       <LearnSection />
-      <FounderSection />
+
+      {/* <FounderSection /> */}
+
       <TestimonialsSection />
+
       <SocialSection />
-      
-    </GoldRatesProvider>
+    </>
   );
 }

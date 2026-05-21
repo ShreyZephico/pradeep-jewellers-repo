@@ -2,16 +2,23 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import TawkToChat from "@/components/TawkToChat";
+import GoogleOneTapShell from "@/components/GoogleOneTapShell";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 
 import { CartProvider } from "@/contexts/CartContext";
+import { CustomerAuthProvider } from "@/contexts/CustomerAuthContext";
 import { GoldRatesProvider } from "@/contexts/GoldRatesContext";
+
+import data from "@/data/contactDatas.json";
 
 import "@/styles/cart.css";
 import "@/styles/cart-page.css";
 import "@/styles/header-search.css";
 import "./globals.css";
+
+const goldRatesRefreshMs =
+  (data.heroSection.rates.refreshIntervalMinutes ?? 5) * 60 * 1000;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,20 +53,21 @@ export default function RootLayout({
         className="min-h-full flex flex-col"
         suppressHydrationWarning
       >
-        {/* PROVIDER START */}
-        <GoldRatesProvider>
-          <CartProvider>
-            <Header />
+        <GoldRatesProvider refreshMs={goldRatesRefreshMs}>
+          <CustomerAuthProvider>
+            <CartProvider>
+              <Header />
 
-            <div suppressHydrationWarning key="app-root">
-              {children}
-            </div>
+              <div suppressHydrationWarning key="app-root">
+                {children}
+              </div>
 
-            <Footer />
-            <TawkToChat />
-          </CartProvider>
+              <Footer />
+              <GoogleOneTapShell />
+              <TawkToChat />
+            </CartProvider>
+          </CustomerAuthProvider>
         </GoldRatesProvider>
-        {/* PROVIDER END */}
       </body>
     </html>
   );

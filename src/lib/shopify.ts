@@ -79,6 +79,8 @@ type ShopifyProductNode = {
     };
   };
   description: string;
+  productType?: string;
+  tags?: string[];
   options: {
     name: string;
     values: string[];
@@ -167,6 +169,8 @@ const productListNodeFields = `
           handle
           title
           description
+          productType
+          tags
           featuredImage {
             url
             altText
@@ -402,6 +406,30 @@ function extractCaratFromSelectedOptions(
   return null;
 }
 
+function deriveListBadge({
+  tags,
+  compareAtPrice,
+  price,
+}: {
+  tags: string[];
+  compareAtPrice: number | null;
+  price: number;
+}): string | undefined {
+  const normalized = tags.map((t) => t.toLowerCase());
+
+  if (compareAtPrice != null && compareAtPrice > price) {
+    return "SALE";
+  }
+  if (normalized.some((t) => t.includes("bestseller") || t.includes("best-seller"))) {
+    return "BESTSELLER";
+  }
+  if (normalized.some((t) => t.includes("new") || t.includes("arrival"))) {
+    return "NEW";
+  }
+
+  return undefined;
+}
+
 /** Listing/card mapping: one gold fetch, min price across sample variants (no full variant list). */
 async function mapShopifyProductListItem(
   node: ShopifyProductNode,
@@ -423,6 +451,7 @@ async function mapShopifyProductListItem(
 
   let price = 0;
   let variantId = node.variants.edges[0]?.node.id ?? "";
+  let makingChargePercent: number | undefined;
 
   for (const { node: variant } of node.variants.edges) {
     const gramsFromApi = shopifyWeightToGrams(
@@ -460,14 +489,22 @@ async function mapShopifyProductListItem(
       shopifyListPrice > 0 ? Math.round(shopifyListPrice) : fallback.price;
   }
 
+  const tags = node.tags ?? [];
+  const badge = deriveListBadge({ tags, compareAtPrice, price });
+
   return {
     id: node.id,
     slug: node.handle,
     handle: node.handle,
     name: node.title,
     description: node.description || fallback.description,
+    shortDescription: node.description?.slice(0, 120) || fallback.shortDescription,
+    productType: node.productType?.trim() || fallback.productType,
+    tags,
+    badge,
     price,
     compareAtPrice,
+    makingChargePercent,
     image: primaryImage,
     images: [primaryImage],
     variantId,

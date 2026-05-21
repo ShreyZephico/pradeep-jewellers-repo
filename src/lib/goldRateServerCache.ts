@@ -1,17 +1,9 @@
 import type { GoldRateApiResponse } from "@/types/goldRate";
 
-export type MetalPriceSnapshot = {
-  gold22k: number;
-  gold24k: number;
-  silver: number;
-};
-
 let cache: {
   payload: GoldRateApiResponse;
   expiresAt: number;
 } | null = null;
-
-let previousPrices: MetalPriceSnapshot | null = null;
 
 export function getCacheTtlMs(refreshIntervalMinutes: number): number {
   const minutes = Math.max(1, refreshIntervalMinutes);
@@ -39,12 +31,4 @@ export function setCachedGoldRates(
     payload,
     expiresAt: Date.now() + ttlMs,
   };
-}
-
-export function getPreviousPrices(): MetalPriceSnapshot | null {
-  return previousPrices;
-}
-
-export function setPreviousPrices(prices: MetalPriceSnapshot) {
-  previousPrices = prices;
 }

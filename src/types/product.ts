@@ -59,6 +59,8 @@ export type Product = {
   variantCount?: number;
   variants?: ProductVariant[];
   badge?: string;
+  /** Approximate making charge % vs gold value (from price breakdown). */
+  makingChargePercent?: number;
   customizable: boolean;
   handle?: string;
   productType?: string;

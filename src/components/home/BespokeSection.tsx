@@ -3,61 +3,89 @@ import Link from "next/link";
 
 import data from "@/data/contactDatas.json";
 
+import "./css/bespoke.css";
+
+function ChatIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+function PlayIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      width="36"
+      height="36"
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden
+    >
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.25" />
+      <path d="M10 8.5v7l5.5-3.5L10 8.5Z" fill="currentColor" />
+    </svg>
+  );
+}
+
 export default function BespokeSection() {
   const s = data.bespokeSection;
 
   return (
-    <section className="relative isolate flex min-h-[min(100svh,52rem)] items-center overflow-hidden">
-      <div className="absolute inset-0">
+    <section className="bespoke-section" aria-labelledby="bespoke-section-heading">
+      <div className="bespoke-section__backdrop">
         <Image
           src={s.backgroundImage}
           alt=""
           fill
-          className="object-cover object-center"
+          priority={false}
           sizes="100vw"
+          className="bespoke-section__image"
         />
         <div
-          className="absolute inset-0 bg-[#0a0806]/75 backdrop-blur-[2px]"
+          className="bespoke-section__overlay bespoke-section__overlay--dim"
           aria-hidden
         />
         <div
-          className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/55"
+          className="bespoke-section__overlay bespoke-section__overlay--gradient"
           aria-hidden
         />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-4xl px-6 py-24 text-center md:py-32 lg:py-36">
-        <div className="mb-8 flex items-center justify-center gap-4 md:mb-10">
-          <span
-            className="h-px w-10 shrink-0 bg-[#B88E4F] md:w-14"
-            aria-hidden
-          />
-          <p className="text-[11px] font-medium uppercase tracking-[0.35em] text-[#B88E4F]">
-            {s.subtitle}
-          </p>
-          <span
-            className="h-px w-10 shrink-0 bg-[#B88E4F] md:w-14"
-            aria-hidden
-          />
+      <div className="bespoke-section__inner">
+        <div className="bespoke-section__badge-row">
+          <span className="bespoke-section__badge-line" aria-hidden />
+          <p className="bespoke-section__subtitle">{s.subtitle}</p>
+          <span className="bespoke-section__badge-line" aria-hidden />
         </div>
 
-        <h2 className="font-serif text-4xl font-light leading-[1.15] tracking-tight text-white md:text-5xl lg:text-6xl">
+        <h2 id="bespoke-section-heading" className="bespoke-section__title">
           {s.titleLine1}
           <br />
-          <span className="text-[#B88E4F] italic">{s.titleLine2}</span>
+          <span className="bespoke-section__title-accent">{s.titleLine2}</span>
         </h2>
 
-        <p className="mx-auto mt-8 max-w-2xl text-base leading-relaxed text-white/90 md:text-lg">
-          {s.description}
-        </p>
+        <p className="bespoke-section__description">{s.description}</p>
 
-        <div className="mt-12 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center md:mt-14">
+        <div className="bespoke-section__actions">
           <Link
             href={s.ctaPrimary.link}
-            className="inline-flex min-h-[48px] items-center justify-center gap-2 bg-[#B88E4F] px-8 py-3.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#c49a56]"
+            className="bespoke-section__cta bespoke-section__cta--primary"
           >
             {s.ctaPrimary.text}
-            <span aria-hidden className="text-sm">
+            <span className="bespoke-section__cta-arrow" aria-hidden>
               →
             </span>
           </Link>
@@ -66,49 +94,18 @@ export default function BespokeSection() {
             href={s.ctaSecondary.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex min-h-[48px] items-center justify-center gap-2 border border-white/90 bg-transparent px-8 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white/10"
+            className="bespoke-section__cta bespoke-section__cta--secondary"
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="shrink-0 text-white"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
+            <ChatIcon className="bespoke-section__cta-icon" />
             {s.ctaSecondary.text}
           </a>
 
           <Link
             href={s.ctaTertiary.link}
-            className="inline-flex min-h-[48px] items-center justify-center gap-2 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:text-[#B88E4F]"
+            className="bespoke-section__cta bespoke-section__cta--tertiary"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center" aria-hidden>
-              <svg
-                width="36"
-                height="36"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="text-white"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="9"
-                  stroke="currentColor"
-                  strokeWidth="1.25"
-                />
-                <path
-                  d="M10 8.5v7l5.5-3.5L10 8.5Z"
-                  fill="currentColor"
-                />
-              </svg>
+            <span className="bespoke-section__cta-play" aria-hidden>
+              <PlayIcon className="bespoke-section__cta-icon" />
             </span>
             {s.ctaTertiary.text}
           </Link>

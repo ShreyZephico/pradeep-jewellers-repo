@@ -1,46 +1,137 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 import data from "@/data/contactDatas.json";
+import {
+  filterProductsForCuratedTab,
+  formatMakingChargeLabel,
+  productCardBadge,
+  productTypeLabel,
+} from "@/lib/curatedProducts";
+import type { Product } from "@/types/product";
+import { getProductHref } from "@/utils/productUrl";
+
+import "./css/curated.css";
 
 type CuratedTab = (typeof data.curatedSection.tabs)[number];
-type CuratedProduct = (typeof data.curatedSection.products)[number];
+
+const formatPrice = (value: number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(value);
+
+function WishlistIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.35"
+      aria-hidden
+    >
+      <path d="M12 21s-7-4.35-7-10a4.5 4.5 0 0 1 8-2.7A4.5 4.5 0 0 1 19 11c0 5.65-7 10-7 10Z" />
+    </svg>
+  );
+}
+
+function ProductCardSkeleton({ index }: { index: number }) {
+  return (
+    <div
+      className="curated-section__skeleton"
+      style={{ "--skeleton-index": index } as CSSProperties}
+      aria-hidden
+    >
+      <div className="curated-section__skeleton-media" />
+      <div className="curated-section__skeleton-line curated-section__skeleton-line--short" />
+      <div className="curated-section__skeleton-line curated-section__skeleton-line--title" />
+      <div className="curated-section__skeleton-line curated-section__skeleton-line--meta" />
+    </div>
+  );
+}
 
 export default function CuratedSection() {
   const section = data.curatedSection;
   const tabs = section.tabs as CuratedTab[];
-  const products = section.products as CuratedProduct[];
+  const limitPerTab = section.productLimitPerTab ?? 6;
+  const fetchLimit = section.fetchLimit ?? 50;
 
   const [activeTabId, setActiveTabId] = useState(tabs[0]?.id ?? "new-arrivals");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const params = new URLSearchParams({
+          page: "1",
+          limit: String(fetchLimit),
+          category: "all",
+        });
+        const res = await fetch(`/api/products?${params.toString()}`, {
+          credentials: "omit",
+        });
+        const json = (await res.json()) as {
+          success?: boolean;
+          products?: Product[];
+          error?: string;
+        };
+
+        if (!res.ok || !json.success) {
+          throw new Error(json.error ?? section.errorMessage);
+        }
+
+        if (!cancelled) {
+          setProducts(json.products ?? []);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : section.errorMessage);
+          setProducts([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchLimit, section.errorMessage]);
 
   const visibleProducts = useMemo(
-    () => products.filter((p) => p.category === activeTabId),
-    [products, activeTabId]
+    () => filterProductsForCuratedTab(products, activeTabId, limitPerTab),
+    [products, activeTabId, limitPerTab]
   );
 
   return (
-    <section className="bg-[#FAF9F6] py-16 md:py-24">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-12 flex flex-col gap-8 lg:mb-14 lg:flex-row lg:items-end lg:justify-between">
-          <div className="min-w-0 flex-1">
-            <div className="mb-4 flex items-center gap-4">
-              <div className="h-px w-10 shrink-0 bg-[#2A2018]/70" />
-              <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#2A2018]/80">
-                {section.badge}
-              </p>
+    <section className="curated-section" aria-labelledby="curated-section-heading">
+      <div className="curated-section__inner">
+        <header className="curated-section__header">
+          <div className="curated-section__header-main">
+            <div className="curated-section__badge-row">
+              <span className="curated-section__badge-line" aria-hidden />
+              <p className="curated-section__badge">{section.badge}</p>
             </div>
-            <h2 className="font-serif text-4xl font-light tracking-tight text-[#1A1410] md:text-5xl lg:text-[2.75rem]">
+            <h2 id="curated-section-heading" className="curated-section__title">
               {section.title}
             </h2>
           </div>
 
-          <nav
-            className="flex flex-wrap gap-x-8 gap-y-3"
-            aria-label="Curated product filters"
-          >
+          <nav className="curated-section__tabs" aria-label="Curated product filters">
             {tabs.map((tab) => {
               const isActive = tab.id === activeTabId;
               return (
@@ -49,91 +140,94 @@ export default function CuratedSection() {
                   type="button"
                   suppressHydrationWarning
                   onClick={() => setActiveTabId(tab.id)}
-                  className={`relative pb-3 text-[11px] font-medium uppercase tracking-[0.2em] transition-colors ${
-                    isActive
-                      ? "text-[#1A1410]"
-                      : "text-[#1A1410]/45 hover:text-[#1A1410]/70"
-                  }`}
+                  className={`curated-section__tab${isActive ? " curated-section__tab--active" : ""}`}
+                  aria-current={isActive ? "true" : undefined}
                 >
                   {tab.label}
-                  <span
-                    className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#1A1410] transition-opacity ${
-                      isActive ? "opacity-100" : "opacity-0"
-                    }`}
-                    aria-hidden
-                  />
+                  <span className="curated-section__tab-indicator" aria-hidden />
                 </button>
               );
             })}
           </nav>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleProducts.map((product) => (
-            <article
-              key={product.id}
-              className="group cursor-pointer"
-            >
-              <div className="relative mb-4 aspect-square overflow-hidden bg-[#EDE9E2]">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover transition duration-500 group-hover:scale-[1.03]"
-                />
+        {error ? (
+          <p className="curated-section__message" role="alert">
+            {error}
+          </p>
+        ) : null}
 
-                {product.tag ? (
-                  <span className="absolute left-3 top-3 z-10 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#1A1410]">
-                    {product.tag}
-                  </span>
-                ) : null}
+        <div key={activeTabId} className="curated-section__grid" role="list">
+          {loading
+            ? Array.from({ length: limitPerTab }).map((_, i) => (
+                <ProductCardSkeleton key={`sk-${i}`} index={i} />
+              ))
+            : visibleProducts.map((product, index) => {
+                const badge = productCardBadge(product);
+                const makingLabel = formatMakingChargeLabel(product);
 
-                <button
-                  type="button"
-                  suppressHydrationWarning
-                  aria-label={`Add ${product.name} to wishlist`}
-                  className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#1A1410] shadow-sm transition hover:bg-[#faf9f6]"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.35"
-                    aria-hidden
+                return (
+                  <Link
+                    key={product.id}
+                    href={getProductHref(product)}
+                    className="curated-section__card"
+                    role="listitem"
+                    style={{ "--card-index": index } as CSSProperties}
                   >
-                    <path d="M12 21s-7-4.35-7-10a4.5 4.5 0 0 1 8-2.7A4.5 4.5 0 0 1 19 11c0 5.65-7 10-7 10Z" />
-                  </svg>
-                </button>
-              </div>
+                    <div className="curated-section__card-media">
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        sizes="(max-width: 1024px) 50vw, 33vw"
+                        className="curated-section__card-image"
+                      />
 
-              <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.22em] text-[#1A1410]/55">
-                {product.type}
-              </p>
-              <h3 className="font-serif text-lg leading-snug text-[#1A1410] md:text-xl">
-                {product.name}
-              </h3>
-              <div className="mt-2 flex items-baseline justify-between gap-3">
-                <p className="font-serif text-base font-semibold text-[#1A1410] md:text-lg">
-                  {product.priceDisplay}
-                </p>
-                <p className="text-[11px] font-normal text-[#1A1410]/45">
-                  Making {product.makingCharges}
-                </p>
-              </div>
-            </article>
-          ))}
+                      {badge ? (
+                        <span className="curated-section__card-tag">{badge}</span>
+                      ) : null}
+
+                      <button
+                        type="button"
+                        suppressHydrationWarning
+                        aria-label={`Add ${product.name} to wishlist`}
+                        className="curated-section__card-wishlist"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                      >
+                        <WishlistIcon />
+                      </button>
+                    </div>
+
+                    <p className="curated-section__card-type">
+                      {productTypeLabel(product)}
+                    </p>
+                    <h3 className="curated-section__card-title">{product.name}</h3>
+                    <div className="curated-section__card-meta">
+                      <p className="curated-section__card-price">
+                        {formatPrice(product.price)}
+                      </p>
+                      {makingLabel ? (
+                        <p className="curated-section__card-making">
+                          Making {makingLabel}
+                        </p>
+                      ) : null}
+                    </div>
+                  </Link>
+                );
+              })}
         </div>
 
-        <div className="mt-14 flex justify-center md:mt-16">
-          <Link
-            href={section.buttonLink}
-            className="inline-flex min-w-[min(100%,20rem)] items-center justify-center gap-2 border border-[#C4A574]/90 bg-transparent px-10 py-3.5 text-[11px] font-medium uppercase tracking-[0.22em] text-[#2A2018] transition hover:border-[#2A2018] hover:bg-[#2A2018] hover:text-[#FAF9F6]"
-          >
+        {!loading && !error && visibleProducts.length === 0 ? (
+          <p className="curated-section__message">{section.emptyMessage}</p>
+        ) : null}
+
+        <div className="curated-section__cta-wrap">
+          <Link href={section.buttonLink} className="curated-section__cta">
             {section.buttonText}
-            <span className="text-sm leading-none" aria-hidden>
+            <span className="curated-section__cta-arrow" aria-hidden>
               ↗
             </span>
           </Link>

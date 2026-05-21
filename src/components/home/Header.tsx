@@ -1,358 +1,398 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-
-import {
-  Phone,
-  LogIn,
-  Menu,
-  ShoppingBag,
-  X,
-} from "lucide-react";
+import { LogIn, Menu, Phone, ShoppingBag, X } from "lucide-react";
 
 import HeaderNavSearch from "@/components/home/HeaderNavSearch";
 import { useCart } from "@/contexts/CartContext";
-import contactData from "@/data/contactDatas.json";
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
+import { useGoldRates } from "@/contexts/GoldRatesContext";
+import { saveReturnPath } from "@/lib/authRedirect";
 import productContent from "@/lib/productContent";
+import { formatInr, formatPercentChange } from "@/lib/goldRates";
+import type { MetalRateItem } from "@/types/goldRate";
 import { getImageUrl } from "@/utils/cloudinary";
+import contactData from "@/data/contactDatas.json";
+
+import "./css/header.css";
 
 const cartCopy = productContent.cart;
+const ratesConfig = contactData.heroSection.rates;
+
+function trendClass(status: MetalRateItem["status"] | undefined): string {
+  if (status === "increased") return "site-header__ticker-trend--up";
+  if (status === "decreased") return "site-header__ticker-trend--down";
+  return "site-header__ticker-trend--same";
+}
+
+function trendArrow(status: MetalRateItem["status"] | undefined): string {
+  if (status === "increased") return "↑";
+  if (status === "decreased") return "↓";
+  return "→";
+}
+
+function TickerItem({
+  label,
+  rate,
+  loading,
+  unitSuffix,
+  fractionDigits,
+}: {
+  label: string;
+  rate?: MetalRateItem;
+  loading: boolean;
+  unitSuffix: string;
+  fractionDigits: number;
+}) {
+  if (loading || !rate) {
+    return (
+      <span className="site-header__ticker-item">
+        <span className="site-header__ticker-label">{label}</span>
+        <span className="site-header__ticker-price">Loading…</span>
+      </span>
+    );
+  }
+
+  return (
+    <span className="site-header__ticker-item">
+      <span className="site-header__ticker-label">{label}</span>
+      <span className="site-header__ticker-price">
+        {formatInr(rate.current, fractionDigits)}
+        {unitSuffix}
+      </span>
+      <span
+        className={`site-header__ticker-trend ${trendClass(rate.status)}`}
+        aria-hidden
+      >
+        {trendArrow(rate.status)} {formatPercentChange(rate.percentChange)}
+      </span>
+    </span>
+  );
+}
+
+function RatesTicker() {
+  const { payload, loading } = useGoldRates();
+  const live = payload?.data;
+
+  const items = (
+    <>
+      <TickerItem
+        label={ratesConfig.gold22k.label}
+        rate={live?.gold22k}
+        loading={loading}
+        unitSuffix={ratesConfig.gold22k.unitSuffix}
+        fractionDigits={ratesConfig.gold22k.fractionDigits ?? 2}
+      />
+      <span className="site-header__ticker-sep" aria-hidden>
+        ◆
+      </span>
+      <TickerItem
+        label={ratesConfig.silver1kg.label}
+        rate={live?.silver1kg}
+        loading={loading}
+        unitSuffix={ratesConfig.silver1kg.unitSuffix}
+        fractionDigits={ratesConfig.silver1kg.fractionDigits ?? 2}
+      />
+      <span className="site-header__ticker-sep" aria-hidden>
+        ◆
+      </span>
+      <span className="site-header__ticker-item">
+        <span className="site-header__ticker-label">{ratesConfig.location}</span>
+      </span>
+    </>
+  );
+
+  return (
+    <div
+      className="site-header__ticker"
+      role="region"
+      aria-label="Live gold and silver rates"
+    >
+      <div className="site-header__ticker-viewport">
+        {loading && !live ? (
+          <span className="site-header__ticker-skeleton" aria-busy="true" />
+        ) : (
+          <div className="site-header__ticker-track" aria-live="polite">
+            <div className="site-header__ticker-group">{items}</div>
+            <div className="site-header__ticker-group" aria-hidden>
+              {items}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const { cart, goToCart, setAuthenticated } = useCart();
+  const {
+    isLoggedIn,
+    userName,
+    loading: authLoading,
+    logout,
+    goToLogin,
+  } = useCustomerAuth();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState("");
   const [logoError, setLogoError] = useState(false);
 
-  // =========================
-  // AUTH CHECK
-  // =========================
+  const lastScrollY = useRef(0);
+  const scrollTicking = useRef(false);
+
+  const RECENT_SCROLL_DELTA = 12;
+  const RECENT_TOP_SHOW_Y = 20;
 
   useEffect(() => {
-    fetch("/api/auth/check")
-      .then((response) => response.json())
-      .then((data) => {
-        if (!data.isAuthenticated) {
-          setIsLoggedIn(false);
-          setAuthenticated(false);
-          return;
-        }
-
-        const email =
-          data.email || localStorage.getItem("customerEmail");
-
-        const name = email
-          ? email.split("@")[0]
-          : "User";
-
-        setUserName(name);
-        setIsLoggedIn(true);
-        setAuthenticated(true);
-      })
-      .catch(() => {
-        setIsLoggedIn(false);
-        setAuthenticated(false);
-      });
-  }, []);
-
-  // =========================
-  // SCROLL EFFECT
-  // =========================
+    setAuthenticated(isLoggedIn);
+  }, [isLoggedIn, setAuthenticated]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 30);
+    lastScrollY.current = window.scrollY;
+
+    const updateOnScroll = () => {
+      const currentY = window.scrollY;
+      setIsScrolled(currentY > 30);
+
+      if (currentY <= RECENT_TOP_SHOW_Y) {
+        lastScrollY.current = currentY;
+        scrollTicking.current = false;
+        return;
+      }
+
+      const delta = currentY - lastScrollY.current;
+      if (delta >= RECENT_SCROLL_DELTA) {
+        lastScrollY.current = currentY;
+      } else if (delta <= -RECENT_SCROLL_DELTA) {
+        lastScrollY.current = currentY;
+      }
+
+      scrollTicking.current = false;
     };
 
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      if (scrollTicking.current) return;
+      scrollTicking.current = true;
+      requestAnimationFrame(updateOnScroll);
+    };
 
-    return () =>
-      window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // =========================
-  // HANDLERS
-  // =========================
-
   const handleLogout = async () => {
-    await fetch("/api/logout", {
-      method: "POST",
-    }).catch(() => null);
-
-    localStorage.removeItem("customerAccessToken");
-    localStorage.removeItem("customerEmail");
-
-    setIsLoggedIn(false);
+    await logout();
     setAuthenticated(false);
-
     router.push("/");
   };
 
   const openCart = () => {
     if (!isLoggedIn) {
+      saveReturnPath();
       router.push("/login");
       return;
     }
     goToCart();
   };
 
-  const getInitial = () => {
-    return userName
-      ? userName.charAt(0).toUpperCase()
-      : "U";
-  };
+  const getInitial = () =>
+    userName ? userName.charAt(0).toUpperCase() : "U";
 
-  // =========================
-  // JSX
-  // =========================
+  const headerClass = [
+    "site-header",
+    isScrolled ? "site-header--scrolled" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const cartQty = cart.totalQuantity;
 
   return (
-    <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-white shadow-md"
-          : "bg-white"
-      }`}
-    >
-      {/* TOP BAR */}
+    <header className={headerClass}>
+      <RatesTicker />
 
-      <div className="bg-amber-50 text-center py-2 text-sm">
-        <p className="text-amber-700">
-          {contactData.header.promoText}
-        </p>
-      </div>
-
-      {/* MAIN HEADER */}
-
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
-
-          {/* LOGO */}
-
-          <Link
-            href="/"
-            className="flex items-center gap-3"
-          >
+      <div className="site-header__main">
+        <div className="site-header__main-inner">
+          <Link href="/" className="site-header__logo">
             {!logoError ? (
               <Image
                 src={getImageUrl(contactData.brand.logo)}
                 alt={contactData.brand.name}
                 width={45}
                 height={45}
-                className="max-h-[45px] max-w-[45px] rounded-full text-black-700"
+                className="site-header__logo-img"
                 style={{ width: "auto", height: "auto" }}
                 onError={() => setLogoError(true)}
               />
             ) : (
-              <div className="w-11 h-11 rounded-full bg-amber-100 flex items-center justify-center">
+              <div className="site-header__logo-fallback" aria-hidden>
                 💎
               </div>
             )}
 
-            <div className="hidden sm:block">
-              <h2 className="font-bold text-lg">
+            <div className="site-header__brand-text">
+              <h2 className="site-header__brand-name">
                 {contactData.brand.name}
               </h2>
-
-              <p className="text-xs text-gray-700">
+              <p className="site-header__brand-tagline">
                 {contactData.brand.tagline}
               </p>
             </div>
           </Link>
 
-          {/* DESKTOP MENU */}
+          <nav className="site-header__nav" aria-label="Main navigation">
+            {contactData.navigation.map((item) => {
+              const isActive =
+                item.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.href);
 
-          <nav className="hidden md:flex items-center gap-6">
-            {contactData.navigation.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm hover:text-amber-600 transition-colors text-gray-700"
-              >
-                {item.label}
-              </Link>
-            ))}
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={[
+                    "site-header__nav-link",
+                    isActive ? "site-header__nav-link--active" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
-          <div className="hidden lg:block">
-            <HeaderNavSearch variant="expanded" />
-          </div>
-
-          {/* RIGHT SECTION */}
-
-          <div className="flex items-center gap-4">
-
-            {/* PHONE */}
-
-            <div className="hidden lg:flex items-center gap-2 text-sm">
-              <Phone size={16} />
-
-              <span className="text-gray-700">
-                {contactData.contact.phone}
-              </span>
+          <div className="site-header__actions">
+            <div className="site-header__phone">
+              <Phone size={16} aria-hidden />
+              <span>{contactData.contact.phone}</span>
             </div>
 
-            {/* VIDEO CALL */}
-
             <Link
-              href="/video-call"
-              className="hidden lg:block text-sm hover:text-amber-600 text-gray-700"
+              href={contactData.header.videoCallUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="site-header__video-link"
             >
               {contactData.header.videoCallText}
             </Link>
 
-            <div className="lg:hidden">
+            <div className="site-header__search-slot site-header__search-slot--desktop">
+              <HeaderNavSearch variant="expanded" />
+            </div>
+
+            <div className="site-header__search-slot site-header__search-slot--mobile">
               <HeaderNavSearch variant="compact" />
             </div>
 
             <button
               type="button"
-              className="header-cart-btn"
+              className="site-header__icon-btn site-header__cart header-cart-btn"
               onClick={openCart}
               aria-label={
-                isLoggedIn && cart.totalQuantity > 0
-                  ? `${cartCopy.openCart} (${cart.totalQuantity} items)`
+                isLoggedIn && cartQty > 0
+                  ? `${cartCopy.openCart} (${cartQty} items)`
                   : cartCopy.openCart
               }
               suppressHydrationWarning
             >
               <span className="header-cart-icon-wrap">
-                <ShoppingBag size={22} strokeWidth={1.75} aria-hidden />
-                {isLoggedIn && cart.totalQuantity > 0 ? (
+                <ShoppingBag size={20} strokeWidth={1.75} aria-hidden />
+                {isLoggedIn && cartQty > 0 ? (
                   <span className="header-cart-badge" aria-hidden>
-                    {cart.totalQuantity > 99 ? "99+" : cart.totalQuantity}
+                    {cartQty > 99 ? "99+" : cartQty}
                   </span>
                 ) : null}
               </span>
             </button>
 
-            {/* LOGIN / PROFILE */}
-
-            {isLoggedIn ? (
-              <div className="relative group">
-
+            {!authLoading && isLoggedIn ? (
+              <div className="site-header__profile-wrap">
                 <button
                   type="button"
+                  className="site-header__profile-btn"
+                  aria-label="Account menu"
                   suppressHydrationWarning
-                  className="w-10 h-10 rounded-full bg-amber-600 text-white font-semibold"
                 >
                   {getInitial()}
                 </button>
 
-                {/* DROPDOWN */}
-
-                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-
-                  <div className="p-3 border-b">
-                    <p className="font-semibold">
-                      {userName}
-                    </p>
-
-                    <p className="text-xs text-gray-500">
-                      My Account
-                    </p>
+                <div className="site-header__dropdown">
+                  <div className="site-header__dropdown-head">
+                    <p className="site-header__dropdown-name">{userName}</p>
+                    <p className="site-header__dropdown-sub">My Account</p>
                   </div>
 
-                  <Link
-                    href="/profile"
-                    className="block px-4 py-2 hover:bg-gray-50"
-                  >
+                  <Link href="/profile" className="site-header__dropdown-link">
                     My Profile
                   </Link>
-
-                  <Link
-                    href="/orders"
-                    className="block px-4 py-2 hover:bg-gray-50"
-                  >
+                  <Link href="/orders" className="site-header__dropdown-link">
                     My Orders
                   </Link>
-
-                  <Link
-                    href="/wishlist"
-                    className="block px-4 py-2 hover:bg-gray-50"
-                  >
+                  <Link href="/wishlist" className="site-header__dropdown-link">
                     Wishlist
                   </Link>
-
                   <button
                     type="button"
-                    suppressHydrationWarning
+                    className="site-header__dropdown-logout"
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
+                    suppressHydrationWarning
                   >
                     Logout
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="hidden md:flex items-center gap-3">
-
+            ) : !authLoading ? (
+              <div className="site-header__auth">
                 <button
                   type="button"
+                  className="site-header__login-btn"
+                  onClick={goToLogin}
                   suppressHydrationWarning
-                  onClick={() => router.push("/login")}
-                  className="flex items-center gap-1"
                 >
-                  <LogIn size={16} />
-
+                  <LogIn size={16} aria-hidden />
                   <span>Login</span>
                 </button>
 
                 <button
                   type="button"
+                  className="site-header__signup-btn"
+                  onClick={() => {
+                    saveReturnPath();
+                    router.push("/signup");
+                  }}
                   suppressHydrationWarning
-                  onClick={() => router.push("/signup")}
-                  className="bg-amber-600 text-white px-4 py-2 rounded-md"
                 >
                   Sign Up
                 </button>
               </div>
-            )}
-
-            {/* MOBILE MENU BUTTON */}
+            ) : null}
 
             <button
               type="button"
+              className="site-header__icon-btn site-header__menu-toggle"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               suppressHydrationWarning
-              className="md:hidden"
-              onClick={() =>
-                setIsMenuOpen(!isMenuOpen)
-              }
             >
-              {isMenuOpen ? (
-                <X size={24} />
-              ) : (
-                <Menu size={24} />
-              )}
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* RECENTLY VIEWED */}
-
-      <div className="bg-gray-50 text-center py-2 text-sm border-t">
-        <span className="text-gray-500">
-          Recently Viewed:
-        </span>
-
-        <span className="ml-2 text-amber-700 font-medium">
-          {contactData.header.recentlyViewed}
-        </span>
-      </div>
-
-      {/* MOBILE MENU */}
-
-      {isMenuOpen && (
-        <div className="md:hidden border-t bg-white">
-          <div className="flex flex-col p-4 gap-2">
+      {isMenuOpen ? (
+        <div className="site-header__mobile">
+          <div className="site-header__mobile-inner">
             <HeaderNavSearch
               variant="mobile"
               onNavigate={() => setIsMenuOpen(false)}
@@ -362,97 +402,70 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="py-2"
-                onClick={() =>
-                  setIsMenuOpen(false)
-                }
+                className="site-header__mobile-link"
+                onClick={() => setIsMenuOpen(false)}
               >
                 {item.label}
               </Link>
             ))}
 
             <Link
-              href="/video-call"
-              className="py-2"
+              href={contactData.header.videoCallUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="site-header__mobile-link"
+              onClick={() => setIsMenuOpen(false)}
             >
               {contactData.header.videoCallText}
             </Link>
 
             <button
               type="button"
-              className="flex items-center justify-between py-2 text-left"
+              className="site-header__mobile-cart"
               onClick={() => {
                 setIsMenuOpen(false);
                 openCart();
               }}
               suppressHydrationWarning
             >
-              <span>{cartCopy.pageTitle}</span>
-              {isLoggedIn && cart.totalQuantity > 0 ? (
-                <span className="header-cart-badge">{cart.totalQuantity}</span>
+              <ShoppingBag size={18} aria-hidden />
+              {cartCopy.pageTitle}
+              {isLoggedIn && cartQty > 0 ? (
+                <span className="header-cart-badge">{cartQty}</span>
               ) : null}
             </button>
 
-            {!isLoggedIn ? (
+            {!authLoading && !isLoggedIn ? (
               <>
                 <button
                   type="button"
+                  className="site-header__mobile-link"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    goToLogin();
+                  }}
                   suppressHydrationWarning
-                  onClick={() =>
-                    router.push("/login")
-                  }
-                  className="text-left py-2"
                 >
                   Login
                 </button>
 
                 <button
                   type="button"
+                  className="site-header__mobile-signup"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    saveReturnPath();
+                    router.push("/signup");
+                  }}
                   suppressHydrationWarning
-                  onClick={() =>
-                    router.push("/signup")
-                  }
-                  className="bg-amber-600 text-white py-2 rounded-md"
                 >
                   Create Account
                 </button>
               </>
-            ) : (
-              <>
-                <Link
-                  href="/profile"
-                  className="py-2"
-                >
-                  My Profile
-                </Link>
-
-                <Link
-                  href="/orders"
-                  className="py-2"
-                >
-                  My Orders
-                </Link>
-
-                <Link
-                  href="/wishlist"
-                  className="py-2"
-                >
-                  Wishlist
-                </Link>
-
-                <button
-                  type="button"
-                  suppressHydrationWarning
-                  onClick={handleLogout}
-                  className="text-left py-2 text-red-600"
-                >
-                  Logout
-                </button>
-              </>
-            )}
+            ) : null}
           </div>
         </div>
-      )}
+      ) : null}
     </header>
   );
 }

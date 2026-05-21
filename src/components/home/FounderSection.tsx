@@ -1,77 +1,102 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 import data from "@/data/contactDatas.json";
 
+import "./css/founder.css";
+
 export default function FounderSection() {
   const s = data.founderSection;
+  const sectionRef = useRef<HTMLElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const reveal = () => setVisible(true);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          reveal();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -48px 0px" }
+    );
+
+    observer.observe(el);
+
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      reveal();
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const sectionClass = `founder-section${
+    visible ? " founder-section--visible" : ""
+  }`;
 
   return (
-    <section className="bg-[#FCF9F5] py-16 md:py-24 lg:py-28">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20">
-          {/* Image + overlay */}
-          <div className="relative mx-auto w-full max-w-md pb-14 sm:pb-16 lg:mx-0 lg:max-w-none lg:pb-0">
-            <div className="relative aspect-[4/5] w-full overflow-hidden shadow-[0_28px_60px_rgba(0,0,0,0.12)]">
+    <section
+      ref={sectionRef}
+      className={sectionClass}
+      aria-labelledby="founder-section-heading"
+    >
+      <div className="founder-section__inner">
+        <div className="founder-section__layout">
+          <div className="founder-section__media-card">
+            <div className="founder-section__media-frame">
               <Image
                 src={s.image}
                 alt={s.imageAlt}
                 fill
-                className="object-cover object-center [filter:sepia(0.12)_saturate(0.92)]"
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="founder-section__image"
+                sizes="(max-width: 1024px) 360px, 416px"
                 priority={false}
               />
-            </div>
-            <div className="absolute -bottom-5 right-0 z-10 w-[min(100%,13.5rem)] bg-[#B08D44] px-6 py-5 shadow-lg md:-bottom-6 md:right-4 md:w-56 lg:right-0">
-              <p className="font-serif text-4xl font-light leading-none text-white md:text-[2.75rem]">
-                {s.establishedYear}
-              </p>
-              <p className="mt-3 text-[10px] font-semibold uppercase leading-snug tracking-[0.2em] text-white/95">
-                {s.establishedText}
-              </p>
+              <aside className="founder-section__year-badge">
+                <p className="founder-section__year">{s.establishedYear}</p>
+                <p className="founder-section__year-label">
+                  {s.establishedText}
+                </p>
+              </aside>
             </div>
           </div>
 
-          {/* Copy */}
-          <div className="pt-6 lg:pt-0">
-            <div className="mb-6 flex items-center gap-4">
-              <span
-                className="h-px w-10 shrink-0 bg-[#B08D44] md:w-12"
-                aria-hidden
-              />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#B08D44]">
-                {s.sectionLabel}
-              </p>
+          <div className="founder-section__content-card">
+            <div className="founder-section__label-row">
+              <span className="founder-section__label-line" aria-hidden />
+              <p className="founder-section__label">{s.sectionLabel}</p>
             </div>
 
-            <h2 className="max-w-xl font-serif text-3xl font-light leading-tight tracking-tight text-[#333333] md:text-4xl lg:text-[2.65rem]">
+            <h2
+              id="founder-section-heading"
+              className="founder-section__heading"
+            >
               {s.heading}
             </h2>
 
-            <div className="relative mt-8 max-w-xl pl-1">
-              <span
-                className="absolute -left-1 top-0 font-serif text-5xl leading-none text-[#B08D44]/90 md:text-6xl"
-                aria-hidden
-              >
+            <div className="founder-section__quote-block">
+              <span className="founder-section__quote-mark" aria-hidden>
                 &ldquo;
               </span>
-              <blockquote className="border-l-2 border-[#B08D44] pl-6 pt-8 md:pl-8 md:pt-10">
-                <p className="font-serif text-lg italic leading-relaxed text-[#333333]/85 md:text-xl">
-                  {s.quote}
-                </p>
+              <blockquote className="founder-section__blockquote">
+                <p className="founder-section__quote">{s.quote}</p>
               </blockquote>
             </div>
 
-            <p className="mt-8 max-w-xl text-sm leading-relaxed text-[#333333]/75 md:text-base">
-              {s.description}
-            </p>
+            <p className="founder-section__description">{s.description}</p>
 
-            <Link
-              href={s.linkHref}
-              className="mt-10 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#B08D44] transition hover:gap-3"
-            >
+            <Link href={s.linkHref} className="founder-section__link">
               {s.linkText}
-              <span className="text-sm leading-none" aria-hidden>
+              <span className="founder-section__link-arrow" aria-hidden>
                 →
               </span>
             </Link>
