@@ -60,7 +60,8 @@
           "purityLabel": "22K",
           "location": "ahmedabad",
           "unit": "gram",
-          "weight": 1
+          "weight": 1,
+          "priceMultiplier": 1
         }
       },
       "silver1kg": {
@@ -72,7 +73,8 @@
           "purityLabel": "99.99%",
           "location": "ahmedabad",
           "unit": "kg",
-          "weight": 1
+          "weight": 1,
+          "priceMultiplier": 1
         }
       },
       "compareDays": 1,

@@ -3,7 +3,7 @@
 import { RefObject, useEffect, useState } from "react";
 
 export function useRevealOnScroll<T extends HTMLElement>(
-  ref: RefObject<T>,
+  ref: RefObject<T | null>,
   options?: { threshold?: number; rootMargin?: string }
 ) {
   const [visible, setVisible] = useState(false);

@@ -182,7 +182,9 @@ export default function GoogleOneTap({
     id.initialize({
       client_id: clientId,
       callback: (res) => {
-        void finishLogin(res.credential);
+        if (res.credential) {
+          void finishLogin(res.credential);
+        }
       },
       auto_select: true,
       cancel_on_tap_outside: false,

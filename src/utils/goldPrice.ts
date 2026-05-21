@@ -1,19 +1,4 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-
-let supabase: SupabaseClient | null = null;
-
-/** Reuse one client; gold price is fetched on the server only. */
-function getSupabase(): SupabaseClient {
-  if (!supabase) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-    const key = process.env.SUPABASE_SERVICE_KEY?.trim();
-    if (!url || !key) {
-      throw new Error("Supabase credentials are not configured");
-    }
-    supabase = createClient(url, key);
-  }
-  return supabase;
-}
+import { getSupabaseServerClient } from "@/lib/supabaseServer";
 
 let cachedPrice: number | null = null;
 let cachedAt = 0;
@@ -21,7 +6,7 @@ let inFlight: Promise<number> | null = null;
 const CACHE_TTL_MS = 60_000;
 
 async function fetchGoldPriceFromDb(): Promise<number> {
-  const { data, error } = await getSupabase()
+  const { data, error } = await getSupabaseServerClient()
     .schema("dev")
     .from("metal_prices")
     .select("price, rounded_price")
@@ -43,11 +28,6 @@ async function fetchGoldPriceFromDb(): Promise<number> {
   if (!Number.isFinite(price) || price <= 0) {
     throw new Error("Invalid gold price in database");
   }
-
-  console.log("[goldPrice] 24K per gram (from DB):", price, {
-    raw: data.price,
-    rounded: data.rounded_price,
-  });
 
   cachedPrice = price;
   cachedAt = Date.now();

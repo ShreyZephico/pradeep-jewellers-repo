@@ -1,0 +1,102 @@
+/* Shopify policy pages (privacy/terms/returns) */
+
+.policy-page {
+  min-height: 60vh;
+  padding: 1.75rem 0 3.5rem;
+  background: linear-gradient(180deg, #f7efe3 0%, #fffaf2 40%, #fff 100%);
+  color: #2f1c12;
+}
+
+.policy-container {
+  width: min(100%, 64rem);
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+.policy-header {
+  margin-bottom: 1.25rem;
+}
+
+.policy-title {
+  margin: 0;
+  font-size: clamp(1.75rem, 3.5vw, 2.35rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.policy-subtitle {
+  margin: 0.45rem 0 0;
+  color: #765f4a;
+  font-size: 0.9rem;
+}
+
+.policy-card {
+  border: 1px solid #eadcc8;
+  border-radius: 1.25rem;
+  background: rgb(255 255 255 / 0.9);
+  box-shadow: 0 16px 48px rgba(70, 45, 21, 0.08);
+  overflow: hidden;
+}
+
+.policy-body {
+  padding: 1.5rem 1.25rem;
+  color: #4a2b17;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+@media (min-width: 640px) {
+  .policy-body {
+    padding: 2rem 1.75rem;
+  }
+}
+
+/* Basic typography for Shopify HTML bodies */
+.policy-body :where(h1, h2, h3) {
+  color: #2f1c12;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  margin: 1.25rem 0 0.65rem;
+}
+
+.policy-body :where(p) {
+  margin: 0.75rem 0;
+}
+
+.policy-body :where(ul, ol) {
+  padding-left: 1.25rem;
+  margin: 0.75rem 0;
+}
+
+.policy-body :where(ul) {
+  list-style: disc;
+}
+
+.policy-body :where(ol) {
+  list-style: decimal;
+}
+
+.policy-body :where(li) {
+  margin: 0.35rem 0;
+}
+
+.policy-body :where(a) {
+  color: #9f2b68;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 700;
+}
+
+.policy-body :where(blockquote) {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid #d97706;
+  background: #fff7df;
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+
+.policy-missing {
+  padding: 1.5rem 1.25rem;
+  color: #765f4a;
+}
+

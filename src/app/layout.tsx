@@ -6,12 +6,15 @@ import GoogleOneTapShell from "@/components/GoogleOneTapShell";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 
-// IMPORT PROVIDER
+import { CartProvider } from "@/contexts/CartContext";
 import { CustomerAuthProvider } from "@/contexts/CustomerAuthContext";
 import { GoldRatesProvider } from "@/contexts/GoldRatesContext";
 
 import data from "@/data/contactDatas.json";
 
+import "@/styles/cart.css";
+import "@/styles/cart-page.css";
+import "@/styles/header-search.css";
 import "./globals.css";
 
 const goldRatesRefreshMs =
@@ -50,24 +53,21 @@ export default function RootLayout({
         className="min-h-full flex flex-col"
         suppressHydrationWarning
       >
-        {/* PROVIDER START */}
         <GoldRatesProvider refreshMs={goldRatesRefreshMs}>
           <CustomerAuthProvider>
-          <Header />
+            <CartProvider>
+              <Header />
 
-          <div suppressHydrationWarning key="app-root">
-            {children}
-          </div>
+              <div suppressHydrationWarning key="app-root">
+                {children}
+              </div>
 
-          <Footer />
-
-          <TawkToChat />
-
-          <GoogleOneTapShell />
-
+              <Footer />
+              <GoogleOneTapShell />
+              <TawkToChat />
+            </CartProvider>
           </CustomerAuthProvider>
         </GoldRatesProvider>
-        {/* PROVIDER END */}
       </body>
     </html>
   );

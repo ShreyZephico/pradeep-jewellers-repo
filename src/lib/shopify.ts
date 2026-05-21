@@ -1,4 +1,11 @@
 import { products as fallbackProducts } from "@/data/products";
+import {
+  applyProductListFilters,
+  computePriceBounds,
+  type PriceBounds,
+  type ProductListFilters,
+  type ProductSort,
+} from "@/lib/productFilters";
 import type { Product, ProductVariant } from "@/types/product";
 import calculateVariantPrice from "@/utils/calculateVariantPrice";
 import getGoldPrice from "@/utils/goldPrice";
@@ -20,18 +27,17 @@ function normalizeStoreDomain(raw?: string): string {
     .replace(/\/+$/, "");
 }
 
-/** Store + Storefront token from `.env` (NEXT_PUBLIC_* preferred, server fallback). */
+/** Store + Storefront token from `.env` (NEXT_* preferred, server fallback). */
 function getStorefrontCredentials() {
   const domain = normalizeStoreDomain(
-    process.env.NEXT_PUBLIC_SHOPIFY_STORE ?? process.env.SHOPIFY_STORE_DOMAIN
+    process.env.NEXT_SHOPIFY_STORE ?? process.env.SHOPIFY_STORE_DOMAIN
   );
 
   const apiVersion =
-    process.env.NEXT_PUBLIC_SHOPIFY_API_VERSION ??
     process.env.SHOPIFY_STOREFRONT_API_VERSION ??
     "2025-04";
 
-  const publicToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_TOKEN?.trim();
+  const publicToken = process.env.NEXT_SHOPIFY_STOREFRONT_TOKEN?.trim();
   const serverToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN?.trim();
 
   // `shpat_*` is an Admin API token — Storefront GraphQL needs a Storefront access token.
@@ -257,6 +263,21 @@ type ShopifyProductsListResponse = {
   };
 };
 
+type ShopifyPolicy = {
+  id: string;
+  title: string;
+  body: string;
+  handle?: string | null;
+  url?: string | null;
+};
+
+export type ShopifyShopPolicies = {
+  privacyPolicy: ShopifyPolicy | null;
+  termsOfService: ShopifyPolicy | null;
+  refundPolicy: ShopifyPolicy | null;
+  shippingPolicy?: ShopifyPolicy | null;
+};
+
 async function shopifyFetch<T>(
   query: string,
   variables?: Record<string, unknown>
@@ -265,7 +286,7 @@ async function shopifyFetch<T>(
 
   if (!domain || !token) {
     throw new Error(
-      "Missing Shopify Storefront credentials. Set NEXT_PUBLIC_SHOPIFY_STORE and a Storefront access token (not Admin shpat_) in .env."
+      "Missing Shopify Storefront credentials. Set NEXT_SHOPIFY_STORE and a Storefront access token (not Admin shpat_) in .env."
     );
   }
 
@@ -288,6 +309,22 @@ async function shopifyFetch<T>(
   }
 
   return json.data as T;
+}
+
+const SHOP_POLICIES_QUERY = `
+  query ShopPolicies {
+    shop {
+      privacyPolicy { id title body handle url }
+      termsOfService { id title body handle url }
+      refundPolicy { id title body handle url }
+      shippingPolicy { id title body handle url }
+    }
+  }
+`;
+
+export async function getShopPolicies(): Promise<ShopifyShopPolicies> {
+  const data = await shopifyFetch<{ shop: ShopifyShopPolicies }>(SHOP_POLICIES_QUERY);
+  return data.shop;
 }
 
 async function shopifyAdminFetch<T>(
@@ -423,20 +460,33 @@ async function mapShopifyProductListItem(
     );
     const weight = resolveVariantWeight(gramsFromApi);
     const carat = extractCaratFromSelectedOptions(variant.selectedOptions);
-    const pricing = await calculateVariantPrice({ weight, carat });
-    if (price === 0 || pricing.finalPrice < price) {
-      price = pricing.finalPrice;
-      variantId = variant.id;
-      if (pricing.actualGoldPrice > 0) {
-        makingChargePercent = Math.round(
-          (pricing.makingCharge / pricing.actualGoldPrice) * 100
-        );
+    const shopifyVariantPrice = Number(variant.price?.amount ?? 0);
+
+    try {
+      const pricing = await calculateVariantPrice({ weight, carat });
+      if (price === 0 || pricing.finalPrice < price) {
+        price = pricing.finalPrice;
+        variantId = variant.id;
+      }
+    } catch (error) {
+      console.warn(
+        "[shopify] Gold price unavailable for listing; using Shopify variant price:",
+        node.handle,
+        error
+      );
+      if (
+        shopifyVariantPrice > 0 &&
+        (price === 0 || shopifyVariantPrice < price)
+      ) {
+        price = Math.round(shopifyVariantPrice);
+        variantId = variant.id;
       }
     }
   }
 
   if (price === 0) {
-    price = fallback.price;
+    price =
+      shopifyListPrice > 0 ? Math.round(shopifyListPrice) : fallback.price;
   }
 
   const tags = node.tags ?? [];
@@ -909,6 +959,14 @@ type CreateDraftCheckoutInput = {
   customerEmail?: string;
 };
 
+export type DraftCheckoutLineItem = {
+  productName: string;
+  variantId: string;
+  price: number;
+  quantity: number;
+  attributes: CheckoutAttribute[];
+};
+
 export async function createDraftCheckout({
   productName,
   variantId,
@@ -916,44 +974,85 @@ export async function createDraftCheckout({
   attributes,
   customerEmail,
 }: CreateDraftCheckoutInput): Promise<string> {
-  const cleanedAttributes = cleanAttributes(attributes);
-  const customizationTags = buildOrderTags(cleanedAttributes);
-  const email = customerEmail?.trim();
+  return createDraftCheckoutFromLines({
+    customerEmail,
+    lines: [
+      {
+        productName,
+        variantId,
+        price,
+        quantity: 1,
+        attributes,
+      },
+    ],
+  });
+}
 
+/** Draft invoice for cart lines at gold-calculated INR prices (requires Admin API). */
+export async function createDraftCheckoutFromLines({
+  lines,
+  customerEmail,
+}: {
+  lines: DraftCheckoutLineItem[];
+  customerEmail?: string;
+}): Promise<string> {
+  if (!lines.length) {
+    throw new Error("Cart is empty.");
+  }
+  if (!adminToken) {
+    throw new Error(
+      "Custom price checkout requires SHOPIFY_ADMIN_ACCESS_TOKEN."
+    );
+  }
+
+  const tagSet = new Set<string>([
+    "custom-jewellery",
+    "zephico",
+    "cart-checkout",
+  ]);
+  const noteParts = [
+    "Custom jewellery order from Pradeep Jewellers website.",
+  ];
+
+  const lineItems = lines.map((line) => {
+    const cleanedAttributes = cleanAttributes(line.attributes);
+    for (const tag of buildOrderTags(cleanedAttributes)) {
+      tagSet.add(tag);
+    }
+    const lineNote = buildOrderNote(cleanedAttributes);
+    if (lineNote) noteParts.push(lineNote);
+
+    return {
+      variantId: line.variantId,
+      title: line.productName,
+      quantity: Math.max(1, line.quantity),
+      priceOverride: {
+        amount: String(Math.max(0, Math.round(line.price))),
+        currencyCode: "INR",
+      },
+      customAttributes: cleanedAttributes,
+    };
+  });
+
+  const email = customerEmail?.trim();
   const data = await shopifyAdminFetch<DraftOrderCreateResponse>(
     DRAFT_ORDER_CREATE_MUTATION,
     {
       input: {
         visibleToCustomer: true,
         ...(email ? { email } : {}),
-        note: buildOrderNote(cleanedAttributes),
-        tags: ["custom-jewellery", "zephico", ...customizationTags],
-        customAttributes: cleanedAttributes,
-        lineItems: [
-          {
-            variantId,
-            title: productName,
-            quantity: 1,
-            priceOverride: {
-              amount: String(price),
-              currencyCode: "INR",
-            },
-            customAttributes: cleanedAttributes,
-          },
-        ],
+        note: noteParts.join("\n"),
+        tags: Array.from(tagSet),
+        lineItems,
       },
     }
   );
+
   const error = data.draftOrderCreate.userErrors[0];
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
+  if (error) throw new Error(error.message);
   if (!data.draftOrderCreate.draftOrder?.invoiceUrl) {
     throw new Error("Shopify did not return a draft order payment URL.");
   }
-
   return data.draftOrderCreate.draftOrder.invoiceUrl;
 }
 
@@ -966,6 +1065,20 @@ function buildShopifyProductsSearchQuery(q: string, category: string): string | 
 
   if (category && category !== "all") {
     switch (category) {
+      case "gold":
+        parts.push("title:*gold* OR tag:gold OR product_type:*gold*");
+        break;
+      case "diamond":
+        parts.push("title:*diamond* OR tag:diamond OR description:*diamond*");
+        break;
+      case "silver":
+        parts.push("title:*silver* OR tag:silver OR product_type:*silver*");
+        break;
+      case "gemstone":
+        parts.push(
+          "title:*gem* OR title:*ruby* OR title:*emerald* OR title:*sapphire* OR title:*pearl* OR tag:gemstone"
+        );
+        break;
       case "rings":
         parts.push("title:*ring*");
         break;
@@ -1063,6 +1176,7 @@ export type ProductsPageResult = {
   page: number;
   limit: number;
   totalPages: number;
+  priceBounds: PriceBounds;
 };
 
 /** Paginated product list for `/api/products` — data from Shopify Storefront only. */
@@ -1071,9 +1185,41 @@ export async function getProductsPage(options: {
   limit: number;
   q?: string;
   category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sort?: ProductSort;
 }): Promise<ProductsPageResult> {
   const page = Math.max(1, options.page);
   const limit = Math.max(1, options.limit);
+  const listFilters: ProductListFilters = {
+    minPrice: options.minPrice,
+    maxPrice: options.maxPrice,
+    sort: options.sort,
+  };
+
+  const paginate = (allProducts: Product[]): ProductsPageResult => {
+    const priceBounds = computePriceBounds(allProducts);
+    const filtered = applyProductListFilters(allProducts, listFilters);
+    const total = filtered.length;
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+    const from = (page - 1) * limit;
+    return {
+      products: filtered.slice(from, from + limit),
+      total,
+      page,
+      limit,
+      totalPages,
+      priceBounds,
+    };
+  };
+
+  const { domain, token } = getStorefrontCredentials();
+  if (!domain || !token) {
+    console.warn(
+      "Shopify Storefront credentials missing — using static catalog fallback."
+    );
+    return paginate(fallbackProducts);
+  }
 
   try {
     const nodes = await fetchShopifyProductNodes({
@@ -1081,30 +1227,14 @@ export async function getProductsPage(options: {
       category: options.category,
     });
 
-    const total = nodes.length;
-    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
-    const from = (page - 1) * limit;
-    const pageNodes = nodes.slice(from, from + limit);
-
-    await getGoldPrice();
-    const products = await Promise.all(
-      pageNodes.map((node, index) => mapShopifyProductListItem(node, from + index))
+    const allProducts = await Promise.all(
+      nodes.map((node, index) => mapShopifyProductListItem(node, index))
     );
 
-    return { products, total, page, limit, totalPages };
+    return paginate(allProducts);
   } catch (error) {
-    console.warn("Shopify products fetch failed:", error);
-    const fallback = fallbackProducts;
-    const total = fallback.length;
-    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
-    const from = (page - 1) * limit;
-    return {
-      products: fallback.slice(from, from + limit),
-      total,
-      page,
-      limit,
-      totalPages,
-    };
+    console.error("Shopify Storefront products fetch failed:", error);
+    throw error;
   }
 }
 

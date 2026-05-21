@@ -1,0 +1,115 @@
+{
+  "meta": {
+    "title": "Diamond Buying Guide",
+    "description": "Learn how diamond colour and clarity affect beauty and value when choosing natural diamonds at Pradeep Jewellers."
+  },
+  "hero": {
+    "pageTitle": "Diamond Buying Guide",
+    "eyebrow": "At Pradeep Jewellers we offer only",
+    "title": "Natural Diamonds",
+    "intro": "To help you choose the perfect one, here's a simple guide on what to look for while finding yours.",
+    "image": "/products/ring-1.png",
+    "imageAlt": "Diamond ring from Pradeep Jewellers collection"
+  },
+  "colour": {
+    "number": "1",
+    "title": "Diamond Colour",
+    "description": "Ironically, the best color for a diamond would be 'colourless'. The colors range from D (colourless) and go all the way to Z (light yellow). To be honest, the colour difference in diamonds within a colour family is quite subtle to an untrained eye. Nevertheless, they do create a difference in the price and quality of the diamond. Bottom line is, colourless diamonds are the most precious!",
+    "hintLabel": "Expert tip",
+    "hint": "As diamond size increases, colour becomes more noticeable. This is especially important to keep in mind if you are purchasing a diamond of two carats or greater. If you pick a slightly yellow coloured diamond, you can pair it with a white gold or platinum band. The white gold will complement the yellow hue of your diamond, and they won't clash with each other!",
+    "grades": [
+      {
+        "id": "d",
+        "label": "D",
+        "name": "Colourless",
+        "tint": "colourless"
+      },
+      {
+        "id": "e",
+        "label": "E",
+        "name": "",
+        "tint": "colourless"
+      },
+      {
+        "id": "f",
+        "label": "F",
+        "name": "",
+        "tint": "colourless"
+      },
+      {
+        "id": "gj",
+        "label": "G – J",
+        "name": "Near colourless",
+        "tint": "near"
+      },
+      {
+        "id": "km",
+        "label": "K – M",
+        "name": "Faint",
+        "tint": "faint"
+      },
+      {
+        "id": "nr",
+        "label": "N – R",
+        "name": "Very light",
+        "tint": "very-light"
+      },
+      {
+        "id": "sz",
+        "label": "S – Z",
+        "name": "Light",
+        "tint": "light"
+      }
+    ]
+  },
+  "clarity": {
+    "number": "2",
+    "title": "Diamond Clarity",
+    "description": "When light passes through a diamond, it bounces back, making the diamond sparkle! Some diamonds have imperfections in the form of spots and blemishes. The more the imperfections, the more difficult it is for light to pass through, thereby reducing the sparkle. If you're lost, here's all you need to remember: Lesser imperfection and inclusions = Better clarity",
+    "hintLabel": "Expert tip",
+    "hint": "If you're buying a diamond that's under a carat, don't obsess over the spots or blemishes because they aren't really visible to an untrained eye. It's better to invest in the cut and sparkle on!",
+    "grades": [
+      {
+        "id": "fl",
+        "code": "FL",
+        "name": "Flawless",
+        "inclusions": 0
+      },
+      {
+        "id": "if",
+        "code": "IF",
+        "name": "Internally flawless",
+        "inclusions": 1
+      },
+      {
+        "id": "vvs",
+        "code": "VVS",
+        "name": "Very very slightly included",
+        "inclusions": 2
+      },
+      {
+        "id": "vs",
+        "code": "VS",
+        "name": "Very slightly included",
+        "inclusions": 3
+      },
+      {
+        "id": "si",
+        "code": "SI",
+        "name": "Slightly included",
+        "inclusions": 5
+      },
+      {
+        "id": "i",
+        "code": "I",
+        "name": "Included",
+        "inclusions": 8
+      }
+    ]
+  },
+  "cta": {
+    "text": "Ready to choose your diamond?",
+    "shopLink": "Browse collection",
+    "shopHref": "/products"
+  }
+}

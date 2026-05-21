@@ -1,21 +1,25 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { LogIn, Menu, Phone, Search, ShoppingBag, X } from "lucide-react";
+import { LogIn, Menu, Phone, ShoppingBag, X } from "lucide-react";
 
-import contactData from "@/data/contactDatas.json";
+import HeaderNavSearch from "@/components/home/HeaderNavSearch";
+import { useCart } from "@/contexts/CartContext";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { useGoldRates } from "@/contexts/GoldRatesContext";
 import { saveReturnPath } from "@/lib/authRedirect";
+import productContent from "@/lib/productContent";
 import { formatInr, formatPercentChange } from "@/lib/goldRates";
 import type { MetalRateItem } from "@/types/goldRate";
 import { getImageUrl } from "@/utils/cloudinary";
+import contactData from "@/data/contactDatas.json";
 
 import "./css/header.css";
 
+const cartCopy = productContent.cart;
 const ratesConfig = contactData.heroSection.rates;
 
 function trendClass(status: MetalRateItem["status"] | undefined): string {
@@ -126,6 +130,7 @@ function RatesTicker() {
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
+  const { cart, goToCart, setAuthenticated } = useCart();
   const {
     isLoggedIn,
     userName,
@@ -135,20 +140,18 @@ export default function Header() {
   } = useCustomerAuth();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showRecentlyViewed, setShowRecentlyViewed] = useState(true);
   const [logoError, setLogoError] = useState(false);
-  const [cartCount] = useState(0);
 
   const lastScrollY = useRef(0);
   const scrollTicking = useRef(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  /** Min px before toggling recently-viewed (avoids flicker on micro-scroll). */
   const RECENT_SCROLL_DELTA = 12;
   const RECENT_TOP_SHOW_Y = 20;
+
+  useEffect(() => {
+    setAuthenticated(isLoggedIn);
+  }, [isLoggedIn, setAuthenticated]);
 
   useEffect(() => {
     lastScrollY.current = window.scrollY;
@@ -158,16 +161,13 @@ export default function Header() {
       setIsScrolled(currentY > 30);
 
       if (currentY <= RECENT_TOP_SHOW_Y) {
-        setShowRecentlyViewed(true);
         lastScrollY.current = currentY;
         scrollTicking.current = false;
         return;
       }
 
       const delta = currentY - lastScrollY.current;
-
       if (delta >= RECENT_SCROLL_DELTA) {
-        setShowRecentlyViewed(false);
         lastScrollY.current = currentY;
       } else if (delta <= -RECENT_SCROLL_DELTA) {
         lastScrollY.current = currentY;
@@ -186,42 +186,19 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (!isSearchOpen) return;
-
-    const focusTimer = window.setTimeout(() => {
-      searchInputRef.current?.focus();
-    }, 50);
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsSearchOpen(false);
-      }
-    };
-
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.clearTimeout(focusTimer);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [isSearchOpen]);
-
-  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const query = searchQuery.trim();
-    setIsSearchOpen(false);
-    setIsMenuOpen(false);
-
-    if (query) {
-      router.push(`/products?q=${encodeURIComponent(query)}`);
-    } else {
-      router.push("/products");
-    }
-  };
-
   const handleLogout = async () => {
     await logout();
+    setAuthenticated(false);
     router.push("/");
+  };
+
+  const openCart = () => {
+    if (!isLoggedIn) {
+      saveReturnPath();
+      router.push("/login");
+      return;
+    }
+    goToCart();
   };
 
   const getInitial = () =>
@@ -234,12 +211,7 @@ export default function Header() {
     .filter(Boolean)
     .join(" ");
 
-  const recentClass = [
-    "site-header__recent",
-    showRecentlyViewed ? "" : "site-header__recent--hidden",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const cartQty = cart.totalQuantity;
 
   return (
     <header className={headerClass}>
@@ -313,27 +285,34 @@ export default function Header() {
               {contactData.header.videoCallText}
             </Link>
 
+            <div className="site-header__search-slot site-header__search-slot--desktop">
+              <HeaderNavSearch variant="expanded" />
+            </div>
+
+            <div className="site-header__search-slot site-header__search-slot--mobile">
+              <HeaderNavSearch variant="compact" />
+            </div>
+
             <button
               type="button"
-              className="site-header__icon-btn"
-              aria-label="Search"
-              aria-expanded={isSearchOpen}
-              onClick={() => setIsSearchOpen((open) => !open)}
+              className="site-header__icon-btn site-header__cart header-cart-btn"
+              onClick={openCart}
+              aria-label={
+                isLoggedIn && cartQty > 0
+                  ? `${cartCopy.openCart} (${cartQty} items)`
+                  : cartCopy.openCart
+              }
               suppressHydrationWarning
             >
-              <Search size={20} />
+              <span className="header-cart-icon-wrap">
+                <ShoppingBag size={20} strokeWidth={1.75} aria-hidden />
+                {isLoggedIn && cartQty > 0 ? (
+                  <span className="header-cart-badge" aria-hidden>
+                    {cartQty > 99 ? "99+" : cartQty}
+                  </span>
+                ) : null}
+              </span>
             </button>
-
-            <Link
-              href="/cart"
-              className="site-header__icon-btn site-header__cart"
-              aria-label={`Cart${cartCount > 0 ? `, ${cartCount} items` : ""}`}
-            >
-              <ShoppingBag size={20} />
-              {cartCount > 0 ? (
-                <span className="site-header__cart-badge">{cartCount}</span>
-              ) : null}
-            </Link>
 
             {!authLoading && isLoggedIn ? (
               <div className="site-header__profile-wrap">
@@ -411,61 +390,14 @@ export default function Header() {
         </div>
       </div>
 
-      {isSearchOpen ? (
-        <div
-          className="site-header__search-backdrop"
-          role="presentation"
-          onClick={() => setIsSearchOpen(false)}
-        />
-      ) : null}
-
-      <div
-        className={[
-          "site-header__search",
-          isSearchOpen ? "site-header__search--open" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-      >
-        <form
-          className="site-header__search-form"
-          onSubmit={handleSearchSubmit}
-          role="search"
-        >
-          <Search size={18} className="site-header__search-icon" aria-hidden />
-          <input
-            ref={searchInputRef}
-            type="search"
-            className="site-header__search-input"
-            placeholder="Search jewellery…"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            aria-label="Search products"
-          />
-          <button type="submit" className="site-header__search-submit">
-            Search
-          </button>
-          <button
-            type="button"
-            className="site-header__search-close"
-            onClick={() => setIsSearchOpen(false)}
-            aria-label="Close search"
-          >
-            <X size={18} />
-          </button>
-        </form>
-      </div>
-
-      {/* <div className={recentClass}>
-        <span className="site-header__recent-label">Recently Viewed:</span>
-        <span className="site-header__recent-value">
-          {contactData.header.recentlyViewed}
-        </span>
-      </div> */}
-
       {isMenuOpen ? (
         <div className="site-header__mobile">
           <div className="site-header__mobile-inner">
+            <HeaderNavSearch
+              variant="mobile"
+              onNavigate={() => setIsMenuOpen(false)}
+            />
+
             {contactData.navigation.map((item) => (
               <Link
                 key={item.href}
@@ -487,14 +419,21 @@ export default function Header() {
               {contactData.header.videoCallText}
             </Link>
 
-            <Link
-              href="/cart"
+            <button
+              type="button"
               className="site-header__mobile-cart"
-              onClick={() => setIsMenuOpen(false)}
+              onClick={() => {
+                setIsMenuOpen(false);
+                openCart();
+              }}
+              suppressHydrationWarning
             >
               <ShoppingBag size={18} aria-hidden />
-              Cart
-            </Link>
+              {cartCopy.pageTitle}
+              {isLoggedIn && cartQty > 0 ? (
+                <span className="header-cart-badge">{cartQty}</span>
+              ) : null}
+            </button>
 
             {!authLoading && !isLoggedIn ? (
               <>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import { parsePriceParam, parseProductSort } from "@/lib/productFilters";
 import { getProductsPage } from "@/lib/shopify";
 
 const DEFAULT_LIMIT = 10;
@@ -21,12 +22,18 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(MAX_LIMIT, Math.max(1, limitRaw));
     const q = sanitizeSearchInput(searchParams.get("q") ?? "");
     const category = searchParams.get("category") ?? "all";
+    const minPrice = parsePriceParam(searchParams.get("minPrice"));
+    const maxPrice = parsePriceParam(searchParams.get("maxPrice"));
+    const sort = parseProductSort(searchParams.get("sort"));
 
-    const { products, total, totalPages } = await getProductsPage({
+    const { products, total, totalPages, priceBounds } = await getProductsPage({
       page,
       limit,
       q,
       category,
+      minPrice,
+      maxPrice,
+      sort,
     });
 
     return NextResponse.json(
@@ -37,6 +44,7 @@ export async function GET(request: NextRequest) {
         limit,
         totalPages,
         products,
+        priceBounds,
       },
       {
         headers: {
