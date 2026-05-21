@@ -1,0 +1,232 @@
+{
+  "imageFallbackPhotoId": "photo-1617038220319-276d3cfab638",
+  "hero": {
+    "headline": "Bespoke Jewellery, Made for You",
+    "subheadline": "Explore what we have crafted for our customers — then tell us your design",
+    "cta": "Request a Custom Quote",
+    "secondaryCta": "View customer work",
+    "secondaryCtaHref": "#craft",
+    "photoId": "photo-1617038220319-276d3cfab638",
+    "imageAlt": "Jeweller crafting a bespoke piece"
+  },
+  "gallery": {
+    "eyebrow": "Our bespoke work",
+    "title": "Made for our customers",
+    "lead": "Rings, sets, redesigns, and heirlooms — each piece crafted to a personal brief.",
+    "footnote": "Every image represents a real custom commission. Share your idea below and we'll craft yours with the same care.",
+    "rows": [
+      {
+        "id": "row-1",
+        "direction": "ltr",
+        "items": [
+          {
+            "id": "g1",
+            "title": "Solitaire Ring",
+            "alt": "Custom solitaire engagement ring on display",
+            "photoId": "photo-1605100804763-247f67b3557e"
+          },
+          {
+            "id": "g2",
+            "title": "Bridal Necklace",
+            "alt": "22K gold bridal necklace set",
+            "photoId": "photo-1599643478518-a784e5dc4c8f"
+          },
+          {
+            "id": "g3",
+            "title": "Temple Jhumka",
+            "alt": "Hand-engraved temple jhumka earrings",
+            "photoId": "photo-1635767798638-3e25273a8236"
+          },
+          {
+            "id": "g4",
+            "title": "Couple Bands",
+            "alt": "Matching gold wedding bands",
+            "photoId": "photo-1515562141207-7a88fb7ce338"
+          },
+          {
+            "id": "g5",
+            "title": "Diamond Pendant",
+            "alt": "Diamond pendant worn on chain",
+            "photoId": "photo-1611085583191-a3b181a88401"
+          },
+          {
+            "id": "g6",
+            "title": "Gold Earrings",
+            "alt": "Custom gold hoop earrings",
+            "photoId": "photo-1603974372039-adc49044b6bd"
+          }
+        ]
+      },
+      {
+        "id": "row-2",
+        "direction": "rtl",
+        "items": [
+          {
+            "id": "g7",
+            "title": "Heritage Ring",
+            "alt": "Traditional heritage gold ring",
+            "photoId": "photo-1611652022419-a9419f74343d"
+          },
+          {
+            "id": "g8",
+            "title": "Atelier Piece",
+            "alt": "Finished piece from our atelier",
+            "photoId": "photo-1617038220319-276d3cfab638"
+          },
+          {
+            "id": "g9",
+            "title": "Pearl Pendant",
+            "alt": "Pearl pendant in gift packaging",
+            "photoId": "photo-1611085583191-a3b181a88401"
+          },
+          {
+            "id": "g10",
+            "title": "Old Gold Redesign",
+            "alt": "Redesigned ring from old gold",
+            "photoId": "photo-1603974372039-adc49044b6bd"
+          },
+          {
+            "id": "g11",
+            "title": "Stud Earrings",
+            "alt": "Diamond stud earrings on display",
+            "photoId": "photo-1635767798638-3e25273a8236"
+          },
+          {
+            "id": "g12",
+            "title": "Craft Studio",
+            "alt": "Jeweller crafting in the studio",
+            "photoId": "photo-1617038260897-41a1f14a8ca0"
+          }
+        ]
+      }
+    ]
+  },
+  "process": {
+    "eyebrow": "How it works",
+    "title": "Your design journey in four steps",
+    "lead": "From first sketch to delivery — a clear, transparent process with updates at every stage.",
+    "steps": [
+      {
+        "step": "01",
+        "title": "Share Your Vision",
+        "body": "Tell us your design idea, budget, and preferences",
+        "photoId": "photo-1617038260897-41a1f14a8ca0",
+        "imageAlt": "Sketch and design inspiration"
+      },
+      {
+        "step": "02",
+        "title": "Design Consultation",
+        "body": "Our experts create 3D renders and provide a detailed quote",
+        "photoId": "photo-1611085583191-a3b181a88401",
+        "imageAlt": "3D jewellery render"
+      },
+      {
+        "step": "03",
+        "title": "Approval & Crafting",
+        "body": "Approve the design and we handcraft your piece",
+        "photoId": "photo-1605100804763-247f67b3557e",
+        "imageAlt": "Craftsman at work"
+      },
+      {
+        "step": "04",
+        "title": "Delivery & Joy",
+        "body": "Receive your bespoke jewellery with certificate",
+        "photoId": "photo-1515562141207-7a88fb7ce338",
+        "imageAlt": "Finished custom jewellery"
+      }
+    ]
+  },
+  "form": {
+    "eyebrow": "Quotation",
+    "title": "Request your custom design",
+    "lead": "Describe the product or design you want — ring, necklace, redesign, or anything bespoke. We reply on WhatsApp within 24 hours.",
+    "submitLabel": "Get My Custom Quote",
+    "photoId": "photo-1617038260897-41a1f14a8ca0",
+    "imageAlt": "Designer consulting on bespoke jewellery",
+    "fileUploadNote": "Images are sent on WhatsApp after you submit — attach them in the chat that opens.",
+    "trustBadges": ["100% secure", "BIS certified", "No hidden charges"],
+    "jewelleryTypes": [
+      "Ring",
+      "Necklace",
+      "Earrings",
+      "Bracelet / Bangle",
+      "Mangalsutra",
+      "Pendant",
+      "Other"
+    ],
+    "metals": [
+      "14K Gold",
+      "18K Gold",
+      "22K Gold",
+      "Rose Gold",
+      "White Gold",
+      "Platinum",
+      "Silver"
+    ],
+    "gemstones": [
+      "Diamonds",
+      "Rubies",
+      "Emeralds",
+      "Sapphires",
+      "Semi-precious",
+      "No gemstone"
+    ],
+    "budgetOptions": [
+      "₹20,000 – ₹50,000",
+      "₹50,000 – ₹1,00,000",
+      "₹1,00,000 – ₹2,50,000",
+      "₹2,50,000+",
+      "Not sure yet"
+    ],
+    "contactMethods": ["WhatsApp", "Phone", "Email"],
+    "whatsappIntro": "Hi Pradeep Jewellers — custom quote request"
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "title": "Common questions",
+    "items": [
+      {
+        "q": "How long does custom jewellery take?",
+        "a": "Typically 4–6 weeks from design approval. Rush timelines may be possible for simpler pieces — we confirm on WhatsApp."
+      },
+      {
+        "q": "Do you provide 3D design previews?",
+        "a": "Yes, included free for most custom orders. You approve the render before we start crafting."
+      },
+      {
+        "q": "Can I use my old gold jewellery?",
+        "a": "Absolutely. We assess purity and weight, then apply exchange value toward your new design."
+      },
+      {
+        "q": "What if I don't like the design?",
+        "a": "We revise the concept until you are satisfied before production begins."
+      },
+      {
+        "q": "Do you ship across India?",
+        "a": "Yes, fully insured shipping nationwide with tracking."
+      },
+      {
+        "q": "Is there a design consultation fee?",
+        "a": "Free for orders above ₹50,000. For smaller pieces we share a quick estimate first."
+      },
+      {
+        "q": "What payment methods do you accept?",
+        "a": "Card, UPI, bank transfer, and installment plans on eligible orders."
+      },
+      {
+        "q": "Do you provide certification?",
+        "a": "Yes — BIS hallmarking and gemstone certificates where applicable."
+      }
+    ]
+  },
+  "finalCta": {
+    "headline": "Ready to Create Something Special?",
+    "subtext": "Get your personalized quote in 24 hours",
+    "cta": "Request Quote Now",
+    "photoId": "photo-1605100804763-247f67b3557e"
+  },
+  "stickyBar": {
+    "quoteLabel": "Get Quote",
+    "whatsappLabel": "WhatsApp"
+  }
+}
