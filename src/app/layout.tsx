@@ -10,6 +10,7 @@ import { GoldRatesProvider } from "@/contexts/GoldRatesContext";
 
 import "@/styles/cart.css";
 import "@/styles/cart-page.css";
+import "@/styles/header-search.css";
 import "./globals.css";
 
 const geistSans = Geist({

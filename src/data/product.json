@@ -40,9 +40,12 @@
     "loadingMore": "Loading…",
     "errorTitle": "Unable to load products",
     "errorRetry": "Try again",
+    "collectionLabel": "The Collection",
     "heroEyebrow": "Pradeep Jewellers",
-    "heroTitle": "Shop the collection",
-    "heroDescription": "Fine jewellery with hallmarked gold, certified stones, and finishes you can feel in hand—browse every piece in one calm, curated space.",
+    "heroTitle": "All Jewellery",
+    "heroDescription": "Discover our curated collection of gold, diamond, and gemstone jewellery handcrafted in Kolkata.",
+    "searchPlaceholderCollection": "Search jewellery…",
+    "wishlistLabel": "Add {name} to wishlist",
     "badges": {
       "designs": "{count} designs",
       "secureCheckout": "Secure checkout",
@@ -69,14 +72,46 @@
     "next": "Next",
     "paginationLabel": "Pagination",
     "pageNumbersLabel": "Page numbers",
-    "placeholderSymbol": "✦"
+    "placeholderSymbol": "✦",
+    "filtersTitle": "Filters",
+    "filtersClose": "Close filters",
+    "filtersOpen": "Filters",
+    "categoryTitle": "Category",
+    "priceTitle": "Price Range",
+    "priceMinLabel": "Min price",
+    "priceMaxLabel": "Max price",
+    "sortTitle": "Sort by",
+    "sortFeatured": "Featured",
+    "sortPriceAsc": "Price: low to high",
+    "sortPriceDesc": "Price: high to low",
+    "sortNameAsc": "Name: A–Z",
+    "sortNameDesc": "Name: Z–A",
+    "applyFilters": "Apply",
+    "clearFilters": "Clear all filters",
+    "priceAny": "Any price"
+  },
+  "nav": {
+    "searchLabel": "Search products",
+    "searchPlaceholder": "Search rings, necklaces, diamonds…",
+    "searching": "Searching…",
+    "noResults": "No products found",
+    "viewAllResults": "View all results for “{query}”",
+    "viewProduct": "View product"
   },
   "categories": [
     { "id": "all", "name": "All" },
-    { "id": "rings", "name": "Rings" },
-    { "id": "necklaces", "name": "Necklaces" },
-    { "id": "earrings", "name": "Earrings" },
-    { "id": "bracelets", "name": "Bracelets" }
+    { "id": "gold", "name": "Gold" },
+    { "id": "diamond", "name": "Diamond" },
+    { "id": "silver", "name": "Silver" },
+    { "id": "gemstone", "name": "Gemstone" }
+  ],
+  "priceTiers": [
+    { "id": "any", "label": "Any price" },
+    { "id": "under-30k", "label": "Under ₹30,000", "max": 30000 },
+    { "id": "30k-75k", "label": "₹30,000 – ₹75,000", "min": 30000, "max": 75000 },
+    { "id": "75k-150k", "label": "₹75,000 – ₹1,50,000", "min": 75000, "max": 150000 },
+    { "id": "150k-300k", "label": "₹1,50,000 – ₹3,00,000", "min": 150000, "max": 300000 },
+    { "id": "over-300k", "label": "Above ₹3,00,000", "min": 300000 }
   ],
   "purchase": {
     "yourPrice": "Your price",

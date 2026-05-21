@@ -6,7 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {
-  Search,
   Phone,
   LogIn,
   Menu,
@@ -14,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 
+import HeaderNavSearch from "@/components/home/HeaderNavSearch";
 import { useCart } from "@/contexts/CartContext";
 import contactData from "@/data/contactDatas.json";
 import productContent from "@/lib/productContent";
@@ -181,6 +181,10 @@ export default function Header() {
             ))}
           </nav>
 
+          <div className="hidden lg:block">
+            <HeaderNavSearch variant="expanded" />
+          </div>
+
           {/* RIGHT SECTION */}
 
           <div className="flex items-center gap-4">
@@ -204,11 +208,9 @@ export default function Header() {
               {contactData.header.videoCallText}
             </Link>
 
-            {/* SEARCH */}
-
-            <button type="button" suppressHydrationWarning>
-              <Search size={20} />
-            </button>
+            <div className="lg:hidden">
+              <HeaderNavSearch variant="compact" />
+            </div>
 
             <button
               type="button"
@@ -351,6 +353,10 @@ export default function Header() {
       {isMenuOpen && (
         <div className="md:hidden border-t bg-white">
           <div className="flex flex-col p-4 gap-2">
+            <HeaderNavSearch
+              variant="mobile"
+              onNavigate={() => setIsMenuOpen(false)}
+            />
 
             {contactData.navigation.map((item) => (
               <Link

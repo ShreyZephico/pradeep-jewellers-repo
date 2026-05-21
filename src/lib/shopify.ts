@@ -1,4 +1,11 @@
 import { products as fallbackProducts } from "@/data/products";
+import {
+  applyProductListFilters,
+  computePriceBounds,
+  type PriceBounds,
+  type ProductListFilters,
+  type ProductSort,
+} from "@/lib/productFilters";
 import type { Product, ProductVariant } from "@/types/product";
 import calculateVariantPrice from "@/utils/calculateVariantPrice";
 import getGoldPrice from "@/utils/goldPrice";
@@ -1021,6 +1028,20 @@ function buildShopifyProductsSearchQuery(q: string, category: string): string | 
 
   if (category && category !== "all") {
     switch (category) {
+      case "gold":
+        parts.push("title:*gold* OR tag:gold OR product_type:*gold*");
+        break;
+      case "diamond":
+        parts.push("title:*diamond* OR tag:diamond OR description:*diamond*");
+        break;
+      case "silver":
+        parts.push("title:*silver* OR tag:silver OR product_type:*silver*");
+        break;
+      case "gemstone":
+        parts.push(
+          "title:*gem* OR title:*ruby* OR title:*emerald* OR title:*sapphire* OR title:*pearl* OR tag:gemstone"
+        );
+        break;
       case "rings":
         parts.push("title:*ring*");
         break;
@@ -1118,6 +1139,7 @@ export type ProductsPageResult = {
   page: number;
   limit: number;
   totalPages: number;
+  priceBounds: PriceBounds;
 };
 
 /** Paginated product list for `/api/products` — data from Shopify Storefront only. */
@@ -1126,26 +1148,40 @@ export async function getProductsPage(options: {
   limit: number;
   q?: string;
   category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sort?: ProductSort;
 }): Promise<ProductsPageResult> {
   const page = Math.max(1, options.page);
   const limit = Math.max(1, options.limit);
+  const listFilters: ProductListFilters = {
+    minPrice: options.minPrice,
+    maxPrice: options.maxPrice,
+    sort: options.sort,
+  };
+
+  const paginate = (allProducts: Product[]): ProductsPageResult => {
+    const priceBounds = computePriceBounds(allProducts);
+    const filtered = applyProductListFilters(allProducts, listFilters);
+    const total = filtered.length;
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+    const from = (page - 1) * limit;
+    return {
+      products: filtered.slice(from, from + limit),
+      total,
+      page,
+      limit,
+      totalPages,
+      priceBounds,
+    };
+  };
 
   const { domain, token } = getStorefrontCredentials();
   if (!domain || !token) {
     console.warn(
       "Shopify Storefront credentials missing — using static catalog fallback."
     );
-    const fallback = fallbackProducts;
-    const total = fallback.length;
-    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
-    const from = (page - 1) * limit;
-    return {
-      products: fallback.slice(from, from + limit),
-      total,
-      page,
-      limit,
-      totalPages,
-    };
+    return paginate(fallbackProducts);
   }
 
   try {
@@ -1154,16 +1190,11 @@ export async function getProductsPage(options: {
       category: options.category,
     });
 
-    const total = nodes.length;
-    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
-    const from = (page - 1) * limit;
-    const pageNodes = nodes.slice(from, from + limit);
-
-    const products = await Promise.all(
-      pageNodes.map((node, index) => mapShopifyProductListItem(node, from + index))
+    const allProducts = await Promise.all(
+      nodes.map((node, index) => mapShopifyProductListItem(node, index))
     );
 
-    return { products, total, page, limit, totalPages };
+    return paginate(allProducts);
   } catch (error) {
     console.error("Shopify Storefront products fetch failed:", error);
     throw error;

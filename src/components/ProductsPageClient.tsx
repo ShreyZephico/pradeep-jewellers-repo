@@ -1,17 +1,28 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { ChevronDown, Search } from 'lucide-react';
+
 import type { Product } from '@/types/product';
-import ProductListCard from '@/components/ProductListCard';
-import productContent, { formatProductCopy } from '@/lib/productContent';
+import CollectionProductCard from '@/components/CollectionProductCard';
+import ProductsFilterSidebar from '@/components/ProductsFilterSidebar';
+import productContent from '@/lib/productContent';
+import type { ProductSort } from '@/lib/productFilters';
+import { priceTierToRange } from '@/lib/productFilters';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
 const copy = productContent.list;
-const breadcrumb = productContent.breadcrumb;
-const categories = productContent.categories;
+const priceTiers = productContent.priceTiers;
 
-/** Compact page list with ellipsis for the pager (UI only). */
+const SORT_OPTIONS: { value: ProductSort; label: string }[] = [
+  { value: 'featured', label: copy.sortFeatured },
+  { value: 'price-asc', label: copy.sortPriceAsc },
+  { value: 'price-desc', label: copy.sortPriceDesc },
+  { value: 'name-asc', label: copy.sortNameAsc },
+  { value: 'name-desc', label: copy.sortNameDesc },
+];
+
 function getPaginationSegments(
   current: number,
   last: number
@@ -40,6 +51,9 @@ function getPaginationSegments(
 }
 
 export default function ProductsPageClient() {
+  const searchParams = useSearchParams();
+  const initialQ = searchParams.get('q')?.trim() ?? '';
+
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -47,14 +61,35 @@ export default function ProductsPageClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedQ, setDebouncedQ] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialQ);
+  const [debouncedQ, setDebouncedQ] = useState(initialQ);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedPriceTier, setSelectedPriceTier] = useState('any');
+  const [sort, setSort] = useState<ProductSort>('featured');
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+  const priceRange = useMemo(
+    () => priceTierToRange(selectedPriceTier, priceTiers),
+    [selectedPriceTier]
+  );
 
   const prevDebouncedRef = useRef(debouncedQ);
   const gridTopRef = useRef<HTMLDivElement>(null);
   const prevPageRef = useRef(page);
+
+  const hasActiveFilters =
+    selectedCategory !== 'all' ||
+    selectedPriceTier !== 'any' ||
+    sort !== 'featured' ||
+    Boolean(searchTerm.trim());
+
+  useEffect(() => {
+    const q = searchParams.get('q')?.trim() ?? '';
+    setSearchTerm(q);
+    setDebouncedQ(q);
+    setPage(1);
+  }, [searchParams]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -70,6 +105,10 @@ export default function ProductsPageClient() {
     }
   }, [debouncedQ]);
 
+  useEffect(() => {
+    setSelectedPriceTier('any');
+  }, [selectedCategory, debouncedQ]);
+
   const loadProducts = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -78,10 +117,18 @@ export default function ProductsPageClient() {
         page: String(page),
         limit: String(PAGE_SIZE),
         category: selectedCategory,
+        sort,
       });
       if (debouncedQ) {
         params.set('q', debouncedQ);
       }
+      if (priceRange.min != null) {
+        params.set('minPrice', String(priceRange.min));
+      }
+      if (priceRange.max != null) {
+        params.set('maxPrice', String(priceRange.max));
+      }
+
       const response = await fetch(`/api/products?${params.toString()}`);
       const data = await response.json();
 
@@ -100,7 +147,7 @@ export default function ProductsPageClient() {
     } finally {
       setLoading(false);
     }
-  }, [page, selectedCategory, debouncedQ]);
+  }, [page, selectedCategory, debouncedQ, sort, priceRange.min, priceRange.max]);
 
   useEffect(() => {
     void loadProducts();
@@ -128,10 +175,29 @@ export default function ProductsPageClient() {
   const selectCategory = (id: string) => {
     setSelectedCategory(id);
     setPage(1);
+    setFiltersOpen(false);
   };
 
-  const rangeStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-  const rangeEnd = total === 0 ? 0 : Math.min(page * PAGE_SIZE, total);
+  const handlePriceTierChange = (id: string) => {
+    setSelectedPriceTier(id);
+    setPage(1);
+  };
+
+  const handleSortChange = (next: ProductSort) => {
+    setSort(next);
+    setPage(1);
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setDebouncedQ('');
+    setSelectedCategory('all');
+    setSelectedPriceTier('any');
+    setSort('featured');
+    setPage(1);
+    setFiltersOpen(false);
+  };
+
   const displayTotalPages =
     total > 0 ? Math.max(totalPages, Math.ceil(total / PAGE_SIZE)) : 0;
   const paginationSegments = getPaginationSegments(page, displayTotalPages);
@@ -140,7 +206,7 @@ export default function ProductsPageClient() {
 
   if (error && products.length === 0 && !loading) {
     return (
-      <div className="product-page product-state-center">
+      <div className="product-page product-page--collection product-state-center">
         <div className="product-state-card">
           <div className="product-list-empty-icon" aria-hidden>
             ⚠
@@ -163,230 +229,158 @@ export default function ProductsPageClient() {
   }
 
   return (
-    <div className="product-page">
-      <div className="product-list-bg" aria-hidden />
-
-      <div className="product-breadcrumb-bar">
-        <nav className="product-container product-breadcrumb" aria-label="Breadcrumb">
-          <Link href="/landing#home">{breadcrumb.home}</Link>
-          <span className="product-breadcrumb-sep" aria-hidden>
-            {breadcrumb.separator}
-          </span>
-          <span className="product-breadcrumb-current">{breadcrumb.shop}</span>
-        </nav>
-      </div>
-
-      <section className="product-list-hero">
-        <div className="product-list-hero-glow-a" aria-hidden />
-        <div className="product-list-hero-glow-b" aria-hidden />
-        <div className="product-container product-list-hero-inner">
-          <p className="product-list-hero-eyebrow">{copy.heroEyebrow}</p>
-          <h1 className="product-item-title product-list-hero-title">{copy.heroTitle}</h1>
-          <p className="product-list-hero-desc">{copy.heroDescription}</p>
-          <div className="product-list-badges">
-            <span className="product-list-badge">
-              {formatProductCopy(copy.badges.designs, { count: total })}
-            </span>
-            <span className="product-list-badge">{copy.badges.secureCheckout}</span>
-            <span className="product-list-badge product-list-badge--dark">
-              {copy.badges.personal}
-            </span>
+    <div className="product-page product-page--collection">
+      <div className="collection-wrap">
+        <header className="collection-header">
+          <div className="collection-header-intro">
+            <div className="collection-eyebrow">
+              <span className="collection-eyebrow-line" aria-hidden />
+              <span className="collection-eyebrow-text">{copy.collectionLabel}</span>
+            </div>
+            <h1 className="collection-title">{copy.heroTitle}</h1>
+            <p className="collection-subtitle">{copy.heroDescription}</p>
           </div>
-        </div>
-      </section>
 
-      <div className="product-container product-list-content">
-        <div className="product-list-toolbar">
-          <div className="product-list-toolbar-row">
-            <div className="product-list-search-wrap">
-              <label htmlFor="product-search" className="sr-only">
-                {copy.searchLabel}
-              </label>
+          <div className="collection-header-tools">
+            <label className="collection-search" htmlFor="collection-search">
+              <Search size={18} className="collection-search-icon" aria-hidden />
               <input
-                id="product-search"
-                type="text"
+                id="collection-search"
+                type="search"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={copy.searchPlaceholder}
-                className="product-list-search"
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder={copy.searchPlaceholderCollection}
+                className="collection-search-input"
               />
-              <svg
-                className="product-list-search-icon"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden
+            </label>
+
+            <label className="collection-sort">
+              <span className="sr-only">{copy.sortTitle}</span>
+              <select
+                className="collection-sort-select"
+                value={sort}
+                onChange={(event) => handleSortChange(event.target.value as ProductSort)}
+                aria-label={copy.sortTitle}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
-
-            <div className="product-list-categories">
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => selectCategory(cat.id)}
-                  className={`product-list-category-btn${
-                    selectedCategory === cat.id ? " product-list-category-btn--active" : ""
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
+                {SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={16} className="collection-sort-chevron" aria-hidden />
+            </label>
           </div>
+        </header>
 
-          <div className="product-list-meta">
-            <p>
-              {total === 0 ? (
-                <>{copy.noPiecesInView}</>
+        <div className="collection-body">
+          <ProductsFilterSidebar
+            selectedCategory={selectedCategory}
+            onCategoryChange={selectCategory}
+            selectedPriceTier={selectedPriceTier}
+            onPriceTierChange={handlePriceTierChange}
+            onClearAll={clearAllFilters}
+            hasActiveFilters={hasActiveFilters}
+            mobileOpen={filtersOpen}
+            onMobileOpenChange={setFiltersOpen}
+          />
+
+          <main className="collection-main">
+            <p className="collection-count" ref={gridTopRef}>
+              {loading && products.length === 0 ? (
+                copy.loading
+              ) : total === 0 ? (
+                copy.noPiecesInView
               ) : (
                 <>
-                  {copy.showingPrefix}{" "}
-                  <strong>
-                    {rangeStart}–{rangeEnd}
-                  </strong>{" "}
-                  {copy.showingOf} <strong>{total}</strong> {copy.showingPieces}
-                  {displayTotalPages > 1 ? (
-                    <>
-                      {" "}
-                      · {copy.pageLabel} <strong>{page}</strong> {copy.pageOf}{" "}
-                      <strong>{displayTotalPages}</strong>
-                    </>
-                  ) : null}
+                  {copy.showingPrefix}{' '}
+                  <strong>{total}</strong> {copy.showingPieces}
                 </>
               )}
             </p>
-            {searchTerm ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchTerm("");
-                  setPage(1);
-                }}
-                className="product-list-clear-search"
-              >
-                {copy.clearSearch}
-              </button>
+
+            {loading && products.length === 0 ? (
+              <div className="collection-loading">
+                <div className="product-spinner" aria-hidden />
+              </div>
             ) : null}
-          </div>
-        </div>
 
-        {loading && products.length === 0 ? (
-          <div className="product-state-center">
-            <div className="product-spinner" aria-hidden />
-            <p>{copy.loading}</p>
-          </div>
-        ) : null}
+            {!loading && total === 0 ? (
+              <div className="collection-empty">
+                <h3>{copy.emptyTitle}</h3>
+                <p>{copy.emptyDescription}</p>
+                <button type="button" className="collection-empty-btn" onClick={clearAllFilters}>
+                  {copy.viewAll}
+                </button>
+              </div>
+            ) : null}
 
-        {!loading && total === 0 ? (
-          <div className="product-list-empty">
-            <div className="product-list-empty-icon" aria-hidden>
-              {copy.placeholderSymbol}
-            </div>
-            <h3 className="product-list-empty-title">{copy.emptyTitle}</h3>
-            <p className="product-list-empty-desc">{copy.emptyDescription}</p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchTerm("");
-                setSelectedCategory("all");
-                setPage(1);
-              }}
-              className="product-btn-primary"
-            >
-              {copy.viewAll}
-            </button>
-          </div>
-        ) : null}
+            {!loading && products.length > 0 ? (
+              <>
+                <ul className="collection-grid">
+                  {products.map((product) => (
+                    <li key={product.id}>
+                      <CollectionProductCard
+                        product={product}
+                        imageSrc={getProductImage(product)}
+                        onImageError={() => handleImageError(product.id)}
+                      />
+                    </li>
+                  ))}
+                </ul>
 
-        {!loading && products.length > 0 ? (
-          <>
-            <div ref={gridTopRef} className="product-list-grid-anchor">
-            <ul className="product-list-grid">
-              {products.map((product, index) => (
-                <li key={product.id}>
-                  <ProductListCard
-                    product={product}
-                    imageSrc={getProductImage(product)}
-                    onImageError={() => handleImageError(product.id)}
-                    animationIndex={index}
-                  />
-                </li>
-              ))}
-            </ul>
-
-            {displayTotalPages > 1 ? (
-              <nav className="product-list-pagination" aria-label={copy.paginationLabel}>
-                <div className="product-list-pagination-inner">
-                  <div className="product-list-page-nav">
+                {displayTotalPages > 1 ? (
+                  <nav className="collection-pagination" aria-label={copy.paginationLabel}>
                     <button
                       type="button"
                       disabled={!canPrev}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      className="product-list-page-btn"
+                      className="collection-page-btn"
                     >
                       {copy.prev}
                     </button>
+                    <div className="collection-page-nums" role="group">
+                      {paginationSegments.map((item, i) =>
+                        item === 'ellipsis' ? (
+                          <span key={`e-${i}`} className="collection-page-ellipsis" aria-hidden>
+                            …
+                          </span>
+                        ) : (
+                          <button
+                            key={item}
+                            type="button"
+                            disabled={loading}
+                            onClick={() => setPage(item)}
+                            aria-current={item === page ? 'page' : undefined}
+                            className={`collection-page-num${
+                              item === page ? ' collection-page-num--active' : ''
+                            }`}
+                          >
+                            {item}
+                          </button>
+                        )
+                      )}
+                    </div>
                     <button
                       type="button"
                       disabled={!canNext}
                       onClick={() => setPage((p) => Math.min(displayTotalPages, p + 1))}
-                      className="product-list-page-btn"
+                      className="collection-page-btn"
                     >
                       {copy.next}
                     </button>
-                  </div>
-
-                  <div className="product-list-page-numbers" role="group" aria-label={copy.pageNumbersLabel}>
-                    {paginationSegments.map((item, i) =>
-                      item === "ellipsis" ? (
-                        <span key={`ellipsis-${i}`} className="product-list-page-ellipsis" aria-hidden>
-                          …
-                        </span>
-                      ) : (
-                        <button
-                          key={item}
-                          type="button"
-                          disabled={loading}
-                          onClick={() => setPage(item)}
-                          aria-current={item === page ? "page" : undefined}
-                          className={`product-list-page-num${
-                            item === page ? " product-list-page-num--active" : ""
-                          }`}
-                        >
-                          {item}
-                        </button>
-                      )
-                    )}
-                  </div>
-
-                  <p className="product-list-page-summary">
-                    <strong>
-                      {rangeStart}–{rangeEnd}
-                    </strong>{" "}
-                    {copy.showingOf} {total}
-                    <span aria-hidden> · </span>
-                    {copy.pageLabel} {page} / {displayTotalPages}
-                  </p>
-                </div>
-              </nav>
+                  </nav>
+                ) : null}
+              </>
             ) : null}
-            </div>
-          </>
-        ) : null}
 
-        {loading && products.length > 0 ? (
-          <div className="product-list-toast" aria-live="polite">
-            {copy.loadingMore}
-          </div>
-        ) : null}
+            {loading && products.length > 0 ? (
+              <p className="collection-loading-more" aria-live="polite">
+                {copy.loadingMore}
+              </p>
+            ) : null}
+          </main>
+        </div>
       </div>
     </div>
   );
