@@ -15,7 +15,8 @@
     "email": "hello@pradeepjewellers.com"
   },
   "social": {
-    "instagram": "https://instagram.com/pradeepjewellers",
+    "instagram": "https://www.instagram.com/pradeepjewellers_nadiad/",
+    "googleMaps": "https://maps.app.goo.gl/UfPtopdgH7vZjDMC8",
     "facebook": "https://facebook.com/pradeepjewellers",
     "youtube": "https://youtube.com/pradeepjewellers",
     "whatsapp": "https://wa.me/919265075114"
@@ -473,7 +474,8 @@
     },
     "clearancePanel": {
       "headerText": "STOCK CLEARANCE ENDS IN",
-      "endsAt": "2026-05-21T18:00:00+05:30",
+      "countdownDays": 2,
+      "endsAt": "2026-05-24T18:00:00+05:30",
       "daysLabel": "DAYS",
       "hoursLabel": "HRS",
       "minutesLabel": "MIN",
@@ -627,33 +629,40 @@
     ]
   },
   "socialSection": {
-    "handle": "@pradeepjewellers",
+    "handle": "@pradeepjewellers_nadiad",
+    "instagramProfile": "https://www.instagram.com/pradeepjewellers_nadiad/",
     "title": "Follow the journey of every piece.",
-    "description": "Behind-the-bench reels, festive lookbooks, and first looks at new collections — across Instagram and our WhatsApp Broadcast.",
+    "description": "Behind-the-bench reels, festive lookbooks, and first looks at new collections — follow us on Instagram and join our WhatsApp Broadcast.",
     "gridImages": [
       {
+        "href": "https://www.instagram.com/pradeepjewellers_nadiad/p/DXUa_zICcQl/",
         "src": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=600&auto=format&fit=crop",
-        "alt": "Gold necklace"
+        "alt": "Pradeep Jewellers Nadiad — Instagram post 1"
       },
       {
+        "href": "https://www.instagram.com/pradeepjewellers_nadiad/p/DWQiFjviSDc/",
         "src": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=600&auto=format&fit=crop",
-        "alt": "Diamond stud earrings"
+        "alt": "Pradeep Jewellers Nadiad — Instagram post 2"
       },
       {
+        "href": "https://www.instagram.com/pradeepjewellers_nadiad/p/DWN8x10Dbf-/",
         "src": "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=600&auto=format&fit=crop",
-        "alt": "Gold bangle"
+        "alt": "Pradeep Jewellers Nadiad — Instagram post 3"
       },
       {
+        "href": "https://www.instagram.com/pradeepjewellers_nadiad/p/DWDpudkiRiC/",
         "src": "https://images.unsplash.com/photo-1611085583191-a3b181a88401?q=80&w=600&auto=format&fit=crop",
-        "alt": "Emerald ring"
+        "alt": "Pradeep Jewellers Nadiad — Instagram post 4"
       },
       {
+        "href": "https://www.instagram.com/pradeepjewellers_nadiad/p/DXo3fyfCdMo/",
         "src": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=600&auto=format&fit=crop",
-        "alt": "Diamond bracelet"
+        "alt": "Pradeep Jewellers Nadiad — Instagram post 5"
       },
       {
+        "href": "https://www.instagram.com/pradeepjewellers_nadiad/p/DWLF5rVCfUR/",
         "src": "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=600&auto=format&fit=crop",
-        "alt": "Gold jhumka earrings"
+        "alt": "Pradeep Jewellers Nadiad — Instagram post 6"
       }
     ],
     "broadcast": {
@@ -732,7 +741,7 @@
     "visit": {
       "address": "24, Ranganathan Street, T. Nagar, Chennai 600017",
       "mapLabel": "VIEW ON MAP",
-      "mapHref": "https://www.google.com/maps/search/?api=1&query=Pradeep+Jewellers+T+Nagar+Chennai",
+      "mapHref": "https://maps.app.goo.gl/UfPtopdgH7vZjDMC8",
       "hours": "Mon-Sat · 11 AM – 8 PM"
     },
     "copyrightBrand": "Pradeep Jewellers",

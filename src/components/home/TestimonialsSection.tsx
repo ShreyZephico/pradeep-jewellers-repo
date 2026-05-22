@@ -150,11 +150,15 @@ export default function TestimonialsSection() {
         </div>
 
         {hasMore ? (
-          <div className="testimonials-section__actions">
+          <div
+            className="testimonials-section__actions"
+            suppressHydrationWarning
+          >
             <button
               type="button"
               className="testimonials-section__toggle"
               aria-expanded={expanded}
+              suppressHydrationWarning
               onClick={() => setExpanded((prev) => !prev)}
             >
               {expanded ? s.viewLessLabel : s.viewMoreLabel}

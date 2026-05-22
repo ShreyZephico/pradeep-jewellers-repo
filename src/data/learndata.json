@@ -1,0 +1,217 @@
+{
+  "shared": {
+    "badge": "LEARN WITH US",
+    "backLabel": "Back to home",
+    "backHref": "/",
+    "hubLabel": "All guides",
+    "hubHref": "/#learn-section-heading",
+    "readPrefix": "Read",
+    "relatedTitle": "More guides",
+    "takeawaysTitle": "Key takeaways",
+    "cta": {
+      "text": "Explore our collection",
+      "href": "/products"
+    }
+  },
+  "articles": [
+    {
+      "slug": "gemstones",
+      "href": "/learn/gemstones",
+      "icon": "gem",
+      "category": "ASTROLOGY",
+      "title": "How do I choose the right gemstone?",
+      "readTime": "5 min",
+      "metaDescription": "Birth stones, durability, and practical questions to ask before you buy a gemstone in Kolkata.",
+      "heroImage": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1200&auto=format&fit=crop",
+      "heroImageAlt": "Assorted coloured gemstones on velvet",
+      "intro": "The right stone balances tradition, daily wear, and your budget. Use this guide to narrow choices before you visit the counter — so every rupee goes toward a piece you will actually wear.",
+      "sections": [
+        {
+          "heading": "Start with purpose, not trend",
+          "paragraphs": [
+            "Astrological guidance is meaningful for many families, but the stone must still suit how you live. A soft stone in a heavy daily ring will scratch and chip; a durable stone in a occasional pendant may never show its beauty.",
+            "Ask yourself: Is this for daily wear, festivals only, or a once-in-a-lifetime bridal set? That answer changes which gems are realistic."
+          ]
+        },
+        {
+          "heading": "Durability matters on the hand",
+          "paragraphs": [
+            "On the Mohs scale, rubies and sapphires (corundum) score 9 — excellent for rings. Emeralds are softer and often oiled; treat them gently and avoid ultrasonic cleaning at home.",
+            "For heavy use, favour stones with fewer internal fissures. A slightly smaller, cleaner stone often outlasts a large included one."
+          ]
+        },
+        {
+          "heading": "Colour and origin",
+          "paragraphs": [
+            "Two rubies of the same carat can differ sharply in price because of hue, saturation, and clarity. Burmese pigeon-blood tones command premiums; well-cut Thai or African stones can look superb at gentler prices.",
+            "Always view stones in natural daylight and warm indoor light — showroom LEDs can flatter or flatten colour."
+          ]
+        },
+        {
+          "heading": "Questions to ask your jeweller",
+          "paragraphs": [
+            "Is the stone natural, heated, or treated? Is it accompanied by a lab certificate? What is the recommended setting — prong, bezel, or closed back?",
+            "At Pradeep Jewellers we weigh every gemstone before setting and document treatments on your bill so there are no surprises later."
+          ]
+        }
+      ],
+      "takeaways": [
+        "Match the stone to how often you will wear the piece.",
+        "Prefer durability (corundum) for rings you never take off.",
+        "Compare colour in daylight, not only under shop lights.",
+        "Ask about treatment, certificate, and setting style in writing."
+      ]
+    },
+    {
+      "slug": "diamonds-4cs",
+      "href": "/learn/diamonds-4cs",
+      "icon": "diamond",
+      "category": "DIAMONDS",
+      "title": "What are the 4Cs of diamonds?",
+      "readTime": "7 min",
+      "metaDescription": "Cut, colour, clarity, and carat explained — how to read a diamond certificate before you buy.",
+      "heroImage": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=1200&auto=format&fit=crop",
+      "heroImageAlt": "Brilliant-cut diamond ring close-up",
+      "intro": "The 4Cs — Cut, Colour, Clarity, and Carat — are the global language jewellers use to describe diamonds. Understanding them helps you compare quotes fairly and spot where to invest or save.",
+      "sections": [
+        {
+          "heading": "Cut — the sparkle engine",
+          "paragraphs": [
+            "Cut is not the shape (round, oval, pear) but how well facets interact with light. An excellent cut can make a slightly smaller stone look larger and brighter.",
+            "Poor cut leaks light through the pavilion; the stone looks dull even with high colour and clarity grades."
+          ]
+        },
+        {
+          "heading": "Colour — the D to Z scale",
+          "paragraphs": [
+            "D is colourless; Z shows noticeable yellow or brown. For 18K yellow gold settings, G–I often looks icy because the metal warms the overall appearance.",
+            "In white gold or platinum, many buyers target F–H for a crisp look without paying for top-tier D–E unless size is secondary."
+          ]
+        },
+        {
+          "heading": "Clarity — eye-clean is the goal",
+          "paragraphs": [
+            "Grades run from Flawless (FL) to Included (I). Most jewellery uses VS or SI stones that appear clean to the naked eye.",
+            "Inspect under 10× magnification in-store. A tiny inclusion under a prong may be acceptable; one dead centre in the table is not."
+          ]
+        },
+        {
+          "heading": "Carat — weight vs spread",
+          "paragraphs": [
+            "Carat is weight, not face-up size. A well-spread 0.90 ct can look larger than a deep 1.00 ct with a small diameter.",
+            "Prices jump at milestone weights (0.50, 0.70, 1.00 ct). Slightly under a milestone can free budget for better cut or colour."
+          ]
+        },
+        {
+          "heading": "Reading your certificate",
+          "paragraphs": [
+            "IGI, GIA, and similar reports list the 4Cs plus fluorescence, measurements, and proportions. Match the laser inscription on the girdle to the report number when possible.",
+            "Keep the certificate with your purchase invoice — it protects resale value and insurance claims."
+          ]
+        }
+      ],
+      "takeaways": [
+        "Prioritise cut for brightness before chasing top colour alone.",
+        "Choose colour grade to suit your metal (yellow vs white).",
+        "Eye-clean SI or VS is enough for most finger sizes.",
+        "Compare spread and cut quality, not carat alone."
+      ]
+    },
+    {
+      "slug": "ring-sizing",
+      "href": "/learn/ring-sizing",
+      "icon": "ruler",
+      "category": "SIZING",
+      "title": "Which ring size will fit perfectly?",
+      "readTime": "3 min",
+      "metaDescription": "Measure ring size at home, when to resize, and why half-sizes matter for comfort.",
+      "heroImage": "https://images.unsplash.com/photo-1603561596112-0a132b757442?q=80&w=1200&auto=format&fit=crop",
+      "heroImageAlt": "Gold rings displayed for sizing",
+      "intro": "A ring that spins or pinches will stay in the drawer. Sizing is quick when you measure correctly — especially for surprise gifts and international finger standards.",
+      "sections": [
+        {
+          "heading": "Measure when fingers are normal",
+          "paragraphs": [
+            "Fingers swell in heat and shrink in cold. Measure in the evening at room temperature for the most reliable fit.",
+            "If you are between sizes, go half a size up for wide bands; narrow bands can sit true to size."
+          ]
+        },
+        {
+          "heading": "At-home methods",
+          "paragraphs": [
+            "Wrap a strip of paper around the knuckle you want the ring to pass over, mark the overlap, and measure the length in millimetres. Match to an Indian/British size chart.",
+            "Borrow a ring that already fits the same finger and measure its inner diameter with a ruler — more accurate than guessing from shoe size."
+          ]
+        },
+        {
+          "heading": "Surprise gifts",
+          "paragraphs": [
+            "Trace an existing ring on paper or press it into clay. Your jeweller can estimate size within a quarter size.",
+            "For solitaires, slightly loose is safer than tight — resizing down is easier than stretching thin shanks."
+          ]
+        },
+        {
+          "heading": "When to resize",
+          "paragraphs": [
+            "Plain gold bands resize cleanly. Full-eternity diamond bands often cannot be sized much without disturbing the line of stones.",
+            "If weight fluctuates seasonally, consider a comfort-fit band or a sizing insert for occasional wear."
+          ]
+        }
+      ],
+      "takeaways": [
+        "Measure in the evening at room temperature.",
+        "Wide bands usually need a half size up.",
+        "Use an existing ring or mm chart — not guesswork.",
+        "Eternity bands need correct size at purchase."
+      ]
+    },
+    {
+      "slug": "silver-925",
+      "href": "/learn/silver-925",
+      "icon": "sparkles",
+      "category": "SILVER",
+      "title": "How is sterling silver (925) tested?",
+      "readTime": "4 min",
+      "metaDescription": "Hallmarks, simple tests, and how to spot plated silver so you buy genuine 925 sterling.",
+      "heroImage": "https://images.unsplash.com/photo-1611591437281-4605be9940a0?q=80&w=1200&auto=format&fit=crop",
+      "heroImageAlt": "Sterling silver jewellery pieces",
+      "intro": "Sterling silver is 92.5% pure silver alloyed for strength. Plated brass and nickel silver are often sold as “silver colour.” Know the checks so your invoice matches the metal you receive.",
+      "sections": [
+        {
+          "heading": "What 925 means",
+          "paragraphs": [
+            "The stamp 925 (or Sterling) means 925 parts per thousand silver, usually with copper for hardness. Fine silver (.999) is softer and rare in everyday jewellery.",
+            "Indian BIS hallmarking for silver articles helps verify purity when present on the piece."
+          ]
+        },
+        {
+          "heading": "Hallmarks and invoices",
+          "paragraphs": [
+            "Look for 925 on an inconspicuous spot — inside shanks, on clasps, or earring posts. Match the description on your bill: “sterling silver 925” not just “silver colour.”",
+            "Reputable sellers state weight in grams and purity on the invoice."
+          ]
+        },
+        {
+          "heading": "Simple checks at home",
+          "paragraphs": [
+            "Sterling tarnishes to a yellow-brown patina; many platings peel or show a different colour at worn edges.",
+            "A strong magnet test: sterling is not magnetic; steel cores in fakes may stick. This is indicative, not definitive — use a jeweller’s acid or XRF test for certainty."
+          ]
+        },
+        {
+          "heading": "Care and longevity",
+          "paragraphs": [
+            "Store in anti-tarnish pouches, avoid chlorine and perfume contact, and polish with a soft cloth — not abrasive toothpaste on oxidised finishes.",
+            "Rhodium-plated silver stays bright longer; when replating is needed, ask whether the base metal is verified 925 first."
+          ]
+        }
+      ],
+      "takeaways": [
+        "925 means 92.5% silver — confirm on piece and invoice.",
+        "BIS hallmark adds confidence when available.",
+        "Magnet and wear-edge checks screen obvious fakes.",
+        "Proper storage slows tarnish on genuine sterling."
+      ]
+    }
+  ]
+}
