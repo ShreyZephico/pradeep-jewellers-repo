@@ -295,6 +295,20 @@
   --design-stagger: 0.08s;
   --design-serif: var(--featured-serif);
   --design-page-max: 72rem;
+  --design-dark-bg: var(--home-ink);
+  --design-dark-ink: var(--color-pure-white);
+  --design-dark-muted: rgb(var(--color-pure-white-rgb) / 0.78);
+  --design-hero-overlay: rgb(var(--color-black-rgb) / 0.55);
+  --design-border: rgb(var(--home-ink-rgb) / 0.1);
+  --design-table-head-bg: rgb(var(--design-accent-rgb) / 0.08);
+  --design-success: #16a34a;
+  --design-sticky-bg: rgb(255 255 255 / 0.92);
+  --design-sticky-shadow: 0 -8px 30px rgb(var(--color-black-rgb) / 0.08);
+  --design-gallery-speed: 42s;
+  --design-gallery-speed-slow: 56s;
+  --design-gallery-item-size: clamp(7.5rem, 18vw, 11.5rem);
+  --design-gallery-radius: 1.35rem;
+  --design-gallery-gap: clamp(0.65rem, 2vw, 1.1rem);
 
   /* Gifting section */
   --gifting-bg: var(--color-warm-ivory);
