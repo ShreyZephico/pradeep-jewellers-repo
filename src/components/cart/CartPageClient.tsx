@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowLeft, Loader2, ShoppingBag, Trash2 } from "lucide-react";
 
 import CartLineImage from "@/components/cart/CartLineImage";
 import PriceCalculationBreakdown from "@/components/PriceCalculationBreakdown";
 import { useCart } from "@/contexts/CartContext";
 import { useCartLineBreakdowns } from "@/hooks/useCartLineBreakdowns";
+import { saveReturnPath } from "@/lib/authRedirect";
 import type { CartLineBreakdownData } from "@/lib/cartBreakdown";
 import productContent, { formatProductCopy } from "@/lib/productContent";
 import type { ClientCartLine } from "@/types/cart";
@@ -20,34 +21,25 @@ import "@/styles/product.css";
 const copy = productContent.cart;
 const breadcrumb = productContent.breadcrumb;
 
+async function isUserAuthenticated(): Promise<boolean> {
+  try {
+    const response = await fetch("/api/auth/check", { credentials: "include" });
+    const data = await response.json();
+    return Boolean(data.isAuthenticated);
+  } catch {
+    return false;
+  }
+}
+
 export default function CartPageClient() {
   const router = useRouter();
-  const { cart, loading, refreshCart, setAuthenticated } = useCart();
+  const { cart, loading, refreshCart } = useCart();
   const { breakdowns, loading: breakdownLoading } = useCartLineBreakdowns(
     cart.lines
   );
-  const [authChecked, setAuthChecked] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [lineLoadingId, setLineLoadingId] = useState<string | null>(null);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    fetch("/api/auth/check", { credentials: "include" })
-      .then((r) => r.json())
-      .then((data) => {
-        const ok = Boolean(data.isAuthenticated);
-        setAuthenticated(ok);
-        if (!ok) {
-          localStorage.setItem("redirectAfterLogin", "/cart");
-          router.replace("/login");
-          return;
-        }
-        setAuthChecked(true);
-      })
-      .catch(() => {
-        router.replace("/login");
-      });
-  }, [router, setAuthenticated]);
 
   const updateQuantity = async (lineId: string, quantity: number) => {
     setLineLoadingId(lineId);
@@ -59,10 +51,6 @@ export default function CartPageClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lineId, quantity }),
       });
-      if (response.status === 401) {
-        router.push("/login");
-        return;
-      }
       if (!response.ok) {
         const data = await response.json();
         setError(typeof data.error === "string" ? data.error : copy.updateError);
@@ -86,10 +74,6 @@ export default function CartPageClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lineId }),
       });
-      if (response.status === 401) {
-        router.push("/login");
-        return;
-      }
       if (!response.ok) {
         const data = await response.json();
         setError(typeof data.error === "string" ? data.error : copy.updateError);
@@ -106,6 +90,15 @@ export default function CartPageClient() {
   const checkout = async () => {
     setCheckoutLoading(true);
     setError("");
+
+    const loggedIn = await isUserAuthenticated();
+    if (!loggedIn) {
+      saveReturnPath("/cart");
+      router.push("/login");
+      setCheckoutLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch("/api/cart/checkout", {
         method: "POST",
@@ -115,6 +108,7 @@ export default function CartPageClient() {
       });
       const data = await response.json();
       if (response.status === 401) {
+        saveReturnPath("/cart");
         router.push("/login");
         return;
       }
@@ -129,15 +123,6 @@ export default function CartPageClient() {
       setCheckoutLoading(false);
     }
   };
-
-  if (!authChecked) {
-    return (
-      <div className="cart-page cart-page--loading">
-        <Loader2 className="cart-page-spinner" size={36} aria-hidden />
-        <p>{copy.loading}</p>
-      </div>
-    );
-  }
 
   const isEmpty = !loading && cart.lines.length === 0;
 

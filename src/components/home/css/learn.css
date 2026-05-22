@@ -106,23 +106,11 @@
   }
 }
 
-.learn-section__icon-wrap {
-  display: flex;
+.learn-section__card .learn-article-icon {
   width: 2.5rem;
   height: 2.5rem;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
   padding: 0.5rem;
-  border: 1px solid var(--learn-accent-border);
   border-radius: 0.125rem;
-  background: var(--learn-accent-bg);
-}
-
-.learn-section__icon-svg {
-  width: 100%;
-  height: 100%;
-  color: var(--learn-accent);
 }
 
 .learn-section__category {

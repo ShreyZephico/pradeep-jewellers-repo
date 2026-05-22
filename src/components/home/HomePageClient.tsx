@@ -6,7 +6,19 @@ import HeroSection from "@/components/home/HeroSection";
 import LegacySection from "@/components/home/LegacySection";
 import CollectionsSection from "@/components/home/CollectionsSection";
 import FeaturedProductsSection from "@/components/home/FeaturedProductsSection";
-import CallbackLeadSection from "@/components/home/CallbackLeadSection";
+const CallbackLeadSection = dynamic(
+  () => import("@/components/home/CallbackLeadSection"),
+  {
+    loading: () => (
+      <section
+        className="callback-lead-section"
+        aria-hidden
+        style={{ minHeight: "14rem" }}
+      />
+    ),
+    ssr: false,
+  }
+);
 
 const CuratedSection = dynamic(
   () => import("@/components/home/CuratedSection"),
@@ -38,7 +50,16 @@ const FounderSection = dynamic(
 );
 const TestimonialsSection = dynamic(
   () => import("@/components/home/TestimonialsSection"),
-  { loading: () => null }
+  {
+    loading: () => (
+      <section
+        className="testimonials-section"
+        aria-hidden
+        style={{ minHeight: "12rem" }}
+      />
+    ),
+    ssr: false,
+  }
 );
 const SocialSection = dynamic(
   () => import("@/components/home/SocialSection"),

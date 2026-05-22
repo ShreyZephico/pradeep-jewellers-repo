@@ -15,10 +15,23 @@ function formatInr(amount: number): string {
   }).format(Math.round(amount))}`;
 }
 
-function getRemainingMs(endIso: string): number {
-  const end = new Date(endIso).getTime();
-  if (Number.isNaN(end)) return 0;
-  return Math.max(0, end - Date.now());
+function resolveClearanceEndMs(endIso: string, countdownDays: number): number {
+  const days = Math.max(1, countdownDays);
+  const cycleMs = days * 86_400_000;
+  const configured = new Date(endIso).getTime();
+  if (Number.isNaN(configured)) {
+    return Date.now() + cycleMs;
+  }
+  let end = configured;
+  const now = Date.now();
+  while (end <= now) {
+    end += cycleMs;
+  }
+  return end;
+}
+
+function getRemainingMs(endIso: string, countdownDays: number): number {
+  return Math.max(0, resolveClearanceEndMs(endIso, countdownDays) - Date.now());
 }
 
 function FlameIcon({ className }: { className?: string }) {
@@ -75,14 +88,19 @@ export default function GoldSchemeSection() {
   const clearance = section.clearancePanel;
 
   const [contribution, setContribution] = useState(scheme.defaultContribution);
-  const [remainingMs, setRemainingMs] = useState(0);
+  const countdownDays = clearance.countdownDays ?? 2;
+
+  const [remainingMs, setRemainingMs] = useState(() =>
+    getRemainingMs(clearance.endsAt, countdownDays)
+  );
 
   useEffect(() => {
-    const tick = () => setRemainingMs(getRemainingMs(clearance.endsAt));
+    const tick = () =>
+      setRemainingMs(getRemainingMs(clearance.endsAt, countdownDays));
     tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [clearance.endsAt]);
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [clearance.endsAt, countdownDays]);
 
   const time = useMemo(() => {
     const sec = Math.floor(remainingMs / 1000);
@@ -234,7 +252,10 @@ export default function GoldSchemeSection() {
                   className="gold-scheme-section__countdown-unit"
                   style={{ "--unit-index": index } as CSSProperties}
                 >
-                  <span className="gold-scheme-section__countdown-value">
+                  <span
+                    className="gold-scheme-section__countdown-value"
+                    suppressHydrationWarning
+                  >
                     {pad(u.value)}
                   </span>
                   <span className="gold-scheme-section__countdown-label">

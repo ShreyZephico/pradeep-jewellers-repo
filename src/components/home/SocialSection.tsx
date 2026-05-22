@@ -159,7 +159,14 @@ export default function SocialSection() {
           <div className="social-section__content">
             <div className="social-section__handle-row">
               <span className="social-section__handle-line" aria-hidden />
-              <p className="social-section__handle">{s.handle}</p>
+              <Link
+                href={s.instagramProfile ?? instaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="social-section__handle"
+              >
+                {s.handle}
+              </Link>
             </div>
 
             <h2 id="social-section-heading" className="social-section__title">
@@ -246,13 +253,10 @@ export default function SocialSection() {
 
           <div className="social-section__grid">
             {s.gridImages.map((img, index) => {
-              const href =
-                "href" in img && typeof img.href === "string"
-                  ? img.href
-                  : instaUrl;
+              const href = img.href ?? instaUrl;
               return (
                 <Link
-                  key={img.src}
+                  key={href}
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"

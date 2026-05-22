@@ -36,10 +36,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const refreshCart = useCallback(async () => {
-    if (!isAuthenticated) {
-      setCart(emptyCart);
-      return;
-    }
     setLoading(true);
     try {
       const response = await fetch("/api/cart", {
@@ -61,7 +57,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated]);
+  }, []);
 
   const goToCart = useCallback(() => {
     router.push("/cart");

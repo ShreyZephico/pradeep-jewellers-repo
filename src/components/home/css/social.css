@@ -67,7 +67,13 @@
   font-weight: 600;
   letter-spacing: var(--social-handle-tracking);
   text-transform: uppercase;
+  text-decoration: none;
   color: var(--social-accent);
+  transition: opacity var(--social-transition);
+}
+
+.social-section__handle:hover {
+  opacity: 0.85;
 }
 
 .social-section__title {
