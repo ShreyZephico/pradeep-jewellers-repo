@@ -1,0 +1,241 @@
+{
+  "meta": {
+    "title": "About Us",
+    "description": "Discover Pradeep Jewellers — BIS hallmarked gold, honest weighing, bespoke craftsmanship, and four decades of family trust."
+  },
+  "hero": {
+    "backLabel": "Back to home",
+    "backHref": "/",
+    "badge": "ABOUT PRADEEP JEWELLERS",
+    "title": "Where every gram tells a story.",
+    "highlightText": "tells a story.",
+    "description": "A family atelier crafting heirloom gold, diamonds, and silver — weighed honestly and finished by hand since 1972.",
+    "image": "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=1600&auto=format&fit=crop",
+    "imageAlt": "Luxury gold jewellery at Pradeep Jewellers"
+  },
+  "brandIntro": {
+    "badge": "WHO WE ARE",
+    "title": "More than a showroom — a house of gold.",
+    "description": "Pradeep Jewellers began with one belief: families deserve jewellery they can trust at every stage — from first earrings to wedding sets passed down generations.",
+    "points": [
+      "BIS hallmarked gold with itemised invoices",
+      "Live daily rates — no hidden deductions at billing",
+      "Bespoke design, redesign, and video consultations"
+    ],
+    "image": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1200&auto=format&fit=crop",
+    "imageAlt": "Gold rings displayed in velvet tray"
+  },
+  "ourStory": {
+    "badge": "OUR STORY",
+    "title": "From one bench to thousands of families.",
+    "paragraphs": [
+      "What started as a modest goldsmith's counter grew into a destination for bridal suites, temple jewellery, and bespoke heirlooms — without ever compromising on weight or purity.",
+      "Our karigars still file, set, and polish under the same roof where generations have shopped. Every commission is weighed twice: once at the bench, once at the counter.",
+      "Today we serve families across India with transparent pricing, live gold charts, and the same promise our founder made in 1984."
+    ],
+    "image": "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?q=80&w=1200&auto=format&fit=crop",
+    "imageAlt": "Master jeweller at the workbench"
+  },
+  "founder": {
+    "id": "founder",
+    "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=900&auto=format&fit=crop",
+    "imageAlt": "Portrait of the founder",
+    "establishedYear": "1984",
+    "establishedText": "THE FIRST HAMMER FELL",
+    "sectionLabel": "FOUNDER STORY",
+    "heading": "A goldsmith's son. A father's promise.",
+    "quote": "We don't sell jewellery. We hand over a piece of someone's wedding day, their daughter's first earrings, their grandmother's memory.",
+    "description": "Ramesh Agarwal opened a single bench in Bowbazar in 1984 with three karigars and one promise: every gram, weighed honestly. Forty years on, his sons run the same bench — and the same promise.",
+    "name": "Ramesh Agarwal",
+    "role": "Founder & Master Goldsmith"
+  },
+  "heritageTimeline": {
+    "badge": "HERITAGE & TIMELINE",
+    "title": "Milestones that shaped our house.",
+    "description": "Four decades of craft, hallmarking, and trust — marked by moments our families still remember.",
+    "items": [
+      {
+        "year": "1972",
+        "title": "Pradeep Jewellers founded",
+        "description": "A showroom opens with bridal gold and transparent weighing at the counter."
+      },
+      
+      {
+        "year": "1984",
+        "title": "The Bowbazar bench",
+        "description": "Ramesh Agarwal establishes the workshop that still defines how we craft."
+      },
+      {
+        "year": "2005",
+        "title": "BIS hallmark standard",
+        "description": "Every gold piece hallmarked and documented — a practice we never relaxed."
+      },
+      {
+        "year": "2018",
+        "title": "Bespoke & video consults",
+        "description": "Custom commissions and remote design for families across India."
+      },
+      {
+        "year": "Today",
+        "title": "Live rates & digital trust",
+        "description": "Daily charts, honest carts, and the same bench promise."
+      }
+    ]
+  },
+  "brandStats": {
+    "badge": "BY THE NUMBERS",
+    "title": "Trust you can measure.",
+    "stats": [
+      { "number": 1972, "suffix": "", "label": "FOUNDED" },
+      { "number": 40, "suffix": "+", "label": "YEARS OF CRAFT" },
+      { "number": 10000, "suffix": "+", "label": "FAMILIES SERVED" },
+      { "number": 100, "suffix": "%", "label": "BIS HALLMARKED" }
+    ]
+  },
+  "craftsmanship": {
+    "badge": "CRAFTSMANSHIP",
+    "title": "How your piece comes to life.",
+    "description": "Every order moves through the same atelier steps — design clarity first, hallmark last.",
+    "steps": [
+      {
+        "step": "01",
+        "title": "Design brief",
+        "description": "Sketches, references, or heirloom pieces — purity, weight, and budget aligned before metal is cut."
+      },
+      {
+        "step": "02",
+        "title": "Cast & set",
+        "description": "Karigars shape, solder, and set stones by hand; diamonds checked under magnification."
+      },
+      {
+        "step": "03",
+        "title": "Finish & hallmark",
+        "description": "Polish, quality check, BIS hallmark where applicable, and itemised invoice with live rate."
+      }
+    ],
+    "image": "https://images.unsplash.com/photo-1533734685302-aee5a945845a?q=80&w=1200&auto=format&fit=crop",
+    "imageAlt": "Finished necklace in presentation case"
+  },
+  "team": {
+    "badge": "MEET OUR ARTISANS",
+    "title": "The hands behind every piece.",
+    "description": "Master goldsmiths, setters, and polishers — many with us for decades.",
+    "members": [
+      {
+        "name": "Suresh Patel",
+        "role": "Head Karigar · Gold",
+        "experience": "28 years",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop",
+        "imageAlt": "Suresh Patel — head gold karigar"
+      },
+      {
+        "name": "Meera Iyer",
+        "role": "Diamond Setter",
+        "experience": "19 years",
+        "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop",
+        "imageAlt": "Meera Iyer — diamond setter"
+      },
+      {
+        "name": "Arjun Das",
+        "role": "Finishing & Polish",
+        "experience": "22 years",
+        "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
+        "imageAlt": "Arjun Das — finishing specialist"
+      }
+    ]
+  },
+  "whyChoose": {
+    "badge": "WHY CHOOSE US",
+    "title": "Three promises on every counter.",
+    "items": [
+      {
+        "icon": "scale",
+        "title": "Honest weight",
+        "description": "What we weigh is what you pay for — no hidden deductions at billing."
+      },
+      {
+        "icon": "shield",
+        "title": "BIS hallmarked gold",
+        "description": "Hallmark registration and purity certificates on every gold piece."
+      },
+      {
+        "icon": "heart",
+        "title": "Heirloom care",
+        "description": "Bridal suites, redesigns, and bespoke pieces treated like family."
+      }
+    ]
+  },
+  "certifications": {
+    "badge": "CERTIFICATIONS & TRUST",
+    "title": "Proof you can verify.",
+    "description": "We document purity, weight, and compliance — so you buy with confidence.",
+    "items": [
+      {
+        "title": "BIS Hallmark",
+        "description": "Registered hallmarking on applicable gold jewellery — HM/CHE/000000.",
+        "icon": "hallmark"
+      },
+      {
+        "title": "GST registered",
+        "description": "Transparent tax invoices — GST 33AAAAA0000A1Z5 on every sale.",
+        "icon": "document"
+      },
+      {
+        "title": "IGI / GIA diamonds",
+        "description": "Certified stones where applicable, with documentation shared before purchase.",
+        "icon": "gem"
+      }
+    ],
+    "complianceLine": "BIS Hallmark Reg. HM/CHE/000000 · GST 33AAAAA0000A1Z5"
+  },
+  "bespoke": {
+    "badge": "BESPOKE EXPERIENCE",
+    "title": "Your design. Our bench.",
+    "description": "From engagement rings to heirloom redesigns — sketch on WhatsApp, refine on video, collect in person.",
+    "features": [
+      "Free design consultation",
+      "Live gold rate at order time",
+      "19-day average turnaround on custom bridal"
+    ],
+    "ctaLabel": "Start bespoke design",
+    "ctaHref": "/bespoke",
+    "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=1200&auto=format&fit=crop",
+    "imageAlt": "Custom solitaire ring being crafted"
+  },
+  "showroom": {
+    "badge": "STORE EXPERIENCE",
+    "title": "Walk into calm, leave with clarity.",
+    "description": "Private viewing bays, live rate screens, and specialists for gold, diamonds, and schemes.",
+    "highlights": [
+      "Private bridal viewing lounge",
+      "Live 22K & 24K rate board",
+      "Gold scheme & redemption desk"
+    ],
+    "address": "24, Ranganathan Street, T. Nagar, Chennai 600017",
+    "phone": "+91 9265075114",
+    "phoneHref": "tel:+919265075114",
+    "hours": "Mon–Sat · 11 AM – 8 PM",
+    "mapLabel": "View on map",
+    "mapHref": "https://maps.app.goo.gl/UfPtopdgH7vZjDMC8",
+    "image": "https://images.unsplash.com/photo-1601925260368-ae2f83b8a168?q=80&w=1200&auto=format&fit=crop",
+    "imageAlt": "Jewellery showroom interior"
+  },
+  "testimonials": {
+    "useHomeComponent": true
+  },
+  "social": {
+    "useHomeComponent": true
+  },
+  "callback": {
+    "useHomeComponent": true
+  },
+  "finalCta": {
+    "title": "Begin your heirloom journey.",
+    "description": "Explore our collections, commission a bespoke piece, or speak with our team today.",
+    "links": [
+      { "label": "Shop collection", "href": "/products", "variant": "primary" },
+      { "label": "Bespoke design", "href": "/bespoke", "variant": "outline" },
+      { "label": "Live gold rates", "href": "/rates", "variant": "outline" }
+    ]
+  }
+}

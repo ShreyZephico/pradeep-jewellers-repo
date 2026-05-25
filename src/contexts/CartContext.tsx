@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 
+import { HOME_REFETCH_EVENT } from "@/lib/homeRefetch";
 import type { ClientCart } from "@/types/cart";
 
 const emptyCart: ClientCart = {
@@ -72,6 +73,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     void refreshCart();
+
+    const onHomeRefetch = () => {
+      void refreshCart();
+    };
+
+    window.addEventListener(HOME_REFETCH_EVENT, onHomeRefetch);
+    return () => window.removeEventListener(HOME_REFETCH_EVENT, onHomeRefetch);
   }, [refreshCart]);
 
   const value = useMemo<CartContextValue>(

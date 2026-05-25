@@ -1,0 +1,49 @@
+/* About page — testimonials (reuses home component) */
+
+.about-testimonials-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+  isolation: isolate;
+}
+
+.about-testimonials-wrap .testimonials-section {
+  width: 100%;
+  padding-top: var(--about-page-padding-y);
+  padding-bottom: var(--about-page-padding-y);
+}
+
+.about-testimonials-wrap .testimonials-section__inner {
+  width: 100%;
+  max-width: var(--about-page-layout-max);
+}
+
+/* Show content immediately on /about (animations still run) */
+.about-testimonials-wrap .testimonials-section--visible .testimonials-section__intro,
+.about-testimonials-wrap .testimonials-section--visible .testimonials-section__badge-line,
+.about-testimonials-wrap .testimonials-section--visible .testimonials-section__rating-card,
+.about-testimonials-wrap .testimonials-section--visible .testimonials-section__card,
+.about-testimonials-wrap .testimonials-section--visible .testimonials-section__actions {
+  opacity: 1;
+}
+
+/* Mobile: full-width third card on about page */
+@media (max-width: 1023px) {
+  .about-testimonials-wrap
+    .testimonials-section__grid:not(.testimonials-section__grid--expanded)
+    .testimonials-section__card:nth-child(3):last-child {
+    grid-column: 1 / -1;
+    max-width: 100%;
+    justify-self: stretch;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .about-testimonials-wrap
+    .testimonials-section__grid:not(.testimonials-section__grid--expanded)
+    .testimonials-section__card:nth-child(3):last-child {
+    max-width: calc(50% - 0.375rem);
+    justify-self: center;
+  }
+}

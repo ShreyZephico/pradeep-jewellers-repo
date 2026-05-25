@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import data from "@/data/contactDatas.json";
+import { HOME_REFETCH_EVENT } from "@/lib/homeRefetch";
 
 import "./css/testimonials.css";
 
@@ -58,6 +59,12 @@ export default function TestimonialsSection() {
     }
 
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const reveal = () => setVisible(true);
+    window.addEventListener(HOME_REFETCH_EVENT, reveal);
+    return () => window.removeEventListener(HOME_REFETCH_EVENT, reveal);
   }, []);
 
   const displayedItems = useMemo(

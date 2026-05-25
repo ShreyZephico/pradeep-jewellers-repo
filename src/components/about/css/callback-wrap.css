@@ -1,0 +1,10 @@
+.about-callback-wrap {
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.about-callback-wrap .callback-lead-section {
+  padding-top: var(--about-page-padding-y);
+  padding-bottom: var(--about-page-padding-y);
+}

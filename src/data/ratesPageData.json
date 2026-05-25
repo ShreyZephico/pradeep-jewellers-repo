@@ -1,0 +1,68 @@
+{
+  "badge": "RATE ANALYTICS",
+  "title": "Gold & silver price chart",
+  "description": "Compare 24K and 22K gold with silver — daily rates from our database, updated throughout the day.",
+  "backLabel": "Back to home",
+  "backHref": "/",
+  "filters": {
+    "periodLabel": "Period",
+    "metalLabel": "Show",
+    "viewLabel": "View",
+    "daysOptions": [
+      { "value": 7, "label": "7 days" },
+      { "value": 14, "label": "14 days" },
+      { "value": 30, "label": "30 days" }
+    ],
+    "metalOptions": [
+      { "value": "all", "label": "Gold + silver" },
+      { "value": "gold", "label": "Gold only" },
+      { "value": "silver", "label": "Silver only" }
+    ],
+    "viewOptions": [
+      { "value": "overview", "label": "Overview" },
+      { "value": "table", "label": "Table" },
+      { "value": "charts", "label": "Charts" }
+    ]
+  },
+  "updatedPrefix": "Last updated",
+  "summaryTitle": "At a glance",
+  "chartTitle": "Price trend",
+  "chartSubtitle": "Daily closing rate per IST calendar day",
+  "tableTitle": "Daily rate comparison",
+  "tableSubtitle": "24K vs 22K gold and silver — day-on-day % change",
+  "analysisTitle": "What the numbers mean",
+  "tableHeaders": {
+    "date": "Date",
+    "gold24k": "24K / g",
+    "gold22k": "22K / g",
+    "silver": "Silver 1 kg",
+    "change": "Day Δ"
+  },
+  "stats": {
+    "latest": "Latest",
+    "high": "Period high",
+    "low": "Period low",
+    "average": "Average",
+    "change": "Period change"
+  },
+  "insights": {
+    "gold24Up": "24K gold rose over the selected period — selling old gold may be favourable.",
+    "gold24Down": "24K gold eased — could be a better window for new 24K purchases.",
+    "gold24Flat": "24K held steady with limited daily movement.",
+    "gold22Up": "22K (jewellery purity) moved higher — making charges still apply on finished pieces.",
+    "gold22Down": "22K softened — compare quotes before commissioning custom work.",
+    "gold22Flat": "22K tracked sideways — predictable budgeting for schemes.",
+    "silverUp": "Silver (1 kg) gained — factor into silver article pricing.",
+    "silverDown": "Silver eased — useful for bulk or gifting orders.",
+    "silverFlat": "Silver stayed in a narrow band.",
+    "spread": "22K trades below 24K by roughly the karat ratio — both charts help you spot divergence.",
+    "volatile": "Wider daily swings than usual — lock a quote on heavier orders.",
+    "stable": "Rates moved in a tight range — good clarity for planning."
+  },
+  "errorTitle": "Rates unavailable",
+  "errorHint": "We could not load history from the database. Please refresh or visit the store for today’s board.",
+  "cta": {
+    "text": "Shop collection",
+    "href": "/products"
+  }
+}

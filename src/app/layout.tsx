@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import Script from "next/script";
+
+import NavigationGuard from "@/components/NavigationGuard";
 import TawkToChat from "@/components/TawkToChat";
 import GoogleOneTapShell from "@/components/GoogleOneTapShell";
 import Header from "@/components/home/Header";
@@ -53,12 +56,24 @@ export default function RootLayout({
         className="min-h-full flex flex-col"
         suppressHydrationWarning
       >
+        <Script
+          id="bfcache-reload"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `window.addEventListener("pageshow",function(e){if(e.persisted)location.reload();});`,
+          }}
+        />
         <GoldRatesProvider refreshMs={goldRatesRefreshMs}>
           <CustomerAuthProvider>
             <CartProvider>
+              <NavigationGuard />
               <Header />
 
-              <div suppressHydrationWarning key="app-root">
+              <div
+                className="app-root flex flex-1 flex-col min-h-0 w-full"
+                suppressHydrationWarning
+                key="app-root"
+              >
                 {children}
               </div>
 

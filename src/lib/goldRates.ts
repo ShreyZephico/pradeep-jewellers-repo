@@ -39,6 +39,16 @@ export function formatRateTimestamp(iso: string): string {
   }).format(d);
 }
 
+export function formatChartDay(isoDate: string): string {
+  const d = new Date(`${isoDate}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return isoDate;
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: IST,
+    weekday: "short",
+    day: "numeric",
+  }).format(d);
+}
+
 export function formatPercentChange(percent: number): string {
   const abs = Math.abs(percent);
   const decimals = abs > 0 && abs < 10 && !Number.isInteger(abs) ? 2 : 1;

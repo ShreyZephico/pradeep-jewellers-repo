@@ -1,11 +1,26 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  env: {
-    NEXT_CLOUDINARY_CLOUD_NAME: process.env.NEXT_CLOUDINARY_CLOUD_NAME,
-    NEXT_TAWK_PROPERTY_ID: process.env.NEXT_TAWK_PROPERTY_ID,
-    NEXT_TAWK_WIDGET_ID: process.env.NEXT_TAWK_WIDGET_ID,
+  allowedDevOrigins: ["192.168.0.106"],
+
+  experimental: {
+    staleTimes: {
+      dynamic: 0,
+      static: 0,
+    },
   },
+
+  env: {
+    NEXT_CLOUDINARY_CLOUD_NAME:
+      process.env.NEXT_CLOUDINARY_CLOUD_NAME,
+
+    NEXT_TAWK_PROPERTY_ID:
+      process.env.NEXT_TAWK_PROPERTY_ID,
+
+    NEXT_TAWK_WIDGET_ID:
+      process.env.NEXT_TAWK_WIDGET_ID,
+  },
+
   images: {
     remotePatterns: [
       {
@@ -16,7 +31,7 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
       },
-         {
+      {
         protocol: "https",
         hostname: "loremflickr.com",
       },

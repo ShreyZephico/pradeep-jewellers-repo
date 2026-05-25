@@ -209,6 +209,7 @@ export default function HeaderNavSearch({
       <form
         className="header-search-form"
         role="search"
+        suppressHydrationWarning
         onSubmit={(event) => {
           event.preventDefault();
           goToProductsPage(query);
@@ -222,6 +223,7 @@ export default function HeaderNavSearch({
             aria-expanded={false}
             aria-controls={listboxId}
             onClick={openSearch}
+            suppressHydrationWarning
           >
             <Search size={20} aria-hidden />
           </button>
@@ -258,12 +260,14 @@ export default function HeaderNavSearch({
               aria-autocomplete="list"
               aria-controls={panelOpen ? listboxId : undefined}
               aria-expanded={panelOpen}
+              suppressHydrationWarning
             />
             {query ? (
               <button
                 type="button"
                 className="header-search-clear"
                 aria-label={productContent.list.clearSearch}
+                suppressHydrationWarning
                 onClick={() => {
                   setQuery("");
                   setDebouncedQ("");
@@ -309,6 +313,7 @@ export default function HeaderNavSearch({
                     className={`header-search-result${
                       isActive ? " header-search-result--active" : ""
                     }`}
+                    suppressHydrationWarning
                     onMouseEnter={() => setActiveIndex(index)}
                     onClick={() => goToProduct(product)}
                   >
@@ -345,6 +350,7 @@ export default function HeaderNavSearch({
               <button
                 type="button"
                 className="header-search-view-all"
+                suppressHydrationWarning
                 onClick={() => goToProductsPage(debouncedQ)}
               >
                 {formatProductCopy(copy.viewAllResults, { query: debouncedQ })}

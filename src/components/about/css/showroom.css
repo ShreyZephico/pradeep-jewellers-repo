@@ -1,0 +1,52 @@
+.about-showroom__highlights {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-showroom__highlights li {
+  padding: 0.4rem 0;
+  font-size: 0.9375rem;
+  color: var(--about-page-muted);
+}
+
+.about-showroom__address {
+  margin: 1.25rem 0 0;
+  font-style: normal;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--about-page-muted);
+}
+
+.about-showroom__address p {
+  margin: 0 0 0.35rem;
+}
+
+.about-showroom__address a {
+  color: var(--about-page-ink);
+  text-decoration: none;
+}
+
+.about-showroom__address a:hover {
+  color: var(--about-page-accent);
+}
+
+.about-showroom__hours {
+  font-weight: 600;
+  color: var(--about-page-ink);
+}
+
+.about-showroom__map {
+  display: inline-flex;
+  margin-top: 1rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--about-page-accent);
+}
+
+.about-showroom__map:hover {
+  text-decoration: underline;
+}

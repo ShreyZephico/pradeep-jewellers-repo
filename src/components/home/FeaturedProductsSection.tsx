@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import type { CSSProperties } from "react";
 
 import data from "@/data/contactDatas.json";
+import { useHomeDataRefetch } from "@/hooks/useHomeDataRefetch";
 import type { Product } from "@/types/product";
 import { getProductHref } from "@/utils/productUrl";
 
@@ -41,50 +42,40 @@ export default function FeaturedProductsSection() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadProducts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-    async function load() {
-      setLoading(true);
-      setError(null);
+    try {
+      const params = new URLSearchParams({
+        page: "1",
+        limit: String(limit),
+        category: "all",
+      });
+      const res = await fetch(`/api/products?${params.toString()}`, {
+        credentials: "omit",
+        cache: "no-store",
+      });
+      const json = (await res.json()) as {
+        success?: boolean;
+        products?: Product[];
+        error?: string;
+      };
 
-      try {
-        const params = new URLSearchParams({
-          page: "1",
-          limit: String(limit),
-          category: "all",
-        });
-        const res = await fetch(`/api/products?${params.toString()}`, {
-          credentials: "omit",
-        });
-        const json = (await res.json()) as {
-          success?: boolean;
-          products?: Product[];
-          error?: string;
-        };
-
-        if (!res.ok || !json.success) {
-          throw new Error(json.error ?? s.errorMessage);
-        }
-
-        if (!cancelled) {
-          setProducts(json.products ?? []);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : s.errorMessage);
-          setProducts([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
+      if (!res.ok || !json.success) {
+        throw new Error(json.error ?? s.errorMessage);
       }
-    }
 
-    void load();
-    return () => {
-      cancelled = true;
-    };
+      setProducts(json.products ?? []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : s.errorMessage);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
   }, [limit, s.errorMessage]);
+
+  useHomeDataRefetch(loadProducts);
 
   return (
     <section

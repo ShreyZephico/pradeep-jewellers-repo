@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 
+import { HOME_REFETCH_EVENT } from "@/lib/homeRefetch";
 import type { GoldRateApiResponse } from "@/types/goldRate";
 
 type GoldRatesContextValue = {
@@ -34,6 +35,9 @@ export function GoldRatesProvider({
   const isFirstLoad = useRef(true);
 
   const load = useCallback(async (forceFresh = false) => {
+    if (forceFresh) {
+      setLoading(true);
+    }
     try {
       const params = new URLSearchParams();
       if (forceFresh) {
@@ -75,11 +79,26 @@ export function GoldRatesProvider({
         load(true);
       }
     };
+
+    const onHomeRefetch = () => {
+      load(true);
+    };
+
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        load(true);
+      }
+    };
+
     document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener(HOME_REFETCH_EVENT, onHomeRefetch);
+    window.addEventListener("pageshow", onPageShow);
 
     return () => {
       clearInterval(id);
       document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener(HOME_REFETCH_EVENT, onHomeRefetch);
+      window.removeEventListener("pageshow", onPageShow);
     };
   }, [load, refreshMs]);
 
