@@ -1,0 +1,40 @@
+.about-stats__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .about-stats__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+.about-stats__card {
+  padding: 1.15rem 1rem;
+  border: 1px solid var(--about-page-card-border);
+  border-radius: var(--about-page-radius);
+  background: var(--about-page-card-bg);
+  box-shadow: var(--about-page-card-shadow);
+  text-align: center;
+}
+
+.about-stats__value {
+  margin: 0;
+  font-family: var(--about-page-serif);
+  font-size: clamp(1.35rem, 3.5vw, 1.85rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.about-stats__label {
+  margin: 0.35rem 0 0;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--about-page-faint);
+}

@@ -1,0 +1,56 @@
+/* About page — social / Instagram (reuses home component) */
+
+.about-social-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+  isolation: isolate;
+}
+
+.about-social-wrap .social-section {
+  width: 100%;
+  padding-top: var(--about-page-padding-y);
+  padding-bottom: var(--about-page-padding-y);
+  background: var(--social-bg);
+}
+
+.about-social-wrap .social-section__inner {
+  width: 100%;
+  max-width: var(--about-page-layout-max);
+}
+
+.about-social-wrap .social-section__layout {
+  width: 100%;
+  min-width: 0;
+}
+
+.about-social-wrap .social-section__content {
+  min-width: 0;
+}
+
+.about-social-wrap .social-section__grid {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Show content immediately on /about */
+.about-social-wrap .social-section--visible .social-section__content,
+.about-social-wrap .social-section--visible .social-section__handle-line,
+.about-social-wrap .social-section--visible .social-section__title,
+.about-social-wrap .social-section--visible .social-section__description,
+.about-social-wrap .social-section--visible .social-section__icons,
+.about-social-wrap .social-section--visible .social-section__broadcast,
+.about-social-wrap .social-section--visible .social-section__grid-item {
+  opacity: 1;
+}
+
+@media (max-width: 1023px) {
+  .about-social-wrap .social-section__grid {
+    margin-top: 0.5rem;
+  }
+
+  .about-social-wrap .social-section__broadcast {
+    max-width: 100%;
+  }
+}

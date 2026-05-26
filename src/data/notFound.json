@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "title": "Page Not Found",
+    "description": "The page you are looking for does not exist. Return to Pradeep Jewellers to explore fine jewellery."
+  },
+  "brandName": "Pradeep Jewellers",
+  "badge": "Lost in the showroom",
+  "code": "404",
+  "title": "This sparkle went off the map!",
+  "description": "The page you tried to open is not in our jewellery box. Maybe the link is old, or the URL has a tiny typo — like a missing karat mark.",
+  "hint": "Try checking the address bar, or let us guide you back to something beautiful.",
+  "actions": {
+    "primary": { "label": "Back to Home", "href": "/" },
+    "secondary": { "label": "Browse Shop", "href": "/products" },
+    "tertiary": { "label": "Live Rates", "href": "/rates" }
+  },
+  "quickLinks": [
+    { "label": "About Us", "href": "/about" },
+    { "label": "Bespoke", "href": "/bespoke" },
+    { "label": "Contact", "href": "/#callback" }
+  ],
+  "funFacts": [
+    "Our family has been crafting jewellery since 1972.",
+    "22K & 24K gold rates update live in the header.",
+    "Book a video call for a personal consultation."
+  ]
+}

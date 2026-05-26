@@ -1,0 +1,42 @@
+.about-certs__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .about-certs__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.about-certs__card {
+  padding: 1.25rem;
+  border: 1px solid var(--about-page-card-border);
+  border-radius: var(--about-page-radius);
+  background: var(--about-page-card-bg);
+  box-shadow: var(--about-page-card-shadow);
+}
+
+.about-certs__card h3 {
+  margin: 0.65rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.about-certs__card p {
+  margin: 0.4rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--about-page-muted);
+}
+
+.about-certs__compliance {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--about-page-faint);
+}

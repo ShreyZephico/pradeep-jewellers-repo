@@ -1,0 +1,53 @@
+.about-team__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .about-team__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.about-team__card {
+  padding: 1rem;
+  border: 1px solid var(--about-page-card-border);
+  border-radius: var(--about-page-radius);
+  background: var(--about-page-card-bg);
+  box-shadow: var(--about-page-card-shadow);
+  text-align: center;
+}
+
+.about-team__photo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: calc(var(--about-page-radius) - 2px);
+  margin-bottom: 0.85rem;
+}
+
+.about-team__name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.about-team__role {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--about-page-muted);
+}
+
+.about-team__exp {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--about-page-accent);
+}

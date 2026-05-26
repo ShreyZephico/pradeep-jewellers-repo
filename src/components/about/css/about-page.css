@@ -1,0 +1,261 @@
+/* About page — shared layout, reveal, tokens from globals.css */
+/* Section styles load via each section component's CSS import (Tailwind v4 cannot resolve @import here). */
+
+.about-page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  background: var(--about-page-bg);
+  color: var(--about-page-ink);
+  box-sizing: border-box;
+}
+
+.about-page__container {
+  width: 100%;
+  max-width: var(--about-page-layout-max);
+  min-width: 0;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 1.5rem);
+  box-sizing: border-box;
+}
+
+.about-page__section--cream {
+  background: var(--about-page-cream);
+}
+
+.about-highlight {
+  color: var(--about-page-accent);
+}
+
+.about-eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: var(--about-page-badge-size);
+  font-weight: 600;
+  letter-spacing: var(--about-page-badge-tracking);
+  text-transform: uppercase;
+  color: var(--about-page-accent);
+}
+
+.about-eyebrow--flush {
+  margin: 0;
+}
+
+.about-heading {
+  margin: 0;
+  font-family: var(--about-page-serif);
+  font-size: var(--about-page-section-title);
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.about-lead {
+  margin: 0.75rem 0 0;
+  max-width: 42rem;
+  font-size: clamp(0.9375rem, 2vw, 1.0625rem);
+  line-height: 1.65;
+  color: var(--about-page-muted);
+}
+
+.about-body {
+  margin: 0.85rem 0 0;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  line-height: 1.7;
+  color: var(--about-page-muted);
+}
+
+.about-section-head {
+  margin-bottom: 1.75rem;
+}
+
+.about-section-head--center {
+  text-align: center;
+}
+
+.about-section-head--center .about-lead {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.about-label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.about-label-line {
+  width: 2rem;
+  height: 1px;
+  background: var(--about-page-accent);
+}
+
+.about-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .about-split {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+
+  .about-split--reverse .about-split__content {
+    order: 2;
+  }
+
+  .about-split--reverse .about-split__media {
+    order: 1;
+  }
+}
+
+.about-split__content,
+.about-split__media {
+  min-width: 0;
+  width: 100%;
+}
+
+.about-media-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--about-page-radius);
+  box-shadow: var(--about-page-card-shadow);
+}
+
+.about-media-frame--portrait {
+  aspect-ratio: 4 / 5;
+  max-width: 26rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 1024px) {
+  .about-media-frame--portrait {
+    margin: 0;
+  }
+}
+
+.about-media-img {
+  object-fit: cover;
+  object-position: center;
+}
+
+.about-media-img--sepia {
+  filter: sepia(0.1) saturate(0.92);
+}
+
+.about-icon {
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  color: var(--about-page-accent);
+}
+
+.about-icon svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.about-btn {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.25rem;
+  border-radius: var(--about-page-radius);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    background var(--about-page-transition),
+    border-color var(--about-page-transition),
+    color var(--about-page-transition),
+    filter var(--about-page-transition);
+}
+
+.about-btn--primary {
+  border: 1px solid var(--about-page-accent);
+  background: var(--about-page-accent);
+  color: var(--color-pure-white);
+}
+
+.about-btn--primary:hover {
+  filter: brightness(1.06);
+}
+
+.about-btn--outline {
+  border: 1px solid var(--about-page-card-border);
+  background: transparent;
+  color: var(--about-page-ink);
+}
+
+.about-btn--outline:hover {
+  border-color: var(--about-page-accent);
+  color: var(--about-page-accent);
+}
+
+/* Entrance animation — runs on load (content stays visible; no hidden opacity trap) */
+
+@keyframes about-reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.about-page [data-reveal] {
+  opacity: 1;
+  transform: translateY(0);
+  animation: about-reveal-in var(--about-page-enter) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.about-page [data-reveal][data-stagger="1"] {
+  animation-delay: calc(var(--about-page-stagger) * 1);
+}
+.about-page [data-reveal][data-stagger="2"] {
+  animation-delay: calc(var(--about-page-stagger) * 2);
+}
+.about-page [data-reveal][data-stagger="3"] {
+  animation-delay: calc(var(--about-page-stagger) * 3);
+}
+.about-page [data-reveal][data-stagger="4"] {
+  animation-delay: calc(var(--about-page-stagger) * 4);
+}
+.about-page [data-reveal][data-stagger="5"] {
+  animation-delay: calc(var(--about-page-stagger) * 5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-page [data-reveal] {
+    animation: none;
+  }
+}
+
+/* Section padding (most sections) */
+
+.about-brand,
+.about-story,
+.about-founder,
+.about-heritage,
+.about-stats,
+.about-craft,
+.about-team,
+.about-why,
+.about-certs,
+.about-bespoke,
+.about-showroom {
+  padding: var(--about-page-padding-y) 0;
+  width: 100%;
+  min-width: 0;
+}

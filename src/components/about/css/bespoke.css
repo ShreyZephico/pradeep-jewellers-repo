@@ -1,0 +1,20 @@
+.about-bespoke__features {
+  margin: 1.25rem 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.about-bespoke__features li {
+  position: relative;
+  padding: 0.45rem 0 0.45rem 1.2rem;
+  font-size: 0.9375rem;
+  color: var(--about-page-muted);
+}
+
+.about-bespoke__features li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--about-page-accent);
+  font-weight: 700;
+}

@@ -1,0 +1,652 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import type { Product } from "@/types/product";
+import { formatProductPrice } from "@/utils/formatPrice";
+import { isKaratLabel, resolveKaratFromSelection } from "@/utils/karat";
+import { findBestMatchingVariant } from "@/utils/variantOptionMatch";
+import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
+import ProductCommerceActions from "@/components/productComponent/ProductCommerceActions";
+import PriceCalculationBreakdown from "@/components/productComponent/PriceCalculationBreakdown";
+import { useCart } from "@/contexts/CartContext";
+import {
+  addProductToCart,
+  handleCheckoutAuthFailure,
+  startProductCheckout,
+} from "@/lib/productCheckout";
+import productContent from "@/lib/productContent";
+import {
+  getCustomizationValidationError,
+  type CustomizationField,
+} from "@/utils/productCustomization";
+
+export { formatProductPrice };
+
+const copy = productContent.purchase;
+
+function optionClass(selected: boolean, center?: boolean, invalid?: boolean) {
+  return [
+    "product-option-btn",
+    center ? "product-option-btn--center" : "",
+    selected ? "product-option-btn--selected" : "",
+    invalid ? "product-option-btn--invalid-hint" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+export type ProductPurchasePanelProps = {
+  product: Product;
+  showDesignSummary?: boolean;
+  priceHeaderVariant?: "modal" | "page";
+  onClose?: () => void;
+  checkoutButtonLabel?: string;
+  checkoutFlow?: "customer-session" | "storefront-cart";
+};
+
+export default function ProductPurchasePanel({
+  product,
+  showDesignSummary = true,
+  priceHeaderVariant = "modal",
+  onClose,
+}: ProductPurchasePanelProps) {
+  const { refreshCart, goToCart } = useCart();
+  const [buyLoading, setBuyLoading] = useState(false);
+  const [cartLoading, setCartLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
+  const [cartToast, setCartToast] = useState("");
+  const [errorField, setErrorField] = useState<CustomizationField | null>(null);
+
+  const metalRef = useRef<HTMLElement>(null);
+  const caratRef = useRef<HTMLElement>(null);
+  const diamondRef = useRef<HTMLElement>(null);
+  const sizeRef = useRef<HTMLElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
+
+  const karatPickerOptions =
+    product.caratOptions?.length
+      ? product.caratOptions
+      : product.metalOptions?.every((o) => isKaratLabel(o.label))
+        ? product.metalOptions
+        : [];
+
+  const metalPickerOptions =
+    product.metalOptions?.filter((o) => !isKaratLabel(o.label)) ?? [];
+
+  const [selectedMetal, setSelectedMetal] = useState("");
+  const [selectedCarat, setSelectedCarat] = useState("");
+  const [selectedQuality, setSelectedQuality] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
+  const hasMetalOptions = metalPickerOptions.length > 0;
+  const hasCaratOptions = karatPickerOptions.length > 0;
+  const hasDiamondOptions = Boolean(product.diamondQualities?.length);
+  const hasSizeOptions = Boolean(product.sizeOptions?.length);
+
+  const selectKarat = (label: string) => {
+    setSelectedCarat(label);
+    if (product.metalOptions?.some((o) => o.label === label && isKaratLabel(label))) {
+      setSelectedMetal(label);
+    }
+  };
+
+  const selectedMetalOption = product.metalOptions?.find(
+    (option) => option.label === selectedMetal
+  );
+  const selectedCaratOption = product.caratOptions?.find(
+    (option) => option.label === selectedCarat
+  );
+  const selectedQualityOption = product.diamondQualities?.find(
+    (option) => option.label === selectedQuality
+  );
+  const selectedSizeOption = product.sizeOptions?.find(
+    (option) => option.size === selectedSize
+  );
+  const karatLabel = resolveKaratFromSelection(selectedMetal, selectedCarat);
+
+  const selectedVariant = findBestMatchingVariant(product.variants, {
+    metal: selectedMetal,
+    carat: selectedCarat,
+    quality: selectedQuality,
+    size: selectedSize,
+    karatLabel,
+  });
+
+  const selectedVariantId = selectedVariant?.id ?? product.variantId ?? "";
+
+  const baseWeight =
+    selectedVariant?.weight ??
+    product.variants?.find((v) => v.weight && v.weight > 0)?.weight ??
+    5;
+
+  const variantPrice = selectedVariant?.price ?? product.price;
+  const [livePrice, setLivePrice] = useState<number | null>(null);
+  const [priceBreakdown, setPriceBreakdown] = useState<VariantPriceBreakdown | null>(
+    null
+  );
+  const [priceLoading, setPriceLoading] = useState(false);
+
+  const optionAdjustments =
+    (selectedMetalOption?.priceAdjustment ?? 0) +
+    (selectedCaratOption?.priceAdjustment ?? 0) +
+    (selectedQualityOption?.priceAdjustment ?? 0) +
+    (selectedSizeOption?.priceAdjustment ?? 0);
+
+  const isPage = priceHeaderVariant === "page";
+  const isModal = !isPage;
+
+  const scrollToField = useCallback((field: CustomizationField) => {
+    const refs: Record<CustomizationField, RefObject<HTMLElement | null>> = {
+      metal: metalRef,
+      carat: caratRef,
+      diamond: diamondRef,
+      size: sizeRef,
+    };
+    const target = refs[field].current;
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    footerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, []);
+
+  const clearFeedback = useCallback(() => {
+    setCheckoutError("");
+    setCartToast("");
+    setErrorField(null);
+  }, []);
+
+  useEffect(() => {
+    clearFeedback();
+  }, [selectedMetal, selectedCarat, selectedQuality, selectedSize, clearFeedback]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLivePrice(variantPrice);
+
+    const recalculate = async () => {
+      setPriceLoading(true);
+      try {
+        const response = await fetch("/api/price/calculate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            weight: baseWeight,
+            carat: karatLabel ?? null,
+          }),
+        });
+        const data = await response.json();
+        if (!cancelled && data.success && typeof data.finalPrice === "number") {
+          setLivePrice(data.finalPrice);
+          setPriceBreakdown({
+            purity: data.purity,
+            karat: data.karat,
+            base24KGoldPrice: data.base24KGoldPrice,
+            adjustedGoldPrice: data.adjustedGoldPrice,
+            perGramRate: data.perGramRate,
+            actualGoldPrice: data.actualGoldPrice,
+            makingCharge: data.makingCharge,
+            subtotal: data.subtotal,
+            gst: data.gst,
+            finalPrice: data.finalPrice,
+          });
+        } else if (!cancelled) {
+          setLivePrice(variantPrice);
+          setPriceBreakdown(null);
+        }
+      } catch {
+        if (!cancelled) {
+          setLivePrice(variantPrice);
+          setPriceBreakdown(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setPriceLoading(false);
+        }
+      }
+    };
+
+    void recalculate();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    karatLabel,
+    baseWeight,
+    selectedMetal,
+    selectedCarat,
+    selectedQuality,
+    selectedSize,
+    variantPrice,
+  ]);
+
+  const catalogVariantIdForCheckout =
+    selectedVariantId.startsWith("gid://shopify/ProductVariant/")
+      ? undefined
+      : selectedVariant?.catalogVariantId ??
+        product.variants?.find(
+          (v) =>
+            v.catalogVariantId === selectedVariantId ||
+            v.id === selectedVariantId
+        )?.catalogVariantId;
+
+  const estimatedPrice = (livePrice ?? variantPrice) + optionAdjustments;
+  const selectedImage = selectedVariant?.image ?? product.image;
+  const listPrice = product.compareAtPrice ?? 0;
+
+  const buildLineAttributes = () => {
+    const attributes: { key: string; value: string }[] = [];
+    if (selectedMetal) attributes.push({ key: "Metal", value: selectedMetal });
+    if (selectedCarat) attributes.push({ key: "Carat", value: selectedCarat });
+    if (selectedQuality) {
+      attributes.push({ key: "Diamond Quality", value: selectedQuality });
+    }
+    if (selectedSize) attributes.push({ key: "Ring Size", value: selectedSize });
+    return attributes;
+  };
+
+  const showValidationError = (message: string, field: CustomizationField) => {
+    setCheckoutError(message);
+    setErrorField(field);
+    setCartToast("");
+    scrollToField(field);
+    footerRef.current?.focus({ preventScroll: true });
+  };
+
+  const handleCheckout = async (redirect: boolean) => {
+    const validation = getCustomizationValidationError(product, {
+      metal: selectedMetal,
+      carat: selectedCarat,
+      quality: selectedQuality,
+      size: selectedSize,
+    });
+    if (validation) {
+      showValidationError(validation.message, validation.field);
+      return;
+    }
+
+    if (!selectedVariantId) {
+      showValidationError(copy.selectOptionsError, hasSizeOptions ? "size" : "metal");
+      return;
+    }
+
+    setCheckoutError("");
+    setErrorField(null);
+    setCartToast("");
+    const setLoading = redirect ? setBuyLoading : setCartLoading;
+    setLoading(true);
+
+    if (redirect) {
+      const result = await startProductCheckout({
+        product,
+        variantId: selectedVariantId,
+        catalogVariantId: catalogVariantIdForCheckout,
+        customPrice: estimatedPrice,
+        attributes: buildLineAttributes(),
+        redirect: true,
+      });
+      setLoading(false);
+      if (!result.ok) {
+        handleCheckoutAuthFailure(result);
+        if (!result.needsLogin) {
+          setCheckoutError(result.error);
+          footerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      }
+      return;
+    }
+
+    const result = await addProductToCart({
+      product,
+      variantId: selectedVariantId,
+      catalogVariantId: catalogVariantIdForCheckout,
+      customPrice: estimatedPrice,
+      attributes: buildLineAttributes(),
+      priceBreakdown: priceBreakdown ?? undefined,
+      weightGrams: baseWeight,
+      karatLabel,
+      optionAdjustments,
+    });
+
+    setLoading(false);
+
+    if (!result.ok) {
+      handleCheckoutAuthFailure(result);
+      if (!result.needsLogin) {
+        setCheckoutError(result.error);
+        footerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+      return;
+    }
+
+    await refreshCart();
+    setCheckoutError("");
+    setErrorField(null);
+    setCartToast(productContent.commerce.addedToCart);
+    window.setTimeout(() => setCartToast(""), 3200);
+    goToCart();
+  };
+
+  const sectionInvalid = (field: CustomizationField) => errorField === field;
+
+  const priceDisplay = (
+    <div className="product-purchase-price-block">
+      <p
+        className={`product-purchase-price-label product-purchase-price-label--${
+          isPage ? "page" : "modal"
+        }`}
+      >
+        {copy.yourPrice}
+      </p>
+      <div className="product-purchase-price-row">
+        <p
+          className={`product-purchase-price-main product-purchase-price-main--${
+            isPage ? "page" : "modal"
+          }${priceLoading ? " product-purchase-price-main--loading" : ""}`}
+        >
+          {priceLoading ? copy.priceLoading : formatProductPrice(estimatedPrice)}
+        </p>
+        {listPrice > estimatedPrice ? (
+          <p className={`product-purchase-price-strike--${isPage ? "page" : "modal"}`}>
+            {formatProductPrice(listPrice)}
+          </p>
+        ) : null}
+      </div>
+      {isModal ? (
+        <p className="product-purchase-modal-gst">{copy.modalGstNote}</p>
+      ) : (
+        <p className="product-purchase-price-note">{copy.gstNote}</p>
+      )}
+    </div>
+  );
+
+  const actionFooter = (
+    <footer
+      ref={footerRef}
+      className={isModal ? "product-purchase-sticky-footer" : "product-purchase-footer"}
+      tabIndex={-1}
+    >
+      {checkoutError ? (
+        <div className="product-purchase-feedback product-purchase-feedback--error" role="alert">
+          <span className="product-purchase-feedback-icon" aria-hidden>
+            !
+          </span>
+          <p>{checkoutError}</p>
+        </div>
+      ) : null}
+
+      {cartToast ? (
+        <div className="product-purchase-feedback product-purchase-feedback--success" role="status">
+          <span className="product-purchase-feedback-icon" aria-hidden>
+            ✓
+          </span>
+          <p>{cartToast}</p>
+        </div>
+      ) : null}
+
+      {isModal ? (
+        <p className="product-purchase-footer-note">{copy.footerSecureNote}</p>
+      ) : null}
+
+      <ProductCommerceActions
+        layout={isModal ? "stack" : "row"}
+        buyLoading={buyLoading}
+        cartLoading={cartLoading}
+        onBuyNow={() => void handleCheckout(true)}
+        onAddToCart={() => void handleCheckout(false)}
+      />
+    </footer>
+  );
+
+  return (
+    <div className={`product-purchase${isModal ? " product-purchase--modal" : ""}`}>
+      {isModal ? (
+        <header className="product-purchase-modal-head">
+          <div className="product-purchase-modal-head-copy">
+            <p className="product-purchase-modal-kicker">{copy.modalKicker}</p>
+            <h2 className="product-purchase-modal-title">{copy.modalTitle}</h2>
+            <p className="product-purchase-modal-product-name">{product.name}</p>
+          </div>
+          <div className="product-purchase-modal-head-aside">
+            {priceDisplay}
+            {onClose ? (
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label={copy.closeModalAria}
+                className="product-purchase-close product-purchase-close--modal"
+              >
+                <span className="product-purchase-close-icon" aria-hidden>
+                  ×
+                </span>
+              </button>
+            ) : null}
+          </div>
+        </header>
+      ) : (
+        <div className="product-purchase-price-header product-purchase-price-header--page">
+          {priceDisplay}
+        </div>
+      )}
+
+      <div
+        className={`product-purchase-body${isModal ? " product-purchase-modal-scroll" : ""}`}
+      >
+        {showDesignSummary ? (
+          <section
+            className={`product-purchase-summary${
+              isModal ? " product-purchase-summary--modal" : ""
+            }`}
+          >
+            <div className="product-purchase-summary-img-wrap">
+              <Image
+                src={selectedImage}
+                alt={product.name}
+                width={220}
+                height={180}
+                className="product-purchase-summary-img"
+              />
+            </div>
+            <div className="product-purchase-summary-text">
+              <p className="product-purchase-summary-eyebrow">{copy.selectedDesign}</p>
+              <h3 className="product-item-title product-item-title--summary">
+                {product.name}
+              </h3>
+              {!isModal ? (
+                <p className="product-purchase-summary-desc">{product.description}</p>
+              ) : null}
+              {product.customizable ? (
+                <p className="product-purchase-custom-note">{copy.customizableNote}</p>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+
+        {hasMetalOptions ? (
+          <section
+            ref={metalRef}
+            className={`product-purchase-section${
+              sectionInvalid("metal") ? " product-purchase-section--invalid" : ""
+            }`}
+          >
+            <h3 className="product-purchase-section-title">
+              {product.metalOptionName ?? copy.metalOptionDefault}
+              <span className="product-purchase-required" aria-hidden>
+                *
+              </span>
+            </h3>
+            <div className="product-purchase-options product-purchase-options--modal">
+              {metalPickerOptions.map((option) => {
+                const isSelected = selectedMetal === option.label;
+                return (
+                  <button
+                    key={option.label}
+                    type="button"
+                    onClick={() => setSelectedMetal(option.label)}
+                    className={optionClass(isSelected, false, sectionInvalid("metal"))}
+                    aria-pressed={isSelected}
+                  >
+                    <span className="product-option-btn-label">{option.label}</span>
+                    {option.note ? (
+                      <span className="product-option-btn-note">{option.note}</span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
+
+        {hasCaratOptions ? (
+          <section
+            ref={caratRef}
+            className={`product-purchase-section${
+              sectionInvalid("carat") ? " product-purchase-section--invalid" : ""
+            }`}
+          >
+            <h3 className="product-purchase-section-title">
+              {product.caratOptionName ?? copy.caratOptionDefault}
+              <span className="product-purchase-required" aria-hidden>
+                *
+              </span>
+            </h3>
+            <p className="product-purchase-section-hint">{copy.caratHint}</p>
+            <div className="product-purchase-options product-purchase-options--modal">
+              {karatPickerOptions.map((option) => {
+                const isSelected =
+                  selectedCarat === option.label ||
+                  (isKaratLabel(option.label) && selectedMetal === option.label);
+                return (
+                  <button
+                    key={option.label}
+                    type="button"
+                    onClick={() => selectKarat(option.label)}
+                    className={optionClass(isSelected, false, sectionInvalid("carat"))}
+                    aria-pressed={isSelected}
+                  >
+                    <span className="product-option-btn-label">{option.label}</span>
+                    {option.note ? (
+                      <span className="product-option-btn-note">{option.note}</span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
+
+        {hasDiamondOptions ? (
+          <section
+            ref={diamondRef}
+            className={`product-purchase-section${
+              sectionInvalid("diamond") ? " product-purchase-section--invalid" : ""
+            }`}
+          >
+            <div className="product-purchase-section-header">
+              <h3 className="product-purchase-section-title">
+                {product.diamondOptionName ?? copy.diamondOptionDefault}
+                <span className="product-purchase-required" aria-hidden>
+                  *
+                </span>
+              </h3>
+              <Link
+                href="/diamond-guide"
+                className="product-purchase-guide-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {copy.diamondGuide}
+              </Link>
+            </div>
+            <div className="product-purchase-options product-purchase-options--modal">
+              {product.diamondQualities?.map((option) => {
+                const isSelected = selectedQuality === option.label;
+                return (
+                  <button
+                    key={option.label}
+                    type="button"
+                    onClick={() => setSelectedQuality(option.label)}
+                    className={optionClass(isSelected, false, sectionInvalid("diamond"))}
+                    aria-pressed={isSelected}
+                  >
+                    <span className="product-option-btn-label">{option.label}</span>
+                    {option.note ? (
+                      <span className="product-option-btn-note">{option.note}</span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
+
+        {hasSizeOptions ? (
+          <section
+            ref={sizeRef}
+            className={`product-purchase-section${
+              sectionInvalid("size") ? " product-purchase-section--invalid" : ""
+            }`}
+          >
+            <div className="product-purchase-section-header">
+              <h3 className="product-purchase-section-title">
+                {product.sizeOptionName ?? copy.sizeOptionDefault}
+                <span className="product-purchase-required" aria-hidden>
+                  *
+                </span>
+              </h3>
+              <a
+                href="https://workdrive.zohoexternal.in/external/80ca836e76f8383e2afda8491fcd9ded5ffe8cfa495029d905efa26a121f6c52/download"
+                className="product-purchase-guide-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {copy.sizeGuide}
+              </a>
+            </div>
+            <div className="product-purchase-options product-purchase-options--size product-purchase-options--modal">
+              {product.sizeOptions?.map((option) => {
+                const isSelected = selectedSize === option.size;
+                return (
+                  <button
+                    key={option.size}
+                    type="button"
+                    onClick={() => setSelectedSize(option.size)}
+                    className={optionClass(isSelected, true, sectionInvalid("size"))}
+                    aria-pressed={isSelected}
+                  >
+                    <span className="product-option-btn-size">{option.size}</span>
+                    {option.mm ? (
+                      <span className="product-option-btn-mm">{option.mm}</span>
+                    ) : null}
+                    {option.note ? (
+                      <span className="product-option-btn-note product-option-btn-note--sm">
+                        {option.note}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
+      </div>
+
+      {isPage ? (
+        <>
+          <PriceCalculationBreakdown
+            breakdown={priceBreakdown}
+            weightGrams={baseWeight}
+            karatLabel={karatLabel}
+            loading={priceLoading}
+            optionAdjustments={optionAdjustments}
+            displayTotal={estimatedPrice}
+          />
+          {actionFooter}
+        </>
+      ) : (
+        actionFooter
+      )}
+    </div>
+  );
+}
