@@ -634,6 +634,21 @@
   --learn-image-hover: var(--featured-image-hover);
   --learn-serif: var(--featured-serif);
 
+  /* Learn article pages */
+  --learn-page-bg: var(--learn-bg);
+  --learn-page-hero-min-h: clamp(14rem, 32vh, 22rem);
+  --learn-page-title-size: clamp(1.65rem, 4.5vw, 2.75rem);
+  --learn-page-intro-size: clamp(1rem, 2.2vw, 1.125rem);
+  --learn-page-body-size: clamp(0.9375rem, 2vw, 1.0625rem);
+  --learn-page-section-title-size: clamp(1.15rem, 2.5vw, 1.4rem);
+  --learn-page-content-max: 42rem;
+  --learn-page-layout-max: 72rem;
+  --learn-page-section-gap: clamp(2rem, 4vh, 3rem);
+  --learn-page-padding-y: clamp(2rem, 5vh, 4rem);
+  --learn-page-related-gap: 1rem;
+  --learn-page-takeaway-bg: var(--learn-accent-bg);
+  --learn-page-takeaway-border: var(--learn-accent-border);
+
   /* Founder section */
   --founder-bg: #fdfcf8;
   --founder-ink: #333333;
