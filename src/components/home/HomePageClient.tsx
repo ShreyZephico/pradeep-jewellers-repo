@@ -1,11 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
+import { HOME_REFETCH_EVENT } from "@/lib/homeRefetch";
+
 import HeroSection from "@/components/home/HeroSection";
-import LegacySection from "@/components/home/LegacySection";
 import CollectionsSection from "@/components/home/CollectionsSection";
 import FeaturedProductsSection from "@/components/home/FeaturedProductsSection";
+
 const CallbackLeadSection = dynamic(
   () => import("@/components/home/CallbackLeadSection"),
   {
@@ -16,38 +19,33 @@ const CallbackLeadSection = dynamic(
         style={{ minHeight: "14rem" }}
       />
     ),
-    ssr: false,
   }
 );
 
 const CuratedSection = dynamic(
-  () => import("@/components/home/CuratedSection"),
-  { loading: () => null }
+  () => import("@/components/home/CuratedSection")
 );
+
 const BespokeSection = dynamic(
-  () => import("@/components/home/BespokeSection"),
-  { loading: () => null }
+  () => import("@/components/home/BespokeSection")
 );
+
 const GiftingSection = dynamic(
-  () => import("@/components/home/GiftingSection"),
-  { loading: () => null }
+  () => import("@/components/home/GiftingSection")
 );
+
 const PricingSection = dynamic(
-  () => import("@/components/home/PricingSection"),
-  { loading: () => null }
+  () => import("@/components/home/PricingSection")
 );
+
 const GoldSchemeSection = dynamic(
-  () => import("@/components/home/GoldSchemeSection"),
-  { loading: () => null }
+  () => import("@/components/home/GoldSchemeSection")
 );
+
 const LearnSection = dynamic(
-  () => import("@/components/home/LearnSection"),
-  { loading: () => null }
+  () => import("@/components/home/LearnSection")
 );
-const FounderSection = dynamic(
-  () => import("@/components/home/FounderSection"),
-  { loading: () => null }
-);
+
 const TestimonialsSection = dynamic(
   () => import("@/components/home/TestimonialsSection"),
   {
@@ -58,44 +56,51 @@ const TestimonialsSection = dynamic(
         style={{ minHeight: "12rem" }}
       />
     ),
-    ssr: false,
   }
 );
+
 const SocialSection = dynamic(
-  () => import("@/components/home/SocialSection"),
-  { loading: () => null }
+  () => import("@/components/home/SocialSection")
 );
 
 export default function HomePageClient() {
+  const [sectionKey, setSectionKey] = useState(0);
+
+  useEffect(() => {
+    const bump = () => setSectionKey((k) => k + 1);
+
+    window.addEventListener(HOME_REFETCH_EVENT, bump);
+
+    return () => window.removeEventListener(HOME_REFETCH_EVENT, bump);
+  }, []);
+
+  const k = sectionKey;
+
   return (
     <>
       <HeroSection />
 
-      {/* <LegacySection /> */}
-
       <CollectionsSection />
 
-      <FeaturedProductsSection />
+      <FeaturedProductsSection key={`featured-${k}`} />
 
-      <CuratedSection />
+      <CuratedSection key={`curated-${k}`} />
 
-      <BespokeSection />
+      <BespokeSection key={`bespoke-${k}`} />
 
-      <GiftingSection />
+      <GiftingSection key={`gifting-${k}`} />
 
-      <PricingSection />
+      <PricingSection key={`pricing-${k}`} />
 
-      <GoldSchemeSection />
+      <GoldSchemeSection key={`gold-scheme-${k}`} />
 
-      <CallbackLeadSection />
+      <CallbackLeadSection key={`callback-${k}`} />
 
-      <LearnSection />
+      <LearnSection key={`learn-${k}`} />
 
-      {/* <FounderSection /> */}
+      <TestimonialsSection key={`testimonials-${k}`} />
 
-      <TestimonialsSection />
-
-      <SocialSection />
+      <SocialSection key={`social-${k}`} />
     </>
   );
 }

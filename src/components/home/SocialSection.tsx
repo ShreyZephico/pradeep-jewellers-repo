@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import data from "@/data/contactDatas.json";
+import { HOME_REFETCH_EVENT } from "@/lib/homeRefetch";
 import { normalizeIndianMobile } from "@/utils/indianPhone";
 
 import "./css/social.css";
@@ -103,6 +104,12 @@ export default function SocialSection() {
     }
 
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const reveal = () => setVisible(true);
+    window.addEventListener(HOME_REFETCH_EVENT, reveal);
+    return () => window.removeEventListener(HOME_REFETCH_EVENT, reveal);
   }, []);
 
   async function handleBroadcast(e: FormEvent<HTMLFormElement>) {

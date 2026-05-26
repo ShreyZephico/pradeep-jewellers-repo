@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import { saveReturnPath } from "@/lib/authRedirect";
+import { HOME_REFETCH_EVENT } from "@/lib/homeRefetch";
 
 export const AUTH_CHANGED_EVENT = "customer-auth-changed";
 
@@ -110,12 +111,18 @@ export function CustomerAuthProvider({
       void refreshAuth();
     };
 
+    const onHomeRefetch = () => {
+      void refreshAuth();
+    };
+
     window.addEventListener(AUTH_CHANGED_EVENT, onAuthChange);
     window.addEventListener("focus", onAuthChange);
+    window.addEventListener(HOME_REFETCH_EVENT, onHomeRefetch);
 
     return () => {
       window.removeEventListener(AUTH_CHANGED_EVENT, onAuthChange);
       window.removeEventListener("focus", onAuthChange);
+      window.removeEventListener(HOME_REFETCH_EVENT, onHomeRefetch);
     };
   }, [refreshAuth]);
 

@@ -148,6 +148,7 @@ export default function CallbackLeadSection() {
 
   return (
     <section
+      id="callback"
       ref={sectionRef}
       className="callback-lead-section"
       aria-labelledby="callback-lead-heading"

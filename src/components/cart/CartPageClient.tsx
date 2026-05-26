@@ -233,6 +233,7 @@ export default function CartPageClient() {
                   )}
                 </button>
                 <p className="cart-page-secure">{copy.secureNote}</p>
+                <p className="cart-page-login-note">{copy.loginAtCheckoutNote}</p>
               </div>
             </aside>
           </div>

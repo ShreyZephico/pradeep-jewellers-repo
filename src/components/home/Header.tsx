@@ -193,11 +193,6 @@ export default function Header() {
   };
 
   const openCart = () => {
-    if (!isLoggedIn) {
-      saveReturnPath();
-      router.push("/login");
-      return;
-    }
     goToCart();
   };
 
@@ -298,7 +293,7 @@ export default function Header() {
               className="site-header__icon-btn site-header__cart header-cart-btn"
               onClick={openCart}
               aria-label={
-                isLoggedIn && cartQty > 0
+                cartQty > 0
                   ? `${cartCopy.openCart} (${cartQty} items)`
                   : cartCopy.openCart
               }
@@ -306,7 +301,7 @@ export default function Header() {
             >
               <span className="header-cart-icon-wrap">
                 <ShoppingBag size={20} strokeWidth={1.75} aria-hidden />
-                {isLoggedIn && cartQty > 0 ? (
+                {cartQty > 0 ? (
                   <span className="header-cart-badge" aria-hidden>
                     {cartQty > 99 ? "99+" : cartQty}
                   </span>
@@ -430,7 +425,7 @@ export default function Header() {
             >
               <ShoppingBag size={18} aria-hidden />
               {cartCopy.pageTitle}
-              {isLoggedIn && cartQty > 0 ? (
+              {cartQty > 0 ? (
                 <span className="header-cart-badge">{cartQty}</span>
               ) : null}
             </button>
