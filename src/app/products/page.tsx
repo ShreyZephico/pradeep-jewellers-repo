@@ -1,17 +1,15 @@
-import { Suspense } from "react";
+import ProductsListShell from "@/components/productComponent/ProductsListShell";
 
-import ProductsPageClient from "@/components/ProductsPageClient";
+export const dynamic = "force-dynamic";
 
-export default function ProductsPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="product-page product-page--collection product-state-center">
-          Loading collection…
-        </div>
-      }
-    >
-      <ProductsPageClient />
-    </Suspense>
-  );
+type PageProps = {
+  searchParams: Promise<{ q?: string | string[] }>;
+};
+
+export default async function ProductsPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const raw = params.q;
+  const initialQuery = (Array.isArray(raw) ? raw[0] : raw)?.trim() ?? "";
+
+  return <ProductsListShell initialQuery={initialQuery} />;
 }

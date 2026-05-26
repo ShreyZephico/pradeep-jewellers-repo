@@ -313,7 +313,15 @@
   text-align: center;
 }
 
-/* ── Search panel ── */
+/* ── Nav product search (HeaderNavSearch) ── */
+
+.site-header__search-slot {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* ── Legacy search panel (unused in Header.tsx) ── */
 
 .site-header__search-backdrop {
   position: fixed;

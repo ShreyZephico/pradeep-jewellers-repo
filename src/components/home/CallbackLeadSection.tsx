@@ -214,7 +214,6 @@ export default function CallbackLeadSection() {
                 onSubmit={handleSubmit}
                 className={formClassName}
                 noValidate
-                suppressHydrationWarning
               >
                 {error ? (
                   <p
@@ -245,7 +244,6 @@ export default function CallbackLeadSection() {
                       id="callback-name"
                       type="text"
                       autoComplete="name"
-                      suppressHydrationWarning
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder={s.fields.namePlaceholder}
@@ -264,7 +262,6 @@ export default function CallbackLeadSection() {
                       id="callback-email"
                       type="email"
                       autoComplete="email"
-                      suppressHydrationWarning
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder={s.fields.emailPlaceholder}
@@ -295,7 +292,6 @@ export default function CallbackLeadSection() {
                         type="tel"
                         inputMode="numeric"
                         autoComplete="tel"
-                        suppressHydrationWarning
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder={s.fields.phonePlaceholder}
@@ -314,7 +310,6 @@ export default function CallbackLeadSection() {
                     <select
                       id="callback-time"
                       value={preferredTime}
-                      suppressHydrationWarning
                       onChange={(e) => setPreferredTime(e.target.value)}
                       className="callback-lead-section__select"
                     >
@@ -342,7 +337,6 @@ export default function CallbackLeadSection() {
                   <textarea
                     id="callback-message"
                     rows={3}
-                    suppressHydrationWarning
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder={s.fields.messagePlaceholder}
@@ -359,7 +353,6 @@ export default function CallbackLeadSection() {
                   <button
                     type="submit"
                     disabled={loading}
-                    suppressHydrationWarning
                     className="callback-lead-section__submit"
                   >
                     {loading ? "Sending…" : s.submitText}

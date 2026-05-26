@@ -10,20 +10,6 @@ export type VerifiedCartAuth = {
   customerEmail: string | null;
 };
 
-/** Guest cart allowed — returns token when logged in. */
-export function getOptionalCartAuth(
-  request: Request
-): { customerAccessToken?: string; customerEmail?: string | null } {
-  const auth = getCheckoutAuthFromRequest(request);
-  if (!auth?.customerAccessToken) {
-    return {};
-  }
-  return {
-    customerAccessToken: auth.customerAccessToken,
-    customerEmail: auth.email ?? null,
-  };
-}
-
 export async function requireCartAuth(
   request: Request
 ): Promise<VerifiedCartAuth | NextResponse> {

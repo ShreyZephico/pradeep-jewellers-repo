@@ -37,6 +37,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const refreshCart = useCallback(async () => {
+    if (!isAuthenticated) {
+      setCart(emptyCart);
+      return;
+    }
     setLoading(true);
     try {
       const response = await fetch("/api/cart", {
@@ -58,11 +62,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const goToCart = useCallback(() => {
     router.push("/cart");
   }, [router]);
+
+  const setAuthenticated = useCallback((authenticated: boolean) => {
+    setIsAuthenticated(authenticated);
+    if (!authenticated) {
+      setCart(emptyCart);
+    }
+  }, []);
 
   useEffect(() => {
     fetch("/api/auth/check", { credentials: "include" })
@@ -88,12 +99,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       loading,
       refreshCart,
       goToCart,
-      setAuthenticated: (authenticated: boolean) => {
-        setIsAuthenticated(authenticated);
-        if (!authenticated) setCart(emptyCart);
-      },
+      setAuthenticated,
     }),
-    [cart, loading, refreshCart, goToCart]
+    [cart, loading, refreshCart, goToCart, setAuthenticated]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

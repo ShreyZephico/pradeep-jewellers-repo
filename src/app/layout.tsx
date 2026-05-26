@@ -9,6 +9,7 @@ import GoogleOneTapShell from "@/components/GoogleOneTapShell";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
 
+import CheckoutFinalizeBridge from "@/components/CheckoutFinalizeBridge";
 import { CartProvider } from "@/contexts/CartContext";
 import { CustomerAuthProvider } from "@/contexts/CustomerAuthContext";
 import { GoldRatesProvider } from "@/contexts/GoldRatesContext";

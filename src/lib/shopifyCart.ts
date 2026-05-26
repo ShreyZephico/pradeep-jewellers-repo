@@ -308,6 +308,18 @@ export async function updateCartLineQuantity(
   return mapCart(data.cartLinesUpdate.cart);
 }
 
+/** Remove every line from a Storefront cart (used after paid checkout). */
+export async function emptyShopifyCart(cartId: string): Promise<CartSnapshot | null> {
+  const cart = await fetchCart(cartId);
+  if (!cart?.lines.length) {
+    return cart;
+  }
+  return removeCartLines(
+    cartId,
+    cart.lines.map((line) => line.id)
+  );
+}
+
 export async function removeCartLines(
   cartId: string,
   lineIds: string[]
