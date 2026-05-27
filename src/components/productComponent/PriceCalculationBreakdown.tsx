@@ -89,13 +89,19 @@ export default function PriceCalculationBreakdown({
       ) : null}
 
       <div className="product-breakdown-table">
-
-
+        <BreakdownRow
+          label={copy.goldRate24k}
+          value={formatProductPrice(breakdown.base24KGoldPrice)}
+        />
+        <BreakdownRow
+          label={formatProductCopy(copy.goldPurity, { purity: purityLabel })}
+          value={formatProductPrice(breakdown.adjustedGoldPrice)}
+        />
         <BreakdownRow
           label={copy.weight}
           value={`${weightGrams} ${copy.weightUnit}`}
         />
-                <BreakdownRow
+        <BreakdownRow
           label={copy.ratePerGram}
           value={`${formatProductPrice(breakdown.perGramRate)}${copy.perGramSuffix}`}
         />

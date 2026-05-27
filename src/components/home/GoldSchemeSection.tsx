@@ -2,9 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import data from "@/data/contactDatas.json";
+import { useCountdown } from "@/hooks/useCountdown";
+import {
+  padCountdownUnit,
+  resolveClearanceCountdown,
+} from "@/lib/goldSchemeCountdown";
 
 import "./css/gold-scheme.css";
 
@@ -13,25 +18,6 @@ function formatInr(amount: number): string {
     maximumFractionDigits: 0,
     minimumFractionDigits: 0,
   }).format(Math.round(amount))}`;
-}
-
-function resolveClearanceEndMs(endIso: string, countdownDays: number): number {
-  const days = Math.max(1, countdownDays);
-  const cycleMs = days * 86_400_000;
-  const configured = new Date(endIso).getTime();
-  if (Number.isNaN(configured)) {
-    return Date.now() + cycleMs;
-  }
-  let end = configured;
-  const now = Date.now();
-  while (end <= now) {
-    end += cycleMs;
-  }
-  return end;
-}
-
-function getRemainingMs(endIso: string, countdownDays: number): number {
-  return Math.max(0, resolveClearanceEndMs(endIso, countdownDays) - Date.now());
 }
 
 function FlameIcon({ className }: { className?: string }) {
@@ -86,36 +72,17 @@ export default function GoldSchemeSection() {
   const section = data.goldSchemeSection;
   const scheme = section.schemeCard;
   const clearance = section.clearancePanel;
+  const countdownConfig = useMemo(
+    () => resolveClearanceCountdown(clearance),
+    [clearance]
+  );
+  const countdown = useCountdown(countdownConfig);
 
   const [contribution, setContribution] = useState(scheme.defaultContribution);
-  const countdownDays = clearance.countdownDays ?? 2;
-
-  const [remainingMs, setRemainingMs] = useState(() =>
-    getRemainingMs(clearance.endsAt, countdownDays)
-  );
-
-  useEffect(() => {
-    const tick = () =>
-      setRemainingMs(getRemainingMs(clearance.endsAt, countdownDays));
-    tick();
-    const id = window.setInterval(tick, 1000);
-    return () => window.clearInterval(id);
-  }, [clearance.endsAt, countdownDays]);
-
-  const time = useMemo(() => {
-    const sec = Math.floor(remainingMs / 1000);
-    const days = Math.floor(sec / 86400);
-    const hours = Math.floor((sec % 86400) / 3600);
-    const minutes = Math.floor((sec % 3600) / 60);
-    const seconds = sec % 60;
-    return { days, hours, minutes, seconds };
-  }, [remainingMs]);
 
   const youPay = contribution * scheme.paidMonthsCount;
   const weAdd = contribution;
   const totalValue = contribution * (scheme.paidMonthsCount + 1);
-
-  const pad = (n: number) => String(n).padStart(2, "0");
 
   const stats = [
     { value: formatInr(youPay), label: scheme.youPayCaption, highlight: false },
@@ -124,11 +91,15 @@ export default function GoldSchemeSection() {
   ];
 
   const countdownUnits = [
-    { value: time.days, label: clearance.daysLabel },
-    { value: time.hours, label: clearance.hoursLabel },
-    { value: time.minutes, label: clearance.minutesLabel },
-    { value: time.seconds, label: clearance.secondsLabel },
+    { value: countdown.days, label: countdownConfig.daysLabel },
+    { value: countdown.hours, label: countdownConfig.hoursLabel },
+    { value: countdown.minutes, label: countdownConfig.minutesLabel },
+    { value: countdown.seconds, label: countdownConfig.secondsLabel },
   ];
+
+  const showExpired =
+    countdown.isReady &&
+    (countdown.isExpired || !countdownConfig.isConfigured || countdown.isInvalid);
 
   return (
     <section
@@ -245,25 +216,35 @@ export default function GoldSchemeSection() {
               </p>
             </div>
 
-            <div className="gold-scheme-section__countdown">
-              {countdownUnits.map((u, index) => (
-                <div
-                  key={u.label}
-                  className="gold-scheme-section__countdown-unit"
-                  style={{ "--unit-index": index } as CSSProperties}
-                >
-                  <span
-                    className="gold-scheme-section__countdown-value"
-                    suppressHydrationWarning
+            {showExpired ? (
+              <p className="gold-scheme-section__countdown-expired">
+                {countdownConfig.expiredMessage}
+              </p>
+            ) : (
+              <div
+                className="gold-scheme-section__countdown"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {countdownUnits.map((u, index) => (
+                  <div
+                    key={u.label}
+                    className="gold-scheme-section__countdown-unit"
+                    style={{ "--unit-index": index } as CSSProperties}
                   >
-                    {pad(u.value)}
-                  </span>
-                  <span className="gold-scheme-section__countdown-label">
-                    {u.label}
-                  </span>
-                </div>
-              ))}
-            </div>
+                    <span
+                      className="gold-scheme-section__countdown-value"
+                      suppressHydrationWarning
+                    >
+                      {countdown.isReady ? padCountdownUnit(u.value) : "--"}
+                    </span>
+                    <span className="gold-scheme-section__countdown-label">
+                      {u.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="gold-scheme-section__products">
               {clearance.products.map((p, index) => (

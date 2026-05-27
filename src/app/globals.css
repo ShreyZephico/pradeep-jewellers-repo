@@ -209,6 +209,55 @@
   --not-found-enter: 0.6s;
   --not-found-ease: cubic-bezier(0.22, 1, 0.36, 1);
 
+  /* Login page (/login) — matches Learn section & header palette */
+  --login-page-bg: var(--learn-bg);
+  --login-page-bg-soft: var(--color-warm-ivory);
+  --login-page-bg-end: var(--color-off-white);
+  --login-page-glow-gold: rgb(197 160 89 / 0.14);
+  --login-page-glow-warm: rgb(var(--color-warm-ivory-rgb) / 0.85);
+  --login-page-grid-line: rgb(var(--learn-ink-rgb) / 0.05);
+  --login-page-card-bg: var(--learn-card-bg);
+  --login-page-card-border: var(--learn-card-border);
+  --login-page-card-shadow: var(--learn-card-shadow);
+  --login-page-card-shadow-hover: var(--learn-card-shadow-hover);
+  --login-page-ink: var(--learn-ink);
+  --login-page-ink-muted: var(--learn-text-muted);
+  --login-page-ink-faint: var(--learn-text-faint);
+  --login-page-accent: var(--learn-accent);
+  --login-page-accent-deep: var(--gold-scheme-accent-deep);
+  --login-page-accent-hover: var(--header-accent-hover);
+  --login-page-accent-text: var(--color-pure-white);
+  --login-page-input-bg: var(--color-pure-white);
+  --login-page-input-border: var(--learn-card-border);
+  --login-page-input-focus: var(--learn-card-border-hover);
+  --login-page-icon-fill: var(--learn-accent-bg);
+  --login-page-icon-stroke: var(--learn-accent);
+  --login-page-icon-border: var(--learn-accent-border);
+  --login-page-error-bg: rgb(var(--color-error-rgb) / 0.08);
+  --login-page-error-border: rgb(var(--color-error-rgb) / 0.25);
+  --login-page-error-text: var(--color-error-dark);
+  --login-page-badge-bg: var(--learn-accent-bg);
+  --login-page-badge-text: var(--learn-accent);
+  --login-page-badge-border: var(--learn-accent-border);
+  --login-page-divider: var(--learn-card-footer-border);
+  --login-page-layout-max: 28rem;
+  --login-page-padding: clamp(1.25rem, 4vw, 2rem);
+  --login-page-radius: 0.75rem;
+  --login-page-radius-sm: var(--learn-card-radius);
+  --login-page-serif: var(--learn-serif, var(--featured-serif));
+  --login-page-badge-tracking: var(--learn-badge-tracking);
+  --login-page-transition: 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  --login-page-enter: 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  --login-page-stagger: 0.08s;
+  --login-page-float-duration: 9s;
+  --login-page-shimmer-duration: 4.5s;
+  --login-page-success-bg: rgb(var(--color-success-rgb) / 0.1);
+  --login-page-success-border: rgb(var(--color-success-rgb) / 0.28);
+  --login-page-success-text: var(--color-success-dark);
+
+  /* Signup page (/signup) — extends login auth tokens */
+  --signup-page-layout-max: 26.5rem;
+
   /* Collections section — shared palette */
   --collections-bg: var(--color-off-white);
   --collections-heading: var(--color-charcoal);
@@ -608,10 +657,15 @@
   --learn-accent-border: rgb(197 160 89 / 0.25);
   --learn-accent-bg: rgb(197 160 89 / 0.1);
   --learn-card-bg: var(--color-pure-white);
-  --learn-card-border: rgb(var(--learn-ink-rgb) / 0.12);
-  --learn-card-border-hover: rgb(197 160 89 / 0.35);
-  --learn-card-shadow: 0 2px 24px rgb(var(--learn-ink-rgb) / 0.04);
-  --learn-card-shadow-hover: 0 12px 40px rgb(var(--learn-ink-rgb) / 0.08);
+  --learn-card-radius: 0.5rem;
+  --learn-card-border: rgb(var(--learn-ink-rgb) / 0.1);
+  --learn-card-border-hover: rgb(197 160 89 / 0.4);
+  --learn-card-shadow: 0 1px 2px rgb(var(--learn-ink-rgb) / 0.04),
+    0 8px 24px rgb(var(--learn-ink-rgb) / 0.05);
+  --learn-card-shadow-hover: 0 4px 12px rgb(var(--learn-ink-rgb) / 0.06),
+    0 16px 40px rgb(197 160 89 / 0.12);
+  --learn-icon-size: 2.75rem;
+  --learn-icon-svg-size: 1.35rem;
   --learn-card-footer-border: rgb(var(--learn-ink-rgb) / 0.06);
   --learn-padding-y: clamp(2.5rem, 6vh, 7rem);
   --learn-header-gap: clamp(2.5rem, 5vh, 4rem);
@@ -927,20 +981,6 @@ body {
   color: #9aa0a6;
 }
 
-.google-one-tap-fallback__error {
-  margin: 0 0 0.5rem;
-  text-align: center;
-  font-size: 0.75rem;
-  color: #f28b82;
-}
-
-.google-one-tap-fallback__gsi-btn {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 0.5rem;
-  min-height: 44px;
-}
-
 .google-one-tap-fallback__cta {
   width: 100%;
   padding: 0.625rem 1rem;
@@ -954,27 +994,8 @@ body {
   transition: background 0.15s ease;
 }
 
-.google-one-tap-fallback__popup-link {
-  display: block;
-  width: 100%;
-  margin-top: 0.5rem;
-  padding: 0.35rem 0;
-  border: none;
-  background: transparent;
-  color: #8ab4f8;
-  font-size: 0.75rem;
-  text-align: center;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.google-one-tap-fallback__popup-link:hover:not(:disabled) {
-  color: #aecbfb;
-}
-
-.google-one-tap-fallback__popup-link:disabled {
-  opacity: 0.6;
-  cursor: wait;
+.google-one-tap-fallback__cta:hover:not(:disabled) {
+  background: #1765cc;
 }
 
 .google-one-tap-fallback__cta:disabled {

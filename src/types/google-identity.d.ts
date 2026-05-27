@@ -24,19 +24,9 @@ interface GooglePromptMomentNotification {
   getDismissedReason: () => string;
 }
 
-interface GoogleButtonConfiguration {
-  type?: string;
-  theme?: string;
-  size?: string;
-  text?: string;
-  width?: number;
-  shape?: string;
-}
-
 interface GoogleAccountsId {
   initialize: (config: GoogleIdConfiguration) => void;
   prompt: (momentListener?: (notification: GooglePromptMomentNotification) => void) => void;
-  renderButton: (parent: HTMLElement, options: GoogleButtonConfiguration) => void;
   cancel: () => void;
   disableAutoSelect: () => void;
 }

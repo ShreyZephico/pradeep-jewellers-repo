@@ -11,8 +11,6 @@ const BRAND_NAME = contactData.brand.name;
 
 type LiveChatLauncherProps = {
   collapsed: boolean;
-  /** Hide launcher visually while profile modal is open (chat still opening). */
-  hidden?: boolean;
   onCollapse: () => void;
   onExpand: () => void;
   onOpenChat: () => void;
@@ -20,7 +18,6 @@ type LiveChatLauncherProps = {
 
 export default function LiveChatLauncher({
   collapsed,
-  hidden = false,
   onCollapse,
   onExpand,
   onOpenChat,
@@ -29,15 +26,14 @@ export default function LiveChatLauncher({
 
   if (collapsed) {
     return (
-      <div
-        className={`live-chat live-chat--collapsed${hidden ? ' live-chat--hidden' : ''}`}
-        aria-live="polite"
-        aria-hidden={hidden}
-      >
+      <div className="live-chat live-chat--collapsed" aria-live="polite">
         <button
           type="button"
           className="live-chat__tab"
-          onClick={onExpand}
+          onClick={() => {
+            onExpand();
+            onOpenChat();
+          }}
           aria-label="Open live chat"
         >
           <span className="live-chat__tab-label">Live Chat</span>
@@ -48,10 +44,9 @@ export default function LiveChatLauncher({
 
   return (
     <div
-      className={`live-chat live-chat--expanded${hidden ? ' live-chat--hidden' : ''}`}
+      className="live-chat live-chat--expanded"
       role="complementary"
       aria-label="Live chat invitation"
-      aria-hidden={hidden}
     >
       <button
         type="button"

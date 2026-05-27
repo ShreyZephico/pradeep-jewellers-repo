@@ -927,6 +927,7 @@ export async function createStorefrontCartCheckout(
 type DraftOrderCreateResponse = {
   draftOrderCreate: {
     draftOrder: {
+      id: string;
       invoiceUrl: string;
     } | null;
     userErrors: {
@@ -936,10 +937,19 @@ type DraftOrderCreateResponse = {
   };
 };
 
+type DraftOrderStatusResponse = {
+  draftOrder: {
+    id: string;
+    status: string;
+    order: { id: string } | null;
+  } | null;
+};
+
 const DRAFT_ORDER_CREATE_MUTATION = `
   mutation DraftOrderCreate($input: DraftOrderInput!) {
     draftOrderCreate(input: $input) {
       draftOrder {
+        id
         invoiceUrl
       }
       userErrors {
@@ -949,6 +959,34 @@ const DRAFT_ORDER_CREATE_MUTATION = `
     }
   }
 `;
+
+const DRAFT_ORDER_STATUS_QUERY = `
+  query DraftOrderStatus($id: ID!) {
+    draftOrder(id: $id) {
+      id
+      status
+      order {
+        id
+      }
+    }
+  }
+`;
+
+export type DraftCheckoutResult = {
+  invoiceUrl: string;
+  draftOrderId: string;
+};
+
+function getStorefrontSiteOrigin(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (fromEnv) {
+    return fromEnv.replace(/\/+$/, "");
+  }
+  if (process.env.VERCEL_URL?.trim()) {
+    return `https://${process.env.VERCEL_URL.trim().replace(/\/+$/, "")}`;
+  }
+  return "http://localhost:3000";
+}
 
 type CreateDraftCheckoutInput = {
   productName: string;
@@ -974,7 +1012,7 @@ export async function createDraftCheckout({
   attributes,
   customerEmail,
 }: CreateDraftCheckoutInput): Promise<string> {
-  return createDraftCheckoutFromLines({
+  const result = await createDraftCheckoutFromLines({
     customerEmail,
     lines: [
       {
@@ -986,6 +1024,7 @@ export async function createDraftCheckout({
       },
     ],
   });
+  return result.invoiceUrl;
 }
 
 /** Draft invoice for cart lines at gold-calculated INR prices (requires Admin API). */
@@ -995,7 +1034,7 @@ export async function createDraftCheckoutFromLines({
 }: {
   lines: DraftCheckoutLineItem[];
   customerEmail?: string;
-}): Promise<string> {
+}): Promise<DraftCheckoutResult> {
   if (!lines.length) {
     throw new Error("Cart is empty.");
   }
@@ -1010,8 +1049,10 @@ export async function createDraftCheckoutFromLines({
     "zephico",
     "cart-checkout",
   ]);
+  const returnUrl = `${getStorefrontSiteOrigin()}/checkout/return`;
   const noteParts = [
     "Custom jewellery order from Pradeep Jewellers website.",
+    `Return to shop after payment: ${returnUrl}`,
   ];
 
   const lineItems = lines.map((line) => {
@@ -1050,10 +1091,35 @@ export async function createDraftCheckoutFromLines({
 
   const error = data.draftOrderCreate.userErrors[0];
   if (error) throw new Error(error.message);
-  if (!data.draftOrderCreate.draftOrder?.invoiceUrl) {
+  const draftOrder = data.draftOrderCreate.draftOrder;
+  if (!draftOrder?.invoiceUrl || !draftOrder.id) {
     throw new Error("Shopify did not return a draft order payment URL.");
   }
-  return data.draftOrderCreate.draftOrder.invoiceUrl;
+  return {
+    invoiceUrl: draftOrder.invoiceUrl,
+    draftOrderId: draftOrder.id,
+  };
+}
+
+/** True when the draft invoice was paid and converted to an order. */
+export async function isDraftOrderPaid(draftOrderId: string): Promise<boolean> {
+  if (!adminToken) return false;
+
+  const id = draftOrderId.trim();
+  if (!id.startsWith("gid://shopify/DraftOrder/")) {
+    return false;
+  }
+
+  const data = await shopifyAdminFetch<DraftOrderStatusResponse>(
+    DRAFT_ORDER_STATUS_QUERY,
+    { id }
+  );
+
+  const draft = data.draftOrder;
+  if (!draft) return false;
+
+  if (draft.order?.id) return true;
+  return draft.status === "COMPLETED";
 }
 
 function buildShopifyProductsSearchQuery(q: string, category: string): string | undefined {

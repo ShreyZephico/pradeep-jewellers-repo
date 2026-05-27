@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/types/product";
-import ProductCommerceActions from "@/components/ProductCommerceActions";
-import ProductContentModal from "@/components/ProductContentModal";
-import ProductModal from "@/components/ProductModal";
+import ProductCommerceActions from "@/components/productComponent/ProductCommerceActions";
+import ProductContentModal from "@/components/productComponent/ProductContentModal";
+import ProductModal from "@/components/productComponent/ProductModal";
 import { useCart } from "@/contexts/CartContext";
 import {
   addProductToCart,
@@ -14,7 +14,7 @@ import {
   resolveDefaultVariant,
   startProductCheckout,
 } from "@/lib/productCheckout";
-import PriceCalculationBreakdown from "@/components/PriceCalculationBreakdown";
+import PriceCalculationBreakdown from "@/components/productComponent/PriceCalculationBreakdown";
 import {
   useProductBasePrice,
   type UseProductBasePriceResult,
@@ -93,7 +93,13 @@ function ProductDetailSummary({
   );
 }
 
-function ProductDetailLoaded({ product }: { product: Product }) {
+function ProductDetailLoaded({
+  product,
+  slug,
+}: {
+  product: Product;
+  slug: string;
+}) {
   const { refreshCart, goToCart } = useCart();
   const [activeImage, setActiveImage] = useState(
     product.images?.[0] ?? product.image ?? "/placeholder.jpg"
@@ -105,6 +111,10 @@ function ProductDetailLoaded({ product }: { product: Product }) {
   const [commerceToast, setCommerceToast] = useState("");
 
   const pricing = useProductBasePrice(product);
+
+  useEffect(() => {
+    writeCachedProduct(slug, product);
+  }, [product, slug]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -234,13 +244,17 @@ function ProductDetailLoaded({ product }: { product: Product }) {
               <p className="product-detail-vendor">
                 {product.vendor ?? productContent.brand.defaultVendor}
               </p>
-              <h1 className="product-item-title product-item-title--detail">{product.name}</h1>
+              <h1 className="product-item-title product-item-title--detail">
+                {product.name}
+              </h1>
 
               <div className="product-detail-rating">
                 <span className="product-detail-rating-stars" aria-hidden>
                   {copy.ratingStars}
                 </span>
-                <span className="product-detail-rating-label">{copy.ratingLabel}</span>
+                <span className="product-detail-rating-label">
+                  {copy.ratingLabel}
+                </span>
               </div>
 
               <ProductCommerceActions
@@ -252,7 +266,10 @@ function ProductDetailLoaded({ product }: { product: Product }) {
               />
 
               {commerceToast ? (
-                <p className="product-detail-commerce-toast product-animate-in" role="status">
+                <p
+                  className="product-detail-commerce-toast product-animate-in"
+                  role="status"
+                >
                   {commerceToast}
                 </p>
               ) : null}
@@ -323,58 +340,192 @@ function ProductDetailLoaded({ product }: { product: Product }) {
   );
 }
 
+const productDetailCacheKey = (slug: string) => `pj-product-detail:${slug}`;
+
+function readCachedProduct(slug: string): Product | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(productDetailCacheKey(slug));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Product;
+    const handle = parsed.slug ?? parsed.handle;
+    return handle === slug || parsed.id === slug ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedProduct(slug: string, product: Product): void {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(productDetailCacheKey(slug), JSON.stringify(product));
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
 export default function ProductDetailClient({ slug }: ProductDetailClientProps) {
+    console.log("=== COMPONENT RENDERING ===", slug); 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const productRef = useRef<Product | null>(null);
+  const mountFetchDone = useRef(false);
 
-  useEffect(() => {
-    let cancelled = false;
+  const applySessionCache = useCallback((): boolean => {
+    const cached = readCachedProduct(slug);
+    if (!cached) return false;
+    setProduct(cached);
+    productRef.current = cached;
+    setError("");
+    setLoading(false);
+    return true;
+  }, [slug]);
 
-    const load = async () => {
-      setLoading(true);
-      setError("");
+  const fetchProduct = useCallback(
+    async (options?: { silent?: boolean; signal?: AbortSignal }) => {
+      const silent = options?.silent === true;
+      if (!silent) {
+        setLoading(true);
+        setError("");
+      }
+
+      const ownController = options?.signal ? null : new AbortController();
+      const signal = options?.signal ?? ownController!.signal;
+      const timeoutId = ownController
+        ? window.setTimeout(() => ownController.abort(), 45_000)
+        : null;
+
       try {
-        const controller = new AbortController();
-        const timeoutId = window.setTimeout(() => controller.abort(), 45_000);
-
         const response = await fetch(
           `/api/product/${encodeURIComponent(slug)}`,
-          { signal: controller.signal }
+          { signal, cache: "no-store" }
         );
-        window.clearTimeout(timeoutId);
         const data = await response.json();
 
         if (!response.ok || !data.success || !data.product) {
-          throw new Error(data.error || "Product not found");
+          throw new Error(
+            typeof data.error === "string" ? data.error : "Product not found"
+          );
         }
 
-        if (!cancelled) {
-          setProduct(data.product as Product);
+        const next = data.product as Product;
+        writeCachedProduct(slug, next);
+        setProduct(next);
+        productRef.current = next;
+        setError("");
+      } catch (e: unknown) {
+        if (signal.aborted) {
+          if (!silent && !productRef.current) {
+            setError("Product took too long to load. Please refresh or try again.");
+          }
+          return;
         }
-      } catch (e) {
-        if (!cancelled) {
-          const message =
-            e instanceof Error && e.name === "AbortError"
-              ? "Product took too long to load. Please refresh or try again."
-              : e instanceof Error
-                ? e.message
-                : "Something went wrong";
+        const message = e instanceof Error ? e.message : "Something went wrong";
+        if (!silent || !productRef.current) {
+          setError(message);
+          setProduct(null);
+        }
+      } finally {
+        if (timeoutId) window.clearTimeout(timeoutId);
+        setLoading(false);
+      }
+    },
+    [slug]
+  );
+
+  const handleHistoryReturn = useCallback(() => {
+    const hadCache = applySessionCache();
+    void fetchProduct({ silent: hadCache || !!productRef.current });
+  }, [applySessionCache, fetchProduct]);
+
+  // Primary mount effect — single source of truth for initial load
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+    mountFetchDone.current = false;
+
+    const run = async () => {
+      // If returning from Shopify, use cache immediately and refresh silently
+      const comingFromShopify = document.referrer.includes("f4hvea-e6.myshopify.com");
+      if (comingFromShopify) {
+        applySessionCache();
+        mountFetchDone.current = true;
+        if (!cancelled) void fetchProduct({ silent: true });
+        return;
+      }
+
+      const hadCache = applySessionCache();
+      if (!hadCache) {
+        setLoading(true);
+        setError("");
+      }
+
+      try {
+        const response = await fetch(
+          `/api/product/${encodeURIComponent(slug)}`,
+          { signal: controller.signal, cache: "no-store" }
+        );
+        const data = await response.json();
+
+        if (cancelled) return;
+
+        if (!response.ok || !data.success || !data.product) {
+          throw new Error(
+            typeof data.error === "string" ? data.error : "Product not found"
+          );
+        }
+
+        const next = data.product as Product;
+        writeCachedProduct(slug, next);
+        setProduct(next);
+        productRef.current = next;
+        setError("");
+      } catch (e: unknown) {
+        if (cancelled) return;
+        if (e instanceof Error && e.name === "AbortError") {
+          if (!productRef.current) {
+            setError("Product took too long to load. Please refresh or try again.");
+          }
+          return;
+        }
+        const message = e instanceof Error ? e.message : "Something went wrong";
+        if (!productRef.current) {
           setError(message);
           setProduct(null);
         }
       } finally {
         if (!cancelled) {
           setLoading(false);
+          mountFetchDone.current = true;
         }
       }
     };
 
-    void load();
+    void run();
+
     return () => {
       cancelled = true;
+      controller.abort();
     };
-  }, [slug]);
+  }, [slug, applySessionCache, fetchProduct]);
+
+  // bfcache restore and SPA popstate handler
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) handleHistoryReturn();
+    };
+    const onPopState = () => {
+      if (mountFetchDone.current) handleHistoryReturn();
+    };
+
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [handleHistoryReturn]);
 
   if (loading) {
     return (
@@ -402,7 +553,10 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
   return (
     <div className="product-page product-detail-page">
       <div className="product-breadcrumb-bar">
-        <nav className="product-container product-breadcrumb" aria-label="Breadcrumb">
+        <nav
+          className="product-container product-breadcrumb"
+          aria-label="Breadcrumb"
+        >
           <Link href="/landing#home">{breadcrumb.home}</Link>
           <span className="product-breadcrumb-sep" aria-hidden>
             {breadcrumb.separator}
@@ -416,7 +570,7 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
       </div>
 
       <div className="product-container product-detail-main">
-        <ProductDetailLoaded product={product} />
+        <ProductDetailLoaded product={product} slug={slug} />
       </div>
     </div>
   );

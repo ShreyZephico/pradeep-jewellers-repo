@@ -139,12 +139,38 @@
   "form": {
     "eyebrow": "Quotation",
     "title": "Request your custom design",
-    "lead": "Describe the product or design you want — ring, necklace, redesign, or anything bespoke. We reply on WhatsApp within 24 hours.",
-    "submitLabel": "Get My Custom Quote",
+    "lead": "A quick 4-step form — one screen at a time. We reply on WhatsApp within 24 hours.",
+    "submitLabel": "Send quote on WhatsApp",
+    "nextLabel": "Continue",
+    "backLabel": "Back",
     "photoId": "photo-1617038260897-41a1f14a8ca0",
     "imageAlt": "Designer consulting on bespoke jewellery",
-    "fileUploadNote": "Images are sent on WhatsApp after you submit — attach them in the chat that opens.",
+    "fileUploadNote": "Add up to 5 reference photos (max 5 MB each). They upload securely and we receive the links on WhatsApp.",
+    "fileUploadHint": "Tap to add photos or drag & drop",
+    "uploadingLabel": "Uploading your images…",
     "trustBadges": ["100% secure", "BIS certified", "No hidden charges"],
+    "steps": [
+      {
+        "id": "contact",
+        "title": "About you",
+        "subtitle": "How should we reach you?"
+      },
+      {
+        "id": "design",
+        "title": "Your design",
+        "subtitle": "What would you like us to create?"
+      },
+      {
+        "id": "details",
+        "title": "Preferences",
+        "subtitle": "Metal, budget & timeline"
+      },
+      {
+        "id": "review",
+        "title": "Review & send",
+        "subtitle": "Check everything, then open WhatsApp"
+      }
+    ],
     "jewelleryTypes": [
       "Ring",
       "Necklace",

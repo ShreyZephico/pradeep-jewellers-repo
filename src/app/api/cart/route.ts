@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { getOptionalCartAuth } from "@/lib/cartAuth";
+import {
+  getCheckoutAuthFromRequest,
+  verifyCheckoutCustomer,
+} from "@/lib/checkoutAuth";
 import {
   clearCartIdCookie,
   getCartIdFromRequest,
@@ -39,6 +42,18 @@ function serializeCart(cart: Awaited<ReturnType<typeof fetchCart>>) {
   };
 }
 
+async function optionalCustomerAccessToken(
+  request: Request
+): Promise<string | undefined> {
+  const auth = getCheckoutAuthFromRequest(request);
+  if (!auth?.customerAccessToken) {
+    return undefined;
+  }
+
+  const customer = await verifyCheckoutCustomer(auth.customerAccessToken);
+  return customer ? auth.customerAccessToken : undefined;
+}
+
 export async function GET(request: Request) {
   const cartId = getCartIdFromRequest(request);
   if (!cartId) {
@@ -62,7 +77,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const optionalAuth = getOptionalCartAuth(request);
+  const customerAccessToken = await optionalCustomerAccessToken(request);
 
   try {
     const body = (await request.json()) as CartItemBody;
@@ -83,7 +98,7 @@ export async function POST(request: Request) {
             merchandiseId,
             quantity,
             attributes,
-            customerAccessToken: optionalAuth.customerAccessToken,
+            ...(customerAccessToken ? { customerAccessToken } : {}),
           });
 
     const enriched = await enrichCartImages(cart);

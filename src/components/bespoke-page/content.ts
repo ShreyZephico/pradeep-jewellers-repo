@@ -84,9 +84,14 @@ export const BESPOKE_FORM_SECTION = {
   title: data.form.title,
   lead: data.form.lead,
   submitLabel: data.form.submitLabel,
+  nextLabel: data.form.nextLabel,
+  backLabel: data.form.backLabel,
   fileUploadNote: data.form.fileUploadNote,
+  fileUploadHint: data.form.fileUploadHint,
+  uploadingLabel: data.form.uploadingLabel,
   trustBadges: data.form.trustBadges,
   whatsappIntro: data.form.whatsappIntro,
+  steps: data.form.steps,
 };
 
 export const BESPOKE_FORM_IMAGE = bespokeImageUrl(data.form.photoId, 800);

@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import type { Product } from "@/types/product";
 import { formatProductPrice } from "@/utils/formatPrice";
 import { isKaratLabel, resolveKaratFromSelection } from "@/utils/karat";
 import { findBestMatchingVariant } from "@/utils/variantOptionMatch";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
-import ProductCommerceActions from "@/components/ProductCommerceActions";
-import PriceCalculationBreakdown from "@/components/PriceCalculationBreakdown";
+import ProductCommerceActions from "@/components/productComponent/ProductCommerceActions";
+import PriceCalculationBreakdown from "@/components/productComponent/PriceCalculationBreakdown";
 import { useCart } from "@/contexts/CartContext";
 import {
   addProductToCart,
@@ -16,17 +17,21 @@ import {
   startProductCheckout,
 } from "@/lib/productCheckout";
 import productContent from "@/lib/productContent";
-import { getCustomizationValidationError } from "@/utils/productCustomization";
+import {
+  getCustomizationValidationError,
+  type CustomizationField,
+} from "@/utils/productCustomization";
 
 export { formatProductPrice };
 
 const copy = productContent.purchase;
 
-function optionClass(selected: boolean, center?: boolean) {
+function optionClass(selected: boolean, center?: boolean, invalid?: boolean) {
   return [
     "product-option-btn",
     center ? "product-option-btn--center" : "",
     selected ? "product-option-btn--selected" : "",
+    invalid ? "product-option-btn--invalid-hint" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -34,16 +39,10 @@ function optionClass(selected: boolean, center?: boolean) {
 
 export type ProductPurchasePanelProps = {
   product: Product;
-  /** When true, shows the compact image + title summary (modal layout). */
   showDesignSummary?: boolean;
-  /** Dark header row with price (modal) vs subtle card (page). */
   priceHeaderVariant?: "modal" | "page";
   onClose?: () => void;
   checkoutButtonLabel?: string;
-  /**
-   * `storefront-cart` — Storefront cart with variant GID only (`createCheckout` in shopify.ts); pricing from Shopify.
-   * `customer-session` — `/api/checkout` (requires logged-in Shopify customer).
-   */
   checkoutFlow?: "customer-session" | "storefront-cart";
 };
 
@@ -52,13 +51,20 @@ export default function ProductPurchasePanel({
   showDesignSummary = true,
   priceHeaderVariant = "modal",
   onClose,
-  checkoutButtonLabel,
 }: ProductPurchasePanelProps) {
   const { refreshCart, goToCart } = useCart();
   const [buyLoading, setBuyLoading] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
   const [cartToast, setCartToast] = useState("");
+  const [errorField, setErrorField] = useState<CustomizationField | null>(null);
+
+  const metalRef = useRef<HTMLElement>(null);
+  const caratRef = useRef<HTMLElement>(null);
+  const diamondRef = useRef<HTMLElement>(null);
+  const sizeRef = useRef<HTMLElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
+
   const karatPickerOptions =
     product.caratOptions?.length
       ? product.caratOptions
@@ -75,6 +81,8 @@ export default function ProductPurchasePanel({
   const [selectedSize, setSelectedSize] = useState("");
   const hasMetalOptions = metalPickerOptions.length > 0;
   const hasCaratOptions = karatPickerOptions.length > 0;
+  const hasDiamondOptions = Boolean(product.diamondQualities?.length);
+  const hasSizeOptions = Boolean(product.sizeOptions?.length);
 
   const selectKarat = (label: string) => {
     setSelectedCarat(label);
@@ -82,8 +90,7 @@ export default function ProductPurchasePanel({
       setSelectedMetal(label);
     }
   };
-  const hasDiamondOptions = Boolean(product.diamondQualities?.length);
-  const hasSizeOptions = Boolean(product.sizeOptions?.length);
+
   const selectedMetalOption = product.metalOptions?.find(
     (option) => option.label === selectedMetal
   );
@@ -125,6 +132,34 @@ export default function ProductPurchasePanel({
     (selectedCaratOption?.priceAdjustment ?? 0) +
     (selectedQualityOption?.priceAdjustment ?? 0) +
     (selectedSizeOption?.priceAdjustment ?? 0);
+
+  const isPage = priceHeaderVariant === "page";
+  const isModal = !isPage;
+
+  const scrollToField = useCallback((field: CustomizationField) => {
+    const refs: Record<CustomizationField, RefObject<HTMLElement | null>> = {
+      metal: metalRef,
+      carat: caratRef,
+      diamond: diamondRef,
+      size: sizeRef,
+    };
+    const target = refs[field].current;
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    footerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, []);
+
+  const clearFeedback = useCallback(() => {
+    setCheckoutError("");
+    setCartToast("");
+    setErrorField(null);
+  }, []);
+
+  useEffect(() => {
+    clearFeedback();
+  }, [selectedMetal, selectedCarat, selectedQuality, selectedSize, clearFeedback]);
 
   useEffect(() => {
     let cancelled = false;
@@ -185,6 +220,7 @@ export default function ProductPurchasePanel({
     selectedSize,
     variantPrice,
   ]);
+
   const catalogVariantIdForCheckout =
     selectedVariantId.startsWith("gid://shopify/ProductVariant/")
       ? undefined
@@ -194,46 +230,49 @@ export default function ProductPurchasePanel({
             v.catalogVariantId === selectedVariantId ||
             v.id === selectedVariantId
         )?.catalogVariantId;
-  const productSlugForCheckout = (product.slug ?? product.handle ?? "").trim();
+
   const estimatedPrice = (livePrice ?? variantPrice) + optionAdjustments;
   const selectedImage = selectedVariant?.image ?? product.image;
   const listPrice = product.compareAtPrice ?? 0;
 
   const buildLineAttributes = () => {
     const attributes: { key: string; value: string }[] = [];
-    if (selectedMetal) {
-      attributes.push({ key: "Metal", value: selectedMetal });
-    }
-    if (selectedCarat) {
-      attributes.push({ key: "Carat", value: selectedCarat });
-    }
+    if (selectedMetal) attributes.push({ key: "Metal", value: selectedMetal });
+    if (selectedCarat) attributes.push({ key: "Carat", value: selectedCarat });
     if (selectedQuality) {
       attributes.push({ key: "Diamond Quality", value: selectedQuality });
     }
-    if (selectedSize) {
-      attributes.push({ key: "Ring Size", value: selectedSize });
-    }
+    if (selectedSize) attributes.push({ key: "Ring Size", value: selectedSize });
     return attributes;
   };
 
+  const showValidationError = (message: string, field: CustomizationField) => {
+    setCheckoutError(message);
+    setErrorField(field);
+    setCartToast("");
+    scrollToField(field);
+    footerRef.current?.focus({ preventScroll: true });
+  };
+
   const handleCheckout = async (redirect: boolean) => {
-    const optionsError = getCustomizationValidationError(product, {
+    const validation = getCustomizationValidationError(product, {
       metal: selectedMetal,
       carat: selectedCarat,
       quality: selectedQuality,
       size: selectedSize,
     });
-    if (optionsError) {
-      setCheckoutError(optionsError);
+    if (validation) {
+      showValidationError(validation.message, validation.field);
       return;
     }
 
     if (!selectedVariantId) {
-      setCheckoutError(copy.selectOptionsError);
+      showValidationError(copy.selectOptionsError, hasSizeOptions ? "size" : "metal");
       return;
     }
 
     setCheckoutError("");
+    setErrorField(null);
     setCartToast("");
     const setLoading = redirect ? setBuyLoading : setCartLoading;
     setLoading(true);
@@ -250,7 +289,10 @@ export default function ProductPurchasePanel({
       setLoading(false);
       if (!result.ok) {
         handleCheckoutAuthFailure(result);
-        if (!result.needsLogin) setCheckoutError(result.error);
+        if (!result.needsLogin) {
+          setCheckoutError(result.error);
+          footerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
       }
       return;
     }
@@ -271,92 +313,132 @@ export default function ProductPurchasePanel({
 
     if (!result.ok) {
       handleCheckoutAuthFailure(result);
-      if (!result.needsLogin) setCheckoutError(result.error);
+      if (!result.needsLogin) {
+        setCheckoutError(result.error);
+        footerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
       return;
     }
 
     await refreshCart();
-    goToCart();
+    setCheckoutError("");
+    setErrorField(null);
     setCartToast(productContent.commerce.addedToCart);
     window.setTimeout(() => setCartToast(""), 3200);
+    goToCart();
   };
 
-  const isPage = priceHeaderVariant === "page";
+  const sectionInvalid = (field: CustomizationField) => errorField === field;
 
-  return (
-    <div className="product-purchase">
-      <div
-        className={`product-purchase-price-header product-purchase-price-header--${
+  const priceDisplay = (
+    <div className="product-purchase-price-block">
+      <p
+        className={`product-purchase-price-label product-purchase-price-label--${
           isPage ? "page" : "modal"
         }`}
       >
-        <div>
-          <p
-            className={`product-purchase-price-label product-purchase-price-label--${
-              isPage ? "page" : "modal"
-            }`}
-          >
-            {copy.yourPrice}
+        {copy.yourPrice}
+      </p>
+      <div className="product-purchase-price-row">
+        <p
+          className={`product-purchase-price-main product-purchase-price-main--${
+            isPage ? "page" : "modal"
+          }${priceLoading ? " product-purchase-price-main--loading" : ""}`}
+        >
+          {priceLoading ? copy.priceLoading : formatProductPrice(estimatedPrice)}
+        </p>
+        {listPrice > estimatedPrice ? (
+          <p className={`product-purchase-price-strike--${isPage ? "page" : "modal"}`}>
+            {formatProductPrice(listPrice)}
           </p>
-          <div className="product-purchase-price-row">
-            <p
-              className={`product-purchase-price-main product-purchase-price-main--${
-                isPage ? "page" : "modal"
-              }${priceLoading ? " product-purchase-price-main--loading" : ""}`}
-            >
-              {priceLoading ? copy.priceLoading : formatProductPrice(estimatedPrice)}
-            </p>
-            {listPrice > estimatedPrice ? (
-              <p className={`product-purchase-price-strike--${isPage ? "page" : "modal"}`}>
-                {formatProductPrice(listPrice)}
-              </p>
-            ) : null}
-          </div>
-          {isPage ? <p className="product-purchase-price-note">{copy.gstNote}</p> : null}
-        </div>
-
-        {onClose ? (
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={copy.closeModalAria}
-            className="product-purchase-close"
-          >
-            <span className="product-purchase-close-icon">×</span>
-          </button>
         ) : null}
       </div>
+      {isModal ? (
+        <p className="product-purchase-modal-gst">{copy.modalGstNote}</p>
+      ) : (
+        <p className="product-purchase-price-note">{copy.gstNote}</p>
+      )}
+    </div>
+  );
 
-      {!isPage ? (
-        <div className="product-purchase-top-actions">
-          <ProductCommerceActions
-            buyLoading={buyLoading}
-            cartLoading={cartLoading}
-            onBuyNow={() => void handleCheckout(true)}
-            onAddToCart={() => void handleCheckout(false)}
-          />
-          {cartToast ? (
-            <p className="product-purchase-cart-toast product-animate-in" role="status">
-              {cartToast}
-            </p>
-          ) : null}
+  const actionFooter = (
+    <footer
+      ref={footerRef}
+      className={isModal ? "product-purchase-sticky-footer" : "product-purchase-footer"}
+      tabIndex={-1}
+    >
+      {checkoutError ? (
+        <div className="product-purchase-feedback product-purchase-feedback--error" role="alert">
+          <span className="product-purchase-feedback-icon" aria-hidden>
+            !
+          </span>
+          <p>{checkoutError}</p>
         </div>
       ) : null}
 
-      {priceHeaderVariant === "page" ? (
-        <PriceCalculationBreakdown
-          breakdown={priceBreakdown}
-          weightGrams={baseWeight}
-          karatLabel={karatLabel}
-          loading={priceLoading}
-          optionAdjustments={optionAdjustments}
-          displayTotal={estimatedPrice}
-        />
+      {cartToast ? (
+        <div className="product-purchase-feedback product-purchase-feedback--success" role="status">
+          <span className="product-purchase-feedback-icon" aria-hidden>
+            ✓
+          </span>
+          <p>{cartToast}</p>
+        </div>
       ) : null}
 
-      <div className="product-purchase-body">
+      {isModal ? (
+        <p className="product-purchase-footer-note">{copy.footerSecureNote}</p>
+      ) : null}
+
+      <ProductCommerceActions
+        layout={isModal ? "stack" : "row"}
+        buyLoading={buyLoading}
+        cartLoading={cartLoading}
+        onBuyNow={() => void handleCheckout(true)}
+        onAddToCart={() => void handleCheckout(false)}
+      />
+    </footer>
+  );
+
+  return (
+    <div className={`product-purchase${isModal ? " product-purchase--modal" : ""}`}>
+      {isModal ? (
+        <header className="product-purchase-modal-head">
+          <div className="product-purchase-modal-head-copy">
+            <p className="product-purchase-modal-kicker">{copy.modalKicker}</p>
+            <h2 className="product-purchase-modal-title">{copy.modalTitle}</h2>
+            <p className="product-purchase-modal-product-name">{product.name}</p>
+          </div>
+          <div className="product-purchase-modal-head-aside">
+            {priceDisplay}
+            {onClose ? (
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label={copy.closeModalAria}
+                className="product-purchase-close product-purchase-close--modal"
+              >
+                <span className="product-purchase-close-icon" aria-hidden>
+                  ×
+                </span>
+              </button>
+            ) : null}
+          </div>
+        </header>
+      ) : (
+        <div className="product-purchase-price-header product-purchase-price-header--page">
+          {priceDisplay}
+        </div>
+      )}
+
+      <div
+        className={`product-purchase-body${isModal ? " product-purchase-modal-scroll" : ""}`}
+      >
         {showDesignSummary ? (
-          <section className="product-purchase-summary">
+          <section
+            className={`product-purchase-summary${
+              isModal ? " product-purchase-summary--modal" : ""
+            }`}
+          >
             <div className="product-purchase-summary-img-wrap">
               <Image
                 src={selectedImage}
@@ -366,13 +448,14 @@ export default function ProductPurchasePanel({
                 className="product-purchase-summary-img"
               />
             </div>
-
-            <div>
+            <div className="product-purchase-summary-text">
               <p className="product-purchase-summary-eyebrow">{copy.selectedDesign}</p>
               <h3 className="product-item-title product-item-title--summary">
                 {product.name}
               </h3>
-              <p className="product-purchase-summary-desc">{product.description}</p>
+              {!isModal ? (
+                <p className="product-purchase-summary-desc">{product.description}</p>
+              ) : null}
               {product.customizable ? (
                 <p className="product-purchase-custom-note">{copy.customizableNote}</p>
               ) : null}
@@ -381,11 +464,19 @@ export default function ProductPurchasePanel({
         ) : null}
 
         {hasMetalOptions ? (
-          <section>
+          <section
+            ref={metalRef}
+            className={`product-purchase-section${
+              sectionInvalid("metal") ? " product-purchase-section--invalid" : ""
+            }`}
+          >
             <h3 className="product-purchase-section-title">
               {product.metalOptionName ?? copy.metalOptionDefault}
+              <span className="product-purchase-required" aria-hidden>
+                *
+              </span>
             </h3>
-            <div className="product-purchase-options">
+            <div className="product-purchase-options product-purchase-options--modal">
               {metalPickerOptions.map((option) => {
                 const isSelected = selectedMetal === option.label;
                 return (
@@ -393,13 +484,12 @@ export default function ProductPurchasePanel({
                     key={option.label}
                     type="button"
                     onClick={() => setSelectedMetal(option.label)}
-                    className={optionClass(isSelected)}
+                    className={optionClass(isSelected, false, sectionInvalid("metal"))}
+                    aria-pressed={isSelected}
                   >
                     <span className="product-option-btn-label">{option.label}</span>
                     {option.note ? (
-                      <span className="product-option-btn-note">
-                        {option.note}
-                      </span>
+                      <span className="product-option-btn-note">{option.note}</span>
                     ) : null}
                   </button>
                 );
@@ -409,12 +499,20 @@ export default function ProductPurchasePanel({
         ) : null}
 
         {hasCaratOptions ? (
-          <section>
+          <section
+            ref={caratRef}
+            className={`product-purchase-section${
+              sectionInvalid("carat") ? " product-purchase-section--invalid" : ""
+            }`}
+          >
             <h3 className="product-purchase-section-title">
               {product.caratOptionName ?? copy.caratOptionDefault}
+              <span className="product-purchase-required" aria-hidden>
+                *
+              </span>
             </h3>
             <p className="product-purchase-section-hint">{copy.caratHint}</p>
-            <div className="product-purchase-options">
+            <div className="product-purchase-options product-purchase-options--modal">
               {karatPickerOptions.map((option) => {
                 const isSelected =
                   selectedCarat === option.label ||
@@ -424,13 +522,12 @@ export default function ProductPurchasePanel({
                     key={option.label}
                     type="button"
                     onClick={() => selectKarat(option.label)}
-                    className={optionClass(isSelected)}
+                    className={optionClass(isSelected, false, sectionInvalid("carat"))}
+                    aria-pressed={isSelected}
                   >
                     <span className="product-option-btn-label">{option.label}</span>
                     {option.note ? (
-                      <span className="product-option-btn-note">
-                        {option.note}
-                      </span>
+                      <span className="product-option-btn-note">{option.note}</span>
                     ) : null}
                   </button>
                 );
@@ -440,16 +537,29 @@ export default function ProductPurchasePanel({
         ) : null}
 
         {hasDiamondOptions ? (
-          <section>
+          <section
+            ref={diamondRef}
+            className={`product-purchase-section${
+              sectionInvalid("diamond") ? " product-purchase-section--invalid" : ""
+            }`}
+          >
             <div className="product-purchase-section-header">
               <h3 className="product-purchase-section-title">
                 {product.diamondOptionName ?? copy.diamondOptionDefault}
+                <span className="product-purchase-required" aria-hidden>
+                  *
+                </span>
               </h3>
-              <button type="button" className="product-purchase-guide-link">
+              <Link
+                href="/diamond-guide"
+                className="product-purchase-guide-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {copy.diamondGuide}
-              </button>
+              </Link>
             </div>
-            <div className="product-purchase-options">
+            <div className="product-purchase-options product-purchase-options--modal">
               {product.diamondQualities?.map((option) => {
                 const isSelected = selectedQuality === option.label;
                 return (
@@ -457,13 +567,12 @@ export default function ProductPurchasePanel({
                     key={option.label}
                     type="button"
                     onClick={() => setSelectedQuality(option.label)}
-                    className={optionClass(isSelected)}
+                    className={optionClass(isSelected, false, sectionInvalid("diamond"))}
+                    aria-pressed={isSelected}
                   >
                     <span className="product-option-btn-label">{option.label}</span>
                     {option.note ? (
-                      <span className="product-option-btn-note">
-                        {option.note}
-                      </span>
+                      <span className="product-option-btn-note">{option.note}</span>
                     ) : null}
                   </button>
                 );
@@ -473,10 +582,18 @@ export default function ProductPurchasePanel({
         ) : null}
 
         {hasSizeOptions ? (
-          <section>
+          <section
+            ref={sizeRef}
+            className={`product-purchase-section${
+              sectionInvalid("size") ? " product-purchase-section--invalid" : ""
+            }`}
+          >
             <div className="product-purchase-section-header">
               <h3 className="product-purchase-section-title">
                 {product.sizeOptionName ?? copy.sizeOptionDefault}
+                <span className="product-purchase-required" aria-hidden>
+                  *
+                </span>
               </h3>
               <a
                 href="https://workdrive.zohoexternal.in/external/80ca836e76f8383e2afda8491fcd9ded5ffe8cfa495029d905efa26a121f6c52/download"
@@ -487,7 +604,7 @@ export default function ProductPurchasePanel({
                 {copy.sizeGuide}
               </a>
             </div>
-            <div className="product-purchase-options product-purchase-options--size">
+            <div className="product-purchase-options product-purchase-options--size product-purchase-options--modal">
               {product.sizeOptions?.map((option) => {
                 const isSelected = selectedSize === option.size;
                 return (
@@ -495,7 +612,8 @@ export default function ProductPurchasePanel({
                     key={option.size}
                     type="button"
                     onClick={() => setSelectedSize(option.size)}
-                    className={optionClass(isSelected, true)}
+                    className={optionClass(isSelected, true, sectionInvalid("size"))}
+                    aria-pressed={isSelected}
                   >
                     <span className="product-option-btn-size">{option.size}</span>
                     {option.mm ? (
@@ -514,21 +632,21 @@ export default function ProductPurchasePanel({
         ) : null}
       </div>
 
-      {(checkoutError || isPage) ? (
-        <div className="product-purchase-footer">
-          {checkoutError ? <p className="product-purchase-error">{checkoutError}</p> : null}
-          {isPage ? (
-            <ProductCommerceActions
-              buyLoading={buyLoading}
-              cartLoading={cartLoading}
-              onBuyNow={() => void handleCheckout(true)}
-              onAddToCart={() => void handleCheckout(false)}
-            />
-          ) : null}
-        </div>
-      ) : null}
+      {isPage ? (
+        <>
+          <PriceCalculationBreakdown
+            breakdown={priceBreakdown}
+            weightGrams={baseWeight}
+            karatLabel={karatLabel}
+            loading={priceLoading}
+            optionAdjustments={optionAdjustments}
+            displayTotal={estimatedPrice}
+          />
+          {actionFooter}
+        </>
+      ) : (
+        actionFooter
+      )}
     </div>
   );
 }
-
-

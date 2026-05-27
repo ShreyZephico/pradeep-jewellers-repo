@@ -8,7 +8,6 @@ import { notifyAuthChanged } from "@/contexts/CustomerAuthContext";
 
 const DISMISS_KEY = "googleOneTapDismissed";
 const DISMISS_MS = 24 * 60 * 60 * 1000;
-const GSI_SCRIPT = "https://accounts.google.com/gsi/client";
 
 type Props = {
   clientId: string;
@@ -38,8 +37,11 @@ function GoogleLogo() {
   );
 }
 
+function firstName(fullName: string): string {
+  return fullName.trim().split(/\s+/)[0] || "there";
+}
+
 function isDismissed(): boolean {
-  if (typeof sessionStorage === "undefined") return false;
   const raw = sessionStorage.getItem(DISMISS_KEY);
   if (!raw) return false;
   const ts = Number(raw);
@@ -61,12 +63,9 @@ export default function GoogleOneTap({
   const [showCard, setShowCard] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hintName, setHintName] = useState("your Google account");
-  const [hintEmail, setHintEmail] = useState("google.com");
-  const gsiInitialized = useRef(false);
-  const buttonRendered = useRef(false);
-  const cardShown = useRef(false);
-  const buttonRef = useRef<HTMLDivElement>(null);
+  const hintName = "your Google account";
+  const hintEmail = "google.com";
+  const prompted = useRef(false);
 
   const skip =
     pathname === "/login" ||
@@ -87,15 +86,11 @@ export default function GoogleOneTap({
         success?: boolean;
         error?: string;
         name?: string;
-        email?: string;
       };
       if (!res.ok || !data.success) {
         throw new Error(data.error ?? "Google sign-in failed");
       }
-      if (data.name) setHintName(data.name);
-      if (data.email) setHintEmail(data.email);
       localStorage.setItem("loginMethod", "google");
-      if (data.email) localStorage.setItem("customerEmail", data.email);
       setShowCard(false);
       setLoggedIn(true);
       notifyAuthChanged();
@@ -109,7 +104,6 @@ export default function GoogleOneTap({
   const openPopup = useCallback(() => {
     setLoading(true);
     setError(null);
-    window.google?.accounts?.id?.cancel();
     const popup = window.open(
       "/api/auth/google?mode=login",
       "GoogleLogin",
@@ -148,7 +142,6 @@ export default function GoogleOneTap({
   useEffect(() => {
     if (skip) return;
     let cancelled = false;
-    setLoggedIn(null);
     fetch("/api/auth/check", { credentials: "include" })
       .then((r) => r.json())
       .then(
@@ -162,8 +155,6 @@ export default function GoogleOneTap({
             setLoggedIn(true);
             return;
           }
-          if (d.name) setHintName(d.name);
-          if (d.email) setHintEmail(d.email);
           setLoggedIn(false);
         }
       )
@@ -176,19 +167,18 @@ export default function GoogleOneTap({
   }, [skip, pathname]);
 
   useEffect(() => {
-    gsiInitialized.current = false;
-    buttonRendered.current = false;
-    cardShown.current = false;
-    setShowCard(false);
-    setError(null);
-    window.google?.accounts?.id?.cancel();
-  }, [pathname, clientId]);
+    if (skip || !gsiReady || loggedIn !== false || isDismissed() || prompted.current) {
+      return;
+    }
 
-  const initGsi = useCallback(() => {
     const id = window.google?.accounts?.id;
-    if (!id || gsiInitialized.current) return id;
+    if (!id) {
+      setShowCard(true);
+      return;
+    }
 
-    gsiInitialized.current = true;
+    prompted.current = true;
+
     id.initialize({
       client_id: clientId,
       callback: (res) => {
@@ -196,68 +186,39 @@ export default function GoogleOneTap({
           void finishLogin(res.credential);
         }
       },
-      auto_select: false,
-      cancel_on_tap_outside: true,
+      auto_select: true,
+      cancel_on_tap_outside: false,
       context: "signin",
       itp_support: true,
-      use_fedcm_for_prompt: false,
     });
-    return id;
-  }, [clientId, finishLogin]);
 
-  useEffect(() => {
-    if (skip || !gsiReady || loggedIn !== false || isDismissed() || cardShown.current) {
-      return;
-    }
-
-    cardShown.current = true;
-    window.google?.accounts?.id?.cancel();
-    initGsi();
-    setShowCard(true);
-  }, [skip, gsiReady, loggedIn, initGsi]);
-
-  useEffect(() => {
-    if (!showCard || !gsiReady || loggedIn !== false) return;
-    const id = window.google?.accounts?.id;
-    const el = buttonRef.current;
-    if (!id || !el || buttonRendered.current) return;
-
-    initGsi();
-    el.innerHTML = "";
-    id.renderButton(el, {
-      type: "standard",
-      theme: "filled_blue",
-      size: "large",
-      text: "continue_with",
-      width: Math.min(360, el.offsetWidth || 360),
-      shape: "rectangular",
+    id.prompt((n) => {
+      if (n.isNotDisplayed() || n.isSkippedMoment()) {
+        setShowCard(true);
+      }
     });
-    buttonRendered.current = true;
-  }, [showCard, gsiReady, loggedIn, initGsi]);
+  }, [skip, gsiReady, loggedIn, clientId, finishLogin]);
 
-  useEffect(() => {
-    return () => {
-      window.google?.accounts?.id?.cancel();
-    };
-  }, []);
-
-  if (skip || loggedIn === true || isDismissed()) {
+  if (skip || loggedIn !== false || isDismissed()) {
     return null;
   }
 
-  const showUi = loggedIn === false;
+  const continueLabel =
+    hintName !== "your Google account"
+      ? `Continue as ${firstName(hintName)}`
+      : "Continue with Google";
 
   return (
     <>
-      {showUi ? (
-        <Script
-          src={GSI_SCRIPT}
-          strategy="afterInteractive"
-          onLoad={() => setGsiReady(true)}
-        />
-      ) : null}
+      <Script
+        src="https://accounts.google.com/gsi/client"
+        strategy="afterInteractive"
+        onLoad={() => setGsiReady(true)}
+      />
 
-      {showUi && showCard ? (
+      <div id="google-one-tap-anchor" className="google-one-tap-anchor" />
+
+      {showCard ? (
         <aside
           className="google-one-tap-fallback"
           role="dialog"
@@ -266,7 +227,7 @@ export default function GoogleOneTap({
           <div className="google-one-tap-fallback__header">
             <GoogleLogo />
             <p className="google-one-tap-fallback__title">
-              Sign in to {siteName} with Google
+              Sign in to {siteName} with google.com
             </p>
             <button
               type="button"
@@ -292,20 +253,18 @@ export default function GoogleOneTap({
           </div>
 
           {error ? (
-            <p className="google-one-tap-fallback__error" role="alert">
+            <p className="mb-2 text-center text-xs text-red-300" role="alert">
               {error}
             </p>
           ) : null}
 
-          <div ref={buttonRef} className="google-one-tap-fallback__gsi-btn" />
-
           <button
             type="button"
-            className="google-one-tap-fallback__popup-link"
+            className="google-one-tap-fallback__cta"
             disabled={loading}
             onClick={openPopup}
           >
-            {loading ? "Opening sign-in…" : "Having trouble? Sign in in a new window"}
+            {loading ? "Signing in…" : continueLabel}
           </button>
 
           <p className="google-one-tap-fallback__legal">

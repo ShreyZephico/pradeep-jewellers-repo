@@ -2,17 +2,18 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2, ShoppingBag, Trash2 } from "lucide-react";
 
 import CartLineImage from "@/components/cart/CartLineImage";
-import PriceCalculationBreakdown from "@/components/PriceCalculationBreakdown";
+import PriceCalculationBreakdown from "@/components/productComponent/PriceCalculationBreakdown";
 import { useCart } from "@/contexts/CartContext";
 import { useCartLineBreakdowns } from "@/hooks/useCartLineBreakdowns";
-import { saveReturnPath } from "@/lib/authRedirect";
 import type { CartLineBreakdownData } from "@/lib/cartBreakdown";
 import productContent, { formatProductCopy } from "@/lib/productContent";
 import type { ClientCartLine } from "@/types/cart";
+import { saveReturnPath } from "@/lib/authRedirect";
+import { markProductsListStale } from "@/lib/productsListRefresh";
 import { formatProductPrice } from "@/utils/formatPrice";
 
 import "@/styles/cart-page.css";
@@ -21,25 +22,26 @@ import "@/styles/product.css";
 const copy = productContent.cart;
 const breadcrumb = productContent.breadcrumb;
 
-async function isUserAuthenticated(): Promise<boolean> {
-  try {
-    const response = await fetch("/api/auth/check", { credentials: "include" });
-    const data = await response.json();
-    return Boolean(data.isAuthenticated);
-  } catch {
-    return false;
-  }
-}
-
 export default function CartPageClient() {
   const router = useRouter();
-  const { cart, loading, refreshCart } = useCart();
+  const { cart, loading, refreshCart, setAuthenticated } = useCart();
   const { breakdowns, loading: breakdownLoading } = useCartLineBreakdowns(
     cart.lines
   );
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [lineLoadingId, setLineLoadingId] = useState<string | null>(null);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/auth/check", { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        setAuthenticated(Boolean(data.isAuthenticated));
+      })
+      .catch(() => {
+        setAuthenticated(false);
+      });
+  }, [setAuthenticated]);
 
   const updateQuantity = async (lineId: string, quantity: number) => {
     setLineLoadingId(lineId);
@@ -87,19 +89,25 @@ export default function CartPageClient() {
     }
   };
 
+  const redirectToLoginForCheckout = () => {
+    saveReturnPath("/cart");
+    router.push("/login");
+  };
+
   const checkout = async () => {
     setCheckoutLoading(true);
     setError("");
 
-    const loggedIn = await isUserAuthenticated();
-    if (!loggedIn) {
-      saveReturnPath("/cart");
-      router.push("/login");
-      setCheckoutLoading(false);
-      return;
-    }
-
     try {
+      const authResponse = await fetch("/api/auth/check", {
+        credentials: "include",
+      });
+      const authData = await authResponse.json();
+      if (!authData.isAuthenticated) {
+        redirectToLoginForCheckout();
+        return;
+      }
+
       const response = await fetch("/api/cart/checkout", {
         method: "POST",
         credentials: "include",
@@ -108,15 +116,16 @@ export default function CartPageClient() {
       });
       const data = await response.json();
       if (response.status === 401) {
-        saveReturnPath("/cart");
-        router.push("/login");
+        redirectToLoginForCheckout();
         return;
       }
       if (!response.ok || !data.checkoutUrl) {
         setError(typeof data.error === "string" ? data.error : copy.checkoutError);
         return;
       }
-      window.location.href = data.checkoutUrl as string;
+      markProductsListStale();
+      window.open(data.checkoutUrl as string, "_blank", "noopener");
+      await refreshCart();
     } catch {
       setError(copy.checkoutError);
     } finally {

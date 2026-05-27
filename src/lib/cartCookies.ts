@@ -1,23 +1,37 @@
 import { NextResponse } from "next/server";
 
-import { CART_COOKIE_MAX_AGE, CART_ID_COOKIE } from "@/lib/cartConstants";
+import {
+  CART_COOKIE_MAX_AGE,
+  CART_ID_COOKIE,
+  PENDING_DRAFT_ORDER_COOKIE,
+} from "@/lib/cartConstants";
 
-export function getCartIdFromRequest(request: Request): string | null {
-  const cookieHeader = request.headers.get("cookie");
+function readCookieValue(cookieHeader: string | null, name: string): string | null {
   if (!cookieHeader) return null;
 
   const match = cookieHeader
     .split(";")
     .map((part) => part.trim())
-    .find((part) => part.startsWith(`${CART_ID_COOKIE}=`));
+    .find((part) => part.startsWith(`${name}=`));
 
   if (!match) return null;
 
   try {
-    return decodeURIComponent(match.slice(CART_ID_COOKIE.length + 1)).trim() || null;
+    return decodeURIComponent(match.slice(name.length + 1)).trim() || null;
   } catch {
-    return match.slice(CART_ID_COOKIE.length + 1).trim() || null;
+    return match.slice(name.length + 1).trim() || null;
   }
+}
+
+export function getCartIdFromRequest(request: Request): string | null {
+  return readCookieValue(request.headers.get("cookie"), CART_ID_COOKIE);
+}
+
+export function getPendingDraftOrderIdFromRequest(request: Request): string | null {
+  return readCookieValue(
+    request.headers.get("cookie"),
+    PENDING_DRAFT_ORDER_COOKIE
+  );
 }
 
 export function setCartIdCookie(response: NextResponse, cartId: string) {
@@ -32,4 +46,21 @@ export function setCartIdCookie(response: NextResponse, cartId: string) {
 
 export function clearCartIdCookie(response: NextResponse) {
   response.cookies.delete(CART_ID_COOKIE);
+}
+
+export function setPendingDraftOrderCookie(
+  response: NextResponse,
+  draftOrderId: string
+) {
+  response.cookies.set(PENDING_DRAFT_ORDER_COOKIE, draftOrderId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: CART_COOKIE_MAX_AGE,
+  });
+}
+
+export function clearPendingDraftOrderCookie(response: NextResponse) {
+  response.cookies.delete(PENDING_DRAFT_ORDER_COOKIE);
 }

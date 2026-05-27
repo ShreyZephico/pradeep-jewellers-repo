@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import type { Product } from "@/types/product";
 import ModalPortal from "@/components/ModalPortal";
-import ProductPurchasePanel from "@/components/ProductPurchasePanel";
+import ProductPurchasePanel from "@/components/productComponent/ProductPurchasePanel";
 
 type ProductModalProps = {
   product: Product | null;

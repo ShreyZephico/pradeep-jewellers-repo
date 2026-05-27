@@ -16,11 +16,48 @@ const SEARCH_LIMIT = 8;
 const DEBOUNCE_MS = 350;
 const MIN_QUERY_LENGTH = 2;
 
+type SearchLayoutVariant = "compact" | "expanded" | "mobile";
+
 type HeaderNavSearchProps = {
-  variant?: "compact" | "expanded" | "mobile";
+  /** responsive: expanded field on desktop (≥1024px), icon toggle on smaller screens */
+  variant?: SearchLayoutVariant | "responsive";
   className?: string;
   onNavigate?: () => void;
 };
+
+function useResponsiveSearchVariant(
+  variant: HeaderNavSearchProps["variant"]
+): SearchLayoutVariant {
+  const [layoutVariant, setLayoutVariant] = useState<SearchLayoutVariant>(() => {
+    if (variant === "mobile") return "mobile";
+    if (variant === "expanded") return "expanded";
+    return "compact";
+  });
+
+  useEffect(() => {
+    if (variant !== "responsive") {
+      setLayoutVariant(
+        variant === "mobile"
+          ? "mobile"
+          : variant === "expanded"
+            ? "expanded"
+            : "compact"
+      );
+      return;
+    }
+
+    const media = window.matchMedia("(min-width: 1024px)");
+    const sync = () => {
+      setLayoutVariant(media.matches ? "expanded" : "compact");
+    };
+
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, [variant]);
+
+  return layoutVariant;
+}
 
 function getProductImage(product: Product): string {
   return product.image || product.images?.[0] || "/placeholder.jpg";
@@ -31,13 +68,14 @@ export default function HeaderNavSearch({
   className = "",
   onNavigate,
 }: HeaderNavSearchProps) {
+  const layoutVariant = useResponsiveSearchVariant(variant);
   const router = useRouter();
   const inputId = useId();
   const listboxId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [isOpen, setIsOpen] = useState(variant !== "compact");
+  const [isOpen, setIsOpen] = useState(layoutVariant !== "compact");
   const [query, setQuery] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
   const [results, setResults] = useState<Product[]>([]);
@@ -99,16 +137,16 @@ export default function HeaderNavSearch({
     const showPanel =
       debouncedQ.length >= MIN_QUERY_LENGTH &&
       (loading || results.length > 0 || (!loading && query.trim().length >= MIN_QUERY_LENGTH));
-    setPanelOpen(showPanel && (variant === "mobile" || isOpen));
+    setPanelOpen(showPanel && (layoutVariant === "mobile" || isOpen));
     if (!showPanel) {
       setActiveIndex(-1);
     }
-  }, [debouncedQ, loading, results.length, query, variant, isOpen]);
+  }, [debouncedQ, loading, results.length, query, layoutVariant, isOpen]);
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) {
-        if (variant === "compact") {
+        if (layoutVariant === "compact") {
           setIsOpen(false);
         }
         setPanelOpen(false);
@@ -117,13 +155,22 @@ export default function HeaderNavSearch({
 
     document.addEventListener("mousedown", handlePointerDown);
     return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, [variant]);
+  }, [layoutVariant]);
+
+  useEffect(() => {
+    if (layoutVariant === "expanded" || layoutVariant === "mobile") {
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+      setPanelOpen(false);
+    }
+  }, [layoutVariant]);
 
   const goToProductsPage = (term: string) => {
     const trimmed = term.trim();
     onNavigate?.();
     setPanelOpen(false);
-    if (variant === "compact") {
+    if (layoutVariant === "compact") {
       setIsOpen(false);
     }
     if (!trimmed) {
@@ -139,7 +186,7 @@ export default function HeaderNavSearch({
     setDebouncedQ("");
     setResults([]);
     setPanelOpen(false);
-    if (variant === "compact") {
+    if (layoutVariant === "compact") {
       setIsOpen(false);
     }
     router.push(getProductHref(product));
@@ -155,7 +202,7 @@ export default function HeaderNavSearch({
       event.preventDefault();
       setQuery("");
       setPanelOpen(false);
-      if (variant === "compact") {
+      if (layoutVariant === "compact") {
         setIsOpen(false);
         inputRef.current?.blur();
       }
@@ -185,10 +232,11 @@ export default function HeaderNavSearch({
     }
   };
 
-  const showInput = variant === "expanded" || variant === "mobile" || isOpen;
+  const showInput =
+    layoutVariant === "expanded" || layoutVariant === "mobile" || isOpen;
   const rootClass = [
     "header-search",
-    `header-search--${variant}`,
+    `header-search--${layoutVariant}`,
     isOpen ? "header-search--open" : "",
     className,
   ]
@@ -215,7 +263,7 @@ export default function HeaderNavSearch({
           goToProductsPage(query);
         }}
       >
-        {variant === "compact" && !isOpen ? (
+        {layoutVariant === "compact" && !isOpen ? (
           <button
             type="button"
             className="header-search-toggle"
@@ -247,7 +295,7 @@ export default function HeaderNavSearch({
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={handleKeyDown}
               onFocus={() => {
-                if (variant === "compact") {
+                if (layoutVariant === "compact") {
                   setIsOpen(true);
                 }
                 if (debouncedQ.length >= MIN_QUERY_LENGTH) {
@@ -360,7 +408,7 @@ export default function HeaderNavSearch({
         </div>
       ) : null}
 
-      {variant === "mobile" && debouncedQ.length >= MIN_QUERY_LENGTH ? (
+      {layoutVariant === "mobile" && debouncedQ.length >= MIN_QUERY_LENGTH ? (
         <Link
           href={`/products?q=${encodeURIComponent(debouncedQ)}`}
           className="sr-only"

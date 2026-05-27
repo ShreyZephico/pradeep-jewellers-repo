@@ -512,7 +512,7 @@ export default function ContactSection() {
               
               <div className={styles.mapDirections}>
                 <a 
-                  href={contactData.social.googleMaps ?? "https://maps.app.goo.gl/UfPtopdgH7vZjDMC8"}
+                  href="https://maps.google.com/maps?daddr=22.695814,72.858726" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className={styles.directionsButton}

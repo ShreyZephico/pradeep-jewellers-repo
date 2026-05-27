@@ -92,7 +92,7 @@ export default function HomePageClient() {
 
       <PricingSection key={`pricing-${k}`} />
 
-      <GoldSchemeSection key={`gold-scheme-${k}`} />
+      <GoldSchemeSection />
 
       <CallbackLeadSection key={`callback-${k}`} />
 

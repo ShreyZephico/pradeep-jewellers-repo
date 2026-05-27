@@ -10,6 +10,13 @@ export type CustomizationSelections = {
   size: string;
 };
 
+export type CustomizationField = "metal" | "carat" | "diamond" | "size";
+
+export type CustomizationValidationResult = {
+  message: string;
+  field: CustomizationField;
+};
+
 export function productHasCustomizationOptions(product: Product): boolean {
   const metalPicker =
     product.metalOptions?.filter((o) => !isKaratLabel(o.label)) ?? [];
@@ -33,12 +40,12 @@ export function getProductCustomizeHref(product: Product): string {
   return `${getProductHref(product)}?customize=1`;
 }
 
-/** Returns an error message when required customization choices are missing. */
+/** Returns a field-specific error when required customization choices are missing. */
 export function getCustomizationValidationError(
   product: Product,
   selected: CustomizationSelections
-): string | null {
-  const message = productContent.purchase.selectOptionsError;
+): CustomizationValidationResult | null {
+  const copy = productContent.purchase;
 
   const metalPicker =
     product.metalOptions?.filter((o) => !isKaratLabel(o.label)) ?? [];
@@ -50,7 +57,7 @@ export function getCustomizationValidationError(
         : [];
 
   if (metalPicker.length && !selected.metal.trim()) {
-    return message;
+    return { message: copy.errorMetal, field: "metal" };
   }
 
   const karatChosen =
@@ -58,15 +65,15 @@ export function getCustomizationValidationError(
     (selected.metal.trim() && isKaratLabel(selected.metal));
 
   if (karatPicker.length && !karatChosen) {
-    return message;
+    return { message: copy.errorCarat, field: "carat" };
   }
 
   if (product.diamondQualities?.length && !selected.quality.trim()) {
-    return message;
+    return { message: copy.errorDiamond, field: "diamond" };
   }
 
   if (product.sizeOptions?.length && !selected.size.trim()) {
-    return message;
+    return { message: copy.errorSize, field: "size" };
   }
 
   return null;

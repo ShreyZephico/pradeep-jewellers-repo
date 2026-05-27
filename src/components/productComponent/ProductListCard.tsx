@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/types/product";
-import ProductCommerceActions from "@/components/ProductCommerceActions";
+import ProductCommerceActions from "@/components/productComponent/ProductCommerceActions";
 import productContent, { formatProductCopy } from "@/lib/productContent";
 import { useCart } from "@/contexts/CartContext";
 import {

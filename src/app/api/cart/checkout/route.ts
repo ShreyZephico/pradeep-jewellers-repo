@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { isAuthError, requireCartAuth } from "@/lib/cartAuth";
-import { clearCartIdCookie, getCartIdFromRequest } from "@/lib/cartCookies";
+import {
+  getCartIdFromRequest,
+  setPendingDraftOrderCookie,
+} from "@/lib/cartCookies";
 import { buildLineAttributesForCart, type CartItemBody } from "@/lib/cartLinePayload";
 import { resolveMerchandiseId } from "@/lib/cartResolve";
 import {
@@ -83,10 +86,11 @@ export async function POST(request: Request) {
       draftLines = cartLinesToDraftItems(cart.lines);
     }
 
-    const checkoutUrl = await createDraftCheckoutFromLines({
-      lines: draftLines,
-      customerEmail: authResult.customerEmail ?? undefined,
-    });
+    const { invoiceUrl: checkoutUrl, draftOrderId } =
+      await createDraftCheckoutFromLines({
+        lines: draftLines,
+        customerEmail: authResult.customerEmail ?? undefined,
+      });
 
     const response = NextResponse.json({
       success: true,
@@ -95,7 +99,7 @@ export async function POST(request: Request) {
     });
 
     if (!body.buyNow) {
-      clearCartIdCookie(response);
+      setPendingDraftOrderCookie(response, draftOrderId);
     }
     return response;
   } catch (error) {

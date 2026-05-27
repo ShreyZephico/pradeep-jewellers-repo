@@ -205,6 +205,7 @@ export default function CallbackLeadSection() {
                   type="button"
                   onClick={() => setSubmitted(false)}
                   className="callback-lead-section__success-reset"
+                  suppressHydrationWarning
                 >
                   Submit another request
                 </button>
@@ -245,11 +246,11 @@ export default function CallbackLeadSection() {
                       id="callback-name"
                       type="text"
                       autoComplete="name"
-                      suppressHydrationWarning
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder={s.fields.namePlaceholder}
                       className="callback-lead-section__input"
+                      suppressHydrationWarning
                     />
                   </div>
 
@@ -264,11 +265,11 @@ export default function CallbackLeadSection() {
                       id="callback-email"
                       type="email"
                       autoComplete="email"
-                      suppressHydrationWarning
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder={s.fields.emailPlaceholder}
                       className="callback-lead-section__input"
+                      suppressHydrationWarning
                     />
                   </div>
                 </div>
@@ -295,11 +296,11 @@ export default function CallbackLeadSection() {
                         type="tel"
                         inputMode="numeric"
                         autoComplete="tel"
-                        suppressHydrationWarning
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder={s.fields.phonePlaceholder}
                         className="callback-lead-section__phone-input"
+                        suppressHydrationWarning
                       />
                     </div>
                   </div>
@@ -314,9 +315,9 @@ export default function CallbackLeadSection() {
                     <select
                       id="callback-time"
                       value={preferredTime}
-                      suppressHydrationWarning
                       onChange={(e) => setPreferredTime(e.target.value)}
                       className="callback-lead-section__select"
+                      suppressHydrationWarning
                     >
                       {s.timeOptions.map((opt) => (
                         <option key={opt} value={opt}>
@@ -342,11 +343,11 @@ export default function CallbackLeadSection() {
                   <textarea
                     id="callback-message"
                     rows={3}
-                    suppressHydrationWarning
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder={s.fields.messagePlaceholder}
                     className="callback-lead-section__textarea"
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -359,8 +360,8 @@ export default function CallbackLeadSection() {
                   <button
                     type="submit"
                     disabled={loading}
-                    suppressHydrationWarning
                     className="callback-lead-section__submit"
+                    suppressHydrationWarning
                   >
                     {loading ? "Sending…" : s.submitText}
                   </button>

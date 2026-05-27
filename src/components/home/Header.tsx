@@ -280,12 +280,8 @@ export default function Header() {
               {contactData.header.videoCallText}
             </Link>
 
-            <div className="site-header__search-slot site-header__search-slot--desktop">
-              <HeaderNavSearch variant="expanded" />
-            </div>
-
-            <div className="site-header__search-slot site-header__search-slot--mobile">
-              <HeaderNavSearch variant="compact" />
+            <div className="site-header__search-slot">
+              <HeaderNavSearch variant="responsive" />
             </div>
 
             <button

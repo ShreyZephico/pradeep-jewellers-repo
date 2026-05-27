@@ -18,4 +18,7 @@ export const PJ_BREAKDOWN_ATTR = {
 
 export const CART_ID_COOKIE = "pj_cart_id";
 
+/** Draft order GID while customer is on Shopify invoice checkout. */
+export const PENDING_DRAFT_ORDER_COOKIE = "pj_checkout_draft";
+
 export const CART_COOKIE_MAX_AGE = 60 * 60 * 24 * 14;

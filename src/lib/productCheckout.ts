@@ -1,5 +1,6 @@
 import { saveReturnPath } from "@/lib/authRedirect";
 import { normalizeCartImageUrl } from "@/lib/cartImageUrl";
+import { markProductsListStale } from "@/lib/productsListRefresh";
 import type { Product } from "@/types/product";
 import productContent from "@/lib/productContent";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
@@ -138,6 +139,9 @@ export async function addProductToCart(
     });
     const data = await response.json();
 
+    if (response.status === 401) {
+      return { ok: false, error: copy.authCheckError, needsLogin: true };
+    }
     if (!response.ok) {
       return {
         ok: false,
@@ -180,9 +184,10 @@ export async function startProductCheckout(
         error: typeof data.error === "string" ? data.error : copy.checkoutGenericError,
       };
     }
-    if (options.redirect !== false) {
-      window.location.href = data.checkoutUrl as string;
-    }
+   if (options.redirect !== false) {
+  markProductsListStale();
+  window.open(data.checkoutUrl as string, "_blank", "noopener");
+}
     return { ok: true, checkoutUrl: data.checkoutUrl as string };
   } catch (error) {
     return {

@@ -1,17 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, Search } from 'lucide-react';
 
 import type { Product } from '@/types/product';
-import CollectionProductCard from '@/components/CollectionProductCard';
-import ProductsFilterSidebar from '@/components/ProductsFilterSidebar';
+import CollectionProductCard from "@/components/productComponent/CollectionProductCard";
+import ProductsFilterSidebar from "@/components/productComponent/ProductsFilterSidebar";
 import productContent from '@/lib/productContent';
 import type { ProductSort } from '@/lib/productFilters';
 import { priceTierToRange } from '@/lib/productFilters';
 
 const PAGE_SIZE = 12;
+const FETCH_TIMEOUT_MS = 25_000;
 const copy = productContent.list;
 const priceTiers = productContent.priceTiers;
 
@@ -50,9 +50,17 @@ function getPaginationSegments(
   return segments;
 }
 
-export default function ProductsPageClient() {
-  const searchParams = useSearchParams();
-  const initialQ = searchParams.get('q')?.trim() ?? '';
+type ProductsPageClientProps = {
+  initialQuery?: string;
+  /** Bumped after checkout (bfcache return) to refetch without remounting the tree. */
+  refreshToken?: number;
+};
+
+export default function ProductsPageClient({
+  initialQuery = '',
+  refreshToken = 0,
+}: ProductsPageClientProps) {
+  const urlQuery = initialQuery.trim();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
@@ -61,8 +69,8 @@ export default function ProductsPageClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const [searchTerm, setSearchTerm] = useState(initialQ);
-  const [debouncedQ, setDebouncedQ] = useState(initialQ);
+  const [searchTerm, setSearchTerm] = useState(urlQuery);
+  const [debouncedQ, setDebouncedQ] = useState(urlQuery);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedPriceTier, setSelectedPriceTier] = useState('any');
   const [sort, setSort] = useState<ProductSort>('featured');
@@ -74,7 +82,7 @@ export default function ProductsPageClient() {
     [selectedPriceTier]
   );
 
-  const prevDebouncedRef = useRef(debouncedQ);
+  const [retryCount, setRetryCount] = useState(0);
   const gridTopRef = useRef<HTMLDivElement>(null);
   const prevPageRef = useRef(page);
 
@@ -84,74 +92,114 @@ export default function ProductsPageClient() {
     sort !== 'featured' ||
     Boolean(searchTerm.trim());
 
+  // Keep list search in sync with ?q= from the server (header search, back/forward).
   useEffect(() => {
-    const q = searchParams.get('q')?.trim() ?? '';
-    setSearchTerm(q);
-    setDebouncedQ(q);
-    setPage(1);
-  }, [searchParams]);
+    setSearchTerm((prev) => (prev === urlQuery ? prev : urlQuery));
+    setDebouncedQ((prev) => (prev === urlQuery ? prev : urlQuery));
+    setPage((prev) => (prev === 1 ? prev : 1));
+  }, [urlQuery]);
 
+  // Debounce only when the user types in the collection search box.
   useEffect(() => {
+    if (searchTerm.trim() === urlQuery) {
+      return;
+    }
+
     const timer = window.setTimeout(() => {
       setDebouncedQ(searchTerm.trim());
-    }, 400);
-    return () => window.clearTimeout(timer);
-  }, [searchTerm]);
-
-  useEffect(() => {
-    if (prevDebouncedRef.current !== debouncedQ) {
-      prevDebouncedRef.current = debouncedQ;
       setPage(1);
-    }
-  }, [debouncedQ]);
+      setSelectedPriceTier('any');
+    }, 400);
+
+    return () => window.clearTimeout(timer);
+  }, [searchTerm, urlQuery]);
 
   useEffect(() => {
     setSelectedPriceTier('any');
-  }, [selectedCategory, debouncedQ]);
+  }, [selectedCategory]);
 
-  const loadProducts = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(PAGE_SIZE),
-        category: selectedCategory,
-        sort,
-      });
-      if (debouncedQ) {
-        params.set('q', debouncedQ);
-      }
-      if (priceRange.min != null) {
-        params.set('minPrice', String(priceRange.min));
-      }
-      if (priceRange.max != null) {
-        params.set('maxPrice', String(priceRange.max));
-      }
-
-      const response = await fetch(`/api/products?${params.toString()}`);
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to load products');
-      }
-
-      setProducts(data.products ?? []);
-      setTotal(typeof data.total === 'number' ? data.total : 0);
-      setTotalPages(typeof data.totalPages === 'number' ? data.totalPages : 0);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Network error. Please try again.');
-      setProducts([]);
-      setTotal(0);
-      setTotalPages(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, selectedCategory, debouncedQ, sort, priceRange.min, priceRange.max]);
-
+  // One fetch pipeline — avoids competing loadProducts() calls that abort each other.
   useEffect(() => {
-    void loadProducts();
-  }, [loadProducts]);
+    let active = true;
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    const run = async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const params = new URLSearchParams({
+          page: String(page),
+          limit: String(PAGE_SIZE),
+          category: selectedCategory,
+          sort,
+        });
+        if (debouncedQ) {
+          params.set('q', debouncedQ);
+        }
+        if (priceRange.min != null) {
+          params.set('minPrice', String(priceRange.min));
+        }
+        if (priceRange.max != null) {
+          params.set('maxPrice', String(priceRange.max));
+        }
+
+        const response = await fetch(`/api/products?${params.toString()}`, {
+          signal: controller.signal,
+          cache: 'no-store',
+        });
+        const data = await response.json();
+
+        if (!active) {
+          return;
+        }
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Failed to load products');
+        }
+
+        setProducts(data.products ?? []);
+        setTotal(typeof data.total === 'number' ? data.total : 0);
+        setTotalPages(typeof data.totalPages === 'number' ? data.totalPages : 0);
+      } catch (e) {
+        if (!active) {
+          return;
+        }
+        if (e instanceof Error && e.name === 'AbortError') {
+          setError('Request timed out. Please try again.');
+        } else {
+          setError(
+            e instanceof Error ? e.message : 'Network error. Please try again.'
+          );
+        }
+        setProducts([]);
+        setTotal(0);
+        setTotalPages(0);
+      } finally {
+        window.clearTimeout(timeoutId);
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void run();
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [
+    page,
+    selectedCategory,
+    debouncedQ,
+    sort,
+    priceRange.min,
+    priceRange.max,
+    retryCount,
+    refreshToken,
+  ]);
 
   useEffect(() => {
     if (prevPageRef.current === page) {
@@ -217,7 +265,7 @@ export default function ProductsPageClient() {
             type="button"
             onClick={() => {
               setError('');
-              void loadProducts();
+              setRetryCount((count) => count + 1);
             }}
             className="product-btn-primary"
           >
