@@ -15,6 +15,7 @@ import { CustomerAuthProvider } from "@/contexts/CustomerAuthContext";
 import { GoldRatesProvider } from "@/contexts/GoldRatesContext";
 
 import data from "@/data/contactDatas.json";
+import { HOME_BACK_NAV_SCRIPT } from "@/lib/homeBackNavigation";
 
 import "@/styles/cart.css";
 import "@/styles/cart-page.css";
@@ -58,11 +59,9 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Script
-          id="bfcache-reload"
+          id="home-back-navigation"
           strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `window.addEventListener("pageshow",function(e){if(e.persisted)location.reload();});`,
-          }}
+          dangerouslySetInnerHTML={{ __html: HOME_BACK_NAV_SCRIPT }}
         />
         <GoldRatesProvider refreshMs={goldRatesRefreshMs}>
           <CustomerAuthProvider>

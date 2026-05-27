@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { isAuthError, requireCartAuth } from "@/lib/cartAuth";
+import {
+  getCheckoutAuthFromRequest,
+  verifyCheckoutCustomer,
+} from "@/lib/checkoutAuth";
 import {
   clearCartIdCookie,
   getCartIdFromRequest,
@@ -39,10 +42,19 @@ function serializeCart(cart: Awaited<ReturnType<typeof fetchCart>>) {
   };
 }
 
-export async function GET(request: Request) {
-  const authResult = await requireCartAuth(request);
-  if (isAuthError(authResult)) return authResult;
+async function optionalCustomerAccessToken(
+  request: Request
+): Promise<string | undefined> {
+  const auth = getCheckoutAuthFromRequest(request);
+  if (!auth?.customerAccessToken) {
+    return undefined;
+  }
 
+  const customer = await verifyCheckoutCustomer(auth.customerAccessToken);
+  return customer ? auth.customerAccessToken : undefined;
+}
+
+export async function GET(request: Request) {
   const cartId = getCartIdFromRequest(request);
   if (!cartId) {
     return NextResponse.json({ cart: serializeCart(null) });
@@ -65,8 +77,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const authResult = await requireCartAuth(request);
-  if (isAuthError(authResult)) return authResult;
+  const customerAccessToken = await optionalCustomerAccessToken(request);
 
   try {
     const body = (await request.json()) as CartItemBody;
@@ -87,7 +98,7 @@ export async function POST(request: Request) {
             merchandiseId,
             quantity,
             attributes,
-            customerAccessToken: authResult.customerAccessToken,
+            ...(customerAccessToken ? { customerAccessToken } : {}),
           });
 
     const enriched = await enrichCartImages(cart);
@@ -105,9 +116,6 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const authResult = await requireCartAuth(request);
-  if (isAuthError(authResult)) return authResult;
-
   const cartId = getCartIdFromRequest(request);
   if (!cartId) {
     return NextResponse.json({ error: "Cart not found." }, { status: 404 });
@@ -146,9 +154,6 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const authResult = await requireCartAuth(request);
-  if (isAuthError(authResult)) return authResult;
-
   const cartId = getCartIdFromRequest(request);
   if (!cartId) {
     return NextResponse.json({ success: true, cart: serializeCart(null) });

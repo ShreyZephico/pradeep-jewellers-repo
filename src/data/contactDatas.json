@@ -486,11 +486,14 @@
     },
     "clearancePanel": {
       "headerText": "STOCK CLEARANCE ENDS IN",
-      "endsAt": "2026-05-21T18:00:00+05:30",
-      "daysLabel": "DAYS",
-      "hoursLabel": "HRS",
-      "minutesLabel": "MIN",
-      "secondsLabel": "SEC",
+      "countdown": {
+        "daysLeft": 4,
+        "daysLabel": "DAYS",
+        "hoursLabel": "HRS",
+        "minutesLabel": "MIN",
+        "secondsLabel": "SEC",
+        "expiredMessage": "Clearance ended — check back soon"
+      },
       "products": [
         {
           "name": "Zumurrud Emerald Ring",

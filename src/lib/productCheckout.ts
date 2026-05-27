@@ -1,3 +1,4 @@
+import { saveReturnPath } from "@/lib/authRedirect";
 import { normalizeCartImageUrl } from "@/lib/cartImageUrl";
 import { markProductsListStale } from "@/lib/productsListRefresh";
 import type { Product } from "@/types/product";
@@ -44,10 +45,7 @@ export type AddToCartResult =
   | { ok: false; error: string; needsLogin?: boolean };
 
 function redirectToLogin() {
-  localStorage.setItem(
-    "redirectAfterLogin",
-    `${window.location.pathname}${window.location.search}`
-  );
+  saveReturnPath();
   window.location.href = "/login";
 }
 
@@ -129,9 +127,6 @@ function buildPayload(options: AddToCartOptions | StartProductCheckoutOptions) {
 export async function addProductToCart(
   options: AddToCartOptions
 ): Promise<AddToCartResult> {
-  const auth = await ensureAuthenticated();
-  if (!auth.ok) return auth;
-
   const payload = buildPayload(options);
   if (!payload.ok) return payload;
 

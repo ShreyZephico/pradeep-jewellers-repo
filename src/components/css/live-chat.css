@@ -12,6 +12,7 @@ body.tawk-custom-launcher:not(.tawk-chat-open) .tawk-button {
   z-index: 999990;
   font-family: var(--font-geist-sans, system-ui, sans-serif);
   pointer-events: none;
+  isolation: isolate;
 }
 
 .live-chat > * {

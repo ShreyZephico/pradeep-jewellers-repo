@@ -22,15 +22,7 @@ export default function BespokeStickyBar({ onQuote }: Props) {
 
   return (
     <>
-      <a
-        href={data.social.whatsapp}
-        className="bespoke-fab-wa"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Chat on WhatsApp"
-      >
-        <span aria-hidden>💬</span>
-      </a>
+      
       <div className={`bespoke-sticky${visible ? " is-visible" : ""}`}>
         <button type="button" className="bespoke-page__btn" onClick={onQuote}>
           {BESPOKE_STICKY_BAR.quoteLabel}

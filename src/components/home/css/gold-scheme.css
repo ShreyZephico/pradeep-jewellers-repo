@@ -328,6 +328,20 @@
 
 /* Countdown — 2x2 mobile, 4-col sm+ */
 
+.gold-scheme-section__countdown-expired {
+  margin: 0 0 2rem;
+  padding: 1.25rem 1rem;
+  border: 1px solid var(--gold-scheme-countdown-border);
+  border-radius: var(--gold-scheme-radius);
+  background: var(--gold-scheme-countdown-bg);
+  font-size: var(--gold-scheme-desc-size);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--gold-scheme-urgency);
+}
+
 .gold-scheme-section__countdown {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

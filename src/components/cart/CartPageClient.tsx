@@ -12,6 +12,7 @@ import { useCartLineBreakdowns } from "@/hooks/useCartLineBreakdowns";
 import type { CartLineBreakdownData } from "@/lib/cartBreakdown";
 import productContent, { formatProductCopy } from "@/lib/productContent";
 import type { ClientCartLine } from "@/types/cart";
+import { saveReturnPath } from "@/lib/authRedirect";
 import { markProductsListStale } from "@/lib/productsListRefresh";
 import { formatProductPrice } from "@/utils/formatPrice";
 
@@ -27,39 +28,20 @@ export default function CartPageClient() {
   const { breakdowns, loading: breakdownLoading } = useCartLineBreakdowns(
     cart.lines
   );
-  const [authChecked, setAuthChecked] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [lineLoadingId, setLineLoadingId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    let cancelled = false;
-
     fetch("/api/auth/check", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
-        if (cancelled) return;
-        const ok = Boolean(data.isAuthenticated);
-        setAuthenticated(ok);
-        if (!ok) {
-          localStorage.setItem("redirectAfterLogin", "/cart");
-          router.replace("/login");
-          return;
-        }
-        setAuthChecked(true);
+        setAuthenticated(Boolean(data.isAuthenticated));
       })
       .catch(() => {
-        if (!cancelled) {
-          router.replace("/login");
-        }
+        setAuthenticated(false);
       });
-
-    return () => {
-      cancelled = true;
-    };
-    // Run once on mount — avoid re-auth loops when cart context updates after checkout.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setAuthenticated]);
 
   const updateQuantity = async (lineId: string, quantity: number) => {
     setLineLoadingId(lineId);
@@ -71,10 +53,6 @@ export default function CartPageClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lineId, quantity }),
       });
-      if (response.status === 401) {
-        router.push("/login");
-        return;
-      }
       if (!response.ok) {
         const data = await response.json();
         setError(typeof data.error === "string" ? data.error : copy.updateError);
@@ -98,10 +76,6 @@ export default function CartPageClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lineId }),
       });
-      if (response.status === 401) {
-        router.push("/login");
-        return;
-      }
       if (!response.ok) {
         const data = await response.json();
         setError(typeof data.error === "string" ? data.error : copy.updateError);
@@ -115,10 +89,25 @@ export default function CartPageClient() {
     }
   };
 
+  const redirectToLoginForCheckout = () => {
+    saveReturnPath("/cart");
+    router.push("/login");
+  };
+
   const checkout = async () => {
     setCheckoutLoading(true);
     setError("");
+
     try {
+      const authResponse = await fetch("/api/auth/check", {
+        credentials: "include",
+      });
+      const authData = await authResponse.json();
+      if (!authData.isAuthenticated) {
+        redirectToLoginForCheckout();
+        return;
+      }
+
       const response = await fetch("/api/cart/checkout", {
         method: "POST",
         credentials: "include",
@@ -127,7 +116,7 @@ export default function CartPageClient() {
       });
       const data = await response.json();
       if (response.status === 401) {
-        router.push("/login");
+        redirectToLoginForCheckout();
         return;
       }
       if (!response.ok || !data.checkoutUrl) {
@@ -143,15 +132,6 @@ export default function CartPageClient() {
       setCheckoutLoading(false);
     }
   };
-
-  if (!authChecked) {
-    return (
-      <div className="cart-page cart-page--loading">
-        <Loader2 className="cart-page-spinner" size={36} aria-hidden />
-        <p>{copy.loading}</p>
-      </div>
-    );
-  }
 
   const isEmpty = !loading && cart.lines.length === 0;
 

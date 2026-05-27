@@ -116,8 +116,10 @@ export default function LearnSection() {
               className="learn-section__card"
               style={{ "--card-index": index } as CSSProperties}
             >
-              <ArticleIcon name={article.icon} />
-              <p className="learn-section__category">{article.category}</p>
+              <div className="learn-section__card-top">
+                <ArticleIcon name={article.icon} />
+                <p className="learn-section__category">{article.category}</p>
+              </div>
               <h3 className="learn-section__card-title">{article.title}</h3>
               <p className="learn-section__summary">{article.summary}</p>
               <div className="learn-section__footer">

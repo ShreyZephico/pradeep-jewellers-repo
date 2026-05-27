@@ -3,6 +3,9 @@
 import Script from 'next/script';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import LiveChatLauncher from '@/components/LiveChatLauncher';
+import { getTawkEmbedConfig } from '@/lib/tawkConfig';
+
+const TAWK_EMBED = getTawkEmbedConfig();
 
 type VisitorProfile = {
   name: string;
@@ -105,10 +108,27 @@ function getStoredGuestProfile(): VisitorProfile | null {
   }
 }
 
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 function tawkAttributesForProfile(profile: VisitorProfile) {
+  const emailRaw = profile.email?.trim();
+  const email = emailRaw ? safeDecode(emailRaw) : undefined;
+
+  const hasValidEmail = Boolean(
+    email &&
+      // Basic sanity check; Tawk rejects malformed values (including URL-encoded).
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  );
+
   return {
     name: profile.name,
-    ...(profile.email ? { email: profile.email } : {}),
+    ...(hasValidEmail ? { email } : {}),
     phone: profile.phone,
     mobile: profile.phone,
     'phone-number': profile.phone,
@@ -129,11 +149,17 @@ export default function TawkToChat() {
   const [launcherHydrated, setLauncherHydrated] = useState(false);
   const launcherCollapsedRef = useRef(false);
   const tawkReadyRef = useRef(false);
+  const tawkConfiguredRef = useRef(false);
+  const openChatAttemptRef = useRef(false);
+  const pendingChatOpenRef = useRef(false);
   const [chatOpen, setChatOpen] = useState(false);
 
   const setTawkChatOpen = useCallback((open: boolean) => {
     setChatOpen(open);
     document.body.classList.toggle('tawk-chat-open', open);
+    if (!open) {
+      openChatAttemptRef.current = false;
+    }
   }, []);
 
   const hideNativeTawkBubble = useCallback(() => {
@@ -146,51 +172,129 @@ export default function TawkToChat() {
   }, []);
 
   const applyTawkProfile = useCallback((nextProfile: VisitorProfile) => {
-    if (!window.Tawk_API?.setAttributes) {
+  if (!window.Tawk_API?.setAttributes) {
+    return;
+  }
+
+  // Proper email validation
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  };
+
+  // Clean email safely
+  const cleanEmail = nextProfile.email?.trim()
+    ? safeDecode(nextProfile.email.trim())
+    : undefined;
+
+  // Build attributes safely
+  const attributes: Record<string, string> = {
+    name: nextProfile.name || 'Visitor',
+    phone: nextProfile.phone,
+    mobile: nextProfile.phone,
+    'phone-number': nextProfile.phone,
+  };
+
+  // Only add email if valid
+  if (cleanEmail && isValidEmail(cleanEmail)) {
+    attributes.email = cleanEmail;
+  }
+
+  window.Tawk_API.setAttributes(attributes, (error) => {
+    if (!error) {
       return;
     }
 
-    window.Tawk_API.setAttributes(
-      tawkAttributesForProfile(nextProfile),
-      (error) => {
-        if (error) {
-          console.error('Unable to set Tawk visitor attributes:', error);
-        }
-      }
-    );
+    const errorText =
+      typeof error === 'string'
+        ? error
+        : (
+            error as {
+              code?: string;
+              name?: string;
+              message?: string;
+            }
+          )?.code ||
+          (
+            error as {
+              code?: string;
+              name?: string;
+              message?: string;
+            }
+          )?.name ||
+          (
+            error as {
+              code?: string;
+              name?: string;
+              message?: string;
+            }
+          )?.message ||
+          '';
 
-    window.Tawk_API.addEvent?.(
-      'visitor-profile-collected',
-      {
-        source: nextProfile.isAuthenticated ? 'shopify-customer' : 'guest-form',
-        hasPhone: nextProfile.phone ? 'yes' : 'no',
-        phone: nextProfile.phone,
-        mobile: nextProfile.phone,
-      },
-      () => {}
-    );
-  }, []);
+    // Ignore invalid email errors completely
+    // because Tawk may cache old visitor email internally
+    if (errorText.includes('INVALID_EMAIL')) {
+      console.warn('Tawk ignored invalid email.');
+      return;
+    }
+
+    console.error('Unable to set Tawk visitor attributes:', error);
+  });
+
+  // Optional analytics event
+  window.Tawk_API.addEvent?.(
+    'visitor-profile-collected',
+    {
+      source: nextProfile.isAuthenticated
+        ? 'shopify-customer'
+        : 'guest-form',
+      hasPhone: nextProfile.phone ? 'yes' : 'no',
+      phone: nextProfile.phone,
+      mobile: nextProfile.phone,
+    },
+    () => {}
+  );
+}, []);
+
+  const maximizeTawkChat = useCallback(() => {
+    if (!profileRef.current?.phone) {
+      return false;
+    }
+
+    applyTawkProfile(profileRef.current);
+    window.Tawk_API?.showWidget?.();
+    window.Tawk_API?.maximize?.();
+    openChatAttemptRef.current = true;
+    return true;
+  }, [applyTawkProfile]);
+
+  const showProfileForm = useCallback(() => {
+    if (needsProfileRef.current) {
+      return;
+    }
+
+    const currentProfile = profileRef.current;
+    shouldOpenAfterProfile.current = true;
+    window.Tawk_API?.minimize?.();
+    hideNativeTawkBubble();
+    setTawkChatOpen(false);
+    setNameInput(currentProfile?.name ?? '');
+    setPhoneInput(currentProfile?.phone?.replace(/^\+91/, '') ?? '');
+    setFieldErrors({});
+    needsProfileRef.current = true;
+    setNeedsProfile(true);
+  }, [hideNativeTawkBubble, setTawkChatOpen]);
 
   const requestProfileBeforeChat = useCallback(() => {
     const currentProfile = profileRef.current;
 
     if (currentProfile?.phone) {
       applyTawkProfile(currentProfile);
-      return;
+      return true;
     }
 
-    if (needsProfileRef.current) {
-      return;
-    }
-
-    shouldOpenAfterProfile.current = true;
-    window.Tawk_API?.minimize?.();
-    setNameInput(currentProfile?.name ?? '');
-    setPhoneInput(currentProfile?.phone?.replace(/^\+91/, '') ?? '');
-    setFieldErrors({});
-    needsProfileRef.current = true;
-    setNeedsProfile(true);
-  }, [applyTawkProfile]);
+    showProfileForm();
+    return false;
+  }, [applyTawkProfile, showProfileForm]);
 
   const loadCustomerProfile = useCallback(async () => {
     const storedProfile = getStoredGuestProfile();
@@ -238,19 +342,32 @@ export default function TawkToChat() {
   }, [applyTawkProfile, updateProfile]);
 
   const openChatFromLauncher = useCallback(() => {
-    const currentProfile = profileRef.current;
+    launcherCollapsedRef.current = false;
+    setLauncherCollapsed(false);
 
-    if (!currentProfile?.phone) {
-      shouldOpenAfterProfile.current = true;
-      requestProfileBeforeChat();
+    try {
+      sessionStorage.removeItem(TAWK_LAUNCHER_COLLAPSED_KEY);
+    } catch {
+      /* ignore */
+    }
+
+    if (!TAWK_EMBED.isConfigured) {
+      showProfileForm();
       return;
     }
 
-    applyTawkProfile(currentProfile);
-    window.Tawk_API?.showWidget?.();
-    window.Tawk_API?.maximize?.();
-    setTawkChatOpen(true);
-  }, [applyTawkProfile, requestProfileBeforeChat, setTawkChatOpen]);
+    if (!requestProfileBeforeChat()) {
+      return;
+    }
+
+    if (!tawkReadyRef.current || !window.Tawk_API?.maximize) {
+      pendingChatOpenRef.current = true;
+      return;
+    }
+
+    pendingChatOpenRef.current = false;
+    maximizeTawkChat();
+  }, [maximizeTawkChat, requestProfileBeforeChat, showProfileForm]);
 
   const handleLauncherCollapse = useCallback(() => {
     launcherCollapsedRef.current = true;
@@ -281,23 +398,45 @@ export default function TawkToChat() {
   }, [hideNativeTawkBubble]);
 
   const configureTawk = useCallback(() => {
+    if (tawkConfiguredRef.current) {
+      return;
+    }
+    tawkConfiguredRef.current = true;
+
     window.Tawk_API = window.Tawk_API || {};
     window.Tawk_LoadStart = new Date();
 
+    const previousOnLoad = window.Tawk_API.onLoad;
+
     window.Tawk_API.onLoad = () => {
+      previousOnLoad?.();
+      tawkReadyRef.current = true;
+      hideNativeTawkBubble();
+
+      void loadCustomerProfile().then(() => {
+        if (pendingChatOpenRef.current && profileRef.current?.phone) {
+          pendingChatOpenRef.current = false;
+          maximizeTawkChat();
+        }
+      });
+    };
+
+    if (typeof window.Tawk_API.showWidget === 'function') {
       tawkReadyRef.current = true;
       loadCustomerProfile();
       hideNativeTawkBubble();
-    };
+    }
 
     window.Tawk_API.onChatMaximized = () => {
-      requestProfileBeforeChat();
+      openChatAttemptRef.current = false;
 
       if (profileRef.current?.phone) {
+        applyTawkProfile(profileRef.current);
         setTawkChatOpen(true);
-      } else {
-        setTawkChatOpen(false);
+        return;
       }
+
+      showProfileForm();
     };
 
     window.Tawk_API.onChatMinimized = () => {
@@ -309,9 +448,20 @@ export default function TawkToChat() {
       setTawkChatOpen(false);
       hideNativeTawkBubble();
     };
-  }, [hideNativeTawkBubble, loadCustomerProfile, requestProfileBeforeChat, setTawkChatOpen]);
+  }, [
+    applyTawkProfile,
+    hideNativeTawkBubble,
+    loadCustomerProfile,
+    maximizeTawkChat,
+    setTawkChatOpen,
+    showProfileForm,
+  ]);
 
   useEffect(() => {
+    if (!TAWK_EMBED.isConfigured) {
+      return;
+    }
+
     configureTawk();
 
     if (!hasLoadedProfile.current) {
@@ -402,28 +552,36 @@ export default function TawkToChat() {
 
     if (shouldOpenAfterProfile.current) {
       shouldOpenAfterProfile.current = false;
+
+      if (!tawkReadyRef.current || !window.Tawk_API?.maximize) {
+        pendingChatOpenRef.current = true;
+        return;
+      }
+
       window.setTimeout(() => {
-        window.Tawk_API?.showWidget?.();
-        window.Tawk_API?.maximize?.();
-        setTawkChatOpen(true);
+        maximizeTawkChat();
       }, 100);
     }
   };
 
   return (
     <>
-      <Script id="tawk-config" strategy="afterInteractive">
-        {`
-          window.Tawk_API = window.Tawk_API || {};
-          window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
-        `}
-      </Script>
-      <Script
-        id="tawk-to"
-        src={`https://embed.tawk.to/${process.env.NEXT_TAWK_PROPERTY_ID}/${process.env.NEXT_TAWK_WIDGET_ID}`}
-        strategy="afterInteractive"
-        crossOrigin="anonymous"
-      />
+      {TAWK_EMBED.isConfigured ? (
+        <>
+          <Script id="tawk-config" strategy="afterInteractive">
+            {`
+              window.Tawk_API = window.Tawk_API || {};
+              window.Tawk_LoadStart = window.Tawk_LoadStart || new Date();
+            `}
+          </Script>
+          <Script
+            id="tawk-to"
+            src={TAWK_EMBED.embedUrl!}
+            strategy="afterInteractive"
+            crossOrigin="anonymous"
+          />
+        </>
+      ) : null}
 
       {needsProfile ? (
         <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/45 px-4">
@@ -496,6 +654,7 @@ export default function TawkToChat() {
               <button
                 type="button"
                 onClick={() => {
+                  needsProfileRef.current = false;
                   setNeedsProfile(false);
                   setFieldErrors({});
                   shouldOpenAfterProfile.current = false;
@@ -515,7 +674,7 @@ export default function TawkToChat() {
         </div>
       ) : null}
 
-      {launcherHydrated && !chatOpen && !needsProfile ? (
+      {launcherHydrated && !chatOpen ? (
         <LiveChatLauncher
           collapsed={launcherCollapsed}
           onCollapse={handleLauncherCollapse}

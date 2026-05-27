@@ -37,20 +37,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const refreshCart = useCallback(async () => {
-    if (!isAuthenticated) {
-      setCart(emptyCart);
-      return;
-    }
     setLoading(true);
     try {
       const response = await fetch("/api/cart", {
         credentials: "include",
         cache: "no-store",
       });
-      if (response.status === 401) {
-        setCart(emptyCart);
-        return;
-      }
       const data = await response.json();
       if (!response.ok) {
         setCart(emptyCart);
@@ -62,7 +54,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated]);
+  }, []);
 
   const goToCart = useCallback(() => {
     router.push("/cart");

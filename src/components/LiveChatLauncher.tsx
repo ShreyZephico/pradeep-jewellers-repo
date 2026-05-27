@@ -30,7 +30,10 @@ export default function LiveChatLauncher({
         <button
           type="button"
           className="live-chat__tab"
-          onClick={onExpand}
+          onClick={() => {
+            onExpand();
+            onOpenChat();
+          }}
           aria-label="Open live chat"
         >
           <span className="live-chat__tab-label">Live Chat</span>
