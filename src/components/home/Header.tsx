@@ -328,9 +328,6 @@ export default function Header() {
                   <Link href="/orders" className="site-header__dropdown-link">
                     My Orders
                   </Link>
-                  <Link href="/wishlist" className="site-header__dropdown-link">
-                    Wishlist
-                  </Link>
                   <button
                     type="button"
                     className="site-header__dropdown-logout"

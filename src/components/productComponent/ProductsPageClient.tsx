@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Search } from 'lucide-react';
+import Link from 'next/link';
+import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
 
 import type { Product } from '@/types/product';
 import CollectionProductCard from "@/components/productComponent/CollectionProductCard";
@@ -251,12 +252,14 @@ export default function ProductsPageClient({
   const paginationSegments = getPaginationSegments(page, displayTotalPages);
   const canPrev = page > 1 && !loading;
   const canNext = displayTotalPages > 0 && page < displayTotalPages && !loading;
+  const sortLabel =
+    SORT_OPTIONS.find((option) => option.value === sort)?.label ?? copy.sortFeatured;
 
   if (error && products.length === 0 && !loading) {
     return (
       <div className="product-page product-page--collection product-state-center">
         <div className="product-state-card">
-          <div className="product-list-empty-icon" aria-hidden>
+          <div className="collection-empty-icon" aria-hidden>
             ⚠
           </div>
           <h2>{copy.errorTitle}</h2>
@@ -279,6 +282,14 @@ export default function ProductsPageClient({
   return (
     <div className="product-page product-page--collection">
       <div className="collection-wrap">
+        <nav className="collection-breadcrumb" aria-label="Breadcrumb">
+          <Link href="/">Home</Link>
+          <span className="collection-breadcrumb__sep" aria-hidden>
+            /
+          </span>
+          <span className="collection-breadcrumb__current">Shop</span>
+        </nav>
+
         <header className="collection-header">
           <div className="collection-header-intro">
             <div className="collection-eyebrow">
@@ -290,10 +301,10 @@ export default function ProductsPageClient({
           </div>
 
           <div className="collection-header-tools">
-            <label className="collection-search" htmlFor="collection-search">
+            <label className="collection-search" htmlFor="collection-search-desktop">
               <Search size={18} className="collection-search-icon" aria-hidden />
               <input
-                id="collection-search"
+                id="collection-search-desktop"
                 type="search"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
@@ -309,6 +320,7 @@ export default function ProductsPageClient({
                 value={sort}
                 onChange={(event) => handleSortChange(event.target.value as ProductSort)}
                 aria-label={copy.sortTitle}
+                suppressHydrationWarning
               >
                 {SORT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -320,6 +332,51 @@ export default function ProductsPageClient({
             </label>
           </div>
         </header>
+
+        <div className="collection-mobile-tools">
+          <label className="collection-search" htmlFor="collection-search-mobile">
+            <Search size={18} className="collection-search-icon" aria-hidden />
+            <input
+              id="collection-search-mobile"
+              type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder={copy.searchPlaceholderCollection}
+              className="collection-search-input"
+            />
+          </label>
+
+          <div className="collection-mobile-bar">
+            <label className="collection-sort--bar">
+              <span className="sr-only">{copy.sortTitle}</span>
+              <span className="collection-sort-label">{sortLabel}</span>
+              <select
+                className="collection-sort-select"
+                value={sort}
+                onChange={(event) => handleSortChange(event.target.value as ProductSort)}
+                aria-label={copy.sortTitle}
+                suppressHydrationWarning
+              >
+                {SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={16} className="collection-sort-chevron" aria-hidden />
+            </label>
+
+            <button
+              type="button"
+              className="collection-filter-trigger"
+              onClick={() => setFiltersOpen(true)}
+              aria-expanded={filtersOpen}
+            >
+              <SlidersHorizontal size={17} aria-hidden />
+              {copy.filtersOpen}
+            </button>
+          </div>
+        </div>
 
         <div className="collection-body">
           <ProductsFilterSidebar
@@ -366,8 +423,12 @@ export default function ProductsPageClient({
             {!loading && products.length > 0 ? (
               <>
                 <ul className="collection-grid">
-                  {products.map((product) => (
-                    <li key={product.id}>
+                  {products.map((product, index) => (
+                    <li
+                      key={product.id}
+                      className="collection-grid-item"
+                      style={{ animationDelay: `${(index % 8) * 0.06}s` }}
+                    >
                       <CollectionProductCard
                         product={product}
                         imageSrc={getProductImage(product)}

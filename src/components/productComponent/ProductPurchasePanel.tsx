@@ -17,6 +17,7 @@ import {
   startProductCheckout,
 } from "@/lib/productCheckout";
 import productContent from "@/lib/productContent";
+import "@/styles/ProductPurchasePanel.css";
 import {
   getCustomizationValidationError,
   type CustomizationField,
@@ -331,7 +332,7 @@ export default function ProductPurchasePanel({
   const sectionInvalid = (field: CustomizationField) => errorField === field;
 
   const priceDisplay = (
-    <div className="product-purchase-price-block">
+    <div className="item-purchase-price-block">
       <p
         className={`product-purchase-price-label product-purchase-price-label--${
           isPage ? "page" : "modal"
@@ -339,7 +340,7 @@ export default function ProductPurchasePanel({
       >
         {copy.yourPrice}
       </p>
-      <div className="product-purchase-price-row">
+      <div className="item-purchase-price-row">
         <p
           className={`product-purchase-price-main product-purchase-price-main--${
             isPage ? "page" : "modal"
@@ -354,9 +355,9 @@ export default function ProductPurchasePanel({
         ) : null}
       </div>
       {isModal ? (
-        <p className="product-purchase-modal-gst">{copy.modalGstNote}</p>
+        <p className="item-purchase-modal-gst">{copy.modalGstNote}</p>
       ) : (
-        <p className="product-purchase-price-note">{copy.gstNote}</p>
+        <p className="item-purchase-price-note">{copy.gstNote}</p>
       )}
     </div>
   );
@@ -368,8 +369,8 @@ export default function ProductPurchasePanel({
       tabIndex={-1}
     >
       {checkoutError ? (
-        <div className="product-purchase-feedback product-purchase-feedback--error" role="alert">
-          <span className="product-purchase-feedback-icon" aria-hidden>
+        <div className="item-purchase-feedback product-purchase-feedback--error" role="alert">
+          <span className="item-purchase-feedback-icon" aria-hidden>
             !
           </span>
           <p>{checkoutError}</p>
@@ -377,8 +378,8 @@ export default function ProductPurchasePanel({
       ) : null}
 
       {cartToast ? (
-        <div className="product-purchase-feedback product-purchase-feedback--success" role="status">
-          <span className="product-purchase-feedback-icon" aria-hidden>
+        <div className="item-purchase-feedback product-purchase-feedback--success" role="status">
+          <span className="item-purchase-feedback-icon" aria-hidden>
             ✓
           </span>
           <p>{cartToast}</p>
@@ -386,7 +387,7 @@ export default function ProductPurchasePanel({
       ) : null}
 
       {isModal ? (
-        <p className="product-purchase-footer-note">{copy.footerSecureNote}</p>
+        <p className="item-purchase-footer-note">{copy.footerSecureNote}</p>
       ) : null}
 
       <ProductCommerceActions
@@ -402,22 +403,31 @@ export default function ProductPurchasePanel({
   return (
     <div className={`product-purchase${isModal ? " product-purchase--modal" : ""}`}>
       {isModal ? (
-        <header className="product-purchase-modal-head">
-          <div className="product-purchase-modal-head-copy">
-            <p className="product-purchase-modal-kicker">{copy.modalKicker}</p>
-            <h2 className="product-purchase-modal-title">{copy.modalTitle}</h2>
-            <p className="product-purchase-modal-product-name">{product.name}</p>
+        <header className="item-purchase-modal-head">
+          <div className="item-purchase-modal-head-copy item-purchase-modal-head-copy--compact">
+            <div className="item-purchase-modal-thumb" aria-hidden>
+              <Image
+                src={selectedImage}
+                alt=""
+                width={56}
+                height={56}
+                className="item-purchase-modal-thumb-img"
+              />
+            </div>
+            <div className="item-purchase-modal-head-text">
+              <h2 className="item-purchase-modal-product-title">{product.name}</h2>
+            </div>
           </div>
-          <div className="product-purchase-modal-head-aside">
+          <div className="item-purchase-modal-head-aside">
             {priceDisplay}
             {onClose ? (
               <button
                 type="button"
                 onClick={onClose}
                 aria-label={copy.closeModalAria}
-                className="product-purchase-close product-purchase-close--modal"
+                className="item-purchase-close product-purchase-close--modal"
               >
-                <span className="product-purchase-close-icon" aria-hidden>
+                <span className="item-purchase-close-icon" aria-hidden>
                   ×
                 </span>
               </button>
@@ -425,7 +435,7 @@ export default function ProductPurchasePanel({
           </div>
         </header>
       ) : (
-        <div className="product-purchase-price-header product-purchase-price-header--page">
+        <div className="item-purchase-price-header product-purchase-price-header--page">
           {priceDisplay}
         </div>
       )}
@@ -433,31 +443,31 @@ export default function ProductPurchasePanel({
       <div
         className={`product-purchase-body${isModal ? " product-purchase-modal-scroll" : ""}`}
       >
-        {showDesignSummary ? (
+        {showDesignSummary && !isModal ? (
           <section
             className={`product-purchase-summary${
               isModal ? " product-purchase-summary--modal" : ""
             }`}
           >
-            <div className="product-purchase-summary-img-wrap">
+            <div className="item-purchase-summary-img-wrap">
               <Image
                 src={selectedImage}
                 alt={product.name}
                 width={220}
                 height={180}
-                className="product-purchase-summary-img"
+                className="item-purchase-summary-img"
               />
             </div>
-            <div className="product-purchase-summary-text">
-              <p className="product-purchase-summary-eyebrow">{copy.selectedDesign}</p>
-              <h3 className="product-item-title product-item-title--summary">
+            <div className="item-purchase-summary-text">
+              <p className="item-purchase-summary-eyebrow">{copy.selectedDesign}</p>
+              <h3 className="item-item-title product-item-title--summary">
                 {product.name}
               </h3>
               {!isModal ? (
-                <p className="product-purchase-summary-desc">{product.description}</p>
+                <p className="item-purchase-summary-desc">{product.description}</p>
               ) : null}
               {product.customizable ? (
-                <p className="product-purchase-custom-note">{copy.customizableNote}</p>
+                <p className="item-purchase-custom-note">{copy.customizableNote}</p>
               ) : null}
             </div>
           </section>
@@ -470,13 +480,13 @@ export default function ProductPurchasePanel({
               sectionInvalid("metal") ? " product-purchase-section--invalid" : ""
             }`}
           >
-            <h3 className="product-purchase-section-title">
+            <h3 className="item-purchase-section-title">
               {product.metalOptionName ?? copy.metalOptionDefault}
-              <span className="product-purchase-required" aria-hidden>
+              <span className="item-purchase-required" aria-hidden>
                 *
               </span>
             </h3>
-            <div className="product-purchase-options product-purchase-options--modal">
+            <div className="item-purchase-options product-purchase-options--modal">
               {metalPickerOptions.map((option) => {
                 const isSelected = selectedMetal === option.label;
                 return (
@@ -487,9 +497,9 @@ export default function ProductPurchasePanel({
                     className={optionClass(isSelected, false, sectionInvalid("metal"))}
                     aria-pressed={isSelected}
                   >
-                    <span className="product-option-btn-label">{option.label}</span>
+                    <span className="item-option-btn-label">{option.label}</span>
                     {option.note ? (
-                      <span className="product-option-btn-note">{option.note}</span>
+                      <span className="item-option-btn-note">{option.note}</span>
                     ) : null}
                   </button>
                 );
@@ -505,14 +515,14 @@ export default function ProductPurchasePanel({
               sectionInvalid("carat") ? " product-purchase-section--invalid" : ""
             }`}
           >
-            <h3 className="product-purchase-section-title">
+            <h3 className="item-purchase-section-title">
               {product.caratOptionName ?? copy.caratOptionDefault}
-              <span className="product-purchase-required" aria-hidden>
+              <span className="item-purchase-required" aria-hidden>
                 *
               </span>
             </h3>
-            <p className="product-purchase-section-hint">{copy.caratHint}</p>
-            <div className="product-purchase-options product-purchase-options--modal">
+            <p className="item-purchase-section-hint">{copy.caratHint}</p>
+            <div className="item-purchase-options product-purchase-options--modal">
               {karatPickerOptions.map((option) => {
                 const isSelected =
                   selectedCarat === option.label ||
@@ -525,9 +535,9 @@ export default function ProductPurchasePanel({
                     className={optionClass(isSelected, false, sectionInvalid("carat"))}
                     aria-pressed={isSelected}
                   >
-                    <span className="product-option-btn-label">{option.label}</span>
+                    <span className="item-option-btn-label">{option.label}</span>
                     {option.note ? (
-                      <span className="product-option-btn-note">{option.note}</span>
+                      <span className="item-option-btn-note">{option.note}</span>
                     ) : null}
                   </button>
                 );
@@ -543,23 +553,23 @@ export default function ProductPurchasePanel({
               sectionInvalid("diamond") ? " product-purchase-section--invalid" : ""
             }`}
           >
-            <div className="product-purchase-section-header">
-              <h3 className="product-purchase-section-title">
+            <div className="item-purchase-section-header">
+              <h3 className="item-purchase-section-title">
                 {product.diamondOptionName ?? copy.diamondOptionDefault}
-                <span className="product-purchase-required" aria-hidden>
+                <span className="item-purchase-required" aria-hidden>
                   *
                 </span>
               </h3>
               <Link
                 href="/diamond-guide"
-                className="product-purchase-guide-link"
+                className="item-purchase-guide-link"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 {copy.diamondGuide}
               </Link>
             </div>
-            <div className="product-purchase-options product-purchase-options--modal">
+            <div className="item-purchase-options product-purchase-options--modal">
               {product.diamondQualities?.map((option) => {
                 const isSelected = selectedQuality === option.label;
                 return (
@@ -570,9 +580,9 @@ export default function ProductPurchasePanel({
                     className={optionClass(isSelected, false, sectionInvalid("diamond"))}
                     aria-pressed={isSelected}
                   >
-                    <span className="product-option-btn-label">{option.label}</span>
+                    <span className="item-option-btn-label">{option.label}</span>
                     {option.note ? (
-                      <span className="product-option-btn-note">{option.note}</span>
+                      <span className="item-option-btn-note">{option.note}</span>
                     ) : null}
                   </button>
                 );
@@ -588,23 +598,23 @@ export default function ProductPurchasePanel({
               sectionInvalid("size") ? " product-purchase-section--invalid" : ""
             }`}
           >
-            <div className="product-purchase-section-header">
-              <h3 className="product-purchase-section-title">
+            <div className="item-purchase-section-header">
+              <h3 className="item-purchase-section-title">
                 {product.sizeOptionName ?? copy.sizeOptionDefault}
-                <span className="product-purchase-required" aria-hidden>
+                <span className="item-purchase-required" aria-hidden>
                   *
                 </span>
               </h3>
               <a
                 href="https://workdrive.zohoexternal.in/external/80ca836e76f8383e2afda8491fcd9ded5ffe8cfa495029d905efa26a121f6c52/download"
-                className="product-purchase-guide-link"
+                className="item-purchase-guide-link"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 {copy.sizeGuide}
               </a>
             </div>
-            <div className="product-purchase-options product-purchase-options--size product-purchase-options--modal">
+            <div className="item-purchase-options product-purchase-options--size product-purchase-options--modal">
               {product.sizeOptions?.map((option) => {
                 const isSelected = selectedSize === option.size;
                 return (
@@ -615,12 +625,12 @@ export default function ProductPurchasePanel({
                     className={optionClass(isSelected, true, sectionInvalid("size"))}
                     aria-pressed={isSelected}
                   >
-                    <span className="product-option-btn-size">{option.size}</span>
+                    <span className="item-option-btn-size">{option.size}</span>
                     {option.mm ? (
-                      <span className="product-option-btn-mm">{option.mm}</span>
+                      <span className="item-option-btn-mm">{option.mm}</span>
                     ) : null}
                     {option.note ? (
-                      <span className="product-option-btn-note product-option-btn-note--sm">
+                      <span className="item-option-btn-note product-option-btn-note--sm">
                         {option.note}
                       </span>
                     ) : null}

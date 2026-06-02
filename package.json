@@ -14,7 +14,9 @@
     "sync:db": "node scripts/sync-shopify-products-to-db.mjs",
     "sync:shopify": "node scripts/sync-db-products-to-shopify.mjs",
     "sync:shopify:apply": "node scripts/sync-db-products-to-shopify.mjs --apply",
-    "sync:shopify:reset": "node scripts/sync-db-products-to-shopify.mjs --apply --reset-store"
+    "sync:shopify:reset": "node scripts/sync-db-products-to-shopify.mjs --apply --reset-store",
+    "store-metal-prices:migrate": "node scripts/run-store-metal-prices-migration.mjs",
+    "store-metal-prices:grant": "node scripts/grant-store-metal-prices.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

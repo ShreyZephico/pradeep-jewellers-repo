@@ -1,4 +1,5 @@
 import "@/styles/product.css";
+import "@/styles/shop-collection.css";
 
 export default function ProductsLayout({
   children,

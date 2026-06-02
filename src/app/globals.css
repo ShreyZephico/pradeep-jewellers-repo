@@ -209,6 +209,20 @@
   --not-found-enter: 0.6s;
   --not-found-ease: cubic-bezier(0.22, 1, 0.36, 1);
 
+  /* Shop / products collection (/products) */
+  --shop-bg: #f9f7f2;
+  --shop-bg-card: #ffffff;
+  --shop-bg-highlight: #ede9e2;
+  --shop-text: #1a1410;
+  --shop-text-muted: rgba(26, 20, 16, 0.55);
+  --shop-border: #e8e4dc;
+  --shop-accent: #c4a574;
+  --shop-accent-deep: #a8813e;
+  --shop-serif: var(--featured-serif);
+  --shop-layout-max: 82rem;
+  --shop-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --shop-enter: 0.5s var(--shop-ease);
+
   /* Login page (/login) — matches Learn section & header palette */
   --login-page-bg: var(--learn-bg);
   --login-page-bg-soft: var(--color-warm-ivory);
@@ -867,6 +881,12 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+  }
+
+  /* Shop page keeps cream background in dark mode */
+  .product-page--collection {
+    --background: var(--shop-bg);
+    --foreground: var(--shop-text);
   }
 }
 

@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import data from "@/data/contactDatas.json";
 
-import { BESPOKE_SHOWROOM_IMAGE } from "../content";
+import { BESPOKE_FORM_IMAGE as BESPOKE_SHOWROOM_IMAGE } from "../content";
 
 export default function BespokeContactSection() {
   const { contact, social, header, visit } = {

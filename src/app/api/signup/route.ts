@@ -5,6 +5,7 @@ import {
   findCustomerByEmailOrPhone,
   splitCustomerName,
 } from '@/lib/shopifyCustomer';
+import { normalizeIndianMobile } from '@/utils/indianPhone';
 
 export async function POST(request: Request) {
   try {
@@ -111,6 +112,16 @@ export async function POST(request: Request) {
       expires,
       path: '/',
     });
+    const nationalPhone = normalizeIndianMobile(cleanPhone);
+    if (nationalPhone) {
+      response.cookies.set('customerPhone', nationalPhone, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        expires,
+        path: '/',
+      });
+    }
     response.cookies.set('loginMethod', 'email', {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',

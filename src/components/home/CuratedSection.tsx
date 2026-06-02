@@ -26,22 +26,6 @@ const formatPrice = (value: number) =>
     maximumFractionDigits: 0,
   }).format(value);
 
-function WishlistIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.35"
-      aria-hidden
-    >
-      <path d="M12 21s-7-4.35-7-10a4.5 4.5 0 0 1 8-2.7A4.5 4.5 0 0 1 19 11c0 5.65-7 10-7 10Z" />
-    </svg>
-  );
-}
-
 function ProductCardSkeleton({ index }: { index: number }) {
   return (
     <div
@@ -177,19 +161,6 @@ export default function CuratedSection() {
                       {badge ? (
                         <span className="curated-section__card-tag">{badge}</span>
                       ) : null}
-
-                      <button
-                        type="button"
-                        suppressHydrationWarning
-                        aria-label={`Add ${product.name} to wishlist`}
-                        className="curated-section__card-wishlist"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                      >
-                        <WishlistIcon />
-                      </button>
                     </div>
 
                     <p className="curated-section__card-type">

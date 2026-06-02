@@ -13,6 +13,8 @@ export type BespokeGalleryRow = {
   items: BespokeGalleryItem[];
 };
 
+export type BespokeCategoryId = "ring" | "necklace" | "earrings";
+
 type BespokeDataRaw = typeof raw;
 
 const data = raw as BespokeDataRaw;
@@ -56,7 +58,7 @@ export const BESPOKE_GALLERY_SECTION = {
 
 export const BESPOKE_GALLERY_ROWS: BespokeGalleryRow[] = data.gallery.rows.map((row) => ({
   id: row.id,
-  direction: row.direction,
+  direction: row.direction === "rtl" ? "rtl" : "ltr",
   items: row.items.map(mapGalleryItem),
 }));
 
@@ -99,6 +101,50 @@ export const BESPOKE_FORM_IMAGE_ALT = data.form.imageAlt;
 export const BESPOKE_JEWELLERY_TYPES = data.form.jewelleryTypes;
 export const BESPOKE_METALS = data.form.metals;
 export const BESPOKE_GEMSTONES = data.form.gemstones;
+export const BESPOKE_STYLES = [
+  {
+    label: "Traditional",
+    image: bespokeImageUrl("photo-1635767798638-3e25273a8236", 600),
+  },
+  {
+    label: "Contemporary",
+    image: bespokeImageUrl("photo-1611085583191-a3b181a88401", 600),
+  },
+  {
+    label: "Minimal",
+    image: bespokeImageUrl("photo-1515562141207-7a88fb7ce338", 600),
+  },
+] as const;
+
+export const BESPOKE_CATEGORIES: Array<{
+  id: BespokeCategoryId;
+  label: string;
+  priceFrom: string;
+  image: string;
+  imageAlt: string;
+}> = [
+  {
+    id: "ring",
+    label: "Rings",
+    priceFrom: "From ₹25,000",
+    image: bespokeImageUrl("photo-1605100804763-247f67b3557e", 800),
+    imageAlt: "Custom ring design",
+  },
+  {
+    id: "necklace",
+    label: "Necklaces",
+    priceFrom: "From ₹60,000",
+    image: bespokeImageUrl("photo-1599643478518-a784e5dc4c8f", 800),
+    imageAlt: "Custom necklace design",
+  },
+  {
+    id: "earrings",
+    label: "Earrings",
+    priceFrom: "From ₹18,000",
+    image: bespokeImageUrl("photo-1635767798638-3e25273a8236", 800),
+    imageAlt: "Custom earrings design",
+  },
+];
 export const BESPOKE_BUDGET_OPTIONS = data.form.budgetOptions;
 export const BESPOKE_CONTACT_METHODS = data.form.contactMethods;
 

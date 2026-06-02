@@ -31,7 +31,11 @@ export default function ProductModal({ product, open, onClose }: ProductModalPro
 
   return (
     <ModalPortal>
-      <div className="product-modal-overlay" role="presentation" onClick={onClose}>
+      <div
+        className="product-modal-overlay product-modal-overlay--drawer"
+        role="presentation"
+        onClick={onClose}
+      >
         <div
           className="product-modal-shell"
           role="dialog"

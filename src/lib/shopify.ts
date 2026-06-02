@@ -9,6 +9,16 @@ import {
 import type { Product, ProductVariant } from "@/types/product";
 import calculateVariantPrice from "@/utils/calculateVariantPrice";
 import getGoldPrice from "@/utils/goldPrice";
+
+let missingGoldPriceLogged = false;
+
+function logMissingGoldPriceOnce(): void {
+  if (missingGoldPriceLogged) return;
+  missingGoldPriceLogged = true;
+  console.warn(
+    "[shopify] No manual 24K gold price in store_metal_prices — using Shopify variant prices. Save today's rates at /metal-prices."
+  );
+}
 import { isKaratLabel, isKaratOption } from "@/utils/karat";
 import { resolveVariantWeight } from "@/utils/resolveVariantWeight";
 import {
@@ -452,28 +462,16 @@ async function mapShopifyProductListItem(
   let price = 0;
   let variantId = node.variants.edges[0]?.node.id ?? "";
   let makingChargePercent: number | undefined;
+  const goldRate = await getGoldPrice();
+
+  if (goldRate == null) {
+    logMissingGoldPriceOnce();
+  }
 
   for (const { node: variant } of node.variants.edges) {
-    const gramsFromApi = shopifyWeightToGrams(
-      variant.weight ?? null,
-      variant.weightUnit ?? null
-    );
-    const weight = resolveVariantWeight(gramsFromApi);
-    const carat = extractCaratFromSelectedOptions(variant.selectedOptions);
     const shopifyVariantPrice = Number(variant.price?.amount ?? 0);
 
-    try {
-      const pricing = await calculateVariantPrice({ weight, carat });
-      if (price === 0 || pricing.finalPrice < price) {
-        price = pricing.finalPrice;
-        variantId = variant.id;
-      }
-    } catch (error) {
-      console.warn(
-        "[shopify] Gold price unavailable for listing; using Shopify variant price:",
-        node.handle,
-        error
-      );
+    if (goldRate == null) {
       if (
         shopifyVariantPrice > 0 &&
         (price === 0 || shopifyVariantPrice < price)
@@ -481,6 +479,20 @@ async function mapShopifyProductListItem(
         price = Math.round(shopifyVariantPrice);
         variantId = variant.id;
       }
+      continue;
+    }
+
+    const gramsFromApi = shopifyWeightToGrams(
+      variant.weight ?? null,
+      variant.weightUnit ?? null
+    );
+    const weight = resolveVariantWeight(gramsFromApi);
+    const carat = extractCaratFromSelectedOptions(variant.selectedOptions);
+
+    const pricing = await calculateVariantPrice({ weight, carat });
+    if (price === 0 || pricing.finalPrice < price) {
+      price = pricing.finalPrice;
+      variantId = variant.id;
     }
   }
 
@@ -558,7 +570,10 @@ async function mapShopifyProduct(
   const images = Array.from(imageSet);
   const primaryImage = node.featuredImage?.url ?? images[0] ?? fallback.image;
 
-  await getGoldPrice();
+  const goldRate = await getGoldPrice();
+  if (goldRate == null) {
+    logMissingGoldPriceOnce();
+  }
 
   const variants = await Promise.all(
     node.variants.edges.map(async ({ node: variant }) => {
@@ -568,6 +583,17 @@ async function mapShopifyProduct(
       );
       const weight = resolveVariantWeight(gramsFromApi);
       const carat = extractCaratFromSelectedOptions(variant.selectedOptions);
+      const shopifyVariantPrice = Math.round(Number(variant.price?.amount ?? 0));
+
+      if (goldRate == null) {
+        return {
+          id: variant.id,
+          image: variant.image?.url,
+          price: shopifyVariantPrice,
+          weight,
+          selectedOptions: variant.selectedOptions,
+        };
+      }
 
       const pricing = await calculateVariantPrice({ weight, carat });
 
@@ -1232,7 +1258,6 @@ export async function fetchAllShopifyProducts(options?: {
   maxProducts?: number;
 }): Promise<Product[]> {
   const nodes = await fetchShopifyProductNodes(options);
-  await getGoldPrice();
   return Promise.all(nodes.map((node, index) => mapShopifyProductListItem(node, index)));
 }
 

@@ -7,26 +7,23 @@ const ratesConfig = contactData.heroSection.rates;
 
 export const RATES_PAGE_DEFAULT_DAYS = 7;
 
+function metalQuery(
+  db: { metal: string; purityLabel: string; unit: string; priceMultiplier?: number }
+) {
+  return {
+    metal: db.metal,
+    purityLabel: db.purityLabel,
+    unit: db.unit,
+    priceMultiplier: db.priceMultiplier,
+  };
+}
+
 export function buildRatesDbConfig(
   compareDays = ratesConfig.compareDays ?? 1
 ): FetchMetalRatesConfig {
   return {
-    gold22k: {
-      metal: ratesConfig.gold22k.db.metal,
-      purityLabel: ratesConfig.gold22k.db.purityLabel,
-      location: ratesConfig.gold22k.db.location,
-      unit: ratesConfig.gold22k.db.unit,
-      weight: ratesConfig.gold22k.db.weight,
-      priceMultiplier: ratesConfig.gold22k.db.priceMultiplier,
-    },
-    silver1kg: {
-      metal: ratesConfig.silver1kg.db.metal,
-      purityLabel: ratesConfig.silver1kg.db.purityLabel,
-      location: ratesConfig.silver1kg.db.location,
-      unit: ratesConfig.silver1kg.db.unit,
-      weight: ratesConfig.silver1kg.db.weight,
-      priceMultiplier: ratesConfig.silver1kg.db.priceMultiplier,
-    },
+    gold22k: metalQuery(ratesConfig.gold22k.db),
+    silver1kg: metalQuery(ratesConfig.silver1kg.db),
     compareDays,
   };
 }
@@ -42,30 +39,9 @@ export function buildRatesAnalyticsConfig(): RatesAnalyticsDbConfig {
       gold22k: ratesConfig.gold22k.label,
       silver1kg: ratesConfig.silver1kg.label,
     },
-    gold24k: {
-      metal: gold24k.db.metal,
-      purityLabel: gold24k.db.purityLabel,
-      location: gold24k.db.location,
-      unit: gold24k.db.unit,
-      weight: gold24k.db.weight,
-      priceMultiplier: gold24k.db.priceMultiplier,
-    },
-    gold22k: {
-      metal: ratesConfig.gold22k.db.metal,
-      purityLabel: ratesConfig.gold22k.db.purityLabel,
-      location: ratesConfig.gold22k.db.location,
-      unit: ratesConfig.gold22k.db.unit,
-      weight: ratesConfig.gold22k.db.weight,
-      priceMultiplier: ratesConfig.gold22k.db.priceMultiplier,
-    },
-    silver1kg: {
-      metal: ratesConfig.silver1kg.db.metal,
-      purityLabel: ratesConfig.silver1kg.db.purityLabel,
-      location: ratesConfig.silver1kg.db.location,
-      unit: ratesConfig.silver1kg.db.unit,
-      weight: ratesConfig.silver1kg.db.weight,
-      priceMultiplier: ratesConfig.silver1kg.db.priceMultiplier,
-    },
+    gold24k: metalQuery(gold24k.db),
+    gold22k: metalQuery(ratesConfig.gold22k.db),
+    silver1kg: metalQuery(ratesConfig.silver1kg.db),
   };
 }
 
