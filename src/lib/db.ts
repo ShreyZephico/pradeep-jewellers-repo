@@ -1,8 +1,10 @@
 import { Pool } from "pg";
 import type { Product, ProductOption, ProductSizeOption } from "@/types/product";
 
+import { getPgPoolConfig } from "@/lib/pgConnection";
+
 const connectionString =
-  process.env.DATABASE_URL ??
+  process.env.DATABASE_URL?.trim() ??
   "postgresql://zephico:zephico_password@localhost:5435/zephico_jewels";
 
 const globalForPg = globalThis as unknown as {
@@ -10,13 +12,7 @@ const globalForPg = globalThis as unknown as {
 };
 
 const pool =
-  globalForPg.zephicoPgPool ??
-  new Pool({
-    connectionString,
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  });
+  globalForPg.zephicoPgPool ?? new Pool(getPgPoolConfig(connectionString));
 if (process.env.NODE_ENV !== "production") {
   globalForPg.zephicoPgPool = pool;
 }

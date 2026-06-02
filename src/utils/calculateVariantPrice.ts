@@ -1,6 +1,13 @@
 import getGoldPrice from "./goldPrice";
 import { parseKaratNumber } from "./karat";
 
+export class GoldPriceUnavailableError extends Error {
+  constructor() {
+    super("No manual 24K gold price in database");
+    this.name = "GoldPriceUnavailableError";
+  }
+}
+
 export type VariantPriceBreakdown = {
   purity: number;
   karat: number;
@@ -23,36 +30,28 @@ async function calculateVariantPrice({
   weight,
   carat,
 }: CalculateVariantPriceProps) {
-
   const base24KGoldPrice = await getGoldPrice();
+  if (base24KGoldPrice == null) {
+    throw new GoldPriceUnavailableError();
+  }
 
   const karat = parseKaratNumber(carat);
 
-  const purityPercentage =
-    Math.round(
-      (karat / 24) * 100
-    );
+  const purityPercentage = Math.round((karat / 24) * 100);
 
-  const adjustedGoldPrice =
-    (base24KGoldPrice * purityPercentage) / 100;
+  const adjustedGoldPrice = (base24KGoldPrice * purityPercentage) / 100;
 
-  const perGramRate =
-    Math.ceil(adjustedGoldPrice);
+  const perGramRate = Math.ceil(adjustedGoldPrice);
 
-  const actualGoldPrice =
-    weight * perGramRate;
+  const actualGoldPrice = weight * perGramRate;
 
-  const makingCharge =
-    actualGoldPrice * 0.07;
+  const makingCharge = actualGoldPrice * 0.07;
 
-  const subtotal =
-    actualGoldPrice + makingCharge;
+  const subtotal = actualGoldPrice + makingCharge;
 
-  const gst =
-    subtotal * 0.03;
+  const gst = subtotal * 0.03;
 
-  const finalPrice =
-    subtotal + gst;
+  const finalPrice = subtotal + gst;
 
   const result: VariantPriceBreakdown = {
     purity: purityPercentage,

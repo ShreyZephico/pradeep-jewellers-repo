@@ -1,6 +1,10 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-
 import { formatRateTimestamp } from "@/lib/goldRates";
+import {
+  fetchStoreMetalPriceRows,
+  pricesByDay,
+  type StoreMetalDbQueryConfig,
+  type StoreMetalPriceRow,
+} from "@/lib/storeMetalPricesQuery";
 
 import type {
   GoldRateApiResponse,
@@ -8,14 +12,7 @@ import type {
   MetalRateTimestamp,
 } from "@/types/goldRate";
 
-export type MetalDbQueryConfig = {
-  metal: string;
-  purityLabel: string;
-  location: string;
-  unit: string;
-  weight: number;
-  priceMultiplier?: number;
-};
+export type MetalDbQueryConfig = StoreMetalDbQueryConfig;
 
 export type FetchMetalRatesConfig = {
   gold22k: MetalDbQueryConfig;
@@ -23,64 +20,12 @@ export type FetchMetalRatesConfig = {
   compareDays: number;
 };
 
-type DbRow = {
-  price: number | string;
-  fetched_at: string;
-};
-
-type DayPrice = { price: number; fetchedAt: string };
-
-let supabase: SupabaseClient | null = null;
-
-function getSupabase(): SupabaseClient {
-  if (!supabase) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-    const key = process.env.SUPABASE_SERVICE_KEY?.trim();
-    if (!url || !key) {
-      throw new Error("Supabase credentials are not configured");
-    }
-    supabase = createClient(url, key);
-  }
-  return supabase;
-}
-
-function rowPrice(row: DbRow, multiplier = 1): number {
-  const value = Number(row.price);
-  if (!Number.isFinite(value) || value <= 0) {
-    throw new Error("Invalid price in database");
-  }
-  return value * multiplier;
-}
-
-function istDate(iso: string): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Kolkata",
-  }).format(new Date(iso));
-}
-
-function toTimestamp(date: string, fetchedAt: string): MetalRateTimestamp {
-  return { date, fetchedAt, label: formatRateTimestamp(fetchedAt) };
-}
-
-/** Latest fetch per IST calendar day (rows must be newest-first). */
-function pricesByDay(rows: DbRow[], multiplier: number): Map<string, DayPrice> {
-  const map = new Map<string, DayPrice>();
-
-  for (const row of rows) {
-    const day = istDate(row.fetched_at);
-    if (!map.has(day)) {
-      map.set(day, {
-        price: rowPrice(row, multiplier),
-        fetchedAt: row.fetched_at,
-      });
-    }
-  }
-
-  return map;
+function toTimestamp(date: string, createdAt: string): MetalRateTimestamp {
+  return { date, fetchedAt: createdAt, label: formatRateTimestamp(createdAt) };
 }
 
 function buildMetalRate(
-  rows: DbRow[],
+  rows: StoreMetalPriceRow[],
   compareDays: number,
   multiplier: number
 ): (MetalRateItem & { fetchedAt: string }) | null {
@@ -114,33 +59,10 @@ function buildMetalRate(
         : current.price < old.price
           ? "decreased"
           : "same",
-    currentAt: toTimestamp(currentDay, current.fetchedAt),
-    oldAt: toTimestamp(oldDay, old.fetchedAt),
-    fetchedAt: current.fetchedAt,
+    currentAt: toTimestamp(currentDay, current.createdAt),
+    oldAt: toTimestamp(oldDay, old.createdAt),
+    fetchedAt: current.createdAt,
   };
-}
-
-async function fetchRows(
-  config: MetalDbQueryConfig,
-  historyDays: number
-): Promise<DbRow[]> {
-  const since = new Date();
-  since.setDate(since.getDate() - historyDays);
-
-  const { data, error } = await getSupabase()
-    .schema("dev")
-    .from("metal_prices")
-    .select("price, fetched_at")
-    .eq("metal", config.metal)
-    .eq("purity_label", config.purityLabel)
-    .ilike("location", config.location)
-    .eq("unit", config.unit)
-    .eq("weight", config.weight)
-    .gte("fetched_at", since.toISOString())
-    .order("fetched_at", { ascending: false });
-
-  if (error) throw error;
-  return (data ?? []) as DbRow[];
 }
 
 export async function fetchMetalRatesFromDb(
@@ -150,8 +72,8 @@ export async function fetchMetalRatesFromDb(
   const historyDays = compareDays + 2;
 
   const [goldRows, silverRows] = await Promise.all([
-    fetchRows(config.gold22k, historyDays),
-    fetchRows(config.silver1kg, historyDays),
+    fetchStoreMetalPriceRows(config.gold22k, historyDays),
+    fetchStoreMetalPriceRows(config.silver1kg, historyDays),
   ]);
 
   const gold22k = buildMetalRate(

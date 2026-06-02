@@ -9,6 +9,7 @@ export async function POST() {
   response.cookies.delete(CART_ID_COOKIE);
   response.cookies.delete('googleVerifiedEmail');
   response.cookies.delete('customerEmail');
+  response.cookies.delete('customerPhone');
   response.cookies.delete('customerName');
   response.cookies.delete('loginMethod');
   response.cookies.delete('shopify_oauth_state');

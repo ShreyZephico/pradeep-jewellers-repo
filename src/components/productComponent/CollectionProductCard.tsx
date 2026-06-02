@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/types/product";
-import productContent, { formatProductCopy } from "@/lib/productContent";
 import {
   getProductCornerBadge,
   getProductMakingLabel,
@@ -17,8 +16,6 @@ type CollectionProductCardProps = {
   imageSrc: string;
   onImageError: () => void;
 };
-
-const copy = productContent.list;
 
 export default function CollectionProductCard({
   product,
@@ -51,28 +48,6 @@ export default function CollectionProductCard({
         {cornerBadge ? (
           <span className="collection-card-tag">{cornerBadge}</span>
         ) : null}
-
-        <button
-          type="button"
-          className="collection-card-wishlist"
-          aria-label={formatProductCopy(copy.wishlistLabel, { name: product.name })}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.35"
-            aria-hidden
-          >
-            <path d="M12 21s-7-4.35-7-10a4.5 4.5 0 0 1 8-2.7A4.5 4.5 0 0 1 19 11c0 5.65-7 10-7 10Z" />
-          </svg>
-        </button>
       </Link>
 
       <div className="collection-card-body">

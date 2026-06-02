@@ -5,7 +5,7 @@ import {
   getCacheTtlMs,
   setCachedGoldRates,
 } from "@/lib/goldRateServerCache";
-import type { FetchMetalRatesConfig } from "@/utils/metalRatesFromDb";
+import { buildRatesDbConfig } from "@/lib/ratesDbConfig";
 import { fetchMetalRatesFromDb } from "@/utils/metalRatesFromDb";
 
 export const runtime = "nodejs";
@@ -14,30 +14,6 @@ export const dynamic = "force-dynamic";
 const REFRESH_MINUTES =
   contactData.heroSection.rates.refreshIntervalMinutes ?? 5;
 const CACHE_TTL_MS = getCacheTtlMs(REFRESH_MINUTES);
-
-const ratesConfig = contactData.heroSection.rates;
-
-function buildDbConfig(): FetchMetalRatesConfig {
-  return {
-    gold22k: {
-      metal: ratesConfig.gold22k.db.metal,
-      purityLabel: ratesConfig.gold22k.db.purityLabel,
-      location: ratesConfig.gold22k.db.location,
-      unit: ratesConfig.gold22k.db.unit,
-      weight: ratesConfig.gold22k.db.weight,
-      priceMultiplier: ratesConfig.gold22k.db.priceMultiplier,
-    },
-    silver1kg: {
-      metal: ratesConfig.silver1kg.db.metal,
-      purityLabel: ratesConfig.silver1kg.db.purityLabel,
-      location: ratesConfig.silver1kg.db.location,
-      unit: ratesConfig.silver1kg.db.unit,
-      weight: ratesConfig.silver1kg.db.weight,
-      priceMultiplier: ratesConfig.silver1kg.db.priceMultiplier,
-    },
-    compareDays: ratesConfig.compareDays ?? 1,
-  };
-}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -58,7 +34,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const payload = await fetchMetalRatesFromDb(buildDbConfig());
+    const payload = await fetchMetalRatesFromDb(buildRatesDbConfig());
 
     if (payload.success) {
       setCachedGoldRates(payload, CACHE_TTL_MS);

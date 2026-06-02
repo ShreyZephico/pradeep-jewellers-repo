@@ -1,6 +1,10 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-
 import { formatRateTimestamp } from "@/lib/goldRates";
+import {
+  fetchStoreMetalPriceRows,
+  pricesByDay,
+  type StoreMetalDbQueryConfig,
+  type StoreMetalPriceRow,
+} from "@/lib/storeMetalPricesQuery";
 
 import type {
   MetalHistorySeries,
@@ -9,11 +13,8 @@ import type {
   RatesAnalyticsApiResponse,
   RatesTableRow,
 } from "@/types/goldRate";
-import type { MetalDbQueryConfig } from "@/utils/metalRatesFromDb";
 
-/** Mirrors `metalRatesFromDb` query logic — do not change that module. */
-type DbRow = { price: number | string; fetched_at: string };
-type DayPrice = { price: number; fetchedAt: string };
+export type MetalDbQueryConfig = StoreMetalDbQueryConfig;
 
 export type RatesAnalyticsDbConfig = {
   gold24k: MetalDbQueryConfig;
@@ -30,83 +31,18 @@ export type RatesAnalyticsDbConfig = {
 
 export const RATES_ANALYTICS_MAX_DAYS = 30;
 
-let supabase: SupabaseClient | null = null;
-
-function getSupabase(): SupabaseClient {
-  if (!supabase) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-    const key = process.env.SUPABASE_SERVICE_KEY?.trim();
-    if (!url || !key) {
-      throw new Error("Supabase credentials are not configured");
-    }
-    supabase = createClient(url, key);
-  }
-  return supabase;
-}
-
-function rowPrice(row: DbRow, multiplier = 1): number {
-  const value = Number(row.price);
-  if (!Number.isFinite(value) || value <= 0) {
-    throw new Error("Invalid price in database");
-  }
-  return value * multiplier;
-}
-
-function istDate(iso: string): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Kolkata",
-  }).format(new Date(iso));
-}
-
 function formatTableDate(isoDate: string): string {
   const d = new Date(`${isoDate}T12:00:00`);
   return new Intl.DateTimeFormat("en-IN", {
     timeZone: "Asia/Kolkata",
     weekday: "short",
-    day: "numeric",   
+    day: "numeric",
     month: "short",
   }).format(d);
 }
 
-function pricesByDay(rows: DbRow[], multiplier: number): Map<string, DayPrice> {
-  const map = new Map<string, DayPrice>();
-  for (const row of rows) {
-    const day = istDate(row.fetched_at);
-    if (!map.has(day)) {
-      map.set(day, {
-        price: rowPrice(row, multiplier),
-        fetchedAt: row.fetched_at,
-      });
-    }
-  }
-  return map;
-}
-
-async function fetchRows(
-  config: MetalDbQueryConfig,
-  historyDays: number
-): Promise<DbRow[]> {
-  const since = new Date();
-  since.setDate(since.getDate() - historyDays);
-
-  const { data, error } = await getSupabase()
-    .schema("dev")
-    .from("metal_prices")
-    .select("price, fetched_at")
-    .eq("metal", config.metal)
-    .eq("purity_label", config.purityLabel)
-    .ilike("location", config.location)
-    .eq("unit", config.unit)
-    .eq("weight", config.weight)
-    .gte("fetched_at", since.toISOString())
-    .order("fetched_at", { ascending: false });
-
-  if (error) throw error;
-  return (data ?? []) as DbRow[];
-}
-
 function buildHistoryPoints(
-  rows: DbRow[],
+  rows: StoreMetalPriceRow[],
   multiplier: number,
   days: number
 ): MetalRateHistoryPoint[] {
@@ -120,7 +56,7 @@ function buildHistoryPoints(
     const point: MetalRateHistoryPoint = {
       date,
       price: entry.price,
-      fetchedAt: entry.fetchedAt,
+      fetchedAt: entry.createdAt,
     };
     if (prevPrice != null && prevPrice > 0) {
       point.percentChange = Number(
@@ -168,7 +104,7 @@ function buildSeries(
   label: string,
   unitSuffix: string,
   fractionDigits: number,
-  rows: DbRow[],
+  rows: StoreMetalPriceRow[],
   multiplier: number,
   days: number
 ): MetalHistorySeries | null {
@@ -215,9 +151,9 @@ export async function fetchRatesAnalyticsFromDb(
   const historyDays = windowDays + 2;
 
   const [gold24Rows, gold22Rows, silverRows] = await Promise.all([
-    fetchRows(config.gold24k, historyDays),
-    fetchRows(config.gold22k, historyDays),
-    fetchRows(config.silver1kg, historyDays),
+    fetchStoreMetalPriceRows(config.gold24k, historyDays),
+    fetchStoreMetalPriceRows(config.gold22k, historyDays),
+    fetchStoreMetalPriceRows(config.silver1kg, historyDays),
   ]);
 
   const gold24k = buildSeries(

@@ -1,6 +1,6 @@
 "use client";
 
-import { SlidersHorizontal, X } from "lucide-react";
+import { X } from "lucide-react";
 
 import productContent from "@/lib/productContent";
 
@@ -55,6 +55,7 @@ export default function ProductsFilterSidebar({
                 }`}
                 onClick={() => onCategoryChange(cat.id)}
                 aria-pressed={selectedCategory === cat.id}
+                suppressHydrationWarning
               >
                 {cat.name}
               </button>
@@ -92,16 +93,6 @@ export default function ProductsFilterSidebar({
 
   return (
     <>
-      <button
-        type="button"
-        className="collection-filter-mobile-trigger"
-        onClick={() => onMobileOpenChange(true)}
-        aria-expanded={mobileOpen}
-      >
-        <SlidersHorizontal size={18} aria-hidden />
-        {copy.filtersOpen}
-      </button>
-
       {mobileOpen ? (
         <button
           type="button"
@@ -114,6 +105,7 @@ export default function ProductsFilterSidebar({
       <aside
         className={`collection-sidebar${mobileOpen ? " collection-sidebar--open" : ""}`}
         aria-label={copy.filtersTitle}
+        aria-hidden={!mobileOpen}
       >
         {panel}
       </aside>
