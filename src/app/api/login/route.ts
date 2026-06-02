@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 import { verifyCheckoutCustomer } from '@/lib/checkoutAuth';
+import { attachGuestCartToCustomer } from '@/lib/cartCustomerLink';
+import {
+  getShopifyStorefrontGraphqlUrl,
+} from '@/lib/shopifyApiVersion';
 
 export async function POST(request: Request) {
   try {
@@ -43,8 +47,9 @@ export async function POST(request: Request) {
       }
     `;
 
+    const storeDomain = process.env.SHOPIFY_STORE_DOMAIN?.trim() ?? '';
     const response = await fetch(
-      `https://${process.env.SHOPIFY_STORE_DOMAIN}/api/2024-01/graphql.json`,
+      getShopifyStorefrontGraphqlUrl(storeDomain),
       {
         method: 'POST',
         headers: {
@@ -154,6 +159,8 @@ export async function POST(request: Request) {
         path: '/',
       });
     }
+
+    await attachGuestCartToCustomer(request, accessToken);
 
     return responseData;
 

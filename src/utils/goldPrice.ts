@@ -4,7 +4,7 @@ let cachedPrice: number | null = null;
 let cachedMissing = false;
 let cachedAt = 0;
 let inFlight: Promise<number | null> | null = null;
-const CACHE_TTL_MS = 60_000;
+const CACHE_TTL_MS = 30_000;
 
 async function fetchGoldPriceFromDb(): Promise<number | null> {
   const { data, error } = await getSupabaseServerClient()

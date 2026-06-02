@@ -5,6 +5,7 @@ import {
   findCustomerByEmailOrPhone,
   splitCustomerName,
 } from '@/lib/shopifyCustomer';
+import { attachGuestCartToCustomer } from '@/lib/cartCustomerLink';
 import { normalizeIndianMobile } from '@/utils/indianPhone';
 
 export async function POST(request: Request) {
@@ -140,6 +141,11 @@ export async function POST(request: Request) {
         path: '/',
       });
     }
+
+    await attachGuestCartToCustomer(
+      request,
+      tokenResult.customerAccessToken.accessToken
+    );
 
     return response;
   } catch (error) {

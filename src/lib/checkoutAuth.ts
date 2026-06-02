@@ -68,14 +68,14 @@ export async function verifyCheckoutCustomer(
   const domain = process.env.SHOPIFY_STORE_DOMAIN;
   const storefrontToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
   const apiVersion =
-    process.env.SHOPIFY_STOREFRONT_API_VERSION ?? "2026-04";
+    process.env.SHOPIFY_STOREFRONT_API_VERSION?.trim() || "2026-04";
 
   if (!domain || !storefrontToken) {
     return null;
   }
 
   const response = await fetch(
-    `https://${domain}/api/${apiVersion}/graphql.json`,
+    `https://${domain.replace(/^https?:\/\//i, "").replace(/\/+$/, "")}/api/${apiVersion}/graphql.json`,
     {
       method: "POST",
       headers: {

@@ -1,18 +1,22 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
+import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { clientIpFromRequest, rateLimit } from "@/lib/rateLimit";
 import { normalizeIndianMobile, toIndianE164 } from "@/utils/indianPhone";
 
-function getSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const key = process.env.SUPABASE_SERVICE_KEY?.trim();
-  if (!url || !key) {
-    throw new Error("Supabase credentials are not configured");
-  }
-  return createClient(url, key);
-}
-
 export async function POST(request: Request) {
+  const ip = clientIpFromRequest(request);
+  const limited = rateLimit(`social-broadcast:${ip}`, 8, 60_000);
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a moment and try again." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil(limited.retryAfterMs / 1000)) },
+      }
+    );
+  }
+
   try {
     const body = (await request.json()) as { phone?: string };
     const raw = body.phone?.trim() ?? "";
@@ -37,7 +41,7 @@ export async function POST(request: Request) {
 
     const phoneE164 = toIndianE164(national);
 
-    const { error } = await getSupabase()
+    const { error } = await getSupabaseServerClient()
       .schema("dev")
       .from("whatsapp_broadcast_subscribers")
       .insert({

@@ -1,5 +1,6 @@
 import { PJ_CUSTOM_PRICE_ATTR, PJ_IMAGE_URL_ATTR } from "@/lib/cartConstants";
 import { normalizeCartImageUrl } from "@/lib/cartImageUrl";
+import { getShopifyStorefrontApiVersion } from "@/lib/shopifyApiVersion";
 import type { CheckoutAttribute } from "@/lib/shopify";
 
 function normalizeStoreDomain(raw?: string): string {
@@ -14,7 +15,7 @@ function getStorefrontCredentials() {
   const domain = normalizeStoreDomain(
     process.env.NEXT_SHOPIFY_STORE ?? process.env.SHOPIFY_STORE_DOMAIN
   );
-  const apiVersion = process.env.SHOPIFY_STOREFRONT_API_VERSION ?? "2025-04";
+  const apiVersion = getShopifyStorefrontApiVersion();
   const publicToken = process.env.NEXT_SHOPIFY_STOREFRONT_TOKEN?.trim();
   const serverToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN?.trim();
   const token =
@@ -351,4 +352,66 @@ export function buildCartLineAttributes(
       value: String(Math.max(0, Math.round(customPriceInr))),
     },
   ];
+}
+
+const VARIANT_AVAILABILITY_QUERY = `
+  query VariantAvailability($id: ID!) {
+    node(id: $id) {
+      ... on ProductVariant {
+        availableForSale
+      }
+    }
+  }
+`;
+
+export type VariantAvailability = {
+  availableForSale: boolean;
+  quantityAvailable: number | null;
+};
+
+export async function checkVariantAvailability(
+  variantGid: string
+): Promise<VariantAvailability> {
+  try {
+    const data = await storefrontFetch<{
+      node: {
+        availableForSale?: boolean;
+        quantityAvailable?: number | null;
+      } | null;
+    }>(VARIANT_AVAILABILITY_QUERY, { id: variantGid });
+
+    const node = data.node;
+    return {
+      availableForSale: node?.availableForSale !== false,
+      quantityAvailable: null,
+    };
+  } catch {
+    return { availableForSale: true, quantityAvailable: null };
+  }
+}
+
+const CART_BUYER_IDENTITY_UPDATE = `
+  mutation CartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
+    cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
+      cart { id }
+      userErrors { field message }
+    }
+  }
+`;
+
+export async function updateCartBuyerIdentity(
+  cartId: string,
+  customerAccessToken: string
+): Promise<void> {
+  const data = await storefrontFetch<{
+    cartBuyerIdentityUpdate: {
+      cart: { id: string } | null;
+      userErrors: { field: string[] | null; message: string }[];
+    };
+  }>(CART_BUYER_IDENTITY_UPDATE, {
+    cartId,
+    buyerIdentity: { customerAccessToken: customerAccessToken.trim() },
+  });
+
+  firstUserError(data.cartBuyerIdentityUpdate.userErrors);
 }

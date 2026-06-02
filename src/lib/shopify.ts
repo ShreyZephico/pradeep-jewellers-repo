@@ -6,6 +6,7 @@ import {
   type ProductListFilters,
   type ProductSort,
 } from "@/lib/productFilters";
+import { getShopifyStorefrontApiVersion } from "@/lib/shopifyApiVersion";
 import type { Product, ProductVariant } from "@/types/product";
 import calculateVariantPrice from "@/utils/calculateVariantPrice";
 import getGoldPrice from "@/utils/goldPrice";
@@ -43,9 +44,7 @@ function getStorefrontCredentials() {
     process.env.NEXT_SHOPIFY_STORE ?? process.env.SHOPIFY_STORE_DOMAIN
   );
 
-  const apiVersion =
-    process.env.SHOPIFY_STOREFRONT_API_VERSION ??
-    "2025-04";
+  const apiVersion = getShopifyStorefrontApiVersion();
 
   const publicToken = process.env.NEXT_SHOPIFY_STOREFRONT_TOKEN?.trim();
   const serverToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN?.trim();
@@ -155,6 +154,7 @@ const productNodeFields = `
             edges {
               node {
                 id
+                availableForSale
                 image {
                   url
                   altText
@@ -1199,6 +1199,10 @@ type NodesCacheEntry = {
 
 let shopifyNodesCache: NodesCacheEntry | null = null;
 const NODES_CACHE_MS = 30_000;
+
+export function clearShopifyNodesCache(): void {
+  shopifyNodesCache = null;
+}
 
 /** Raw Shopify product nodes (list query — lighter GraphQL). */
 export async function fetchShopifyProductNodes(options?: {

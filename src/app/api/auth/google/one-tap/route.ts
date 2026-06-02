@@ -5,6 +5,7 @@ import {
   authenticateGoogleProfile,
   verifyGoogleIdToken,
 } from "@/lib/googleAuthSession";
+import { attachGuestCartToCustomer } from "@/lib/cartCustomerLink";
 
 export async function POST(request: Request) {
   try {
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
     });
 
     applyGoogleAuthCookies(response, session);
+    await attachGuestCartToCustomer(request, session.accessToken);
     return response;
   } catch (error) {
     console.error("Google One Tap error:", error);

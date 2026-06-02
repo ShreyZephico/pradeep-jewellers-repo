@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { attachGuestCartToCustomer } from '@/lib/cartCustomerLink';
 import {
   createCustomer,
   createCustomerTokenWithPasswords,
@@ -305,6 +306,8 @@ export async function handleGoogleShopifyAuth(request: Request, redirectUri: str
         path: '/',
       });
     }
+
+    await attachGuestCartToCustomer(request, customerAccessToken.accessToken);
 
     return response;
   } catch (error) {

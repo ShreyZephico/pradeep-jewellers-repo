@@ -619,13 +619,31 @@ function ProductDetailLoaded({
 }
 
 const productDetailCacheKey = (slug: string) => `pj-product-detail:${slug}`;
+const PRODUCT_DETAIL_CACHE_TTL_MS = 5 * 60 * 1000;
+
+type CachedProductEntry = {
+  product: Product;
+  cachedAt: number;
+};
 
 function readCachedProduct(slug: string): Product | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = sessionStorage.getItem(productDetailCacheKey(slug));
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as Product;
+    const entry = JSON.parse(raw) as CachedProductEntry | Product;
+    const parsed =
+      entry && typeof entry === "object" && "product" in entry && "cachedAt" in entry
+        ? (entry as CachedProductEntry).product
+        : (entry as Product);
+    const cachedAt =
+      entry && typeof entry === "object" && "cachedAt" in entry
+        ? (entry as CachedProductEntry).cachedAt
+        : 0;
+    if (cachedAt && Date.now() - cachedAt > PRODUCT_DETAIL_CACHE_TTL_MS) {
+      sessionStorage.removeItem(productDetailCacheKey(slug));
+      return null;
+    }
     const handle = parsed.slug ?? parsed.handle;
     return handle === slug || parsed.id === slug ? parsed : null;
   } catch {
@@ -636,7 +654,8 @@ function readCachedProduct(slug: string): Product | null {
 function writeCachedProduct(slug: string, product: Product): void {
   if (typeof window === "undefined") return;
   try {
-    sessionStorage.setItem(productDetailCacheKey(slug), JSON.stringify(product));
+    const payload: CachedProductEntry = { product, cachedAt: Date.now() };
+    sessionStorage.setItem(productDetailCacheKey(slug), JSON.stringify(payload));
   } catch {
     // ignore quota / private mode
   }

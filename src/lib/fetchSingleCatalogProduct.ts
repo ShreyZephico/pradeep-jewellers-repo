@@ -41,7 +41,11 @@ export async function fetchSingleCatalogProduct(
   const staticMatch = staticFallbackProducts.find(
     (p) => p.slug === key || p.id === key || p.handle === key
   );
-  if (staticMatch) {
+  if (
+    staticMatch &&
+    (process.env.ALLOW_STATIC_PRODUCT_FALLBACK === "true" ||
+      process.env.NODE_ENV === "development")
+  ) {
     return staticMatch;
   }
 

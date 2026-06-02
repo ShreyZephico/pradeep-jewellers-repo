@@ -6,33 +6,39 @@ import {
   setPendingDraftOrderCookie,
 } from "@/lib/cartCookies";
 import { buildLineAttributesForCart, type CartItemBody } from "@/lib/cartLinePayload";
-import { resolveMerchandiseId } from "@/lib/cartResolve";
+import {
+  PriceMismatchError,
+  revalidateCartLineUnitPrice,
+  resolveCartLinePricing,
+} from "@/lib/serverCartPricing";
+import {
+  InsufficientStockError,
+  assertVariantCanBePurchased,
+} from "@/lib/variantInventory";
 import {
   createDraftCheckoutFromLines,
   type DraftCheckoutLineItem,
 } from "@/lib/shopify";
-import { fetchCart, parseCustomPriceInr } from "@/lib/shopifyCart";
+import { fetchCart } from "@/lib/shopifyCart";
 
 type CheckoutBody = CartItemBody & { buyNow?: boolean };
 
 function cartLinesToDraftItems(
   lines: NonNullable<Awaited<ReturnType<typeof fetchCart>>>["lines"]
-): DraftCheckoutLineItem[] {
-  return lines.map((line) => {
-    const price = line.customPriceInr;
-    if (price <= 0) {
-      throw new Error(
-        `Missing custom price for "${line.title}". Remove it and add again.`
-      );
-    }
-    return {
-      variantId: line.merchandiseId,
-      productName: line.title,
-      price,
-      quantity: line.quantity,
-      attributes: line.attributes,
-    };
-  });
+): Promise<DraftCheckoutLineItem[]> {
+  return Promise.all(
+    lines.map(async (line) => {
+      const price = await revalidateCartLineUnitPrice(line);
+      await assertVariantCanBePurchased(line.merchandiseId, line.quantity);
+      return {
+        variantId: line.merchandiseId,
+        productName: line.title,
+        price,
+        quantity: line.quantity,
+        attributes: line.attributes,
+      };
+    })
+  );
 }
 
 export async function POST(request: Request) {
@@ -43,20 +49,17 @@ export async function POST(request: Request) {
     let draftLines: DraftCheckoutLineItem[];
 
     if (body.buyNow) {
-      const merchandiseId = await resolveMerchandiseId(body);
-      const attributes = buildLineAttributesForCart(body);
-      const rawPrice = body.customPrice;
-      const price =
-        typeof rawPrice === "number" && Number.isFinite(rawPrice)
-          ? Math.max(0, Math.round(rawPrice))
-          : parseCustomPriceInr(attributes);
+      const quantity =
+        typeof body.quantity === "number" && body.quantity > 0
+          ? Math.floor(body.quantity)
+          : 1;
 
-      if (price <= 0) {
-        return NextResponse.json(
-          { error: "Invalid price for checkout." },
-          { status: 400 }
-        );
-      }
+      const { merchandiseId, trustedPrice } = await resolveCartLinePricing(body);
+      await assertVariantCanBePurchased(merchandiseId, quantity);
+      const attributes = buildLineAttributesForCart({
+        ...body,
+        customPrice: trustedPrice,
+      });
 
       draftLines = [
         {
@@ -65,11 +68,8 @@ export async function POST(request: Request) {
             typeof body.productName === "string" && body.productName.trim()
               ? body.productName.trim()
               : "Product",
-          price,
-          quantity:
-            typeof body.quantity === "number" && body.quantity > 0
-              ? Math.floor(body.quantity)
-              : 1,
+          price: trustedPrice,
+          quantity,
           attributes,
         },
       ];
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       if (!cart?.lines.length) {
         return NextResponse.json({ error: "Your cart is empty." }, { status: 400 });
       }
-      draftLines = cartLinesToDraftItems(cart.lines);
+      draftLines = await cartLinesToDraftItems(cart.lines);
     }
 
     const { invoiceUrl: checkoutUrl, draftOrderId } =
@@ -97,11 +97,15 @@ export async function POST(request: Request) {
       customerEmail: authResult.customerEmail,
     });
 
-    if (!body.buyNow) {
-      setPendingDraftOrderCookie(response, draftOrderId);
-    }
+    setPendingDraftOrderCookie(response, draftOrderId);
     return response;
   } catch (error) {
+    if (error instanceof PriceMismatchError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
+    if (error instanceof InsufficientStockError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
     const message =
       error instanceof Error ? error.message : "Unable to start checkout.";
     return NextResponse.json({ error: message }, { status: 400 });

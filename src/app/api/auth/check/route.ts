@@ -1,20 +1,25 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+
+import {
+  getCheckoutAuthFromRequest,
+  verifyCheckoutCustomer,
+} from "@/lib/checkoutAuth";
 
 export async function GET(request: Request) {
-  const cookieHeader = request.headers.get('cookie');
-  const token = cookieHeader?.match(/customerAccessToken=([^;]+)/)?.[1];
-  const email = cookieHeader?.match(/customerEmail=([^;]+)/)?.[1];
-  const name = cookieHeader?.match(/customerName=([^;]+)/)?.[1];
-  const loginMethod = cookieHeader?.match(/loginMethod=([^;]+)/)?.[1];
-  
-  if (!token) {
+  const auth = getCheckoutAuthFromRequest(request);
+  if (!auth) {
+    return NextResponse.json({ isAuthenticated: false });
+  }
+
+  const customer = await verifyCheckoutCustomer(auth.customerAccessToken);
+  if (!customer) {
     return NextResponse.json({ isAuthenticated: false });
   }
 
   return NextResponse.json({
     isAuthenticated: true,
-    email: email ? decodeURIComponent(email) : null,
-    name: name ? decodeURIComponent(name) : null,
-    loginMethod: loginMethod ? decodeURIComponent(loginMethod) : null,
+    email: customer.email ?? auth.email,
+    name: auth.name,
+    loginMethod: auth.loginMethod,
   });
 }
