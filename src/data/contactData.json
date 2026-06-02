@@ -23,10 +23,11 @@
   },
   "map": {
     "address": "Nadiad, Gujarat",
-    "latitude": 22.695814,
-    "longitude": 72.858726,
-    "zoom": 15,
-    "embedUrl": "https://maps.google.com/maps?q=22.695814,72.858726&z=15&output=embed"
+    "latitude": 22.695693,
+    "longitude": 72.865441,
+    "zoom": 17,
+    "mapHref": "https://maps.app.goo.gl/ryRkHi6wxcVVxnuh7",
+    "embedUrl": "https://www.google.com/maps?q=22.695693,72.865441&z=17&output=embed"
   },
   "businessHours": [
     { "day": "Monday - Saturday", "hours": "11:00 AM - 8:00 PM" },

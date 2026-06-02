@@ -498,7 +498,7 @@ export default function ContactSection() {
               
               <div className={styles.mapContainer}>
                 <iframe
-                  src="https://maps.google.com/maps?q=22.695814,72.858726&z=15&output=embed"
+                  src={contactData.map.embedUrl}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -512,7 +512,7 @@ export default function ContactSection() {
               
               <div className={styles.mapDirections}>
                 <a 
-                  href="https://maps.google.com/maps?daddr=22.695814,72.858726" 
+                  href={contactData.map.mapHref}
                   target="_blank" 
                   rel="noopener noreferrer"
                   className={styles.directionsButton}

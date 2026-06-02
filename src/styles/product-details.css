@@ -583,8 +583,8 @@ body {
 }
 
 .product-commerce-actions button {
-  flex: 1;
-  min-width: 140px;
+  flex: 1 1 auto;
+  min-width: min(100%, 8.75rem);
 }
 
 .btn-buy-now {

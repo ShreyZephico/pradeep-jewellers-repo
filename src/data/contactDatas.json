@@ -682,7 +682,7 @@
   },
   "footerSection": {
     "brandDescription": "Heirloom jewellery, hand-finished in India since 1972. BIS hallmarked. Every gram weighed honestly — the way Pradeep Jewellers has always done it.",
-    "complianceLine": "BIS Hallmark Reg. HM/CHE/000000 · GST 33AAAAA0000A1Z5",
+    "complianceLine": "GST 24ASDPP5488Q2ZU",
     "newsletter": {
       "placeholder": "Your email",
       "mailtoSubject": "Newsletter signup"
@@ -742,11 +742,12 @@
     "visit": {
       "address": "24, Ranganathan Street, T. Nagar, Chennai 600017",
       "mapLabel": "VIEW ON MAP",
-      "mapHref": "https://www.google.com/maps/search/?api=1&query=Pradeep+Jewellers+T+Nagar+Chennai",
+      "mapHref": "https://maps.app.goo.gl/ryRkHi6wxcVVxnuh7",
+      "mapEmbedUrl": "https://www.google.com/maps?q=22.695693,72.865441&z=17&output=embed",
       "hours": "Mon-Sat · 11 AM – 8 PM"
     },
     "copyrightBrand": "Pradeep Jewellers",
-    "copyrightExtras": "BIS Hallmark Reg. HM/CHE/000000 · GST 33AAAAA0000A1Z5",
+    "copyrightExtras": "GST 24ASDPP5488Q2ZU",
     "legalLinks": [
       {
         "label": "Privacy",

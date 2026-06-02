@@ -172,12 +172,12 @@
     "items": [
       {
         "title": "BIS Hallmark",
-        "description": "Registered hallmarking on applicable gold jewellery — HM/CHE/000000.",
+        "description": "Registered hallmarking on applicable gold jewellery.",
         "icon": "hallmark"
       },
       {
         "title": "GST registered",
-        "description": "Transparent tax invoices — GST 33AAAAA0000A1Z5 on every sale.",
+        "description": "Transparent tax invoices — GST 24ASDPP5488Q2ZU on every sale.",
         "icon": "document"
       },
       {
@@ -186,7 +186,7 @@
         "icon": "gem"
       }
     ],
-    "complianceLine": "BIS Hallmark Reg. HM/CHE/000000 · GST 33AAAAA0000A1Z5"
+    "complianceLine": "GST 24ASDPP5488Q2ZU"
   },
   "bespoke": {
     "badge": "BESPOKE EXPERIENCE",
@@ -216,7 +216,7 @@
     "phoneHref": "tel:+919265075114",
     "hours": "Mon–Sat · 11 AM – 8 PM",
     "mapLabel": "View on map",
-    "mapHref": "https://maps.app.goo.gl/UfPtopdgH7vZjDMC8",
+    "mapHref": "https://maps.app.goo.gl/ryRkHi6wxcVVxnuh7",
     "image": "https://images.unsplash.com/photo-1601925260368-ae2f83b8a168?q=80&w=1200&auto=format&fit=crop",
     "imageAlt": "Jewellery showroom interior"
   },

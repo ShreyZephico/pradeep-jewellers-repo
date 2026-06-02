@@ -344,6 +344,7 @@ export default function Header() {
                   type="button"
                   className="site-header__login-btn"
                   onClick={goToLogin}
+                  aria-label="Login"
                   suppressHydrationWarning
                 >
                   <LogIn size={16} aria-hidden />

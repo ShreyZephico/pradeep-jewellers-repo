@@ -2,7 +2,7 @@
 
 .section {
   position: relative;
-  padding: 100px 0;
+  padding: clamp(3rem, 8vw, 6.25rem) 0;
   background: linear-gradient(135deg, var(--color-deep-teal) 0%, var(--color-deep-teal-accent) 50%, var(--color-deep-teal) 100%);
   overflow: hidden;
 }
@@ -79,8 +79,8 @@
   position: absolute;
   top: -30%;
   right: -15%;
-  width: 600px;
-  height: 600px;
+  width: clamp(12rem, 72vw, 600px);
+  height: clamp(12rem, 72vw, 600px);
   background: radial-gradient(circle, rgb(var(--color-soft-gold-rgb) / 0.12), transparent 70%);
   border-radius: 50%;
   animation: floatOrb1 20s ease-in-out infinite;
@@ -90,8 +90,8 @@
   position: absolute;
   bottom: -30%;
   left: -15%;
-  width: 550px;
-  height: 550px;
+  width: clamp(11rem, 68vw, 550px);
+  height: clamp(11rem, 68vw, 550px);
   background: radial-gradient(circle, rgb(var(--color-rose-gold-rgb) / 0.08), transparent 70%);
   border-radius: 50%;
   animation: floatOrb2 25s ease-in-out infinite;
@@ -150,7 +150,7 @@
   position: relative;
   max-width: 1000px;
   margin: 0 auto;
-  padding: 0 48px;
+  padding: 0 clamp(1rem, 4vw, 3rem);
   z-index: 2;
 }
 

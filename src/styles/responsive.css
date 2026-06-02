@@ -1,0 +1,35 @@
+/* Shared responsive utilities — mobile-first defaults site-wide */
+
+/* Scrollable tables on narrow viewports (policy HTML, rates, admin) */
+.policy-body :where(table),
+.rich-content :where(table),
+.responsive-table-wrap table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.policy-body :where(table) {
+  border-collapse: collapse;
+}
+
+.policy-body :where(img, iframe, video) {
+  max-width: 100%;
+  height: auto;
+}
+
+.policy-body :where(pre, code) {
+  overflow-x: auto;
+  word-break: break-word;
+}
+
+.policy-body :where(a, p, li) {
+  overflow-wrap: anywhere;
+}
+
+/* Prevent long unbroken strings from forcing horizontal scroll */
+main :where(h1, h2, h3, h4, p, li, td, th) {
+  overflow-wrap: break-word;
+}

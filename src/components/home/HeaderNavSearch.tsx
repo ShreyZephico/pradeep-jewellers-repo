@@ -19,7 +19,7 @@ const MIN_QUERY_LENGTH = 2;
 type SearchLayoutVariant = "compact" | "expanded" | "mobile";
 
 type HeaderNavSearchProps = {
-  /** responsive: expanded field on desktop (≥1024px), icon toggle on smaller screens */
+  /** responsive: expanded field on desktop (≥1280px), icon toggle on smaller screens */
   variant?: SearchLayoutVariant | "responsive";
   className?: string;
   onNavigate?: () => void;
@@ -46,7 +46,7 @@ function useResponsiveSearchVariant(
       return;
     }
 
-    const media = window.matchMedia("(min-width: 1024px)");
+    const media = window.matchMedia("(min-width: 1280px)");
     const sync = () => {
       setLayoutVariant(media.matches ? "expanded" : "compact");
     };

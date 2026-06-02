@@ -25,7 +25,13 @@
 }
 
 .header-search--expanded .header-search-form {
-  width: min(14rem, 36vw);
+  width: min(13rem, 22vw);
+}
+
+@media (min-width: 1280px) {
+  .header-search--expanded .header-search-form {
+    width: min(14rem, 18vw);
+  }
 }
 
 .header-search--mobile .header-search-form {

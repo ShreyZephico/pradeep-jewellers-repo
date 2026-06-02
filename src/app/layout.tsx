@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import Script from "next/script";
@@ -21,6 +21,7 @@ import "@/styles/cart.css";
 import "@/styles/cart-page.css";
 import "@/styles/header-search.css";
 import "./globals.css";
+import "@/styles/responsive.css";
 
 const goldRatesRefreshMs =
   (data.heroSection.rates.refreshIntervalMinutes ?? 5) * 60 * 1000;
@@ -43,6 +44,12 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -51,6 +58,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >

@@ -2,7 +2,7 @@
 
 .section {
   position: relative;
-  padding: 100px 0;
+  padding: clamp(3rem, 8vw, 6.25rem) 0;
   background: linear-gradient(135deg, var(--color-deep-teal) 0%, var(--color-deep-teal-accent) 50%, var(--color-deep-teal) 100%);
   overflow: hidden;
 }
@@ -65,8 +65,8 @@
   position: absolute;
   top: -20%;
   right: -10%;
-  width: 500px;
-  height: 500px;
+  width: clamp(11rem, 70vw, 500px);
+  height: clamp(11rem, 70vw, 500px);
   background: radial-gradient(circle, rgb(var(--color-soft-gold-rgb) / 0.08), transparent 70%);
   border-radius: 50%;
   pointer-events: none;
@@ -79,8 +79,8 @@
   position: absolute;
   bottom: -20%;
   left: -10%;
-  width: 450px;
-  height: 450px;
+  width: clamp(10rem, 62vw, 450px);
+  height: clamp(10rem, 62vw, 450px);
   background: radial-gradient(circle, rgb(var(--color-rose-gold-rgb) / 0.06), transparent 70%);
   border-radius: 50%;
   pointer-events: none;
@@ -124,7 +124,7 @@
   position: relative;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 48px;
+  padding: 0 clamp(1rem, 4vw, 3rem);
   z-index: 2;
 }
 
