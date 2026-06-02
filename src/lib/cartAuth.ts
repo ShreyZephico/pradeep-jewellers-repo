@@ -40,3 +40,24 @@ export function isAuthError(
 ): result is NextResponse {
   return result instanceof NextResponse;
 }
+
+export type OptionalCartAuth = {
+  customerEmail?: string | null;
+};
+
+/** When logged in, attach customer email to draft orders; guests checkout without auth. */
+export async function optionalCartAuth(request: Request): Promise<OptionalCartAuth> {
+  const auth = getCheckoutAuthFromRequest(request);
+  if (!auth?.customerAccessToken) {
+    return {};
+  }
+
+  const customer = await verifyCheckoutCustomer(auth.customerAccessToken);
+  if (!customer) {
+    return {};
+  }
+
+  return {
+    customerEmail: customer.email ?? auth.email ?? null,
+  };
+}

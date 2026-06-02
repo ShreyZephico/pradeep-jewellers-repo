@@ -62,9 +62,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const setAuthenticated = useCallback((authenticated: boolean) => {
     setIsAuthenticated(authenticated);
-    if (!authenticated) {
-      setCart(emptyCart);
-    }
   }, []);
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isAuthError, requireCartAuth } from "@/lib/cartAuth";
+import { optionalCartAuth } from "@/lib/cartAuth";
 import {
   getCartIdFromRequest,
   setPendingDraftOrderCookie,
@@ -36,8 +36,7 @@ function cartLinesToDraftItems(
 }
 
 export async function POST(request: Request) {
-  const authResult = await requireCartAuth(request);
-  if (isAuthError(authResult)) return authResult;
+  const authResult = await optionalCartAuth(request);
 
   try {
     const body = (await request.json()) as CheckoutBody;

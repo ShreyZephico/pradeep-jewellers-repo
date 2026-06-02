@@ -9,7 +9,6 @@ import productContent, { formatProductCopy } from "@/lib/productContent";
 import { useCart } from "@/contexts/CartContext";
 import {
   addProductToCart,
-  handleCheckoutAuthFailure,
   resolveDefaultVariant,
   startProductCheckout,
 } from "@/lib/productCheckout";
@@ -78,10 +77,7 @@ export default function ProductListCard({
         redirect: true,
       });
       setLoading(false);
-      if (!result.ok) {
-        handleCheckoutAuthFailure(result);
-        if (!result.needsLogin) setToast(result.error);
-      }
+      if (!result.ok) setToast(result.error);
       return;
     }
 
@@ -96,8 +92,7 @@ export default function ProductListCard({
     setLoading(false);
 
     if (!result.ok) {
-      handleCheckoutAuthFailure(result);
-      if (!result.needsLogin) setToast(result.error);
+      setToast(result.error);
       return;
     }
 

@@ -1,4 +1,3 @@
-import { saveReturnPath } from "@/lib/authRedirect";
 import { normalizeCartImageUrl } from "@/lib/cartImageUrl";
 import { markProductsListStale } from "@/lib/productsListRefresh";
 import type { Product } from "@/types/product";
@@ -27,7 +26,7 @@ export type StartProductCheckoutOptions = CartPricingMeta & {
 
 export type StartProductCheckoutResult =
   | { ok: true; checkoutUrl: string }
-  | { ok: false; error: string; needsLogin?: boolean };
+  | { ok: false; error: string };
 
 export type AddToCartOptions = CartPricingMeta & {
   product: Product;
@@ -40,29 +39,7 @@ export type AddToCartOptions = CartPricingMeta & {
   productImage?: string;
 };
 
-export type AddToCartResult =
-  | { ok: true }
-  | { ok: false; error: string; needsLogin?: boolean };
-
-function redirectToLogin() {
-  saveReturnPath();
-  window.location.href = "/login";
-}
-
-async function ensureAuthenticated(): Promise<
-  { ok: true } | { ok: false; error: string; needsLogin?: boolean }
-> {
-  try {
-    const authResponse = await fetch("/api/auth/check", { credentials: "include" });
-    const authData = await authResponse.json();
-    if (!authData.isAuthenticated) {
-      return { ok: false, error: copy.authCheckError, needsLogin: true };
-    }
-    return { ok: true };
-  } catch {
-    return { ok: false, error: copy.authCheckError };
-  }
-}
+export type AddToCartResult = { ok: true } | { ok: false; error: string };
 
 function resolveProductImage(
   product: Product,
@@ -139,9 +116,6 @@ export async function addProductToCart(
     });
     const data = await response.json();
 
-    if (response.status === 401) {
-      return { ok: false, error: copy.authCheckError, needsLogin: true };
-    }
     if (!response.ok) {
       return {
         ok: false,
@@ -160,9 +134,6 @@ export async function addProductToCart(
 export async function startProductCheckout(
   options: StartProductCheckoutOptions
 ): Promise<StartProductCheckoutResult> {
-  const auth = await ensureAuthenticated();
-  if (!auth.ok) return auth;
-
   const payload = buildPayload(options);
   if (!payload.ok) return payload;
 
@@ -175,19 +146,16 @@ export async function startProductCheckout(
     });
     const data = await response.json();
 
-    if (response.status === 401) {
-      return { ok: false, error: copy.authCheckError, needsLogin: true };
-    }
     if (!response.ok || !data.checkoutUrl) {
       return {
         ok: false,
         error: typeof data.error === "string" ? data.error : copy.checkoutGenericError,
       };
     }
-   if (options.redirect !== false) {
-  markProductsListStale();
-  window.open(data.checkoutUrl as string, "_blank", "noopener");
-}
+    if (options.redirect !== false) {
+      markProductsListStale();
+      window.open(data.checkoutUrl as string, "_blank", "noopener");
+    }
     return { ok: true, checkoutUrl: data.checkoutUrl as string };
   } catch (error) {
     return {
@@ -204,12 +172,4 @@ export function resolveDefaultVariant(product: Product) {
     catalogVariantId: variant?.catalogVariantId ?? variant?.id,
     price: variant?.price ?? product.price,
   };
-}
-
-export function handleCheckoutAuthFailure(
-  result: StartProductCheckoutResult | AddToCartResult
-) {
-  if (!result.ok && result.needsLogin) {
-    redirectToLogin();
-  }
 }

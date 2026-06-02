@@ -11,7 +11,6 @@ import { useCart } from "@/contexts/CartContext";
 import "@/styles/product-details.css";
 import {
   addProductToCart,
-  handleCheckoutAuthFailure,
   resolveDefaultVariant,
   startProductCheckout,
 } from "@/lib/productCheckout";
@@ -146,9 +145,9 @@ function ProductDetailSummary({
 
   return (
     <>
-      <div className="item-detail-price-preview">
-        <p className="item-detail-price-label">{copy.startingPrice}</p>
-        <div className="item-detail-price-row">
+      <div className="product-detail-price-preview">
+        <p className="product-detail-price-label">{copy.startingPrice}</p>
+        <div className="product-detail-price-row">
           <span
             className={`product-detail-price-value${
               loading ? " product-detail-price-value--loading" : ""
@@ -157,35 +156,38 @@ function ProductDetailSummary({
             {loading ? copy.priceLoading : formatProductPrice(estimatedPrice)}
           </span>
           {listPrice > estimatedPrice ? (
-            <span className="item-detail-price-compare">
+            <span className="product-detail-price-compare">
               {formatProductPrice(listPrice)}
             </span>
           ) : null}
         </div>
-        <p className="item-detail-price-hint">{copy.priceHint}</p>
+        {copy.gstNote ? (
+          <p className="product-detail-gst-note">{copy.gstNote}</p>
+        ) : null}
+        <p className="product-detail-price-hint">{copy.priceHint}</p>
       </div>
 
-      <div className="item-detail-actions product-detail-actions--secondary">
+      <div className="product-detail-actions product-detail-actions--secondary">
         <button
           type="button"
           onClick={onCustomize}
-          className="item-detail-btn-secondary"
+          className="product-detail-btn-secondary"
         >
           {copy.customizeAndBuy}
         </button>
         <button
           type="button"
           onClick={onPriceBreakdown}
-          className="item-detail-btn-ghost product-detail-btn-ghost--block"
+          className="product-detail-btn-ghost product-detail-btn-ghost--block"
         >
           {copy.viewPriceBreakdown}
         </button>
       </div>
 
-      <ul className="item-detail-trust-list product-detail-trust-list--compact">
+      <ul className="product-detail-trust-list product-detail-trust-list--compact">
         {copy.trustBullets.map((bullet) => (
-          <li key={bullet} className="item-detail-trust-item">
-            <span className="item-detail-trust-icon" aria-hidden>
+          <li key={bullet} className="product-detail-trust-item">
+            <span className="product-detail-trust-icon" aria-hidden>
               ✓
             </span>
             {bullet}
@@ -280,10 +282,7 @@ function ProductDetailLoaded({
         redirect: true,
       });
       setLoading(false);
-      if (!result.ok) {
-        handleCheckoutAuthFailure(result);
-        if (!result.needsLogin) setCommerceToast(result.error);
-      }
+      if (!result.ok) setCommerceToast(result.error);
       return;
     }
 
@@ -297,8 +296,7 @@ function ProductDetailLoaded({
     setLoading(false);
 
     if (!result.ok) {
-      handleCheckoutAuthFailure(result);
-      if (!result.needsLogin) setCommerceToast(result.error);
+      setCommerceToast(result.error);
       return;
     }
 
@@ -335,14 +333,14 @@ function ProductDetailLoaded({
 
   return (
     <>
-      <div className="item-detail-layout">
+      <div className="product-detail-layout">
         <div
           className={`product-detail-grid product-detail-top${
             hasGallery ? "" : " product-detail-grid--no-media"
           }`}
         >
           {hasGallery ? (
-            <div className="item-detail-gallery-col product-detail-animate product-detail-animate--media">
+            <div className="product-detail-gallery-col product-detail-animate product-detail-animate--media">
               <div
                 className={`product-detail-gallery${
                   gallery.length > 1
@@ -351,7 +349,7 @@ function ProductDetailLoaded({
                 }`}
               >
                 {gallery.length > 1 ? (
-                  <div className="item-detail-thumbs product-detail-thumbs--side">
+                  <div className="product-detail-thumbs product-detail-thumbs--side">
                     {thumbImages.map((src, idx) => {
                       const showOverflow =
                         thumbOverflow > 0 && idx === thumbImages.length - 1;
@@ -374,7 +372,7 @@ function ProductDetailLoaded({
                             src={src}
                             alt=""
                             fill
-                            className="item-detail-thumb-img"
+                            className="product-detail-thumb-img"
                             sizes="80px"
                           />
                           {showOverflow ? (
@@ -391,14 +389,14 @@ function ProductDetailLoaded({
                   </div>
                 ) : null}
 
-                <div className="item-detail-hero-image">
-                  <div className="item-detail-hero-frame">
+                <div className="product-detail-hero-image">
+                  <div className="product-detail-hero-frame">
                     {activeImage ? (
                       <Image
                         src={activeImage}
                         alt={product.name}
                         fill
-                        className="item-detail-hero-img"
+                        className="product-detail-hero-img"
                         sizes="(max-width: 1024px) 100vw, 55vw"
                         priority
                       />
@@ -409,7 +407,7 @@ function ProductDetailLoaded({
                     <>
                       <button
                         type="button"
-                        className="item-detail-hero-nav item-detail-hero-nav--prev"
+                        className="product-detail-hero-nav product-detail-hero-nav--prev"
                         onClick={goPrev}
                         aria-label="Previous image"
                       >
@@ -417,19 +415,24 @@ function ProductDetailLoaded({
                       </button>
                       <button
                         type="button"
-                        className="item-detail-hero-nav item-detail-hero-nav--next"
+                        className="product-detail-hero-nav product-detail-hero-nav--next"
                         onClick={goNext}
                         aria-label="Next image"
                       >
                         ›
                       </button>
+                      {activeIndex >= 0 ? (
+                        <span className="product-detail-gallery-index" aria-live="polite">
+                          {activeIndex + 1} / {gallery.length}
+                        </span>
+                      ) : null}
                     </>
                   ) : null}
                 </div>
               </div>
 
               {gallery.length > 1 ? (
-                <div className="item-detail-thumbs product-detail-thumbs--bottom">
+                <div className="product-detail-thumbs product-detail-thumbs--bottom">
                   {thumbImages.map((src, idx) => {
                     const showOverflow =
                       thumbOverflow > 0 && idx === thumbImages.length - 1;
@@ -452,7 +455,7 @@ function ProductDetailLoaded({
                           src={src}
                           alt=""
                           fill
-                          className="item-detail-thumb-img"
+                          className="product-detail-thumb-img"
                           sizes="80px"
                         />
                         {showOverflow ? (
@@ -471,34 +474,45 @@ function ProductDetailLoaded({
             </div>
           ) : null}
 
-          <aside className="item-detail-sidebar product-detail-animate product-detail-animate--panel">
-            <div className="item-detail-card">
-              <header className="item-detail-card-header">
-                <p className="item-detail-vendor">
+          <aside className="product-detail-sidebar product-detail-animate product-detail-animate--panel">
+            <div className="product-detail-card">
+              <header className="product-detail-card-header">
+                <p className="product-detail-vendor">
                   {product.vendor ?? productContent.brand.defaultVendor}
                 </p>
-                <h1 className="item-item-title product-item-title--detail">
+                <h1 className="product-detail-title">
                   {product.name}
                 </h1>
 
-                <div className="item-detail-rating">
-                  <span className="item-detail-rating-stars" aria-hidden>
+                <div className="product-detail-rating">
+                  <span className="product-detail-rating-stars" aria-hidden>
                     {copy.ratingStars}
                   </span>
-                  <span className="item-detail-rating-label">
+                  <span className="product-detail-rating-label">
                     {copy.ratingLabel}
                   </span>
                 </div>
+
+                {copy.assurances?.length ? (
+                  <ul className="product-detail-assurance" aria-label="Product assurances">
+                    {copy.assurances.map((label) => (
+                      <li key={label} className="product-detail-assurance__item">
+                        <span className="product-detail-assurance__dot" aria-hidden />
+                        {label}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </header>
 
-              <div className="item-detail-card-body">
+              <div className="product-detail-card-body">
                 <ProductDetailSummary
                   pricing={pricing}
                   onCustomize={() => setCustomizeOpen(true)}
                   onPriceBreakdown={() => setBreakdownOpen(true)}
                 />
 
-                <div className="item-detail-commerce-bottom">
+                <div className="product-detail-commerce-bottom">
                   <ProductCommerceActions
                     buyLoading={buyLoading}
                     cartLoading={cartLoading}
@@ -508,7 +522,7 @@ function ProductDetailLoaded({
 
                   {commerceToast ? (
                     <p
-                      className="item-detail-commerce-toast product-animate-in"
+                      className="product-detail-commerce-toast product-animate-in"
                       role="status"
                     >
                       {commerceToast}
@@ -520,13 +534,13 @@ function ProductDetailLoaded({
           </aside>
         </div>
 
-        <div className="item-detail-details product-detail-bottom">
-          <section className="item-detail-section">
-            <h2 className="item-detail-section-title">{copy.aboutTitle}</h2>
-            <div className="item-detail-copy">
-              <p className="item-detail-description">{product.description}</p>
+        <div className="product-detail-details product-detail-bottom">
+          <section className="product-detail-section">
+            <h2 className="product-detail-section-title">{copy.aboutTitle}</h2>
+            <div className="product-detail-copy">
+              <p className="product-detail-description">{product.description}</p>
               {product.shortDescription ? (
-                <p className="item-detail-short-description">
+                <p className="product-detail-short-description">
                   {product.shortDescription}
                 </p>
               ) : null}
@@ -534,9 +548,9 @@ function ProductDetailLoaded({
           </section>
 
           {specRows.length > 0 ? (
-            <section className="item-detail-section">
-              <h2 className="item-detail-section-title">{copy.specsTitle}</h2>
-              <table className="item-detail-spec-table">
+            <section className="product-detail-section">
+              <h2 className="product-detail-section-title">{copy.specsTitle}</h2>
+              <table className="product-detail-spec-table">
                 <tbody>
                   {specRows.map((row) => (
                     <tr key={`${row.label}-${row.value}`}>
@@ -559,12 +573,12 @@ function ProductDetailLoaded({
         title="All images"
         onClose={() => setGalleryDialogOpen(false)}
       >
-        <div className="item-detail-gallery-dialog">
+        <div className="product-detail-gallery-dialog">
           {gallery.map((src) => (
             <button
               key={src}
               type="button"
-              className={`item-detail-gallery-dialog-item${
+              className={`product-detail-gallery-dialog-item${
                 src === activeImage ? " is-active" : ""
               }`}
               onClick={() => {
@@ -572,7 +586,7 @@ function ProductDetailLoaded({
                 setGalleryDialogOpen(false);
               }}
             >
-              <span className="item-detail-gallery-dialog-img">
+              <span className="product-detail-gallery-dialog-img">
                 <Image src={src} alt="" fill sizes="160px" />
               </span>
             </button>
@@ -629,7 +643,6 @@ function writeCachedProduct(slug: string, product: Product): void {
 }
 
 export default function ProductDetailClient({ slug }: ProductDetailClientProps) {
-  console.log("=== COMPONENT RENDERING ===", slug);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -799,8 +812,8 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
 
   if (loading) {
     return (
-      <div className="item-page product-state-center">
-        <div className="item-spinner" aria-hidden />
+      <div className="product-detail-page product-state-center">
+        <div className="product-spinner" aria-hidden />
         <p>{copy.loading}</p>
       </div>
     );
@@ -808,11 +821,11 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
 
   if (error || !product) {
     return (
-      <div className="item-page product-state-center">
-        <div className="item-state-card">
+      <div className="product-detail-page product-state-center">
+        <div className="product-state-card">
           <h1>{copy.unavailableTitle}</h1>
           <p>{error || copy.unavailableFallback}</p>
-          <Link href="/products" className="item-btn-primary">
+          <Link href="/products" className="product-btn-primary">
             {copy.backToShop}
           </Link>
         </div>
@@ -821,25 +834,18 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
   }
 
   return (
-    <div className="item-page product-detail-page">
-      <div className="item-breadcrumb-bar">
-        <nav
-          className="item-container product-breadcrumb"
-          aria-label="Breadcrumb"
-        >
-          <Link href="/landing#home">{breadcrumb.home}</Link>
-          <span className="item-breadcrumb-sep" aria-hidden>
-            {breadcrumb.separator}
-          </span>
+    <div className="product-detail-page">
+      <div className="product-breadcrumb-bar">
+        <nav className="product-breadcrumb" aria-label="Breadcrumb">
+          <Link href="/">{breadcrumb.home}</Link>
+          <span aria-hidden>{breadcrumb.separator}</span>
           <Link href="/products">{breadcrumb.shop}</Link>
-          <span className="item-breadcrumb-sep" aria-hidden>
-            {breadcrumb.separator}
-          </span>
-          <span className="item-breadcrumb-current">{product.name}</span>
+          <span aria-hidden>{breadcrumb.separator}</span>
+          <span aria-current="page">{product.name}</span>
         </nav>
       </div>
 
-      <div className="item-container product-detail-main">
+      <div className="product-container product-detail-main">
         <ProductDetailLoaded product={product} slug={slug} />
       </div>
     </div>

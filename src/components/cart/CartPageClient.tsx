@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowLeft, Loader2, ShoppingBag, Trash2 } from "lucide-react";
 
 import CartLineImage from "@/components/cart/CartLineImage";
@@ -12,7 +11,6 @@ import { useCartLineBreakdowns } from "@/hooks/useCartLineBreakdowns";
 import type { CartLineBreakdownData } from "@/lib/cartBreakdown";
 import productContent, { formatProductCopy } from "@/lib/productContent";
 import type { ClientCartLine } from "@/types/cart";
-import { saveReturnPath } from "@/lib/authRedirect";
 import { markProductsListStale } from "@/lib/productsListRefresh";
 import { formatProductPrice } from "@/utils/formatPrice";
 
@@ -23,25 +21,13 @@ const copy = productContent.cart;
 const breadcrumb = productContent.breadcrumb;
 
 export default function CartPageClient() {
-  const router = useRouter();
-  const { cart, loading, refreshCart, setAuthenticated } = useCart();
+  const { cart, loading, refreshCart } = useCart();
   const { breakdowns, loading: breakdownLoading } = useCartLineBreakdowns(
     cart.lines
   );
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [lineLoadingId, setLineLoadingId] = useState<string | null>(null);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    fetch("/api/auth/check", { credentials: "include" })
-      .then((r) => r.json())
-      .then((data) => {
-        setAuthenticated(Boolean(data.isAuthenticated));
-      })
-      .catch(() => {
-        setAuthenticated(false);
-      });
-  }, [setAuthenticated]);
 
   const updateQuantity = async (lineId: string, quantity: number) => {
     setLineLoadingId(lineId);
@@ -89,25 +75,11 @@ export default function CartPageClient() {
     }
   };
 
-  const redirectToLoginForCheckout = () => {
-    saveReturnPath("/cart");
-    router.push("/login");
-  };
-
   const checkout = async () => {
     setCheckoutLoading(true);
     setError("");
 
     try {
-      const authResponse = await fetch("/api/auth/check", {
-        credentials: "include",
-      });
-      const authData = await authResponse.json();
-      if (!authData.isAuthenticated) {
-        redirectToLoginForCheckout();
-        return;
-      }
-
       const response = await fetch("/api/cart/checkout", {
         method: "POST",
         credentials: "include",
@@ -115,10 +87,6 @@ export default function CartPageClient() {
         body: JSON.stringify({}),
       });
       const data = await response.json();
-      if (response.status === 401) {
-        redirectToLoginForCheckout();
-        return;
-      }
       if (!response.ok || !data.checkoutUrl) {
         setError(typeof data.error === "string" ? data.error : copy.checkoutError);
         return;

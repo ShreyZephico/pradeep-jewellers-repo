@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { isAuthError, requireCartAuth } from "@/lib/cartAuth";
 import {
   clearCartIdCookie,
   clearPendingDraftOrderCookie,
@@ -11,9 +10,6 @@ import { isDraftOrderPaid } from "@/lib/shopify";
 import { emptyShopifyCart } from "@/lib/shopifyCart";
 
 export async function POST(request: Request) {
-  const authResult = await requireCartAuth(request);
-  if (isAuthError(authResult)) return authResult;
-
   const draftOrderId = getPendingDraftOrderIdFromRequest(request);
   if (!draftOrderId) {
     return NextResponse.json({ status: "idle" });

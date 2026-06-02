@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-/** Checkout APIs only — login required at payment time, not for browsing or cart. */
+/** Legacy Shopify checkout APIs — cart checkout is guest-friendly via /api/cart/checkout. */
 function requiresAuth(pathname: string): boolean {
   return (
     pathname === '/api/checkout' ||
-    pathname.startsWith('/api/checkout/') ||
-    pathname === '/api/cart/checkout'
+    pathname.startsWith('/api/checkout/')
   );
 }
 
