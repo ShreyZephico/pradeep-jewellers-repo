@@ -1,167 +1,161 @@
 {
   "meta": {
     "title": "About Us",
-    "description": "Discover Pradeep Jewellers — BIS hallmarked gold, honest weighing, bespoke craftsmanship, and four decades of family trust."
+    "description": "Pradeep Jewellers — custom gold, diamond, and silver jewellery made in Nadiad. Skilled karigars, transparent specs, and fast estimates on WhatsApp."
   },
   "hero": {
     "backLabel": "Back to home",
     "backHref": "/",
     "badge": "ABOUT PRADEEP JEWELLERS",
-    "title": "Where every gram tells a story.",
-    "highlightText": "tells a story.",
-    "description": "A family atelier crafting heirloom gold, diamonds, and silver — weighed honestly and finished by hand since 1972.",
-    "image": "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=1600&auto=format&fit=crop",
-    "imageAlt": "Luxury gold jewellery at Pradeep Jewellers"
+    "title": "Craftsmanship you can trust.",
+    "highlightText": "you can trust.",
+    "description": "Made-to-order gold, diamonds, and silver in Nadiad — from your sketch or photo to a finished piece, with clarity on metal, purity, and weight at every step.",
+    "image": "https://images.unsplash.com/photo-1533734685302-aee5a945845a?q=80&w=1600&auto=format&fit=crop",
+    "imageAlt": "Custom jewellery craftsmanship at Pradeep Jewellers, Nadiad"
   },
   "brandIntro": {
     "badge": "WHO WE ARE",
-    "title": "More than a showroom — a house of gold.",
-    "description": "Pradeep Jewellers began with one belief: families deserve jewellery they can trust at every stage — from first earrings to wedding sets passed down generations.",
+    "title": "More than a counter — a custom workshop.",
+    "description": "Pradeep Jewellers is a gold, diamond, and silver store in Nadiad where families commission rings, mangalsutras, bridal sets, and everyday pieces — built around your design, not a fixed catalogue.",
     "points": [
-      "BIS hallmarked gold with itemised invoices",
-      "Live daily rates — no hidden deductions at billing",
-      "Bespoke design, redesign, and video consultations"
+      "Upload a photo or sketch — get a tailored estimate on WhatsApp",
+      "Metal, purity, weight, stones, and finish locked before we start",
+      "Suvarna Vriddhi savings plans (12+1, 18+2, 24+3) for jewellery purchase"
     ],
     "image": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1200&auto=format&fit=crop",
-    "imageAlt": "Gold rings displayed in velvet tray"
+    "imageAlt": "Gold rings crafted to order"
   },
   "ourStory": {
     "badge": "OUR STORY",
-    "title": "From one bench to thousands of families.",
+    "title": "Rooted in Nadiad. Built on craft.",
     "paragraphs": [
-      "What started as a modest goldsmith's counter grew into a destination for bridal suites, temple jewellery, and bespoke heirlooms — without ever compromising on weight or purity.",
-      "Our karigars still file, set, and polish under the same roof where generations have shopped. Every commission is weighed twice: once at the bench, once at the counter.",
-      "Today we serve families across India with transparent pricing, live gold charts, and the same promise our founder made in 1984."
+      "From Santh Bazzar to families across Gujarat, we grew by doing one thing well: turning your inspiration into jewellery you can wear with confidence.",
+      "Our karigars handle consult, specs, model approval, casting, setting, polish, and quality checks under one roof — so you always know who is making your piece.",
+      "Today we serve Nadiad and customers nationwide with transparent pricing, live gold rates, and the same custom-first approach that built our name on the high street."
     ],
     "image": "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?q=80&w=1200&auto=format&fit=crop",
-    "imageAlt": "Master jeweller at the workbench"
+    "imageAlt": "Jeweller at the workbench in Nadiad"
   },
   "founder": {
     "id": "founder",
-    "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=900&auto=format&fit=crop",
-    "imageAlt": "Portrait of the founder",
-    "establishedYear": "1984",
-    "establishedText": "THE FIRST HAMMER FELL",
-    "sectionLabel": "FOUNDER STORY",
-    "heading": "A goldsmith's son. A father's promise.",
-    "quote": "We don't sell jewellery. We hand over a piece of someone's wedding day, their daughter's first earrings, their grandmother's memory.",
-    "description": "Ramesh Agarwal opened a single bench in Bowbazar in 1984 with three karigars and one promise: every gram, weighed honestly. Forty years on, his sons run the same bench — and the same promise.",
-    "name": "Ramesh Agarwal",
-    "role": "Founder & Master Goldsmith"
+    "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=900&auto=format&fit=crop",
+    "imageAlt": "Master karigar at Pradeep Jewellers",
+    "establishedYear": "Nadiad",
+    "establishedText": "MADE-TO-ORDER IN GUJARAT",
+    "sectionLabel": "OUR PROMISE",
+    "heading": "Your design. Our bench.",
+    "quote": "We don't push ready stock — we start from what you want to wear, and build clarity on weight, purity, and finish before a single gram is cast.",
+    "description": "Pradeep Jewellers began as a neighbourhood gold and silver store trusted for honest conversations at the counter. That promise still guides every custom commission — whether you walk in at Amdavadi Bazar or send a design on WhatsApp.",
+    "name": "Pradeep Jewellers",
+    "role": "Custom Gold · Diamond · Silver — Nadiad"
   },
   "heritageTimeline": {
-    "badge": "HERITAGE & TIMELINE",
-    "title": "Milestones that shaped our house.",
-    "description": "Four decades of craft, hallmarking, and trust — marked by moments our families still remember.",
+    "badge": "HOW WE WORK",
+    "title": "From sketch to delivery.",
+    "description": "The same steps whether you visit the store or message us online — consult first, specs locked, then craft.",
     "items": [
       {
-        "year": "1972",
-        "title": "Pradeep Jewellers founded",
-        "description": "A showroom opens with bridal gold and transparent weighing at the counter."
-      },
-      
-      {
-        "year": "1984",
-        "title": "The Bowbazar bench",
-        "description": "Ramesh Agarwal establishes the workshop that still defines how we craft."
+        "year": "01",
+        "title": "Consult",
+        "description": "We understand your design, budget, and timeline — photos, Pinterest boards, or heirloom references welcome."
       },
       {
-        "year": "2005",
-        "title": "BIS hallmark standard",
-        "description": "Every gold piece hallmarked and documented — a practice we never relaxed."
+        "year": "02",
+        "title": "Specs lock",
+        "description": "Metal, purity, weight, stones, finish, and sizes agreed before production begins."
       },
       {
-        "year": "2018",
-        "title": "Bespoke & video consults",
-        "description": "Custom commissions and remote design for families across India."
+        "year": "03",
+        "title": "Model & craft",
+        "description": "3D or hand sketch when needed, then casting, setting, polish, and quality checks by our karigars."
       },
       {
-        "year": "Today",
-        "title": "Live rates & digital trust",
-        "description": "Daily charts, honest carts, and the same bench promise."
+        "year": "04",
+        "title": "Delivery & care",
+        "description": "Final polish, secure packaging, and aftercare — resize, repair, and polish support when you need it."
       }
     ]
   },
   "brandStats": {
     "badge": "BY THE NUMBERS",
-    "title": "Trust you can measure.",
+    "title": "Trust you can see.",
     "stats": [
-      { "number": 1972, "suffix": "", "label": "FOUNDED" },
-      { "number": 40, "suffix": "+", "label": "YEARS OF CRAFT" },
-      { "number": 10000, "suffix": "+", "label": "FAMILIES SERVED" },
-      { "number": 100, "suffix": "%", "label": "BIS HALLMARKED" }
+      { "number": 4.9, "suffix": "", "label": "GOOGLE RATING" },
+      { "number": 25, "suffix": "+", "label": "GOOGLE REVIEWS" },
+      { "number": 100, "suffix": "%", "label": "CUSTOM-FIRST" },
+      { "number": 1, "suffix": "", "label": "STORE IN NADIAD" }
     ]
   },
   "craftsmanship": {
     "badge": "CRAFTSMANSHIP",
-    "title": "How your piece comes to life.",
-    "description": "Every order moves through the same atelier steps — design clarity first, hallmark last.",
+    "title": "How your custom piece comes to life.",
+    "description": "Every order follows our atelier flow — material clarity first, hallmark and invoice last.",
     "steps": [
       {
         "step": "01",
-        "title": "Design brief",
-        "description": "Sketches, references, or heirloom pieces — purity, weight, and budget aligned before metal is cut."
+        "title": "Upload & consult",
+        "description": "Share design photos or sketches; we align on metal, purity, weight, stones, finish, and budget."
       },
       {
         "step": "02",
-        "title": "Cast & set",
-        "description": "Karigars shape, solder, and set stones by hand; diamonds checked under magnification."
+        "title": "Craft & set",
+        "description": "Karigars cast, solder, and set stones by hand; diamond grades discussed before we start."
       },
       {
         "step": "03",
-        "title": "Finish & hallmark",
-        "description": "Polish, quality check, BIS hallmark where applicable, and itemised invoice with live rate."
+        "title": "Finish & handover",
+        "description": "Polish, quality check, BIS hallmark where applicable, and itemised billing with live gold rate."
       }
     ],
-    "image": "https://images.unsplash.com/photo-1533734685302-aee5a945845a?q=80&w=1200&auto=format&fit=crop",
-    "imageAlt": "Finished necklace in presentation case"
+    "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=1200&auto=format&fit=crop",
+    "imageAlt": "Finished custom ring in presentation case"
   },
   "team": {
     "badge": "MEET OUR ARTISANS",
     "title": "The hands behind every piece.",
-    "description": "Master goldsmiths, setters, and polishers — many with us for decades.",
+    "description": "Head goldsmiths, diamond setters, and polishers — many seasons of craft on our bench in Nadiad.",
     "members": [
       {
-        "name": "Suresh Patel",
-        "role": "Head Karigar · Gold",
-        "experience": "28 years",
+        "name": "Gold karigar team",
+        "role": "Casting & finishing",
+        "experience": "In-house",
         "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop",
-        "imageAlt": "Suresh Patel — head gold karigar"
+        "imageAlt": "Gold karigar at the bench"
       },
       {
-        "name": "Meera Iyer",
-        "role": "Diamond Setter",
-        "experience": "19 years",
+        "name": "Diamond setting",
+        "role": "Stone setting & QC",
+        "experience": "In-house",
         "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop",
-        "imageAlt": "Meera Iyer — diamond setter"
+        "imageAlt": "Diamond setter at work"
       },
       {
-        "name": "Arjun Das",
-        "role": "Finishing & Polish",
-        "experience": "22 years",
+        "name": "Customer desk",
+        "role": "Specs, schemes & quotes",
+        "experience": "Walk-in & WhatsApp",
         "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
-        "imageAlt": "Arjun Das — finishing specialist"
+        "imageAlt": "Showroom consultation"
       }
     ]
   },
   "whyChoose": {
     "badge": "WHY CHOOSE US",
-    "title": "Three promises on every counter.",
+    "title": "Three promises on every order.",
     "items": [
       {
         "icon": "scale",
-        "title": "Honest weight",
-        "description": "What we weigh is what you pay for — no hidden deductions at billing."
+        "title": "Material clarity",
+        "description": "Purity, weight, stone grades, and finish discussed before we start — no surprises at billing."
       },
       {
         "icon": "shield",
         "title": "BIS hallmarked gold",
-        "description": "Hallmark registration and purity certificates on every gold piece."
+        "description": "Hallmark registration and purity documentation on applicable gold jewellery."
       },
       {
         "icon": "heart",
-        "title": "Heirloom care",
-        "description": "Bridal suites, redesigns, and bespoke pieces treated like family."
+        "title": "Custom-first care",
+        "description": "Mangalsutras, bridal sets, couple rings, and redesigns treated like family milestones."
       }
     ]
   },
@@ -177,48 +171,48 @@
       },
       {
         "title": "GST registered",
-        "description": "Transparent tax invoices — GST 24ASDPP5488Q2ZU on every sale.",
+        "description": "Transparent tax invoices on every sale.",
         "icon": "document"
       },
       {
-        "title": "IGI / GIA diamonds",
-        "description": "Certified stones where applicable, with documentation shared before purchase.",
+        "title": "Certified diamonds",
+        "description": "Stone grades and documentation shared before purchase when applicable.",
         "icon": "gem"
       }
     ],
-    "complianceLine": "GST 24ASDPP5488Q2ZU"
+    "complianceLine": "GST-registered jeweller · Nadiad, Gujarat"
   },
   "bespoke": {
-    "badge": "BESPOKE EXPERIENCE",
-    "title": "Your design. Our bench.",
-    "description": "From engagement rings to heirloom redesigns — sketch on WhatsApp, refine on video, collect in person.",
+    "badge": "CUSTOM JEWELLERY",
+    "title": "Your design. Our craft.",
+    "description": "Upload inspiration on WhatsApp, lock specs with our team, and collect in Nadiad — rings, mangalsutras, bridal sets, and more.",
     "features": [
       "Free design consultation",
       "Live gold rate at order time",
-      "19-day average turnaround on custom bridal"
+      "Fast estimates on WhatsApp"
     ],
-    "ctaLabel": "Start bespoke design",
+    "ctaLabel": "Get a custom quote",
     "ctaHref": "/bespoke",
-    "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=1200&auto=format&fit=crop",
-    "imageAlt": "Custom solitaire ring being crafted"
+    "image": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=1200&auto=format&fit=crop",
+    "imageAlt": "Custom jewellery being crafted"
   },
   "showroom": {
-    "badge": "STORE EXPERIENCE",
-    "title": "Walk into calm, leave with clarity.",
-    "description": "Private viewing bays, live rate screens, and specialists for gold, diamonds, and schemes.",
+    "badge": "VISIT THE STORE",
+    "title": "Pradeep Jewellers, Nadiad.",
+    "description": "Walk in at Santh Bazzar for viewing, scheme enrolment, and custom consultations — or message us first on WhatsApp.",
     "highlights": [
-      "Private bridal viewing lounge",
-      "Live 22K & 24K rate board",
-      "Gold scheme & redemption desk"
+      "Gold, diamond & silver under one roof",
+      "Suvarna Vriddhi scheme desk",
+      "Get Directions · Call · WhatsApp from the footer"
     ],
-    "address": "24, Ranganathan Street, T. Nagar, Chennai 600017",
-    "phone": "+91 9265075114",
-    "phoneHref": "tel:+919265075114",
-    "hours": "Mon–Sat · 11 AM – 8 PM",
+    "address": "Santh Bazzar, Amdavadi Bazar Road, Nadiad, Gujarat 387001",
+    "phone": "+91 88668 73390",
+    "phoneHref": "tel:+918866873390",
+    "hours": "Mon–Sat · 10 AM – 8 PM · Sunday closed",
     "mapLabel": "View on map",
-    "mapHref": "https://maps.app.goo.gl/ryRkHi6wxcVVxnuh7",
+    "mapHref": "https://www.google.com/maps?q=22.667084,72.855967",
     "image": "https://images.unsplash.com/photo-1601925260368-ae2f83b8a168?q=80&w=1200&auto=format&fit=crop",
-    "imageAlt": "Jewellery showroom interior"
+    "imageAlt": "Jewellery showroom in Nadiad"
   },
   "testimonials": {
     "useHomeComponent": true
@@ -230,11 +224,11 @@
     "useHomeComponent": true
   },
   "finalCta": {
-    "title": "Begin your heirloom journey.",
-    "description": "Explore our collections, commission a bespoke piece, or speak with our team today.",
+    "title": "Send a design & get an estimate.",
+    "description": "Share your inspiration, metal choice, and timeline — we respond fastest on WhatsApp.",
     "links": [
       { "label": "Shop collection", "href": "/products", "variant": "primary" },
-      { "label": "Bespoke design", "href": "/bespoke", "variant": "outline" },
+      { "label": "Custom quote", "href": "/bespoke", "variant": "outline" },
       { "label": "Live gold rates", "href": "/rates", "variant": "outline" }
     ]
   }

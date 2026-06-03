@@ -1,37 +1,37 @@
 {
   "brand": {
     "name": "Pradeep Jewellers",
-    "tagline": "Crafting Dreams Since 1972",
-    "description": "Experience the pinnacle of fine jewellery craftsmanship with personalized attention and timeless designs."
+    "tagline": "Custom Gold · Diamond · Silver",
+    "description": "Custom jewellery made in Nadiad — upload your design and get a fast estimate on WhatsApp."
   },
   "contact": {
-    "phone": "+91 98765 43210",
-    "email": "hello@pradeepjewellers.com",
-    "studio": "Nadiad, Gujarat - 387001",
-    "hours": "Mon - Sat: 11:00 AM - 8:00 PM",
-    "sunday": "Sunday: By Appointment Only"
+    "phone": "+91 88668 73390",
+    "email": "hello@pradeepjewellers.in",
+    "studio": "Santh Bazzar, Amdavadi Bazar Road, Nadiad, Gujarat 387001",
+    "hours": "Mon - Sat: 10:00 AM - 8:00 PM",
+    "sunday": "Sunday: Closed"
   },
   "social": {
-    "instagram": "https://instagram.com/pradeepjewellers",
+    "instagram": "https://instagram.com/pradeepjewellers_nadiad",
     "facebook": "https://facebook.com/pradeepjewellers",
     "youtube": "https://youtube.com/pradeepjewellers",
-    "whatsapp": "https://wa.me/919876543210"
+    "whatsapp": "https://wa.me/918866873390"
   },
   "appointment": {
     "available": true,
-    "notice": "24 hours prior notice required for private consultations"
+    "notice": "Walk in Mon–Sat 10 AM – 8 PM, or message us on WhatsApp for a custom quote"
   },
   "map": {
-    "address": "Nadiad, Gujarat",
-    "latitude": 22.695693,
-    "longitude": 72.865441,
+    "address": "Santh Bazzar, Amdavadi Bazar Road, Nadiad, Gujarat 387001",
+    "latitude": 22.667084,
+    "longitude": 72.855967,
     "zoom": 17,
-    "mapHref": "https://maps.app.goo.gl/ryRkHi6wxcVVxnuh7",
-    "embedUrl": "https://www.google.com/maps?q=22.695693,72.865441&z=17&output=embed"
+    "mapHref": "https://www.google.com/maps?q=22.667084,72.855967",
+    "embedUrl": "https://www.google.com/maps?q=22.667084,72.855967&z=17&output=embed"
   },
   "businessHours": [
-    { "day": "Monday - Saturday", "hours": "11:00 AM - 8:00 PM" },
-    { "day": "Sunday", "hours": "Closed (Video consultations available)" }
+    { "day": "Monday - Saturday", "hours": "10:00 AM - 8:00 PM" },
+    { "day": "Sunday", "hours": "Closed" }
   ],
   "footer": {
     "quickLinks": [

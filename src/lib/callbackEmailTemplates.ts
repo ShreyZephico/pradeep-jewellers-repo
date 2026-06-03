@@ -58,7 +58,7 @@ function layout(
           <tr>
             <td style="padding:0 32px 28px;border-top:1px solid ${BORDER};">
               <p style="margin:16px 0 0;font-size:12px;line-height:1.6;color:${MUTED};text-align:center;">
-                ${footerNote ?? "Crafting Dreams Since 1972"}
+                ${footerNote ?? "Custom Gold · Diamond · Silver — Nadiad"}
               </p>
             </td>
           </tr>

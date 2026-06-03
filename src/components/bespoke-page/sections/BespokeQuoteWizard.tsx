@@ -34,7 +34,7 @@ type PendingImage = {
 
 function getWhatsAppNumber(): string {
   const m = data.social.whatsapp.match(/wa\.me\/(\d+)/);
-  return m ? m[1] : "919265075114";
+  return m ? m[1] : "918866873390";
 }
 
 function toggleChip(list: string[], value: string): string[] {
