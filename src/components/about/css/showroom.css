@@ -31,14 +31,30 @@
   color: var(--about-page-accent);
 }
 
+.about-showroom__whatsapp {
+  font-weight: 600;
+  color: var(--social-whatsapp, #25d366);
+}
+
+.about-showroom__whatsapp:hover {
+  color: var(--about-page-accent);
+}
+
 .about-showroom__hours {
   font-weight: 600;
   color: var(--about-page-ink);
 }
 
-.about-showroom__map {
-  display: inline-flex;
+.about-showroom__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
   margin-top: 1rem;
+}
+
+.about-showroom__map,
+.about-showroom__scheme {
+  display: inline-flex;
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -47,6 +63,7 @@
   color: var(--about-page-accent);
 }
 
-.about-showroom__map:hover {
+.about-showroom__map:hover,
+.about-showroom__scheme:hover {
   text-decoration: underline;
 }

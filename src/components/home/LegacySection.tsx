@@ -47,11 +47,12 @@ export default function LegacySection() {
             {/* Header */}
             <div className="flex items-start gap-5">
               <Image
-                src={legacy.astroCard.image}
-                alt={legacy.astroCard.name}
+                src="/images/placeholders/avatar.svg"
+                alt=""
                 width={90}
                 height={90}
-                className="h-24 w-24 rounded-full border-2 border-amber-400 object-cover"
+                className="h-24 w-24 rounded-full border-2 border-amber-400 object-cover bg-[#F3EDE4]"
+                unoptimized
               />
 
               <div>

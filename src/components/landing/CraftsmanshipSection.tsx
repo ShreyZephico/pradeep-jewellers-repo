@@ -47,11 +47,12 @@ export default function CraftsmanshipSection() {
             <div className={styles.imageWrapper}>
               <div className={styles.imageOverlay} />
               <Image
-                src="/makeringimg.jpg"
-                alt="Master craftsman creating exquisite jewellery at Pradeep Jewellers"
+                src="/images/placeholders/jewellery.svg"
+                alt="Fine jewellery craftsmanship at Pradeep Jewellers"
                 fill
                 className={styles.craftsmanshipImage}
                 priority
+                unoptimized
               />
               <div className={styles.goldFrame} />
               <div className={styles.imageCaption}>

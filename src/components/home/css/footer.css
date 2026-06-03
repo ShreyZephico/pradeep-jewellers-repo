@@ -275,6 +275,16 @@
   transition: color var(--footer-transition);
 }
 
+.site-footer__link--whatsapp {
+  color: var(--social-whatsapp, #25d366);
+  font-weight: 600;
+}
+
+.site-footer__link--whatsapp:hover {
+  color: var(--social-whatsapp, #25d366);
+  opacity: 0.85;
+}
+
 .site-footer__link:hover {
   color: var(--footer-accent);
 }

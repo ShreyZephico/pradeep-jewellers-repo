@@ -33,13 +33,13 @@
       "Our karigars handle consult, specs, model approval, casting, setting, polish, and quality checks under one roof — so you always know who is making your piece.",
       "Today we serve Nadiad and customers nationwide with transparent pricing, live gold rates, and the same custom-first approach that built our name on the high street."
     ],
-    "image": "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?q=80&w=1200&auto=format&fit=crop",
+    "image": "https://images.unsplash.com/photo-1533734685302-aee5a945845a?q=80&w=1200&auto=format&fit=crop",
     "imageAlt": "Jeweller at the workbench in Nadiad"
   },
   "founder": {
     "id": "founder",
-    "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=900&auto=format&fit=crop",
-    "imageAlt": "Master karigar at Pradeep Jewellers",
+    "image": "/images/placeholders/jewellery.svg",
+    "imageAlt": "Custom jewellery at Pradeep Jewellers",
     "establishedYear": "Nadiad",
     "establishedText": "MADE-TO-ORDER IN GUJARAT",
     "sectionLabel": "OUR PROMISE",
@@ -119,22 +119,22 @@
         "name": "Gold karigar team",
         "role": "Casting & finishing",
         "experience": "In-house",
-        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop",
-        "imageAlt": "Gold karigar at the bench"
+        "image": "/images/placeholders/avatar.svg",
+        "imageAlt": "Gold craft team"
       },
       {
         "name": "Diamond setting",
         "role": "Stone setting & QC",
         "experience": "In-house",
-        "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop",
-        "imageAlt": "Diamond setter at work"
+        "image": "/images/placeholders/avatar.svg",
+        "imageAlt": "Diamond setting team"
       },
       {
         "name": "Customer desk",
         "role": "Specs, schemes & quotes",
         "experience": "Walk-in & WhatsApp",
-        "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
-        "imageAlt": "Showroom consultation"
+        "image": "/images/placeholders/avatar.svg",
+        "imageAlt": "Customer service desk"
       }
     ]
   },
@@ -193,6 +193,8 @@
     ],
     "ctaLabel": "Get a custom quote",
     "ctaHref": "/bespoke",
+    "secondaryCtaLabel": "Suvarna Vriddhi scheme",
+    "secondaryCtaHref": "/scheme",
     "image": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=1200&auto=format&fit=crop",
     "imageAlt": "Custom jewellery being crafted"
   },
@@ -208,6 +210,8 @@
     "address": "Santh Bazzar, Amdavadi Bazar Road, Nadiad, Gujarat 387001",
     "phone": "+91 88668 73390",
     "phoneHref": "tel:+918866873390",
+    "whatsappHref": "https://wa.me/918866873390",
+    "whatsappLabel": "Chat on WhatsApp",
     "hours": "Mon–Sat · 10 AM – 8 PM · Sunday closed",
     "mapLabel": "View on map",
     "mapHref": "https://www.google.com/maps?q=22.667084,72.855967",
@@ -228,6 +232,7 @@
     "description": "Share your inspiration, metal choice, and timeline — we respond fastest on WhatsApp.",
     "links": [
       { "label": "Shop collection", "href": "/products", "variant": "primary" },
+      { "label": "Suvarna Vriddhi", "href": "/scheme", "variant": "outline" },
       { "label": "Custom quote", "href": "/bespoke", "variant": "outline" },
       { "label": "Live gold rates", "href": "/rates", "variant": "outline" }
     ]

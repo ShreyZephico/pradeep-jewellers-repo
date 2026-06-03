@@ -16,6 +16,7 @@
   },
   "quickLinks": [
     { "label": "About Us", "href": "/about" },
+    { "label": "Suvarna Vriddhi", "href": "/scheme" },
     { "label": "Bespoke", "href": "/bespoke" },
     { "label": "Contact", "href": "/#callback" }
   ],

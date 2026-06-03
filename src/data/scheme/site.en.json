@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "brandName": "Suvarna Vridhhi",
+    "brandFullName": "Suvarna Vridhhi Yojna",
+    "year": "2024"
+  },
+  "topNav": {
+    "links": [
+      { "key": "home", "label": "Home", "href": "/scheme", "active": false },
+      { "key": "plans", "label": "Plans", "href": "/scheme/plans", "active": false },
+      { "key": "calculator", "label": "Calculator", "href": "/scheme#calculator", "active": false },
+      { "key": "contact", "label": "ContactUs", "href": "/scheme/enquiry", "active": false }
+    ],
+    "cta": { "label": "Start Investing", "href": "/scheme/enquiry" },
+    "languageToggle": {
+      "groupAriaLabel": "Website language — choose English or Gujarati",
+      "switchHint": "Language",
+      "englishShort": "English",
+      "gujaratiShort": "ગુજરાતી",
+      "englishAria": "Show this website in English",
+      "gujaratiAria": "Show this website in Gujarati"
+    },
+    "ariaPrimaryNav": "Primary navigation"
+  },
+  "mechanism": {
+    "id": "plans",
+    "sectionAria": "Bonus and EMI mechanism",
+    "heading": "Bonus + EMI Mechanism",
+    "subheading": "A systematic approach where consistency is rewarded with bonus months.",
+    "largeStep": {
+      "icon": "payments",
+      "title": "Monthly Contributions",
+      "description": "Pay your monthly installment on time for the selected tenure.",
+      "image": {
+        "src": "https://res.cloudinary.com/coffewithpratham/image/upload/v1778585192/Gemini_Generated_Image_hr7h9mhr7h9mhr7h_m2wwzc.png",
+        "alt": "Premium investment desk with gold bars, books, and professional setting"
+      }
+    },
+    "rewardStep": {
+      "icon": "workspace_premium",
+      "title": "Bonus Months",
+      "description": "On successful completion, you receive back your paid EMI equivalent plus bonus months as reward."
+    },
+    "details": [
+      {
+        "icon": "security",
+        "title": "Secure Process",
+        "description": "Clear terms and transparent process for every plan."
+      },
+      {
+        "icon": "schedule",
+        "title": "On-time Benefit",
+        "description": "Stay consistent and unlock the bonus benefit."
+      },
+      {
+        "icon": "verified",
+        "title": "Trusted Support",
+        "description": "Our team supports you through the full scheme."
+      }
+    ]
+  },
+  "home": {
+    "hero": {
+      "kicker": "Scheme introduction film",
+      "title": {
+        "before": "Preserve Your Legacy in ",
+        "highlight": "Pure Gold",
+        "after": "."
+      },
+      "subtitle": "Watch the short film to see how Suvarna Vridhhi works — disciplined monthly contributions, transparent terms, and bonus-rewarded gold accumulation at Pradeep Jewellers.",
+      "primaryCta": { "label": "Open Your Yojna Account", "href": "/scheme/enquiry" },
+      "secondaryCta": { "label": "Request a Callback", "href": "/scheme/enquiry" },
+      "videoBadge": "Introductory film · Suvarna Vridhhi Yojna",
+      "video": {
+        "src": "https://res.cloudinary.com/coffewithpratham/video/upload/v1778651051/WhatsApp_Video_2026-05-12_at_17.05.59_yth9a9.mp4",
+        "poster": "https://res.cloudinary.com/coffewithpratham/video/upload/so_0,w_1400,c_fill,q_auto,f_jpg/v1778651051/WhatsApp_Video_2026-05-12_at_17.05.59_yth9a9.jpg",
+        "ariaLabel": "Introductory video explaining the Suvarna Vridhhi gold savings scheme"
+      },
+      "videoControls": {
+        "toolbarAria": "Video playback controls",
+        "play": "Play",
+        "pause": "Pause",
+        "mute": "Mute",
+        "unmute": "Unmute"
+      },
+      "sectionAria": "Hero"
+    },
+    "calculator": {
+      "id": "calculator",
+      "kicker": "Calculator",
+      "heading": "Calculate your return after scheme completion",
+      "subheading": "Minimum monthly amount is ₹2,000.",
+      "inputLabel": "Enter amount (₹)",
+      "inputTitle": "Monthly EMI Amount",
+      "summaryTitle": "Return Summary",
+      "summaryFormula": "Total return = (months paid + bonus months) × monthly amount",
+      "minAmount": 2000,
+      "invalidMin": "Minimum amount is ₹2000.",
+      "stepAmount": 1000,
+      "invalidStep": "Amount must be in multiples of ₹1000.",
+      "sectionAria": "Calculator",
+      "resultsAria": "Calculated results",
+      "enteredAmountTemplate": "You entered: {amount} per month",
+      "rowPaidBonusTemplate": "Paid: {paid} • Bonus: {bonus}"
+    },
+    "faq": {
+      "id": "faq",
+      "kicker": "FAQ",
+      "heading": "Questions we hear often",
+      "subheading": "Straight answers about Suvarna Vridhhi. Visit Pradeep Jewellers or enquire for plan-specific details.",
+      "sectionAria": "Frequently asked questions",
+      "items": [
+        {
+          "question": "What is Suvarna Vridhhi Yojna?",
+          "answer": "It is a disciplined gold savings scheme at Pradeep Jewellers: you pay a fixed monthly installment for your chosen tenure. When you complete all payments on time, you receive back your total paid EMI amount plus bonus month(s) as per your plan — transparent terms explained at enrollment."
+        },
+        {
+          "question": "What is the minimum monthly installment?",
+          "answer": "The minimum monthly amount is ₹2,000. You can choose a higher installment based on the plan and your comfort."
+        },
+        {
+          "question": "How do bonus months work?",
+          "answer": "Each plan includes bonus month(s) (for example 11+1 or 18+2). After you successfully complete the full tenure with on-time payments, your return follows the scheme formula: total return equals (months paid + bonus months) × monthly amount. Use the calculator on this page to estimate."
+        },
+        {
+          "question": "Where can I enroll or get help?",
+          "answer": "You can visit Pradeep Jewellers in Nadiad during store hours, call us, or submit the enquiry form — our team will guide you through enrollment and documentation."
+        }
+      ]
+    },
+    "visitUs": {
+      "id": "visit-us",
+      "kicker": "Visit Us",
+      "heading": "Pradeep Jewellers, Nadiad",
+      "address": "Pradeep Jewellers, Santh Bazzar, Amdavadi Bazar, Road, Nadiad, Gujarat 387001",
+      "hours": "Hours: Mon–Sat: 10:00 AM — 8:00 PM | Sunday: Closed",
+      "phoneDisplay": "+91 88668 73390",
+      "phoneTel": "+918866873390",
+      "getDirections": "Get Directions",
+      "callNow": "Call Now",
+      "storeWebsite": {
+        "label": "Visit Store Website",
+        "href": "https://pradeepjewellers.in/"
+      },
+      "sectionAria": "Visit us",
+      "gridAria": "Store location",
+      "mapCardAria": "Map preview",
+      "mapIframeTitle": "Store location map"
+    }
+  },
+  "plans": {
+    "page": {
+      "kicker": "Choose your plan",
+      "heading": "Bonus-Rewarded EMI Plans",
+      "subheading": "Complete the EMI tenure and receive your paid EMI equivalent back, plus bonus month(s) as reward.",
+      "ctaPrefix": "Start with ",
+      "copy": {
+        "monthSingular": "month",
+        "monthPlural": "months",
+        "planSubtitle": "{code} Plan • Pay {months} {monthsLabel} EMI",
+        "completionLine": "On completion: you receive back {paidMonths} {paidMonthsLabel} EMI equivalent plus {bonusMonths} {bonusMonthsLabel} bonus.",
+        "totalBenefitBefore": "Total benefit: ",
+        "totalBenefitAfter": " EMI equivalent.",
+        "sectionAria": "Plans"
+      }
+    },
+    "items": [
+      {
+        "code": "11+1",
+        "name": "Shubharambh Yojana (11+1)",
+        "months": 11,
+        "bonusMonths": 1,
+        "icon": "workspace_premium",
+        "tagline": "A refined entry into disciplined investing."
+      },
+      {
+        "code": "18+2",
+        "name": "Samruddhi Yojana (18+2)",
+        "months": 18,
+        "bonusMonths": 2,
+        "icon": "trending_up",
+        "tagline": "Build consistency with a stronger reward."
+      },
+      {
+        "code": "24+3",
+        "name": "Vishwas Yojana (24+3)",
+        "months": 24,
+        "bonusMonths": 3,
+        "icon": "shield",
+        "tagline": "A long-horizon plan for maximum bonus."
+      }
+    ]
+  },
+  "enquiry": {
+    "id": "enquire",
+    "minMonthlyInstallment": 2000,
+    "stepMonthlyInstallment": 1000,
+    "sectionAria": "Enquiry form",
+    "honeypotLabel": "Do not fill this out:",
+    "submitSuccess": "Form submitted successfully!",
+    "submitError": "Something went wrong.",
+    "heading": "Enquire for Your Vridhhi",
+    "subheading": "A wealth advisor will help you structure your golden legacy.",
+    "fields": [
+      { "type": "text", "name": "fullName", "label": "Full Name", "placeholder": "John Doe" },
+      { "type": "tel", "name": "contactNumber", "label": "Contact Number", "placeholder": "+91 00000 00000" },
+      { "type": "number", "name": "monthlyAmount", "label": "Monthly Installment Amount", "placeholder": "₹ 5,000" },
+      { "type": "select", "name": "plan", "label": "Select Plan", "options": ["Select", "Shubharambh Yojana (11+1)", "Samruddhi Yojana (18+2)", "Vishwas Yojana (24+3)"] }
+    ],
+    "consent": {
+      "id": "consent",
+      "label": "By checking this, you agree to receive a call from our team regarding your investment journey."
+    },
+    "submit": { "label": "Request a Callback" },
+    "validation": {
+      "contactRequired": "Contact number is required.",
+      "contactTenDigits": "Enter a valid 10-digit mobile number.",
+      "contactIndian": "Enter a valid Indian mobile number (starts with 6-9).",
+      "nameRequired": "Full name is required.",
+      "nameMin": "Full name must be at least 3 characters.",
+      "nameInvalid": "Full name can contain only letters and spaces.",
+      "amountRequired": "Monthly amount is required.",
+      "amountInvalid": "Enter a valid monthly amount.",
+      "amountWhole": "Monthly amount must be a whole number.",
+      "amountStep": "Monthly amount must be in multiples of ₹1000.",
+      "amountMin": "Minimum monthly installment is ₹2000.",
+      "planRequired": "Please select a plan.",
+      "consentRequired": "You must agree to proceed."
+    }
+  },
+  "footer": {
+    "ariaFooter": "Footer",
+    "ariaFooterLinks": "Footer links",
+    "about": "© 2024 Suvarna Vridhhi Yojna.",
+    "poweredBy": "Powered by Pradeep Jewellers",
+    "links": [
+      { "label": "Store Website", "href": "https://pradeepjewellers.in/" },
+      { "label": "Privacy Policy", "href": "/scheme/privacy" },
+      { "label": "Terms of Use", "href": "/scheme/terms" }
+    ]
+  }
+}
+

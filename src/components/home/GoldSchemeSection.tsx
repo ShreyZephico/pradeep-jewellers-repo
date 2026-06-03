@@ -195,15 +195,29 @@ export default function GoldSchemeSection() {
                   ))}
                 </div>
 
-                <a
-                  href={scheme.whatsappCta.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="gold-scheme-section__whatsapp"
-                >
-                  <WhatsAppIcon className="gold-scheme-section__whatsapp-icon" />
-                  {scheme.whatsappCta.text}
-                </a>
+                <div className="gold-scheme-section__cta-row">
+                  <Link
+                    href={scheme.schemeCta.href}
+                    className="gold-scheme-section__scheme-link"
+                  >
+                    {scheme.schemeCta.text}
+                  </Link>
+                  <Link
+                    href={scheme.plansCta.href}
+                    className="gold-scheme-section__plans-link"
+                  >
+                    {scheme.plansCta.text}
+                  </Link>
+                  <a
+                    href={scheme.whatsappCta.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="gold-scheme-section__whatsapp"
+                  >
+                    <WhatsAppIcon className="gold-scheme-section__whatsapp-icon" />
+                    {scheme.whatsappCta.text}
+                  </a>
+                </div>
               </div>
             </div>
           </div>

@@ -61,6 +61,7 @@ export default function FounderSection() {
                 className="founder-section__image"
                 sizes="(max-width: 1024px) 360px, 416px"
                 priority={false}
+                unoptimized={s.image.endsWith(".svg")}
               />
               <aside className="founder-section__year-badge">
                 <p className="founder-section__year">{s.establishedYear}</p>

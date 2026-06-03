@@ -22,9 +22,19 @@ export default function AboutBespokeSection() {
                 <li key={f}>{f}</li>
               ))}
             </ul>
-            <Link href={s.ctaHref} className="about-btn about-btn--primary">
-              {s.ctaLabel}
-            </Link>
+            <div className="about-bespoke__actions">
+              <Link href={s.ctaHref} className="about-btn about-btn--primary">
+                {s.ctaLabel}
+              </Link>
+              {s.secondaryCtaHref ? (
+                <Link
+                  href={s.secondaryCtaHref}
+                  className="about-btn about-btn--outline"
+                >
+                  {s.secondaryCtaLabel}
+                </Link>
+              ) : null}
+            </div>
           </div>
           <div className="about-split__media" data-reveal data-stagger="2">
             <div className="about-media-frame">

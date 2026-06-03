@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "brandName": "શુવરણ વૃદ્ધિ",
+    "brandFullName": "શુવરણ વૃદ્ધિ યોજના",
+    "year": "2024"
+  },
+  "topNav": {
+    "links": [
+      { "key": "home", "label": "હોમ", "href": "/scheme", "active": false },
+      { "key": "plans", "label": "યોજનાઓ", "href": "/scheme/plans", "active": false },
+      { "key": "calculator", "label": "કેલ્ક્યુલેટર", "href": "/scheme#calculator", "active": false },
+      { "key": "contact", "label": "સંપર્ક", "href": "/scheme/enquiry", "active": false }
+    ],
+    "cta": { "label": "શરૂ કરો", "href": "/scheme/enquiry" },
+    "languageToggle": {
+      "groupAriaLabel": "વેબસાઇટ ભાષા — અંગ્રેજી અથવા ગુજરાતી પસંદ કરો",
+      "switchHint": "ભાષા",
+      "englishShort": "English",
+      "gujaratiShort": "ગુજરાતી",
+      "englishAria": "આ વેબસાઇટ અંગ્રેજીમાં બતાવો",
+      "gujaratiAria": "આ વેબસાઇટ ગુજરાતીમાં બતાવો"
+    },
+    "ariaPrimaryNav": "મુખ્ય નેવિગેશન"
+  },
+  "mechanism": {
+    "id": "plans",
+    "sectionAria": "બોનસ અને EMI વિભાગ",
+    "heading": "બોનસ + EMI મિકેનિઝમ",
+    "subheading": "નિયમિતતા રાખો અને બોનસ લાભ મેળવો.",
+    "largeStep": {
+      "icon": "payments",
+      "title": "માસિક હપ્તા",
+      "description": "પસંદ કરેલા સમયગાળા માટે સમયસર માસિક હપ્તો ચૂકવો.",
+      "image": {
+        "src": "https://res.cloudinary.com/coffewithpratham/image/upload/v1778585192/Gemini_Generated_Image_hr7h9mhr7h9mhr7h_m2wwzc.png",
+        "alt": "પ્રીમિયમ ઇન્વેસ્ટમેન્ટ ડેસ્ક — સોના, કિતાબો અને વ્યાવસાયિક વાતાવરણ"
+      }
+    },
+    "rewardStep": {
+      "icon": "workspace_premium",
+      "title": "બોનસ મહિના",
+      "description": "યોજના પૂર્ણ થયા પછી ચૂકવેલી EMI જેટલું રિટર્ન + બોનસ મહિના મેળવો."
+    },
+    "details": [
+      {
+        "icon": "security",
+        "title": "સુરક્ષિત પ્રક્રિયા",
+        "description": "દરેક યોજનામાં સ્પષ્ટ શરતો અને પારદર્શિતા."
+      },
+      {
+        "icon": "schedule",
+        "title": "સમયસર લાભ",
+        "description": "નિયમિતતા રાખો અને બોનસ લાભ મેળવો."
+      },
+      {
+        "icon": "verified",
+        "title": "વિશ્વસનીય સપોર્ટ",
+        "description": "સંપૂર્ણ યોજના દરમિયાન અમારી ટીમ સહાય કરશે."
+      }
+    ]
+  },
+  "home": {
+    "hero": {
+      "kicker": "યોજનાનો પરિચય વીડિયો",
+      "title": {
+        "before": "તમારો વારસો ",
+        "highlight": "શુદ્ધ સોનામાં",
+        "after": " સુરક્ષિત કરો."
+      },
+      "subtitle": "નાનકડો વીડિયો જુઓ — શુવરણ વૃદ્ધિ કેવી રીતે કામ કરે છે: નિયમિત હપ્તો, સ્પષ્ટ શરતો અને પ્રદીપ જ્વેલર્સ પર બોનસ સાથે સોનાની બચત.",
+      "primaryCta": { "label": "યોજના માટે અરજી કરો", "href": "/scheme/enquiry" },
+      "secondaryCta": { "label": "કોલબેક માંગો", "href": "/scheme/enquiry" },
+      "videoBadge": "પરિચય ફિલ્મ · શુવરણ વૃદ્ધિ યોજના",
+      "video": {
+        "src": "https://res.cloudinary.com/coffewithpratham/video/upload/v1778651051/WhatsApp_Video_2026-05-12_at_17.05.59_yth9a9.mp4",
+        "poster": "https://res.cloudinary.com/coffewithpratham/video/upload/so_0,w_1400,c_fill,q_auto,f_jpg/v1778651051/WhatsApp_Video_2026-05-12_at_17.05.59_yth9a9.jpg",
+        "ariaLabel": "શુવરણ વૃદ્ધિ સોનાની બચત યોજનાનો પરિચય વીડિયો"
+      },
+      "videoControls": {
+        "toolbarAria": "વીડિયો નિયંત્રણો",
+        "play": "ચલાવો",
+        "pause": "થોભાવો",
+        "mute": "અવાજ બંધ",
+        "unmute": "અવાજ ચાલુ"
+      },
+      "sectionAria": "હીરો વિભાગ"
+    },
+    "calculator": {
+      "id": "calculator",
+      "kicker": "કેલ્ક્યુલેટર",
+      "heading": "યોજના પૂર્ણ થયા પછી રિટર્ન ગણો",
+      "subheading": "ઓછામાં ઓછું માસિક રકમ ₹2,000 છે.",
+      "inputLabel": "રકમ દાખલ કરો (₹)",
+      "inputTitle": "માસિક EMI રકમ",
+      "summaryTitle": "રિટર્ન સમરી",
+      "summaryFormula": "કુલ રિટર્ન = (ચૂકવેલા મહિના + બોનસ મહિના) × માસિક રકમ",
+      "minAmount": 2000,
+      "invalidMin": "ઓછામાં ઓછું રકમ ₹2000 છે.",
+      "stepAmount": 1000,
+      "invalidStep": "રકમ ₹1000 ના ગુણાકારમાં હોવી જોઈએ.",
+      "sectionAria": "કેલ્ક્યુલેટર",
+      "resultsAria": "ગણતરીના પરિણામો",
+      "enteredAmountTemplate": "તમે દાખલ કર્યું: દર મહિને {amount}",
+      "rowPaidBonusTemplate": "ચૂકવેલું: {paid} • બોનસ: {bonus}"
+    },
+    "faq": {
+      "id": "faq",
+      "kicker": "FAQ",
+      "heading": "વારંવાર પૂછાતા પ્રશ્નો",
+      "subheading": "શુવરણ વૃદ્ધિ વિશે ટૂંકા જવાબો. યોજના વિગતો માટે પ્રદીપ જ્વેલર્સે મુલાકાત લો અથવા પૂછપરછ કરો.",
+      "sectionAria": "વારંવાર પૂછાતા પ્રશ્નો",
+      "items": [
+        {
+          "question": "શુવરણ વૃદ્ધિ યોજના શું છે?",
+          "answer": "આ પ્રદીપ જ્વેલર્સ પરની વ્યવસ્થિત સોનાની બચત યોજના છે: તમે પસંદ કરેલા સમયગાળા માટે નિશ્ચિત માસિક હપ્તો ભરો. નિયમિત સંપૂર્ણ ચુકવણી પછી તમને યોજના મુજબ કુલ ચૂકવેલ EMI અને બોનસ મહિના મળે છે — નોંધણી વખતે શરતો સ્પષ્ટ થાય છે."
+        },
+        {
+          "question": "ઓછામાં ઓછો માસિક હપ્તો કેટલો?",
+          "answer": "ઓછામાં ઓછી માસિક રકમ ₹2,000 છે. યોજના અને તમારી સુવિધા મુજબ વધુ રકમ પણ પસંદ કરી શકાય."
+        },
+        {
+          "question": "બોનસ મહિના કેવી રીતે કામ કરે છે?",
+          "answer": "દરેક યોજામાં બોનસ મહિના હોય છે (જેમ કે 11+1 અથવા 18+2). સંપૂર્ણ સમય સુધી નિયમિત ચુકવણી પછી રિટર્ન યોજના સૂત્ર પ્રમાણે: કુલ રિટર્ન = (ચૂકવેલા મહિના + બોનસ મહિના) × માસિક રકમ. અંદાજ માટે આ પેજ પરનો કેલ્ક્યુલેટર વાપરો."
+        },
+        {
+          "question": "નોંધણી અથવા મદદ ક્યાં મળે?",
+          "answer": "દુકાનના સમય દરમિયાન પ્રદીપ જ્વેલર્સ નડિયાદ પર આવો, ફોન કરો, અથવા પૂછપરછ ફોર્મ ભરો — અમારી ટીમ નોંધણી અને કાગળોમાં માર્ગદર્શન આપશે."
+        }
+      ]
+    },
+    "visitUs": {
+      "id": "visit-us",
+      "kicker": "અમને મુલાકાત લો",
+      "heading": "પ્રદીપ જ્વેલર્સ, નડિયાદ",
+      "address": "પ્રદીપ જ્વેલર્સ, સંત બજાર, અમદાવાદી બજાર રોડ, નડિયાદ, ગુજરાત 387001",
+      "hours": "સમય: સોમ–શનિ: 10:00 AM — 8:00 PM | રવિવાર: બંધ",
+      "phoneDisplay": "+91 88668 73390",
+      "phoneTel": "+918866873390",
+      "getDirections": "દિશા મેળવો",
+      "callNow": "હવે કોલ કરો",
+      "storeWebsite": {
+        "label": "દુકાનની વેબસાઇટ જુઓ",
+        "href": "https://pradeepjewellers.in/"
+      },
+      "sectionAria": "અમને મુલાકાત લો",
+      "gridAria": "દુકાનનું સ્થાન",
+      "mapCardAria": "નકશાનું પૂર્વાવલોકન",
+      "mapIframeTitle": "દુકાન સ્થાન નકશો"
+    }
+  },
+  "plans": {
+    "page": {
+      "kicker": "તમારી યોજના પસંદ કરો",
+      "heading": "બોનસ સાથે EMI યોજનાઓ",
+      "subheading": "પૂર્ણ સમયગાળો પૂરો કરો અને ચૂકવેલી EMI જેટલું રિટર્ન + બોનસ મહિના મેળવો.",
+      "ctaPrefix": "શરૂ કરો: ",
+      "copy": {
+        "monthSingular": "મહિનો",
+        "monthPlural": "મહિના",
+        "planSubtitle": "{code} યોજના • {months} {monthsLabel} EMI",
+        "completionLine": "પૂર્ણ થયા પછી: તમને પાછા {paidMonths} {paidMonthsLabel} EMI જેટલું અને વધારાના {bonusMonths} {bonusMonthsLabel} બોનસ મળે છે.",
+        "totalBenefitBefore": "કુલ લાભ: ",
+        "totalBenefitAfter": " EMI જેટલું.",
+        "sectionAria": "યોજનાઓ"
+      }
+    },
+    "items": [
+      {
+        "code": "11+1",
+        "name": "શુભારંભ યોજના (11+1)",
+        "months": 11,
+        "bonusMonths": 1,
+        "icon": "workspace_premium",
+        "tagline": "શિસ્તબદ્ધ બચત માટે સારો શરૂઆતનો વિકલ્પ."
+      },
+      {
+        "code": "18+2",
+        "name": "સમૃદ્ધિ યોજના (18+2)",
+        "months": 18,
+        "bonusMonths": 2,
+        "icon": "trending_up",
+        "tagline": "વધુ બોનસ સાથે સતત બચત બનાવો."
+      },
+      {
+        "code": "24+3",
+        "name": "વિશ્વાસ યોજના (24+3)",
+        "months": 24,
+        "bonusMonths": 3,
+        "icon": "shield",
+        "tagline": "લાંબા ગાળાની યોજના માટે મહત્તમ બોનસ."
+      }
+    ]
+  },
+  "enquiry": {
+    "id": "enquire",
+    "minMonthlyInstallment": 2000,
+    "stepMonthlyInstallment": 1000,
+    "sectionAria": "પૂછપરછ ફોર્મ",
+    "honeypotLabel": "આ ખાનું ભરશો નહીં:",
+    "submitSuccess": "ફોર્મ સફળતાપૂર્વક સબમિટ થયું!",
+    "submitError": "કંઈક ખોટું થયું. ફરી પ્રયત્ન કરો.",
+    "heading": "યોજના માટે પૂછપરછ",
+    "subheading": "અમારો સલાહકાર તમને યોગ્ય યોજના પસંદ કરવામાં મદદ કરશે.",
+    "fields": [
+      { "type": "text", "name": "fullName", "label": "પૂર્ણ નામ", "placeholder": "તમારું નામ" },
+      { "type": "tel", "name": "contactNumber", "label": "મોબાઇલ નંબર", "placeholder": "+91 00000 00000" },
+      { "type": "number", "name": "monthlyAmount", "label": "માસિક હપ્તાની રકમ", "placeholder": "₹ 2,000" },
+      { "type": "select", "name": "plan", "label": "યોજનાનો પસંદ કરો", "options": ["પસંદ કરો", "શુભારંભ યોજના (11+1)", "સમૃદ્ધિ યોજના (18+2)", "વિશ્વાસ યોજના (24+3)"] }
+    ],
+    "consent": {
+      "id": "consent",
+      "label": "આ પસંદ કરીને, તમે અમારી ટીમ તરફથી કોલ પ્રાપ્ત કરવા માટે સંમત છો."
+    },
+    "submit": { "label": "કોલબેક માંગો" },
+    "validation": {
+      "contactRequired": "મોબાઇલ નંબર જરૂરી છે.",
+      "contactTenDigits": "યોગ્ય 10 અંકનો મોબાઇલ નંબર દાખલ કરો.",
+      "contactIndian": "યોગ્ય ભારતીય મોબાઇલ નંબર દાખલ કરો (6-9 થી શરૂ થાય).",
+      "nameRequired": "પૂર્ણ નામ જરૂરી છે.",
+      "nameMin": "પૂર્ણ નામ ઓછામાં ઓછું 3 અક્ષરોનું હોવું જોઈએ.",
+      "nameInvalid": "કૃપા કરીને યોગ્ય નામ દાખલ કરો.",
+      "amountRequired": "માસિક રકમ જરૂરી છે.",
+      "amountInvalid": "યોગ્ય માસિક રકમ દાખલ કરો.",
+      "amountWhole": "માસિક રકમ પૂર્ણાંક હોવી જોઈએ.",
+      "amountStep": "માસિક રકમ ₹1000 ના ગુણાકારમાં હોવી જોઈએ.",
+      "amountMin": "ઓછામાં ઓછું માસિક હપ્તું ₹2000 છે.",
+      "planRequired": "કૃપા કરીને યોજના પસંદ કરો.",
+      "consentRequired": "આગળ વધવા માટે સંમતિ જરૂરી છે."
+    }
+  },
+  "footer": {
+    "ariaFooter": "ફૂટર",
+    "ariaFooterLinks": "ફૂટર લિંક્સ",
+    "about": "© 2024 શુવરણ વૃદ્ધિ યોજના.",
+    "poweredBy": "પ્રદીપ જ્વેલર્સ દ્વારા સંચાલિત",
+    "links": [
+      { "label": "દુકાનની વેબસાઇટ", "href": "https://pradeepjewellers.in/" },
+      { "label": "પ્રાઇવસી પોલિસી", "href": "/scheme/privacy" },
+      { "label": "ઉપયોગની શરતો", "href": "/scheme/terms" }
+    ]
+  }
+}
+
