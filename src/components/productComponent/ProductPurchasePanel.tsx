@@ -17,6 +17,7 @@ import {
 } from "@/lib/productCheckout";
 import productContent from "@/lib/productContent";
 import "@/styles/ProductPurchasePanel.css";
+import { buildPriceBreakdownOptionLines } from "@/utils/priceBreakdownOptions";
 import {
   getCustomizationValidationError,
   type CustomizationField,
@@ -133,6 +134,13 @@ export default function ProductPurchasePanel({
     (selectedQualityOption?.priceAdjustment ?? 0) +
     (selectedSizeOption?.priceAdjustment ?? 0);
 
+  const optionBreakdownLines = buildPriceBreakdownOptionLines({
+    metal: selectedMetalOption ?? null,
+    carat: selectedCaratOption ?? null,
+    quality: selectedQualityOption ?? null,
+    size: selectedSizeOption ?? null,
+  });
+
   const isPage = priceHeaderVariant === "page";
   const isModal = !isPage;
 
@@ -174,6 +182,7 @@ export default function ProductPurchasePanel({
           body: JSON.stringify({
             weight: baseWeight,
             carat: karatLabel ?? null,
+            makingChargePercent: product.makingChargePercent ?? null,
           }),
         });
         const data = await response.json();
@@ -219,6 +228,7 @@ export default function ProductPurchasePanel({
     selectedQuality,
     selectedSize,
     variantPrice,
+    product.makingChargePercent,
   ]);
 
   const catalogVariantIdForCheckout =
@@ -639,8 +649,11 @@ export default function ProductPurchasePanel({
             breakdown={priceBreakdown}
             weightGrams={baseWeight}
             karatLabel={karatLabel}
+            metalLabel={selectedMetalOption?.label ?? selectedMetal}
+            diamondLabel={selectedQualityOption?.label ?? selectedQuality}
             loading={priceLoading}
             optionAdjustments={optionAdjustments}
+            optionLines={optionBreakdownLines}
             displayTotal={estimatedPrice}
           />
           {actionFooter}

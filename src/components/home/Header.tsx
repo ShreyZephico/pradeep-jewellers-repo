@@ -196,6 +196,19 @@ export default function Header() {
     goToCart();
   };
 
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isMenuOpen]);
+
   const getInitial = () =>
     userName ? userName.charAt(0).toUpperCase() : "U";
 
@@ -219,8 +232,8 @@ export default function Header() {
               <Image
                 src={getImageUrl(contactData.brand.logo)}
                 alt={contactData.brand.name}
-                width={45}
-                height={45}
+                width={36}
+                height={36}
                 className="site-header__logo-img"
                 style={{ width: "auto", height: "auto" }}
                 onError={() => setLogoError(true)}
@@ -267,7 +280,7 @@ export default function Header() {
 
           <div className="site-header__actions">
             <div className="site-header__phone">
-              <Phone size={16} aria-hidden />
+              <Phone size={14} aria-hidden />
               <span>{contactData.contact.phone}</span>
             </div>
 
@@ -281,7 +294,7 @@ export default function Header() {
             </Link>
 
             <div className="site-header__search-slot">
-              <HeaderNavSearch variant="responsive" />
+              <HeaderNavSearch variant="compact" />
             </div>
 
             <button
@@ -296,7 +309,7 @@ export default function Header() {
               suppressHydrationWarning
             >
               <span className="header-cart-icon-wrap">
-                <ShoppingBag size={20} strokeWidth={1.75} aria-hidden />
+                <ShoppingBag size={18} strokeWidth={1.75} aria-hidden />
                 {cartQty > 0 ? (
                   <span className="header-cart-badge" aria-hidden>
                     {cartQty > 99 ? "99+" : cartQty}
@@ -373,20 +386,23 @@ export default function Header() {
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               suppressHydrationWarning
             >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
       </div>
 
       {isMenuOpen ? (
-        <div className="site-header__mobile">
-          <div className="site-header__mobile-inner">
-            <HeaderNavSearch
-              variant="mobile"
-              onNavigate={() => setIsMenuOpen(false)}
-            />
-
+        <>
+          <button
+            type="button"
+            className="site-header__mobile-backdrop"
+            aria-label="Close menu"
+            onClick={() => setIsMenuOpen(false)}
+            suppressHydrationWarning
+          />
+          <div className="site-header__mobile" role="dialog" aria-modal="true">
+            <div className="site-header__mobile-inner">
             {contactData.navigation.map((item) => (
               <Link
                 key={item.href}
@@ -407,22 +423,6 @@ export default function Header() {
             >
               {contactData.header.videoCallText}
             </Link>
-
-            <button
-              type="button"
-              className="site-header__mobile-cart"
-              onClick={() => {
-                setIsMenuOpen(false);
-                openCart();
-              }}
-              suppressHydrationWarning
-            >
-              <ShoppingBag size={18} aria-hidden />
-              {cartCopy.pageTitle}
-              {cartQty > 0 ? (
-                <span className="header-cart-badge">{cartQty}</span>
-              ) : null}
-            </button>
 
             {!authLoading && !isLoggedIn ? (
               <>
@@ -452,8 +452,9 @@ export default function Header() {
                 </button>
               </>
             ) : null}
+            </div>
           </div>
-        </div>
+        </>
       ) : null}
     </header>
   );

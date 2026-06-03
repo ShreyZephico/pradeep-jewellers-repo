@@ -49,6 +49,7 @@ export function useProductBasePrice(product: Product): UseProductBasePriceResult
           body: JSON.stringify({
             weight: baseWeight,
             carat: karatLabel ?? null,
+            makingChargePercent: product.makingChargePercent ?? null,
           }),
         });
         const data = await response.json();
@@ -86,7 +87,7 @@ export function useProductBasePrice(product: Product): UseProductBasePriceResult
     return () => {
       cancelled = true;
     };
-  }, [baseWeight, karatLabel, variantPrice, product.id]);
+  }, [baseWeight, karatLabel, variantPrice, product.id, product.makingChargePercent]);
 
   return {
     estimatedPrice: livePrice ?? variantPrice,

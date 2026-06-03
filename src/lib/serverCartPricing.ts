@@ -66,6 +66,15 @@ function resolveOptionAdjustments(input: ServerCartPriceInput): number {
   return parseIntAttr(input.attributes, PJ_BREAKDOWN_ATTR.optionAdj) ?? 0;
 }
 
+async function resolveMakingChargePercentForProduct(
+  productSlug: string | undefined
+): Promise<number | null | undefined> {
+  const slug = typeof productSlug === "string" ? productSlug.trim() : "";
+  if (!slug) return undefined;
+  const product = await fetchSingleCatalogProduct(slug);
+  return product?.makingChargePercent ?? null;
+}
+
 async function catalogVariantUnitPrice(
   input: ResolveMerchandiseInput & { productSlug?: string }
 ): Promise<number | null> {
@@ -103,7 +112,14 @@ export async function resolveTrustedCartUnitPrice(
   const optionAdj = resolveOptionAdjustments(input);
 
   if (weight != null && weight > 0) {
-    const pricing = await calculateVariantPrice({ weight, carat: karat });
+    const makingChargePercent = await resolveMakingChargePercentForProduct(
+      input.productSlug
+    );
+    const pricing = await calculateVariantPrice({
+      weight,
+      carat: karat,
+      makingChargePercent,
+    });
     return Math.max(0, Math.round(pricing.finalPrice + optionAdj));
   }
 
@@ -153,9 +169,13 @@ export async function revalidateCartLineUnitPrice(line: CartLine): Promise<numbe
     attributes: line.attributes,
   });
   if (parsed) {
+    const makingChargePercent = await resolveMakingChargePercentForProduct(
+      line.productHandle
+    );
     const pricing = await calculateVariantPrice({
       weight: parsed.weightGrams,
       carat: parsed.karatLabel,
+      makingChargePercent,
     });
     const trusted = Math.max(
       0,

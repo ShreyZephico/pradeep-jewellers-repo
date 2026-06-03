@@ -289,6 +289,7 @@ function CartPageLine({
                   weightGrams={lineBreakdown.weightGrams}
                   karatLabel={lineBreakdown.karatLabel}
                   optionAdjustments={lineBreakdown.optionAdjustments}
+                  optionLines={lineBreakdown.optionLines}
                   displayTotal={lineBreakdown.unitPrice}
                 />
               ) : (

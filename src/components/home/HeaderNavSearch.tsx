@@ -19,7 +19,7 @@ const MIN_QUERY_LENGTH = 2;
 type SearchLayoutVariant = "compact" | "expanded" | "mobile";
 
 type HeaderNavSearchProps = {
-  /** responsive: expanded field on desktop (≥1280px), icon toggle on smaller screens */
+  /** responsive: same as compact — search icon only until opened */
   variant?: SearchLayoutVariant | "responsive";
   className?: string;
   onNavigate?: () => void;
@@ -35,25 +35,16 @@ function useResponsiveSearchVariant(
   });
 
   useEffect(() => {
-    if (variant !== "responsive") {
-      setLayoutVariant(
-        variant === "mobile"
-          ? "mobile"
-          : variant === "expanded"
-            ? "expanded"
-            : "compact"
-      );
+    if (variant === "mobile") {
+      setLayoutVariant("mobile");
       return;
     }
-
-    const media = window.matchMedia("(min-width: 1280px)");
-    const sync = () => {
-      setLayoutVariant(media.matches ? "expanded" : "compact");
-    };
-
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
+    if (variant === "expanded") {
+      setLayoutVariant("expanded");
+      return;
+    }
+    /* responsive + compact: icon toggle only; input opens on click */
+    setLayoutVariant("compact");
   }, [variant]);
 
   return layoutVariant;
@@ -273,7 +264,7 @@ export default function HeaderNavSearch({
             onClick={openSearch}
             suppressHydrationWarning
           >
-            <Search size={20} aria-hidden />
+            <Search size={18} aria-hidden />
           </button>
         ) : null}
 
@@ -290,7 +281,9 @@ export default function HeaderNavSearch({
             <input
               ref={inputRef}
               id={inputId}
-              type="search"
+              type="text"
+              inputMode="search"
+              enterKeyHint="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={handleKeyDown}

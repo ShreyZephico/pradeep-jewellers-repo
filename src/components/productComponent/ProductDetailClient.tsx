@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/types/product";
@@ -22,6 +22,7 @@ import {
 import { formatProductPrice } from "@/utils/formatPrice";
 import productContent from "@/lib/productContent";
 import { productHasCustomizationOptions } from "@/utils/productCustomization";
+import { buildPriceBreakdownOptionLines, sumOptionLineAmounts } from "@/utils/priceBreakdownOptions";
 
 type ProductDetailClientProps = {
   slug: string;
@@ -30,8 +31,23 @@ type ProductDetailClientProps = {
 const copy = productContent.detail;
 const breadcrumb = productContent.breadcrumb;
 
-// ===== CERTIFIED AUTHENTICITY COMPONENT =====
-// ===== CERTIFIED AUTHENTICITY COMPONENT with SVG Icons =====
+function CertifiedIcon({ children }: { children: ReactNode }) {
+  return (
+    <svg
+      className="certified-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.35"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      {children}
+    </svg>
+  );
+}
+
 function CertifiedAuthenticity() {
   const certifications = [
     {
@@ -39,11 +55,10 @@ function CertifiedAuthenticity() {
       title: "BIS Hallmarked",
       description: "Government certified purity",
       icon: (
-        <svg className="certified-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2L15 8.5L22 9.5L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9.5L9 8.5L12 2Z" />
-          <path d="M12 7.5V12.5" />
-          <path d="M9 10.5L12 12.5L15 10.5" />
-        </svg>
+        <CertifiedIcon>
+          <path d="M12 3L4 6.5V12c0 4.2 3.4 7.8 8 8.5 4.6-.7 8-4.3 8-8.5V6.5L12 3z" />
+          <path d="M9 12l2 2 4-4" />
+        </CertifiedIcon>
       ),
     },
     {
@@ -51,15 +66,12 @@ function CertifiedAuthenticity() {
       title: "IGI Certified",
       description: "International gemological",
       icon: (
-        <svg className="certified-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 2L12 7" />
-          <path d="M12 22L12 17" />
-          <path d="M2 12L7 12" />
-          <path d="M22 12L17 12" />
-          <circle cx="12" cy="12" r="3" />
-          <path d="M12 9L12 12L14 14" />
-        </svg>
+        <CertifiedIcon>
+          <circle cx="12" cy="9" r="4.5" />
+          <path d="M8.5 14.5L6 20h12l-2.5-5.5" />
+          <path d="M12 7v2" />
+          <path d="M10.5 9.5L12 11l1.5-1.5" />
+        </CertifiedIcon>
       ),
     },
     {
@@ -67,18 +79,12 @@ function CertifiedAuthenticity() {
       title: "SGL Authentic",
       description: "Lab certified quality",
       icon: (
-        <svg className="certified-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2L12 6" />
-          <path d="M12 18L12 22" />
-          <path d="M4.93 4.93L7.76 7.76" />
-          <path d="M16.24 16.24L19.07 19.07" />
-          <path d="M2 12L6 12" />
-          <path d="M18 12L22 12" />
-          <path d="M4.93 19.07L7.76 16.24" />
-          <path d="M16.24 7.76L19.07 4.93" />
-          <circle cx="12" cy="12" r="3" />
-          <path d="M12 9L12 12L14 14" />
-        </svg>
+        <CertifiedIcon>
+          <path d="M7 4h10l2 4v12H5V8l2-4z" />
+          <path d="M9 12h6" />
+          <path d="M9 16h4" />
+          <path d="M12 4v4" />
+        </CertifiedIcon>
       ),
     },
     {
@@ -86,47 +92,37 @@ function CertifiedAuthenticity() {
       title: "Buyback Policy",
       description: "100% value guarantee",
       icon: (
-        <svg className="certified-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2V4" />
-          <path d="M12 20V22" />
-          <path d="M4 12H2" />
-          <path d="M22 12H20" />
-          <path d="M7.5 7.5L5.5 5.5" />
-          <path d="M18.5 18.5L16.5 16.5" />
-          <path d="M16.5 7.5L18.5 5.5" />
-          <path d="M5.5 18.5L7.5 16.5" />
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 8V12L14 14" />
-        </svg>
+        <CertifiedIcon>
+          <path d="M20 12a8 8 0 1 1-2.3-5.7" />
+          <path d="M20 4v5h-5" />
+          <path d="M8 12H6" />
+          <path d="M12 8v8" />
+        </CertifiedIcon>
       ),
     },
   ];
 
   return (
-    <section className="certified-section">
+    <section className="certified-section" aria-labelledby="certified-authenticity-title">
       <div className="certified-container">
-        <div className="certified-header">
-          <h2 className="certified-title">Certified Authenticity</h2>
+        <header className="certified-header">
+          <h2 id="certified-authenticity-title" className="certified-title">
+            Certified Authenticity
+          </h2>
           <p className="certified-subtitle">
             Every piece comes with guaranteed certification and authentic documentation
           </p>
-        </div>
+        </header>
 
-        <div className="certified-badges">
-          {certifications.map((cert, index) => (
-            <div
-              key={cert.id}
-              className="certified-badge"
-              style={{ animationDelay: `${0.1 * (index + 1)}s` }}
-            >
-              <div className="certified-icon-wrapper">
-                {cert.icon}
-              </div>
+        <ul className="certified-badges">
+          {certifications.map((cert) => (
+            <li key={cert.id} className="certified-badge">
+              <span className="certified-icon-wrapper">{cert.icon}</span>
               <h3 className="certified-badge-title">{cert.title}</h3>
               <p className="certified-badge-desc">{cert.description}</p>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );
@@ -229,6 +225,13 @@ function ProductDetailLoaded({
   const [commerceToast, setCommerceToast] = useState("");
 
   const pricing = useProductBasePrice(product);
+  const defaultBreakupLines = buildPriceBreakdownOptionLines({
+    metal: product.metalOptions?.[0] ?? null,
+    carat: product.caratOptions?.[0] ?? null,
+    quality: product.diamondQualities?.[0] ?? null,
+    size: null,
+  });
+  const defaultBreakupAdjustments = sumOptionLineAmounts(defaultBreakupLines);
 
   useEffect(() => {
     writeCachedProduct(slug, product);
@@ -398,6 +401,7 @@ function ProductDetailLoaded({
                         fill
                         className="product-detail-hero-img"
                         sizes="(max-width: 1024px) 100vw, 55vw"
+                        style={{ objectFit: "contain", objectPosition: "center" }}
                         priority
                       />
                     ) : null}
@@ -609,8 +613,12 @@ function ProductDetailLoaded({
           breakdown={pricing.breakdown}
           weightGrams={pricing.weightGrams}
           karatLabel={pricing.karatLabel}
+          metalLabel={product.metalOptions?.[0]?.label}
+          diamondLabel={product.diamondQualities?.[0]?.label}
           loading={pricing.loading}
-          displayTotal={pricing.estimatedPrice}
+          optionLines={defaultBreakupLines}
+          optionAdjustments={defaultBreakupAdjustments}
+          displayTotal={pricing.estimatedPrice + defaultBreakupAdjustments}
           embedded
         />
       </ProductContentModal>

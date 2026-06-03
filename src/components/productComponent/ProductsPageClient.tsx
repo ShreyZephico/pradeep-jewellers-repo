@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
 
 import type { Product } from '@/types/product';
 import CollectionProductCard from "@/components/productComponent/CollectionProductCard";
+import CollectionProductCardSkeleton from "@/components/productComponent/CollectionProductCardSkeleton";
 import ProductsFilterSidebar from "@/components/productComponent/ProductsFilterSidebar";
 import productContent from '@/lib/productContent';
 import type { ProductSort } from '@/lib/productFilters';
@@ -13,6 +14,7 @@ import { priceTierToRange } from '@/lib/productFilters';
 
 const PAGE_SIZE = 12;
 const FETCH_TIMEOUT_MS = 25_000;
+const SKELETON_COUNT = PAGE_SIZE;
 const copy = productContent.list;
 const priceTiers = productContent.priceTiers;
 
@@ -24,38 +26,24 @@ const SORT_OPTIONS: { value: ProductSort; label: string }[] = [
   { value: 'name-desc', label: copy.sortNameDesc },
 ];
 
-function getPaginationSegments(
-  current: number,
-  last: number
-): Array<number | 'ellipsis'> {
-  if (last <= 1) return [];
-  if (last <= 9) {
-    return Array.from({ length: last }, (_, i) => i + 1);
-  }
-
-  const segments: Array<number | 'ellipsis'> = [];
-  const windowStart = Math.max(2, current - 1);
-  const windowEnd = Math.min(last - 1, current + 1);
-
-  segments.push(1);
-  if (windowStart > 2) {
-    segments.push('ellipsis');
-  }
-  for (let p = windowStart; p <= windowEnd; p++) {
-    segments.push(p);
-  }
-  if (windowEnd < last - 1) {
-    segments.push('ellipsis');
-  }
-  segments.push(last);
-  return segments;
-}
-
 type ProductsPageClientProps = {
   initialQuery?: string;
   /** Bumped after checkout (bfcache return) to refetch without remounting the tree. */
   refreshToken?: number;
 };
+
+function mergeProducts(prev: Product[], incoming: Product[]): Product[] {
+  if (incoming.length === 0) return prev;
+  const ids = new Set(prev.map((p) => p.id));
+  const next = [...prev];
+  for (const product of incoming) {
+    if (!ids.has(product.id)) {
+      ids.add(product.id);
+      next.push(product);
+    }
+  }
+  return next;
+}
 
 export default function ProductsPageClient({
   initialQuery = '',
@@ -65,9 +53,9 @@ export default function ProductsPageClient({
 
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
 
   const [searchTerm, setSearchTerm] = useState(urlQuery);
@@ -85,7 +73,10 @@ export default function ProductsPageClient({
 
   const [retryCount, setRetryCount] = useState(0);
   const gridTopRef = useRef<HTMLDivElement>(null);
-  const prevPageRef = useRef(page);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef(1);
+  const fetchGenRef = useRef(0);
+  const loadingMoreRef = useRef(false);
 
   const hasActiveFilters =
     selectedCategory !== 'all' ||
@@ -93,14 +84,12 @@ export default function ProductsPageClient({
     sort !== 'featured' ||
     Boolean(searchTerm.trim());
 
-  // Keep list search in sync with ?q= from the server (header search, back/forward).
   useEffect(() => {
     setSearchTerm((prev) => (prev === urlQuery ? prev : urlQuery));
     setDebouncedQ((prev) => (prev === urlQuery ? prev : urlQuery));
-    setPage((prev) => (prev === 1 ? prev : 1));
+    pageRef.current = 1;
   }, [urlQuery]);
 
-  // Debounce only when the user types in the collection search box.
   useEffect(() => {
     if (searchTerm.trim() === urlQuery) {
       return;
@@ -108,7 +97,7 @@ export default function ProductsPageClient({
 
     const timer = window.setTimeout(() => {
       setDebouncedQ(searchTerm.trim());
-      setPage(1);
+      pageRef.current = 1;
       setSelectedPriceTier('any');
     }, 400);
 
@@ -119,15 +108,19 @@ export default function ProductsPageClient({
     setSelectedPriceTier('any');
   }, [selectedCategory]);
 
-  // One fetch pipeline — avoids competing loadProducts() calls that abort each other.
-  useEffect(() => {
-    let active = true;
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const fetchProducts = useCallback(
+    async (page: number, append: boolean, generation: number) => {
+      if (append) {
+        if (loadingMoreRef.current) return;
+        loadingMoreRef.current = true;
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+        setError('');
+      }
 
-    const run = async () => {
-      setLoading(true);
-      setError('');
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
       try {
         const params = new URLSearchParams({
@@ -152,7 +145,7 @@ export default function ProductsPageClient({
         });
         const data = await response.json();
 
-        if (!active) {
+        if (generation !== fetchGenRef.current) {
           return;
         }
 
@@ -160,11 +153,19 @@ export default function ProductsPageClient({
           throw new Error(data.error || 'Failed to load products');
         }
 
-        setProducts(data.products ?? []);
-        setTotal(typeof data.total === 'number' ? data.total : 0);
-        setTotalPages(typeof data.totalPages === 'number' ? data.totalPages : 0);
+        const incoming = (data.products ?? []) as Product[];
+        const nextTotal = typeof data.total === 'number' ? data.total : 0;
+        const totalPages =
+          typeof data.totalPages === 'number'
+            ? data.totalPages
+            : Math.ceil(nextTotal / PAGE_SIZE);
+
+        setTotal(nextTotal);
+        setProducts((prev) => (append ? mergeProducts(prev, incoming) : incoming));
+        setHasMore(page < totalPages && incoming.length > 0);
+        pageRef.current = page;
       } catch (e) {
-        if (!active) {
+        if (generation !== fetchGenRef.current) {
           return;
         }
         if (e instanceof Error && e.name === 'AbortError') {
@@ -174,41 +175,67 @@ export default function ProductsPageClient({
             e instanceof Error ? e.message : 'Network error. Please try again.'
           );
         }
-        setProducts([]);
-        setTotal(0);
-        setTotalPages(0);
+        if (!append) {
+          setProducts([]);
+          setTotal(0);
+          setHasMore(false);
+        }
       } finally {
         window.clearTimeout(timeoutId);
-        if (active) {
+        if (generation !== fetchGenRef.current) {
+          return;
+        }
+        if (append) {
+          loadingMoreRef.current = false;
+          setLoadingMore(false);
+        } else {
           setLoading(false);
         }
       }
-    };
+    },
+    [
+      debouncedQ,
+      selectedCategory,
+      sort,
+      priceRange.min,
+      priceRange.max,
+    ]
+  );
 
-    void run();
-
-    return () => {
-      active = false;
-      controller.abort();
-    };
+  useEffect(() => {
+    const generation = ++fetchGenRef.current;
+    pageRef.current = 1;
+    setProducts([]);
+    setHasMore(false);
+    void fetchProducts(1, false, generation);
   }, [
-    page,
-    selectedCategory,
-    debouncedQ,
-    sort,
-    priceRange.min,
-    priceRange.max,
+    fetchProducts,
     retryCount,
     refreshToken,
   ]);
 
   useEffect(() => {
-    if (prevPageRef.current === page) {
-      return;
-    }
-    prevPageRef.current = page;
-    gridTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, [page]);
+    const sentinel = loadMoreRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry?.isIntersecting) return;
+        if (loading || loadingMore || !hasMore || loadingMoreRef.current) {
+          return;
+        }
+
+        const nextPage = pageRef.current + 1;
+        const generation = fetchGenRef.current;
+        void fetchProducts(nextPage, true, generation);
+      },
+      { root: null, rootMargin: '280px 0px', threshold: 0 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [fetchProducts, hasMore, loading, loadingMore, products.length]);
 
   const handleImageError = (productId: string) => {
     setImageErrors((prev) => ({ ...prev, [productId]: true }));
@@ -221,20 +248,25 @@ export default function ProductsPageClient({
     return product.image || '/placeholder.jpg';
   };
 
+  const resetList = () => {
+    pageRef.current = 1;
+    gridTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const selectCategory = (id: string) => {
     setSelectedCategory(id);
-    setPage(1);
+    resetList();
     setFiltersOpen(false);
   };
 
   const handlePriceTierChange = (id: string) => {
     setSelectedPriceTier(id);
-    setPage(1);
+    resetList();
   };
 
   const handleSortChange = (next: ProductSort) => {
     setSort(next);
-    setPage(1);
+    resetList();
   };
 
   const clearAllFilters = () => {
@@ -243,17 +275,15 @@ export default function ProductsPageClient({
     setSelectedCategory('all');
     setSelectedPriceTier('any');
     setSort('featured');
-    setPage(1);
+    resetList();
     setFiltersOpen(false);
   };
 
-  const displayTotalPages =
-    total > 0 ? Math.max(totalPages, Math.ceil(total / PAGE_SIZE)) : 0;
-  const paginationSegments = getPaginationSegments(page, displayTotalPages);
-  const canPrev = page > 1 && !loading;
-  const canNext = displayTotalPages > 0 && page < displayTotalPages && !loading;
   const sortLabel =
     SORT_OPTIONS.find((option) => option.value === sort)?.label ?? copy.sortFeatured;
+
+  const showInitialSkeleton = loading && products.length === 0;
+  const showGrid = products.length > 0 || showInitialSkeleton;
 
   if (error && products.length === 0 && !loading) {
     return (
@@ -392,7 +422,7 @@ export default function ProductsPageClient({
 
           <main className="collection-main">
             <p className="collection-count" ref={gridTopRef}>
-              {loading && products.length === 0 ? (
+              {showInitialSkeleton ? (
                 copy.loading
               ) : total === 0 ? (
                 copy.noPiecesInView
@@ -400,17 +430,17 @@ export default function ProductsPageClient({
                 <>
                   {copy.showingPrefix}{' '}
                   <strong>{total}</strong> {copy.showingPieces}
+                  {products.length < total ? (
+                    <>
+                      {' '}
+                      · {products.length} {copy.loadedSoFar}
+                    </>
+                  ) : null}
                 </>
               )}
             </p>
 
-            {loading && products.length === 0 ? (
-              <div className="collection-loading">
-                <div className="product-spinner" aria-hidden />
-              </div>
-            ) : null}
-
-            {!loading && total === 0 ? (
+            {!showInitialSkeleton && total === 0 ? (
               <div className="collection-empty">
                 <h3>{copy.emptyTitle}</h3>
                 <p>{copy.emptyDescription}</p>
@@ -420,9 +450,9 @@ export default function ProductsPageClient({
               </div>
             ) : null}
 
-            {!loading && products.length > 0 ? (
+            {showGrid ? (
               <>
-                <ul className="collection-grid">
+                <ul className="collection-grid" aria-busy={loading || loadingMore}>
                   {products.map((product, index) => (
                     <li
                       key={product.id}
@@ -436,57 +466,36 @@ export default function ProductsPageClient({
                       />
                     </li>
                   ))}
+
+                  {showInitialSkeleton
+                    ? Array.from({ length: SKELETON_COUNT }, (_, i) => (
+                        <li key={`skeleton-initial-${i}`} className="collection-grid-item">
+                          <CollectionProductCardSkeleton index={i} />
+                        </li>
+                      ))
+                    : null}
+
+                  {loadingMore
+                    ? Array.from({ length: SKELETON_COUNT }, (_, i) => (
+                        <li key={`skeleton-more-${i}`} className="collection-grid-item">
+                          <CollectionProductCardSkeleton index={i} />
+                        </li>
+                      ))
+                    : null}
                 </ul>
 
-                {displayTotalPages > 1 ? (
-                  <nav className="collection-pagination" aria-label={copy.paginationLabel}>
-                    <button
-                      type="button"
-                      disabled={!canPrev}
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      className="collection-page-btn"
-                    >
-                      {copy.prev}
-                    </button>
-                    <div className="collection-page-nums" role="group">
-                      {paginationSegments.map((item, i) =>
-                        item === 'ellipsis' ? (
-                          <span key={`e-${i}`} className="collection-page-ellipsis" aria-hidden>
-                            …
-                          </span>
-                        ) : (
-                          <button
-                            key={item}
-                            type="button"
-                            disabled={loading}
-                            onClick={() => setPage(item)}
-                            aria-current={item === page ? 'page' : undefined}
-                            className={`collection-page-num${
-                              item === page ? ' collection-page-num--active' : ''
-                            }`}
-                          >
-                            {item}
-                          </button>
-                        )
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      disabled={!canNext}
-                      onClick={() => setPage((p) => Math.min(displayTotalPages, p + 1))}
-                      className="collection-page-btn"
-                    >
-                      {copy.next}
-                    </button>
-                  </nav>
+                <div ref={loadMoreRef} className="collection-scroll-sentinel" aria-hidden />
+
+                {!hasMore && !loading && !loadingMore && products.length > 0 ? (
+                  <p className="collection-end-note">{copy.endOfCollection}</p>
+                ) : null}
+
+                {loadingMore ? (
+                  <p className="collection-loading-more" aria-live="polite">
+                    {copy.loadingMore}
+                  </p>
                 ) : null}
               </>
-            ) : null}
-
-            {loading && products.length > 0 ? (
-              <p className="collection-loading-more" aria-live="polite">
-                {copy.loadingMore}
-              </p>
             ) : null}
           </main>
         </div>

@@ -10,6 +10,10 @@ import {
 import type { ClientCartLine } from "@/types/cart";
 import type { Product } from "@/types/product";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
+import {
+  buildPriceBreakdownOptionLinesFromCartLine,
+  type PriceBreakdownOptionLine,
+} from "@/utils/priceBreakdownOptions";
 import { resolveVariantWeight } from "@/utils/resolveVariantWeight";
 
 type BreakdownMap = Map<string, CartLineBreakdownData>;
@@ -33,12 +37,13 @@ function weightForLine(product: Product, line: ClientCartLine): number {
 
 async function calculateBreakdown(
   weight: number,
-  carat: string | null
+  carat: string | null,
+  makingChargePercent?: number
 ): Promise<VariantPriceBreakdown | null> {
   const response = await fetch("/api/price/calculate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ weight, carat }),
+    body: JSON.stringify({ weight, carat, makingChargePercent: makingChargePercent ?? null }),
   });
   const data = await response.json();
   if (!data.success || typeof data.finalPrice !== "number") return null;
@@ -61,21 +66,37 @@ async function resolveLineBreakdown(
   line: ClientCartLine,
   productCache: Map<string, Product | null>
 ): Promise<CartLineBreakdownData | null> {
-  const stored = parseBreakdownFromLine(line);
-  if (stored) return stored;
-
   const handle = line.productHandle?.trim();
-  if (!handle) return null;
+  let product: Product | null = null;
 
-  if (!productCache.has(handle)) {
-    productCache.set(handle, await fetchProductByHandle(handle));
+  if (handle) {
+    if (!productCache.has(handle)) {
+      productCache.set(handle, await fetchProductByHandle(handle));
+    }
+    product = productCache.get(handle) ?? null;
   }
-  const product = productCache.get(handle);
-  if (!product) return null;
+
+  const optionLines: PriceBreakdownOptionLine[] = product
+    ? buildPriceBreakdownOptionLinesFromCartLine(line, product)
+    : [];
+
+  const stored = parseBreakdownFromLine(line);
+  if (stored) {
+    return {
+      ...stored,
+      optionLines,
+    };
+  }
+
+  if (!handle || !product) return null;
 
   const weightGrams = weightForLine(product, line);
   const caratLabel = getCaratFromLineAttributes(line.attributes);
-  const breakdown = await calculateBreakdown(weightGrams, caratLabel);
+  const breakdown = await calculateBreakdown(
+    weightGrams,
+    caratLabel,
+    product.makingChargePercent
+  );
   if (!breakdown) return null;
 
   const unitPrice =
@@ -85,6 +106,7 @@ async function resolveLineBreakdown(
     weightGrams,
     karatLabel: caratLabel,
     breakdown,
+    optionLines,
     optionAdjustments: Math.max(0, unitPrice - breakdown.finalPrice),
     unitPrice,
   };
