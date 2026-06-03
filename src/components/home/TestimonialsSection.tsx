@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 
 import data from "@/data/contactDatas.json";
 import { HOME_REFETCH_EVENT } from "@/lib/homeRefetch";
+import { PLACEHOLDER_AVATAR } from "@/lib/placeholderImages";
 
 import "./css/testimonials.css";
 
@@ -136,11 +137,14 @@ export default function TestimonialsSection() {
               <div className="testimonials-section__author-row">
                 <div className="testimonials-section__avatar">
                   <Image
-                    src={item.image}
+                    src={item.image || PLACEHOLDER_AVATAR}
                     alt={item.imageAlt}
                     fill
                     className="testimonials-section__avatar-image"
                     sizes="48px"
+                    unoptimized={(item.image || PLACEHOLDER_AVATAR).endsWith(
+                      ".svg"
+                    )}
                   />
                 </div>
                 <div className="testimonials-section__author-meta">

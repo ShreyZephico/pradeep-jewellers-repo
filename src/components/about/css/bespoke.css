@@ -18,3 +18,10 @@
   color: var(--about-page-accent);
   font-weight: 700;
 }
+
+.about-bespoke__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}

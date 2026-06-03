@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="Jewellery placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1D1916"/>
+      <stop offset="100%" stop-color="#3B2A15"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <circle cx="400" cy="280" r="88" fill="none" stroke="#C9A227" stroke-width="3" opacity="0.55"/>
+  <circle cx="400" cy="280" r="56" fill="#C9A227" opacity="0.2"/>
+  <path d="M400 200 L430 260 H370 Z" fill="#C9A227" opacity="0.85"/>
+  <text x="400" y="420" text-anchor="middle" fill="#E8DFD2" font-family="Georgia, serif" font-size="28" letter-spacing="0.2em">PRADEEP JEWELLERS</text>
+</svg>

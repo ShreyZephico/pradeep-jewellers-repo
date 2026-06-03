@@ -77,3 +77,10 @@
   line-height: 1.65;
   color: var(--about-page-hero-muted);
 }
+
+.about-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.35rem;
+}

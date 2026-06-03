@@ -1,4 +1,9 @@
 import raw from "@/data/bespokedata.json";
+import {
+  JEWELLERY_PHOTO,
+  PLACEHOLDER_AVATAR,
+  jewelleryImageUrl,
+} from "@/lib/placeholderImages";
 
 export type BespokeGalleryItem = {
   id: string;
@@ -23,7 +28,7 @@ export function bespokeImageUrl(
   photoId: string,
   width: 400 | 600 | 800 | 1200 | 1920 = 600
 ): string {
-  return `https://images.unsplash.com/${photoId}?q=80&w=${width}&auto=format&fit=crop`;
+  return jewelleryImageUrl(photoId, width);
 }
 
 function mapGalleryItem(
@@ -104,7 +109,7 @@ export const BESPOKE_GEMSTONES = data.form.gemstones;
 export const BESPOKE_STYLES = [
   {
     label: "Traditional",
-    image: bespokeImageUrl("photo-1635767798638-3e25273a8236", 600),
+    image: bespokeImageUrl(JEWELLERY_PHOTO.earrings, 600),
   },
   {
     label: "Contemporary",
@@ -207,25 +212,25 @@ export const BESPOKE_TESTIMONIALS: Array<{
     name: "Priya S.",
     rating: 5,
     text: "Shared a Pinterest photo and got a gorgeous mangalsutra made in 2 weeks. Responsive on WhatsApp.",
-    image: bespokeImageUrl("photo-1594633312681-425c7b97ccd1", 400),
+    image: PLACEHOLDER_AVATAR,
   },
   {
     name: "Rohan M.",
     rating: 5,
     text: "They matched my ring size perfectly and gave clarity on gold weight before production.",
-    image: bespokeImageUrl("photo-1472099645785-5658abf4ff4e", 400),
+    image: PLACEHOLDER_AVATAR,
   },
   {
     name: "Hetal P.",
     rating: 5,
     text: "Transparent pricing, quick estimate, and the craftsmanship is superb.",
-    image: bespokeImageUrl("photo-1573496359142-b8d87734a5a2", 400),
+    image: PLACEHOLDER_AVATAR,
   },
   {
     name: "Kiran & Meera",
     rating: 5,
     text: "From WhatsApp quote to pickup in Nadiad — specs were clear and the finish was exactly what we discussed.",
-    image: bespokeImageUrl("photo-1522673607260-14d3b7361e9a", 400),
+    image: PLACEHOLDER_AVATAR,
   },
 ];
 

@@ -23,6 +23,7 @@ export default function AboutFounderSection() {
                 fill
                 sizes="(max-width: 1024px) 100vw, 26rem"
                 className="about-media-img about-media-img--sepia"
+                unoptimized={s.image.endsWith(".svg")}
               />
               <aside className="about-founder__year">
                 <p className="about-founder__year-num">{s.establishedYear}</p>

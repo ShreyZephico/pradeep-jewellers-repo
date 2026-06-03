@@ -4,6 +4,10 @@ import aboutData from "@/data/about.json";
 
 import "../css/team.css";
 
+function isSvgSrc(src: string): boolean {
+  return src.endsWith(".svg");
+}
+
 export default function AboutTeamSection() {
   const s = aboutData.team;
 
@@ -32,6 +36,7 @@ export default function AboutTeamSection() {
                   fill
                   sizes="(max-width: 640px) 100vw, 33vw"
                   className="about-media-img"
+                  unoptimized={isSvgSrc(member.image)}
                 />
               </div>
               <h3 className="about-team__name">{member.name}</h3>

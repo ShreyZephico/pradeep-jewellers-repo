@@ -38,10 +38,29 @@
       "href": "/rates"
     },
     {
+      "label": "Scheme",
+      "href": "/scheme"
+    },
+    {
       "label": "About",
       "href": "/about"
     }
   ],
+  "schemeApp": {
+    "navLabel": "Scheme",
+    "title": "Suvarna Vriddhi Yojna",
+    "shortTitle": "Suvarna Vriddhi",
+    "tagline": "12+1 · 18+2 · 24+3 gold savings plans",
+    "homeHref": "/scheme",
+    "plansHref": "/scheme/plans",
+    "enquiryHref": "/scheme/enquiry",
+    "calculatorHref": "/scheme#calculator",
+    "termsHref": "/scheme/terms",
+    "privacyHref": "/scheme/privacy",
+    "exploreLabel": "Explore the scheme",
+    "plansLabel": "View plans",
+    "enquireLabel": "Start enquiry"
+  },
   "heroSection": {
     "heroImages": [
       "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=1600&auto=format&fit=crop",
@@ -139,7 +158,7 @@
       "tag": "TODAY'S READING",
       "name": "Pandit Aditya Sharma",
       "experience": "Vedic astrologer • 25 years",
-      "image": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop",
+      "image": "/images/placeholders/avatar.svg",
       "luckyGem": "Yellow Sapphire",
       "luckyMetal": "22K Gold",
       "prediction": "Jupiter favours new beginnings today — an auspicious moment to commission heirloom pieces.",
@@ -148,24 +167,24 @@
     },
     "stats": [
       {
-        "number": 4.9,
+        "number": 1983,
         "suffix": "",
-        "label": "GOOGLE RATING"
-      },
-      {
-        "number": 25,
-        "suffix": "+",
-        "label": "GOOGLE REVIEWS"
+        "label": "CRAFTING SINCE"
       },
       {
         "number": 100,
-        "suffix": "%",
-        "label": "CUSTOM-FIRST"
+        "suffix": "+",
+        "label": "FAMILIES SERVED"
       },
       {
-        "number": 1,
+        "number": 2,
         "suffix": "",
-        "label": "SINCE 1983"
+        "label": "WHOLESALE & RETAIL"
+      },
+      {
+        "number": 4.9,
+        "suffix": "",
+        "label": "GOOGLE RATING"
       }
     ]
   },
@@ -347,7 +366,7 @@
         "eyebrowWhite": "GIFTS FOR",
         "headline": "Anniversary",
         "description": "Handpicked pieces that turn moments into memories.",
-        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=900&auto=format&fit=crop",
+        "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=900&auto=format&fit=crop",
         "primaryCta": {
           "text": "SHOP ANNIVERSARY",
           "href": "/gifts/anniversary"
@@ -362,7 +381,7 @@
         "eyebrowWhite": "GIFTS FOR",
         "headline": "Birthday",
         "description": "Celebrate another year with sparkle she will remember.",
-        "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=900&auto=format&fit=crop",
+        "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=900&auto=format&fit=crop",
         "primaryCta": {
           "text": "SHOP BIRTHDAY",
           "href": "/gifts/birthday"
@@ -377,7 +396,7 @@
         "eyebrowWhite": "GIFTS FOR",
         "headline": "Wedding",
         "description": "Timeless bands and chains for the big day and beyond.",
-        "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=900&auto=format&fit=crop",
+        "image": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=900&auto=format&fit=crop",
         "primaryCta": {
           "text": "SHOP WEDDING",
           "href": "/gifts/wedding"
@@ -473,6 +492,14 @@
       "youPayCaption": "YOU PAY (11 MO)",
       "weAddCaption": "WE ADD",
       "totalCaption": "TOTAL VALUE",
+      "schemeCta": {
+        "text": "EXPLORE SUVARNA VRIDDHI",
+        "href": "/scheme"
+      },
+      "plansCta": {
+        "text": "VIEW PLANS",
+        "href": "/scheme/plans"
+      },
       "whatsappCta": {
         "text": "JOIN VIA WHATSAPP",
         "href": "https://wa.me/918866873390"
@@ -555,10 +582,10 @@
     ]
   },
   "founderSection": {
-    "image": "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?q=80&w=900&auto=format&fit=crop",
-    "imageAlt": "Karigar at the bench — modern gold craft",
+    "image": "/images/placeholders/jewellery.svg",
+    "imageAlt": "Modern Kolkata fusion jewellery craft",
     "establishedYear": "1983",
-    "establishedText": "MADE-TO-ORDER IN GUJARAT",
+    "establishedText": "KOLKATA FUSION · EST. 1983",
     "sectionLabel": "CRAFTSMANSHIP",
     "heading": "Craftsmanship & trust.",
     "quote": "From sketches to stone-setting, every step is handled by skilled karigars with attention to detail.",
@@ -586,8 +613,8 @@
           "CUSTOM MANGALSUTRA",
           "22K"
         ],
-        "image": "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=200&auto=format&fit=crop",
-        "imageAlt": "Priya S."
+        "image": "/images/placeholders/avatar.svg",
+        "imageAlt": "Customer review"
       },
       {
         "quote": "They matched my ring size perfectly and gave clarity on gold weight before production.",
@@ -596,8 +623,8 @@
           "COUPLE RINGS",
           "18K"
         ],
-        "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop",
-        "imageAlt": "Rohan M."
+        "image": "/images/placeholders/avatar.svg",
+        "imageAlt": "Customer review"
       },
       {
         "quote": "Transparent pricing, quick estimate, and the craftsmanship is superb.",
@@ -606,8 +633,8 @@
           "DIAMOND EARRINGS",
           "18K"
         ],
-        "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop",
-        "imageAlt": "Hetal P."
+        "image": "/images/placeholders/avatar.svg",
+        "imageAlt": "Customer review"
       },
       {
         "quote": "From WhatsApp quote to pickup at the store — specs were clear and the finish was exactly what we discussed.",
@@ -616,8 +643,8 @@
           "BRIDAL SET",
           "22K"
         ],
-        "image": "https://images.unsplash.com/photo-1522673607260-14d3b7361e9a?q=80&w=200&auto=format&fit=crop",
-        "imageAlt": "Kiran and Meera"
+        "image": "/images/placeholders/avatar.svg",
+        "imageAlt": "Customer review"
       },
       {
         "quote": "Joined Suvarna Vriddhi and redeemed for my daughter's ring. Every month's credit was explained — no surprises.",
@@ -627,8 +654,8 @@
           "RING",
           "22K"
         ],
-        "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop",
-        "imageAlt": "Vikram P."
+        "image": "/images/placeholders/avatar.svg",
+        "imageAlt": "Customer review"
       }
     ]
   },
@@ -715,7 +742,11 @@
         "href": "/about"
       },
       {
-        "label": "Schemes",
+        "label": "Suvarna Vriddhi",
+        "href": "/scheme"
+      },
+      {
+        "label": "Gold rates",
         "href": "/rates"
       },
       {

@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "About Us",
-    "description": "Pradeep Jewellers — modern Kolkata fusion gold, diamond, and silver since 1983. Skilled karigars, transparent specs, and fast estimates on WhatsApp."
+    "description": "Pradeep Jewellers — modern Kolkata fusion gold, diamond, and silver since 1983. 100+ families served as wholesaler and retailer. Contact us for custom work."
   },
   "hero": {
     "backLabel": "Back to home",
@@ -9,18 +9,22 @@
     "badge": "KOLKATA FUSION · EST. 1983",
     "title": "Modern craft you can trust.",
     "highlightText": "you can trust.",
-    "description": "Made-to-order gold, diamonds, and silver with a contemporary Kolkata fusion aesthetic — from your sketch or photo to a finished piece, with clarity on metal, purity, and weight at every step.",
+    "description": "Building jewellery since 1983 — more than 100 families served as wholesaler and retailer. Made-to-order gold, diamonds, and silver with a contemporary Kolkata fusion finish.",
+    "ctaLabel": "Contact us",
+    "ctaHref": "https://wa.me/918866873390",
+    "secondaryCtaLabel": "Request a callback",
+    "secondaryCtaHref": "#callback",
     "image": "https://images.unsplash.com/photo-1533734685302-aee5a945845a?q=80&w=1600&auto=format&fit=crop",
     "imageAlt": "Modern Kolkata fusion jewellery craftsmanship at Pradeep Jewellers"
   },
   "brandIntro": {
     "badge": "WHO WE ARE",
     "title": "Kolkata fusion meets modern gold craft.",
-    "description": "Pradeep Jewellers blends heritage bench work since 1983 with contemporary Kolkata-fusion design — rings, mangalsutras, bridal sets, and everyday pieces built around your brief, not a fixed catalogue.",
+    "description": "Pradeep Jewellers blends heritage bench work since 1983 with contemporary Kolkata-fusion design — trusted by more than 100 families as wholesaler and retailer for rings, mangalsutras, bridal sets, and everyday gold and silver.",
     "points": [
-      "Upload a photo or sketch — get a tailored estimate on WhatsApp",
-      "Metal, purity, weight, stones, and finish locked before we start",
-      "Suvarna Vriddhi savings plans (12+1, 18+2, 24+3) for jewellery purchase"
+      "Building gold & silver jewellery since 1983 — mangalsutras, bridal sets, rings & more",
+      "Wholesaler and retailer — trade partners and families under one roof",
+      "Contact us on WhatsApp or in store — specs on metal, purity & weight before we start"
     ],
     "image": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1200&auto=format&fit=crop",
     "imageAlt": "Gold rings crafted to order"
@@ -38,58 +42,58 @@
   },
   "founder": {
     "id": "founder",
-    "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=900&auto=format&fit=crop",
-    "imageAlt": "Master karigar at Pradeep Jewellers",
+    "image": "/images/placeholders/jewellery.svg",
+    "imageAlt": "Gold and silver jewellery craftsmanship at Pradeep Jewellers",
     "establishedYear": "1983",
     "establishedText": "KOLKATA FUSION CRAFT",
-    "sectionLabel": "OUR PROMISE",
-    "heading": "Your design. Our bench.",
-    "quote": "We don't push ready stock — we start from what you want to wear, and build clarity on weight, purity, and finish before a single gram is cast.",
-    "description": "Pradeep Jewellers began as a neighbourhood gold and silver store trusted for honest conversations at the counter. That promise still guides every custom commission — whether you walk in at Amdavadi Bazar or send a design on WhatsApp.",
+    "sectionLabel": "OUR LEGACY",
+    "heading": "Gold & silver craftsmanship since 1983.",
+    "quote": "More than 100 families have trusted us — as wholesaler, as retailer, and as karigars who never compromise on purity or finish. Contact us on WhatsApp or visit our showroom.",
+    "description": "From 1983 we built Pradeep Jewellers on hand-finished gold and silver, transparent weight, and Kolkata-fusion design — whether you need wholesale supply or a custom piece for your family.",
     "name": "Pradeep Jewellers",
     "role": "Wholesale · Retail · Gold & Silver"
   },
   "heritageTimeline": {
-    "badge": "HOW WE WORK",
-    "title": "From sketch to delivery.",
-    "description": "The same steps whether you visit the store or message us online — consult first, specs locked, then craft.",
+    "badge": "OUR HERITAGE",
+    "title": "Building jewellery since 1983.",
+    "description": "Four decades of gold and silver craftsmanship — wholesaler, retailer, and partner to more than 100 families.",
     "items": [
       {
-        "year": "01",
-        "title": "Consult",
-        "description": "We understand your design, budget, and timeline — photos, Pinterest boards, or heirloom references welcome."
+        "year": "1983",
+        "title": "Craft begins",
+        "description": "We open our workshop with a focus on gold and silver — hand work, honest weight, and pieces families wear for life."
       },
       {
-        "year": "02",
-        "title": "Specs lock",
-        "description": "Metal, purity, weight, stones, finish, and sizes agreed before production begins."
+        "year": "100+",
+        "title": "Families served",
+        "description": "Generations of customers — retail walk-ins, wholesale partners, and custom commissions on WhatsApp and at the counter."
       },
       {
-        "year": "03",
-        "title": "Model & craft",
-        "description": "3D or hand sketch when needed, then casting, setting, polish, and quality checks by our karigars."
+        "year": "B2B & B2C",
+        "title": "Wholesaler & retailer",
+        "description": "Supply to jewellers and shops wholesale; welcome families and designers at our showroom with the same purity standards."
       },
       {
-        "year": "04",
-        "title": "Delivery & care",
-        "description": "Final polish, secure packaging, and aftercare — resize, repair, and polish support when you need it."
+        "year": "Today",
+        "title": "Contact us anytime",
+        "description": "Call, WhatsApp, or visit for gold and silver craftsmanship — custom orders, schemes, repairs, and live-rate estimates."
       }
     ]
   },
   "brandStats": {
     "badge": "BY THE NUMBERS",
-    "title": "Trust you can see.",
+    "title": "Heritage you can count on.",
     "stats": [
-      { "number": 4.9, "suffix": "", "label": "GOOGLE RATING" },
-      { "number": 25, "suffix": "+", "label": "GOOGLE REVIEWS" },
-      { "number": 100, "suffix": "%", "label": "CUSTOM-FIRST" },
-      { "number": 1983, "suffix": "", "label": "CRAFTING SINCE" }
+      { "number": 1983, "suffix": "", "label": "CRAFTING SINCE" },
+      { "number": 100, "suffix": "+", "label": "FAMILIES SERVED" },
+      { "number": 2, "suffix": "", "label": "WHOLESALE & RETAIL" },
+      { "number": 4.9, "suffix": "", "label": "GOOGLE RATING" }
     ]
   },
   "craftsmanship": {
     "badge": "CRAFTSMANSHIP",
     "title": "Kolkata fusion — how your piece comes to life.",
-    "description": "Modern design language, heritage gold craft — material clarity first, hallmark and invoice last.",
+    "description": "Modern design language and heritage gold craft since 1983 — material clarity first, hallmark and invoice last.",
     "steps": [
       {
         "step": "01",
@@ -119,43 +123,43 @@
         "name": "Gold karigar team",
         "role": "Casting & finishing",
         "experience": "In-house",
-        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop",
-        "imageAlt": "Gold karigar at the bench"
+        "image": "/images/placeholders/avatar.svg",
+        "imageAlt": "Gold craft team"
       },
       {
         "name": "Diamond setting",
         "role": "Stone setting & QC",
         "experience": "In-house",
-        "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop",
-        "imageAlt": "Diamond setter at work"
+        "image": "/images/placeholders/avatar.svg",
+        "imageAlt": "Diamond setting team"
       },
       {
         "name": "Customer desk",
         "role": "Specs, schemes & quotes",
         "experience": "Walk-in & WhatsApp",
-        "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
-        "imageAlt": "Showroom consultation"
+        "image": "/images/placeholders/avatar.svg",
+        "imageAlt": "Customer service desk"
       }
     ]
   },
   "whyChoose": {
     "badge": "WHY CHOOSE US",
-    "title": "Three promises on every order.",
+    "title": "Wholesale, retail, and craft since 1983.",
     "items": [
       {
         "icon": "scale",
-        "title": "Material clarity",
-        "description": "Purity, weight, stone grades, and finish discussed before we start — no surprises at billing."
+        "title": "Gold & silver expertise",
+        "description": "Hand-finished gold and silver — purity, weight, and finish agreed before we cast, for retail and wholesale orders."
       },
       {
         "icon": "shield",
-        "title": "BIS hallmarked gold",
-        "description": "Hallmark registration and purity documentation on applicable gold jewellery."
+        "title": "Wholesaler & retailer",
+        "description": "Trade supply for jewellers plus a family-friendly showroom — one standard of quality for both."
       },
       {
         "icon": "heart",
-        "title": "Custom-first care",
-        "description": "Mangalsutras, bridal sets, couple rings, and redesigns treated like family milestones."
+        "title": "100+ families served",
+        "description": "Generations of trust since 1983 — contact us for custom work, schemes, repairs, or wholesale enquiries."
       }
     ]
   },
@@ -180,7 +184,7 @@
         "icon": "gem"
       }
     ],
-    "complianceLine": "GST-registered jeweller · Nadiad, Gujarat"
+    "complianceLine": "GST-registered jeweller · Gujarat"
   },
   "bespoke": {
     "badge": "CUSTOM JEWELLERY",
@@ -193,26 +197,30 @@
     ],
     "ctaLabel": "Get a custom quote",
     "ctaHref": "/bespoke",
+    "secondaryCtaLabel": "Suvarna Vriddhi scheme",
+    "secondaryCtaHref": "/scheme",
     "image": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=1200&auto=format&fit=crop",
     "imageAlt": "Custom jewellery being crafted"
   },
   "showroom": {
-    "badge": "VISIT THE STORE",
+    "badge": "CONTACT US",
     "title": "Visit our showroom.",
-    "description": "Walk in for viewing, scheme enrolment, and custom consultations — or message us first on WhatsApp. Address and hours below.",
+    "description": "Since 1983 we have welcomed families and wholesale buyers. Contact us for gold and silver craftsmanship, scheme enrolment, or a custom quote — address and hours below.",
     "highlights": [
-      "Gold, diamond & silver under one roof",
-      "Suvarna Vriddhi scheme desk",
-      "Get Directions · Call · WhatsApp from the footer"
+      "Crafting gold & silver jewellery since 1983",
+      "Wholesaler & retailer — 100+ families served",
+      "Call · WhatsApp · directions below"
     ],
     "address": "Santh Bazzar, Amdavadi Bazar Road, Nadiad, Gujarat 387001",
     "phone": "+91 88668 73390",
     "phoneHref": "tel:+918866873390",
+    "whatsappHref": "https://wa.me/918866873390",
+    "whatsappLabel": "Chat on WhatsApp",
     "hours": "Mon–Sat · 10 AM – 8 PM · Sunday closed",
     "mapLabel": "View on map",
     "mapHref": "https://www.google.com/maps?q=22.667084,72.855967",
     "image": "https://images.unsplash.com/photo-1601925260368-ae2f83b8a168?q=80&w=1200&auto=format&fit=crop",
-    "imageAlt": "Jewellery showroom in Nadiad"
+    "imageAlt": "Jewellery showroom"
   },
   "testimonials": {
     "useHomeComponent": true
@@ -224,12 +232,13 @@
     "useHomeComponent": true
   },
   "finalCta": {
-    "title": "Send a design & get an estimate.",
-    "description": "Share your inspiration, metal choice, and timeline — we respond fastest on WhatsApp.",
+    "title": "Contact us — gold & silver since 1983.",
+    "description": "Wholesaler or retailer, custom or catalogue — message us on WhatsApp or request a callback. We have served 100+ families; we would be glad to help yours.",
     "links": [
-      { "label": "Shop collection", "href": "/products", "variant": "primary" },
-      { "label": "Custom quote", "href": "/bespoke", "variant": "outline" },
-      { "label": "Live gold rates", "href": "/rates", "variant": "outline" }
+      { "label": "Contact us on WhatsApp", "href": "https://wa.me/918866873390", "variant": "primary" },
+      { "label": "Request a callback", "href": "#callback", "variant": "outline" },
+      { "label": "Shop collection", "href": "/products", "variant": "outline" },
+      { "label": "Suvarna Vriddhi", "href": "/scheme", "variant": "outline" }
     ]
   }
 }

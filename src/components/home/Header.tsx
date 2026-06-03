@@ -285,10 +285,15 @@ export default function Header() {
           </nav>
 
           <div className="site-header__actions">
-            <div className="site-header__phone">
+            <Link
+              href={contactData.social.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="site-header__phone"
+            >
               <Phone size={14} aria-hidden />
               <span>{contactData.contact.phone}</span>
-            </div>
+            </Link>
 
             <Link
               href={contactData.header.videoCallUrl}
@@ -421,6 +426,16 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
+
+            <Link
+              href={contactData.social.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="site-header__mobile-link"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {contactData.contact.phone}
+            </Link>
 
             <Link
               href={contactData.header.videoCallUrl}

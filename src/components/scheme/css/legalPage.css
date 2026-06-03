@@ -1,0 +1,115 @@
+.svy__legalPageWrap {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 32px 32px 96px;
+}
+
+.svy__legalBreadcrumb {
+  font-family: 'Work Sans', system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--svy-on-surface-variant);
+  margin-bottom: 28px;
+}
+
+.svy__legalBreadcrumb a {
+  color: var(--svy-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.svy__legalBreadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.svy__legalDoc {
+  color: var(--svy-on-surface);
+}
+
+.svy__legalDocHeader {
+  margin-bottom: 40px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(28, 27, 27, 0.1);
+}
+
+.svy__legalDocTitle {
+  font-family: 'Noto Serif', serif;
+  font-size: clamp(28px, 4vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 12px 0 16px;
+  text-transform: uppercase;
+}
+
+.svy__legalDocMeta {
+  margin: 0 0 20px;
+}
+
+.svy__legalDocUpdated {
+  font-family: 'Work Sans', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--svy-on-surface-variant);
+  letter-spacing: 0.04em;
+}
+
+.svy__legalDocLead {
+  margin: 14px 0 0;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--svy-on-surface-variant);
+}
+
+.svy__legalSection {
+  margin-top: 36px;
+}
+
+.svy__legalH2 {
+  font-family: 'Noto Serif', serif;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 14px;
+  color: var(--svy-on-surface);
+  letter-spacing: -0.01em;
+}
+
+.svy__legalH3 {
+  font-family: 'Noto Serif', serif;
+  font-size: 17px;
+  font-weight: 700;
+  margin: 22px 0 10px;
+  color: var(--svy-on-surface);
+}
+
+.svy__legalP {
+  margin: 0 0 14px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--svy-on-surface-variant);
+}
+
+.svy__legalSubsection .svy__legalP:last-child {
+  margin-bottom: 0;
+}
+
+.svy__legalUl {
+  margin: 0 0 16px;
+  padding-left: 20px;
+  color: var(--svy-on-surface-variant);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.svy__legalUl li {
+  margin-bottom: 8px;
+}
+
+.svy__legalUl li:last-child {
+  margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .svy__legalPageWrap {
+    padding-top: 48px;
+  }
+}

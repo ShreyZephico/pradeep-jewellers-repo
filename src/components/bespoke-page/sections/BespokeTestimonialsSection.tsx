@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import { PLACEHOLDER_AVATAR } from "@/lib/placeholderImages";
+
 import { BESPOKE_TESTIMONIALS } from "../content";
 
 export default function BespokeTestimonialsSection() {
@@ -29,7 +31,15 @@ export default function BespokeTestimonialsSection() {
               <p>{t.text}</p>
               <footer className="bespoke-testimonials__head">
                 <div className="bespoke-testimonials__avatar">
-                  <Image src={t.image} alt="" fill sizes="48px" />
+                  <Image
+                    src={t.image || PLACEHOLDER_AVATAR}
+                    alt=""
+                    fill
+                    sizes="48px"
+                    unoptimized={(t.image || PLACEHOLDER_AVATAR).endsWith(
+                      ".svg"
+                    )}
+                  />
                 </div>
                 <p className="bespoke-testimonials__name">{t.name}</p>
               </footer>

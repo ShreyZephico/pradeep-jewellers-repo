@@ -38,6 +38,7 @@
       { "label": "Home", "url": "/" },
       { "label": "Collections", "url": "/#featured-products" },
       { "label": "Shop", "url": "/products" },
+      { "label": "Suvarna Vriddhi", "url": "/scheme" },
       { "label": "Testimonials", "url": "/#testimonials-section-heading" },
       { "label": "Contact Us", "url": "/#callback" }
     ],
