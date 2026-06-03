@@ -21,7 +21,8 @@ export const products: Product[] = [
     ],
     diamondQualities: [
       { label: "IJ-SI", note: "Only 2 left!", priceAdjustment: 0 },
-      { label: "FG-SI", note: "Only 3 left!", priceAdjustment: 1800 },
+      { label: "GH-VS", note: "Only 3 left!", priceAdjustment: 1800 },
+      { label: "EF-VVS", note: "Premium grade", priceAdjustment: 3200 },
     ],
     sizeOptions: [
       { size: "5", mm: "44.8 mm", note: "Made to Order", priceAdjustment: 0 },

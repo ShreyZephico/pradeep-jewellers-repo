@@ -1,4 +1,5 @@
 import type { Product, ProductSizeOption } from "@/types/product";
+import { getSizeSpecLabel } from "@/utils/productCustomizationLabels";
 import calculateVariantPrice from "@/utils/calculateVariantPrice";
 
 /** Supabase nested select for products + variants (shared by list and detail APIs). */
@@ -166,6 +167,12 @@ export async function mapSupabaseProductRowToProduct(product: any): Promise<Prod
 
     vendor: product.vendor || "",
 
+    productType:
+      product.category_name ||
+      product.product_type ||
+      product.category ||
+      undefined,
+
     price: defaultVariant?.price || 0,
 
     compareAtPrice,
@@ -214,6 +221,22 @@ export async function mapSupabaseProductRowToProduct(product: any): Promise<Prod
           ])
       ).values()
     ) as ProductSizeOption[],
+
+    sizeOptionName:
+      product.size_option_name?.trim() ||
+      (variants.some((v: any) => v.size)
+        ? getSizeSpecLabel({
+            id: product.id,
+            name: product.name,
+            slug: product.slug,
+            description: product.description || "",
+            price: 0,
+            compareAtPrice: null,
+            image: product.default_image_url || "",
+            customizable: Boolean(product.customizable),
+            productType: product.category_name || product.product_type,
+          })
+        : undefined),
 
     colorOptions: [
       ...new Set(

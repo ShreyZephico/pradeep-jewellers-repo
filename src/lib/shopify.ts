@@ -12,6 +12,7 @@ import calculateVariantPrice from "@/utils/calculateVariantPrice";
 import getGoldPrice from "@/utils/goldPrice";
 import { parseMakingChargeFromMetafields } from "@/utils/makingCharge";
 import { fetchMakingChargeFromShopifyAdmin } from "@/lib/shopifyMakingCharge";
+import { getSiteOrigin } from "@/lib/siteUrl";
 
 let missingGoldPriceLogged = false;
 
@@ -29,6 +30,11 @@ import {
   intersectionScoreFuzzy,
   variantOptionValueSet,
 } from "@/utils/variantOptionMatch";
+import {
+  isSizeLikeOptionName,
+  readSizeFromAttributes,
+} from "@/utils/productCustomizationLabels";
+import { productHasCustomizationOptions } from "@/utils/productCustomization";
 
 function normalizeStoreDomain(raw?: string): string {
   if (!raw?.trim()) {
@@ -574,13 +580,42 @@ async function mapShopifyProduct(
       return false;
     }
     const name = option.name.toLowerCase();
-    return name.includes("metal") || name.includes("material");
+    return (
+      name.includes("metal") ||
+      name.includes("material") ||
+      (name.includes("gold") && !name.includes("carat")) ||
+      name.includes("color") ||
+      name.includes("colour") ||
+      name.includes("finish")
+    );
   });
-  const diamondOption = node.options.find((option) =>
-    option.name.toLowerCase().includes("diamond")
-  );
-  const sizeOption = node.options.find((option) =>
-    option.name.toLowerCase().includes("size")
+  const diamondOption = node.options.find((option) => {
+    if (option === caratOption || option === metalOption || isKaratOption(option)) {
+      return false;
+    }
+    const name = option.name.toLowerCase();
+    if (
+      name.includes("size") ||
+      name.includes("length") ||
+      name.includes("chain") ||
+      name.includes("metal") ||
+      name.includes("material")
+    ) {
+      return false;
+    }
+    return (
+      name.includes("diamond") ||
+      name.includes("clarity") ||
+      name.includes("quality") ||
+      name.includes("stone")
+    );
+  });
+  const sizeOption = node.options.find(
+    (option) =>
+      option !== caratOption &&
+      option !== metalOption &&
+      option !== diamondOption &&
+      isSizeLikeOptionName(option.name)
   );
   const fallback = fallbackProducts[index % fallbackProducts.length];
   const compareRaw = Number(node.compareAtPriceRange.minVariantPrice.amount);
@@ -655,13 +690,27 @@ async function mapShopifyProduct(
 
   const defaultVariant = variants[0];
   const price = defaultVariant?.price ?? 0;
+  const metalOptions = metalOption?.values.length
+    ? metalOption.values.map((value) => ({ label: value }))
+    : undefined;
+  const caratOptions = caratOption?.values.length
+    ? caratOption.values.map((value) => ({ label: value }))
+    : undefined;
+  const diamondQualities = diamondOption?.values.length
+    ? diamondOption.values.map((value) => ({ label: value }))
+    : undefined;
+  const sizeOptions = sizeOption?.values.length
+    ? sizeOption.values.map((value) => ({ size: value }))
+    : undefined;
 
-  return {
+  const mapped: Product = {
     id: node.id,
     slug: node.handle,
     handle: node.handle,
     name: node.title,
     description: node.description || fallback.description,
+    productType: node.productType?.trim() || fallback.productType,
+    tags: node.tags ?? [],
     price,
     compareAtPrice,
     makingChargePercent,
@@ -674,22 +723,15 @@ async function mapShopifyProduct(
     caratOptionName: caratOption?.name,
     diamondOptionName: diamondOption?.name,
     sizeOptionName: sizeOption?.name,
-    metalOptions:
-      metalOption?.values.map((value) => ({
-        label: value,
-      })) ?? fallback.metalOptions,
-    caratOptions:
-      caratOption?.values.map((value) => ({
-        label: value,
-      })) ?? fallback.caratOptions,
-    diamondQualities:
-      diamondOption?.values.map((value) => ({
-        label: value,
-      })) ?? fallback.diamondQualities,
-    sizeOptions:
-      sizeOption?.values.map((value) => ({
-        size: value,
-      })) ?? fallback.sizeOptions,
+    metalOptions,
+    caratOptions,
+    diamondQualities,
+    sizeOptions,
+  };
+
+  return {
+    ...mapped,
+    customizable: productHasCustomizationOptions(mapped),
   };
 }
 
@@ -841,6 +883,42 @@ export function mergeShopifyVariantGids(
     ...catalog,
     makingChargePercent:
       storefront.makingChargePercent ?? catalog.makingChargePercent,
+    productType: catalog.productType ?? storefront.productType,
+    tags: catalog.tags?.length ? catalog.tags : storefront.tags,
+    sizeOptionName: catalog.sizeOptionName ?? storefront.sizeOptionName,
+    metalOptionName: catalog.metalOptionName ?? storefront.metalOptionName,
+    caratOptionName: catalog.caratOptionName ?? storefront.caratOptionName,
+    diamondOptionName: catalog.diamondOptionName ?? storefront.diamondOptionName,
+    metalOptions: catalog.metalOptions?.length
+      ? catalog.metalOptions
+      : storefront.metalOptions,
+    caratOptions: catalog.caratOptions?.length
+      ? catalog.caratOptions
+      : storefront.caratOptions,
+    diamondQualities: catalog.diamondQualities?.length
+      ? catalog.diamondQualities
+      : storefront.diamondQualities,
+    sizeOptions: catalog.sizeOptions?.length
+      ? catalog.sizeOptions
+      : storefront.sizeOptions,
+    customizable:
+      catalog.customizable ||
+      storefront.customizable ||
+      productHasCustomizationOptions({
+        ...catalog,
+        metalOptions: catalog.metalOptions?.length
+          ? catalog.metalOptions
+          : storefront.metalOptions,
+        caratOptions: catalog.caratOptions?.length
+          ? catalog.caratOptions
+          : storefront.caratOptions,
+        diamondQualities: catalog.diamondQualities?.length
+          ? catalog.diamondQualities
+          : storefront.diamondQualities,
+        sizeOptions: catalog.sizeOptions?.length
+          ? catalog.sizeOptions
+          : storefront.sizeOptions,
+      }),
     variants: mergedVariants,
     variantId: primary?.id ?? catalog.variantId,
     price: primary?.price ?? catalog.price,
@@ -906,22 +984,29 @@ function slugifyTag(value: string) {
 }
 
 function buildOrderTags(attributes: CheckoutAttribute[]) {
-  const tagKeys = ["Metal", "Carat", "Diamond Quality", "Ring Size"];
+  const tagKeys = ["Metal", "Carat", "Diamond Quality"];
 
-  return tagKeys
+  const tags = tagKeys
     .map((key) => {
       const value = getAttributeValue(attributes, key);
 
       return value ? `${slugifyTag(key)}-${slugifyTag(value)}` : "";
     })
     .filter(Boolean);
+
+  const sizeValue = readSizeFromAttributes(attributes);
+  if (sizeValue) {
+    tags.push(`size-${slugifyTag(sizeValue)}`);
+  }
+
+  return tags;
 }
 
 function buildOrderNote(attributes: CheckoutAttribute[]) {
   const metal = getAttributeValue(attributes, "Metal");
   const carat = getAttributeValue(attributes, "Carat");
   const diamondQuality = getAttributeValue(attributes, "Diamond Quality");
-  const ringSize = getAttributeValue(attributes, "Ring Size");
+  const sizeValue = readSizeFromAttributes(attributes);
   const estimatedPrice = getAttributeValue(attributes, "Estimated Custom Price");
 
   return [
@@ -929,7 +1014,7 @@ function buildOrderNote(attributes: CheckoutAttribute[]) {
     metal ? `Metal: ${metal}` : "",
     carat ? `Carat: ${carat}` : "",
     diamondQuality ? `Diamond Quality: ${diamondQuality}` : "",
-    ringSize ? `Ring Size: ${ringSize}` : "",
+    sizeValue ? `Size: ${sizeValue}` : "",
     estimatedPrice ? `Estimated Custom Price: ${estimatedPrice}` : "",
   ]
     .filter(Boolean)
@@ -1048,14 +1133,7 @@ export type DraftCheckoutResult = {
 };
 
 function getStorefrontSiteOrigin(): string {
-  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (fromEnv) {
-    return fromEnv.replace(/\/+$/, "");
-  }
-  if (process.env.VERCEL_URL?.trim()) {
-    return `https://${process.env.VERCEL_URL.trim().replace(/\/+$/, "")}`;
-  }
-  return "http://localhost:3000";
+  return getSiteOrigin();
 }
 
 type CreateDraftCheckoutInput = {

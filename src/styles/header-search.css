@@ -144,8 +144,10 @@
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
-  z-index: 60;
+  left: auto;
+  z-index: 120;
   width: min(22rem, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
   max-height: min(24rem, 70vh);
   overflow: hidden;
   display: flex;
@@ -158,9 +160,23 @@
     0 4px 10px rgba(0, 0, 0, 0.04);
 }
 
+/* Compact search sits in the header action bar — anchor panel to viewport on small screens */
+@media (max-width: 1279px) {
+  .header-search--compact.header-search--open .header-search-panel {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 5.25rem);
+    right: max(0.75rem, env(safe-area-inset-right, 0px));
+    left: max(0.75rem, env(safe-area-inset-left, 0px));
+    width: auto;
+    max-width: none;
+    margin-top: 0;
+  }
+}
+
 .header-search--mobile .header-search-panel {
   position: static;
   width: 100%;
+  max-width: none;
   max-height: none;
   margin-top: 0.5rem;
   box-shadow: none;
@@ -214,13 +230,16 @@
 }
 
 .header-search-result-name {
-  display: block;
+  display: -webkit-box;
   font-size: 0.875rem;
   font-weight: 600;
+  line-height: 1.35;
   color: #1f2937;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  word-break: break-word;
 }
 
 .header-search-result-price {

@@ -1,6 +1,11 @@
 import productContent, { formatProductCopy } from "@/lib/productContent";
-import type { ProductOption, ProductSizeOption } from "@/types/product";
+import type { Product, ProductOption, ProductSizeOption } from "@/types/product";
+import { getDiamondPickerOptions } from "@/utils/customizePickerCatalog";
 import type { ClientCartLine } from "@/types/cart";
+import {
+  getSizeBreakdownTemplate,
+  readSizeFromAttributes,
+} from "@/utils/productCustomizationLabels";
 
 export type PriceBreakdownOptionLine = {
   label: string;
@@ -28,8 +33,12 @@ export function buildPriceBreakdownOptionLines(input: {
   carat?: ProductOption | null;
   quality?: ProductOption | null;
   size?: ProductSizeOption | null;
+  product?: Product;
 }): PriceBreakdownOptionLine[] {
   const lines: PriceBreakdownOptionLine[] = [];
+  const sizeLineTemplate = input.product
+    ? getSizeBreakdownTemplate(input.product)
+    : copy.sizeOption.replace("{sizeLabel}", "Size");
 
   pushLine(lines, copy.metalOption, "metal", input.metal?.label ?? "", input.metal?.priceAdjustment);
   pushLine(lines, copy.caratOption, "carat", input.carat?.label ?? "", input.carat?.priceAdjustment);
@@ -40,7 +49,13 @@ export function buildPriceBreakdownOptionLines(input: {
     input.quality?.label ?? "",
     input.quality?.priceAdjustment
   );
-  pushLine(lines, copy.ringSize, "size", input.size?.size ?? "", input.size?.priceAdjustment);
+  pushLine(
+    lines,
+    sizeLineTemplate,
+    "size",
+    input.size?.size ?? "",
+    input.size?.priceAdjustment
+  );
 
   return lines;
 }
@@ -54,23 +69,19 @@ function attrValue(
 
 export function buildPriceBreakdownOptionLinesFromCartLine(
   line: ClientCartLine,
-  product: {
-    metalOptions?: ProductOption[];
-    caratOptions?: ProductOption[];
-    diamondQualities?: ProductOption[];
-    sizeOptions?: ProductSizeOption[];
-  }
+  product: Product
 ): PriceBreakdownOptionLine[] {
   const metalLabel = attrValue(line.attributes, "Metal");
   const caratLabel = attrValue(line.attributes, "Carat");
   const qualityLabel = attrValue(line.attributes, "Diamond Quality");
-  const sizeLabel = attrValue(line.attributes, "Ring Size");
+  const sizeLabel = readSizeFromAttributes(line.attributes, product);
 
   return buildPriceBreakdownOptionLines({
     metal: product.metalOptions?.find((option) => option.label === metalLabel) ?? null,
     carat: product.caratOptions?.find((option) => option.label === caratLabel) ?? null,
-    quality: product.diamondQualities?.find((option) => option.label === qualityLabel) ?? null,
+    quality: getDiamondPickerOptions(product).find((option) => option.label === qualityLabel) ?? null,
     size: product.sizeOptions?.find((option) => option.size === sizeLabel) ?? null,
+    product,
   });
 }
 

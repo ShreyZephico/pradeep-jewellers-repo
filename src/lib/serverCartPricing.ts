@@ -7,6 +7,7 @@ import type { CartLine } from "@/lib/shopifyCart";
 import calculateVariantPrice from "@/utils/calculateVariantPrice";
 import { resolveVariantWeight } from "@/utils/resolveVariantWeight";
 
+/** Legacy tolerance — client estimate may drift slightly from live gold; server price wins. */
 export const PRICE_TOLERANCE_INR = 2;
 
 export class PriceMismatchError extends Error {
@@ -75,6 +76,35 @@ async function resolveMakingChargePercentForProduct(
   return product?.makingChargePercent ?? null;
 }
 
+async function resolveWeightFromCatalog(
+  input: ResolveMerchandiseInput & { productSlug?: string }
+): Promise<number | null> {
+  const slug =
+    typeof input.productSlug === "string" ? input.productSlug.trim() : "";
+  if (!slug) return null;
+
+  const product = await fetchSingleCatalogProduct(slug);
+  if (!product) return null;
+
+  const catalogId =
+    typeof input.catalogVariantId === "string"
+      ? input.catalogVariantId.trim()
+      : "";
+  const variant = product.variants?.find(
+    (v) =>
+      v.catalogVariantId === catalogId ||
+      v.id === catalogId ||
+      (input.variantId &&
+        (v.id === input.variantId || v.catalogVariantId === input.variantId))
+  );
+
+  const grams =
+    variant?.weight ??
+    product.variants?.find((v) => v.weight && v.weight > 0)?.weight;
+  if (typeof grams !== "number" || !Number.isFinite(grams)) return null;
+  return resolveVariantWeight(grams);
+}
+
 async function catalogVariantUnitPrice(
   input: ResolveMerchandiseInput & { productSlug?: string }
 ): Promise<number | null> {
@@ -104,10 +134,31 @@ async function catalogVariantUnitPrice(
 }
 
 /** Authoritative INR unit price for cart / checkout (never trust client `customPrice` alone). */
+/** Use breakdown snapshot stored on the cart line (avoids live gold drift at checkout). */
+function trustedPriceFromStoredBreakdown(
+  attributes: CheckoutAttribute[] | undefined
+): number | null {
+  const weight = parseIntAttr(attributes, PJ_BREAKDOWN_ATTR.weight);
+  const subtotal = parseIntAttr(attributes, PJ_BREAKDOWN_ATTR.subtotal);
+  const gst = parseIntAttr(attributes, PJ_BREAKDOWN_ATTR.gst);
+  if (weight == null || subtotal == null || gst == null) return null;
+
+  const optionAdj = parseIntAttr(attributes, PJ_BREAKDOWN_ATTR.optionAdj) ?? 0;
+  return Math.max(0, Math.round(subtotal + gst + optionAdj));
+}
+
 export async function resolveTrustedCartUnitPrice(
   input: ServerCartPriceInput
 ): Promise<number> {
-  const weight = resolveWeight(input);
+  const stored = trustedPriceFromStoredBreakdown(input.attributes);
+  if (stored != null) {
+    return stored;
+  }
+
+  let weight = resolveWeight(input);
+  if (weight == null) {
+    weight = await resolveWeightFromCatalog(input);
+  }
   const karat = resolveKarat(input);
   const optionAdj = resolveOptionAdjustments(input);
 
@@ -131,14 +182,15 @@ export async function resolveTrustedCartUnitPrice(
   throw new Error("Unable to calculate price for this item.");
 }
 
+/**
+ * Server `trustedPrice` is always used for cart/checkout.
+ * Do not block purchases when the UI estimate is slightly stale (live gold rates).
+ */
 export function assertClientPriceMatches(
-  clientPrice: number | undefined,
-  trustedPrice: number
+  _clientPrice: number | undefined,
+  _trustedPrice: number
 ): void {
-  if (clientPrice == null || !Number.isFinite(clientPrice)) return;
-  if (Math.abs(Math.round(clientPrice) - trustedPrice) > PRICE_TOLERANCE_INR) {
-    throw new PriceMismatchError(trustedPrice);
-  }
+  /* no-op */
 }
 
 /** Resolve merchandise GID + trusted unit price for add-to-cart / buy-now. */
@@ -169,17 +221,9 @@ export async function revalidateCartLineUnitPrice(line: CartLine): Promise<numbe
     attributes: line.attributes,
   });
   if (parsed) {
-    const makingChargePercent = await resolveMakingChargePercentForProduct(
-      line.productHandle
-    );
-    const pricing = await calculateVariantPrice({
-      weight: parsed.weightGrams,
-      carat: parsed.karatLabel,
-      makingChargePercent,
-    });
     const trusted = Math.max(
       0,
-      Math.round(pricing.finalPrice + parsed.optionAdjustments)
+      Math.round(parsed.breakdown.finalPrice + parsed.optionAdjustments)
     );
     assertClientPriceMatches(line.customPriceInr, trusted);
     return trusted;

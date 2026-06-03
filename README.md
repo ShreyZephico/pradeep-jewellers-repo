@@ -173,6 +173,10 @@ Open:
 http://localhost:3000
 ```
 
+### Local development
+
+Use `NEXT_PUBLIC_SITE_URL=http://localhost:3000` in `.env` or `.env.local`. Google OAuth needs `http://localhost:3000/api/auth/google/callback` in Google Cloud Console when testing login locally.
+
 ## Script Reference
 
 ### App commands
