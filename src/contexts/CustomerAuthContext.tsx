@@ -11,6 +11,7 @@ import {
 
 import { saveReturnPath } from "@/lib/authRedirect";
 import { HOME_REFETCH_EVENT } from "@/lib/homeRefetch";
+import { parseJsonResponse } from "@/lib/parseJsonResponse";
 
 export const AUTH_CHANGED_EVENT = "customer-auth-changed";
 
@@ -48,9 +49,13 @@ export function CustomerAuthProvider({
         credentials: "include",
         cache: "no-store",
       });
-      const data = await response.json();
+      const data = await parseJsonResponse<{
+        isAuthenticated?: boolean;
+        email?: string;
+        name?: string;
+      }>(response);
 
-      if (!data.isAuthenticated) {
+      if (!data?.isAuthenticated) {
         setIsLoggedIn(false);
         setUserName("");
         setEmail(null);

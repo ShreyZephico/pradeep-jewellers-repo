@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { notifyAuthChanged } from "@/contexts/CustomerAuthContext";
+import { parseJsonResponse } from "@/lib/parseJsonResponse";
 
 const DISMISS_KEY = "googleOneTapDismissed";
 const DISMISS_MS = 24 * 60 * 60 * 1000;
@@ -82,13 +83,13 @@ export default function GoogleOneTap({
         credentials: "include",
         body: JSON.stringify({ credential }),
       });
-      const data = (await res.json()) as {
+      const data = await parseJsonResponse<{
         success?: boolean;
         error?: string;
         name?: string;
-      };
-      if (!res.ok || !data.success) {
-        throw new Error(data.error ?? "Google sign-in failed");
+      }>(res);
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error ?? "Google sign-in failed");
       }
       localStorage.setItem("loginMethod", "google");
       setShowCard(false);
@@ -143,15 +144,16 @@ export default function GoogleOneTap({
     if (skip) return;
     let cancelled = false;
     fetch("/api/auth/check", { credentials: "include" })
-      .then((r) => r.json())
-      .then(
-        (d: {
+      .then((r) =>
+        parseJsonResponse<{
           isAuthenticated?: boolean;
           name?: string;
           email?: string;
-        }) => {
+        }>(r)
+      )
+      .then((d) => {
           if (cancelled) return;
-          if (d.isAuthenticated) {
+          if (d?.isAuthenticated) {
             setLoggedIn(true);
             return;
           }

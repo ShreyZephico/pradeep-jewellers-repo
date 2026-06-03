@@ -8,6 +8,7 @@ import ProductCommerceActions from "@/components/productComponent/ProductCommerc
 import ProductContentModal from "@/components/productComponent/ProductContentModal";
 import ProductModal from "@/components/productComponent/ProductModal";
 import { useCart } from "@/contexts/CartContext";
+import { parseJsonResponse } from "@/lib/parseJsonResponse";
 import "@/styles/product-details.css";
 import {
   addProductToCart,
@@ -805,15 +806,19 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
           `/api/product/${encodeURIComponent(slug)}`,
           { signal, cache: "no-store" }
         );
-        const data = await response.json();
+        const data = await parseJsonResponse<{
+          success?: boolean;
+          error?: string;
+          product?: Product;
+        }>(response);
 
-        if (!response.ok || !data.success || !data.product) {
+        if (!response.ok || !data?.success || !data.product) {
           throw new Error(
-            typeof data.error === "string" ? data.error : "Product not found"
+            typeof data?.error === "string" ? data.error : "Product not found"
           );
         }
 
-        const next = data.product as Product;
+        const next = data.product;
         writeCachedProduct(slug, next);
         setProduct(next);
         productRef.current = next;
@@ -874,17 +879,21 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
           `/api/product/${encodeURIComponent(slug)}`,
           { signal: controller.signal, cache: "no-store" }
         );
-        const data = await response.json();
+        const data = await parseJsonResponse<{
+          success?: boolean;
+          error?: string;
+          product?: Product;
+        }>(response);
 
         if (cancelled) return;
 
-        if (!response.ok || !data.success || !data.product) {
+        if (!response.ok || !data?.success || !data.product) {
           throw new Error(
-            typeof data.error === "string" ? data.error : "Product not found"
+            typeof data?.error === "string" ? data.error : "Product not found"
           );
         }
 
-        const next = data.product as Product;
+        const next = data.product;
         writeCachedProduct(slug, next);
         setProduct(next);
         productRef.current = next;

@@ -109,10 +109,25 @@
   },
   "categories": [
     { "id": "all", "name": "All" },
+    { "id": "ring", "name": "Rings" },
+    { "id": "earring", "name": "Earrings" },
+    { "id": "bracelet", "name": "Bracelets" },
+    { "id": "bangle", "name": "Bangles" },
+    { "id": "necklace", "name": "Necklaces" },
+    { "id": "pendant", "name": "Pendants" },
+    { "id": "mangalsutra", "name": "Mangalsutras" },
+    { "id": "chain", "name": "Chains" },
+    { "id": "anklet", "name": "Anklets" },
+    { "id": "kada", "name": "Kadas" },
+    { "id": "charm", "name": "Charms" },
+    { "id": "nose-pin", "name": "Nose pins" },
+    { "id": "necklace-set", "name": "Necklace sets" },
+    { "id": "pendant-set", "name": "Pendant sets" },
     { "id": "gold", "name": "Gold" },
     { "id": "diamond", "name": "Diamond" },
     { "id": "silver", "name": "Silver" },
     { "id": "gemstone", "name": "Gemstone" }
+   
   ],
   "priceTiers": [
     { "id": "any", "label": "Any price" },

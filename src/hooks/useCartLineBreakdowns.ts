@@ -9,6 +9,7 @@ import {
 } from "@/lib/cartBreakdown";
 import type { ClientCartLine } from "@/types/cart";
 import type { Product } from "@/types/product";
+import { parsePriceCalculateResponse } from "@/lib/priceCalculateResponse";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
 import {
   buildPriceBreakdownOptionLinesFromCartLine,
@@ -45,21 +46,8 @@ async function calculateBreakdown(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ weight, carat, makingChargePercent: makingChargePercent ?? null }),
   });
-  const data = await response.json();
-  if (!data.success || typeof data.finalPrice !== "number") return null;
-
-  return {
-    purity: data.purity,
-    karat: data.karat,
-    base24KGoldPrice: data.base24KGoldPrice,
-    adjustedGoldPrice: data.adjustedGoldPrice,
-    perGramRate: data.perGramRate,
-    actualGoldPrice: data.actualGoldPrice,
-    makingCharge: data.makingCharge,
-    subtotal: data.subtotal,
-    gst: data.gst,
-    finalPrice: data.finalPrice,
-  };
+  const pricing = await parsePriceCalculateResponse(response);
+  return pricing?.breakdown ?? null;
 }
 
 async function resolveLineBreakdown(

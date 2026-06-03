@@ -44,9 +44,10 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  return NextResponse.next();
+  return NextResponse.next({ request });
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Skip /api so App Router route handlers are reachable in `next dev` (see Next.js 16 proxy).
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

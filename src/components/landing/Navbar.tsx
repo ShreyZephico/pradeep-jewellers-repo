@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "./css/Navbar.module.css";
+import { parseJsonResponse } from "@/lib/parseJsonResponse";
 import { getImageUrl } from "@/utils/cloudinary";
 
 // Import contact data
@@ -45,9 +46,13 @@ export default function Navbar() {
   // Check login status on mount
   useEffect(() => {
     fetch("/api/auth/check")
-      .then((response) => response.json())
+      .then((response) =>
+        parseJsonResponse<{ isAuthenticated?: boolean; email?: string }>(
+          response
+        )
+      )
       .then((data) => {
-        if (!data.isAuthenticated) {
+        if (!data?.isAuthenticated) {
           setIsLoggedIn(false);
           return;
         }

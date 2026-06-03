@@ -7,10 +7,14 @@ import { consumeProductsListStale } from "@/lib/productsListRefresh";
 
 type ProductsListShellProps = {
   initialQuery: string;
+  initialCategory?: string;
+  initialPriceTier?: string;
 };
 
 export default function ProductsListShell({
   initialQuery,
+  initialCategory = "",
+  initialPriceTier = "",
 }: ProductsListShellProps) {
   const [refreshToken, setRefreshToken] = useState(0);
 
@@ -37,6 +41,8 @@ export default function ProductsListShell({
   return (
     <ProductsPageClient
       initialQuery={initialQuery}
+      initialCategory={initialCategory}
+      initialPriceTier={initialPriceTier}
       refreshToken={refreshToken}
     />
   );

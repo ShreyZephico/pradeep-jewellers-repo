@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import { HOME_REFETCH_EVENT } from "@/lib/homeRefetch";
+import { parseJsonResponse } from "@/lib/parseJsonResponse";
 import type { ClientCart } from "@/types/cart";
 
 const emptyCart: ClientCart = {
@@ -43,12 +44,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         credentials: "include",
         cache: "no-store",
       });
-      const data = await response.json();
-      if (!response.ok) {
+      const data = await parseJsonResponse<{ cart?: ClientCart }>(response);
+      if (!response.ok || !data) {
         setCart(emptyCart);
         return;
       }
-      setCart((data.cart as ClientCart) ?? emptyCart);
+      setCart(data.cart ?? emptyCart);
     } catch {
       setCart(emptyCart);
     } finally {
@@ -66,8 +67,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetch("/api/auth/check", { credentials: "include" })
-      .then((r) => r.json())
-      .then((data) => setIsAuthenticated(Boolean(data.isAuthenticated)))
+      .then((r) => parseJsonResponse<{ isAuthenticated?: boolean }>(r))
+      .then((data) => setIsAuthenticated(Boolean(data?.isAuthenticated)))
       .catch(() => setIsAuthenticated(false));
   }, []);
 

@@ -11,6 +11,7 @@ import {
   getReturnPathFromSearch,
   saveReturnPath,
 } from '@/lib/authRedirect';
+import { parseJsonResponse } from '@/lib/parseJsonResponse';
 
 import '@/styles/login.css';
 
@@ -70,9 +71,11 @@ function LoginForm() {
     }
 
     fetch('/api/auth/check', { credentials: 'include' })
-      .then((response) => response.json())
+      .then((response) =>
+        parseJsonResponse<{ isAuthenticated?: boolean }>(response)
+      )
       .then((data) => {
-        if (data.isAuthenticated) {
+        if (data?.isAuthenticated) {
           completeLogin(router);
         }
       })

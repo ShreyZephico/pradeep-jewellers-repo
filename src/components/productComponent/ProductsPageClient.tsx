@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
 
 import type { Product } from '@/types/product';
 import CollectionProductCard from "@/components/productComponent/CollectionProductCard";
 import CollectionProductCardSkeleton from "@/components/productComponent/CollectionProductCardSkeleton";
 import ProductsFilterSidebar from "@/components/productComponent/ProductsFilterSidebar";
+import { isValidCategoryNavId } from '@/lib/categoryNav';
 import productContent from '@/lib/productContent';
 import type { ProductSort } from '@/lib/productFilters';
 import { priceTierToRange } from '@/lib/productFilters';
@@ -28,9 +30,35 @@ const SORT_OPTIONS: { value: ProductSort; label: string }[] = [
 
 type ProductsPageClientProps = {
   initialQuery?: string;
+  initialCategory?: string;
+  initialPriceTier?: string;
   /** Bumped after checkout (bfcache return) to refetch without remounting the tree. */
   refreshToken?: number;
 };
+
+const LEGACY_CATEGORY_IDS = new Set([
+  'gold',
+  'diamond',
+  'silver',
+  'gemstone',
+  'rings',
+  'necklaces',
+  'earrings',
+  'bracelets',
+]);
+
+function normalizeCategoryId(raw: string): string {
+  const id = raw.trim().toLowerCase();
+  if (!id || id === 'all') return 'all';
+  if (isValidCategoryNavId(id) || LEGACY_CATEGORY_IDS.has(id)) return id;
+  return 'all';
+}
+
+function normalizePriceTierId(raw: string): string {
+  const id = raw.trim();
+  if (!id) return 'any';
+  return priceTiers.some((tier) => tier.id === id) ? id : 'any';
+}
 
 function mergeProducts(prev: Product[], incoming: Product[]): Product[] {
   if (incoming.length === 0) return prev;
@@ -47,8 +75,12 @@ function mergeProducts(prev: Product[], incoming: Product[]): Product[] {
 
 export default function ProductsPageClient({
   initialQuery = '',
+  initialCategory = '',
+  initialPriceTier = '',
   refreshToken = 0,
 }: ProductsPageClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const urlQuery = initialQuery.trim();
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -60,8 +92,12 @@ export default function ProductsPageClient({
 
   const [searchTerm, setSearchTerm] = useState(urlQuery);
   const [debouncedQ, setDebouncedQ] = useState(urlQuery);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedPriceTier, setSelectedPriceTier] = useState('any');
+  const [selectedCategory, setSelectedCategory] = useState(() =>
+    normalizeCategoryId(initialCategory)
+  );
+  const [selectedPriceTier, setSelectedPriceTier] = useState(() =>
+    normalizePriceTierId(initialPriceTier)
+  );
   const [sort, setSort] = useState<ProductSort>('featured');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
@@ -84,11 +120,42 @@ export default function ProductsPageClient({
     sort !== 'featured' ||
     Boolean(searchTerm.trim());
 
+  const syncListUrl = useCallback(
+    (next: { category: string; price: string; q: string }) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (next.q) params.set('q', next.q);
+      else params.delete('q');
+      if (next.category && next.category !== 'all') {
+        params.set('category', next.category);
+      } else {
+        params.delete('category');
+      }
+      if (next.price && next.price !== 'any') {
+        params.set('price', next.price);
+      } else {
+        params.delete('price');
+      }
+      const qs = params.toString();
+      router.replace(qs ? `/products?${qs}` : '/products', { scroll: false });
+    },
+    [router, searchParams]
+  );
+
   useEffect(() => {
     setSearchTerm((prev) => (prev === urlQuery ? prev : urlQuery));
     setDebouncedQ((prev) => (prev === urlQuery ? prev : urlQuery));
     pageRef.current = 1;
   }, [urlQuery]);
+
+  useEffect(() => {
+    setSelectedCategory(normalizeCategoryId(initialCategory));
+    pageRef.current = 1;
+  }, [initialCategory]);
+
+  useEffect(() => {
+    setSelectedPriceTier(normalizePriceTierId(initialPriceTier));
+    pageRef.current = 1;
+  }, [initialPriceTier]);
 
   useEffect(() => {
     if (searchTerm.trim() === urlQuery) {
@@ -257,11 +324,21 @@ export default function ProductsPageClient({
     setSelectedCategory(id);
     resetList();
     setFiltersOpen(false);
+    syncListUrl({
+      category: id,
+      price: selectedPriceTier,
+      q: debouncedQ,
+    });
   };
 
   const handlePriceTierChange = (id: string) => {
     setSelectedPriceTier(id);
     resetList();
+    syncListUrl({
+      category: selectedCategory,
+      price: id,
+      q: debouncedQ,
+    });
   };
 
   const handleSortChange = (next: ProductSort) => {
@@ -277,6 +354,7 @@ export default function ProductsPageClient({
     setSort('featured');
     resetList();
     setFiltersOpen(false);
+    syncListUrl({ category: 'all', price: 'any', q: '' });
   };
 
   const sortLabel =

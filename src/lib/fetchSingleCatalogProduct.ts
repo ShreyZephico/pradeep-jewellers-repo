@@ -6,6 +6,17 @@ import {
 import type { Product } from "@/types/product";
 
 const SHOPIFY_PRODUCT_GID_RE = /^gid:\/\/shopify\/Product\//i;
+/** Catalog URLs may append a stable hash suffix after the Shopify handle. */
+const TRAILING_CATALOG_HASH_RE = /-[a-f0-9]{32}$/i;
+
+function handleLookupKeys(identifier: string): string[] {
+  const keys = [identifier];
+  const withoutHash = identifier.replace(TRAILING_CATALOG_HASH_RE, "");
+  if (withoutHash && withoutHash !== identifier) {
+    keys.push(withoutHash);
+  }
+  return keys;
+}
 
 /**
  * Loads one product from Shopify Storefront GraphQL (by handle or product GID), then static fallback.
@@ -29,17 +40,26 @@ export async function fetchSingleCatalogProduct(
     }
   }
 
-  try {
-    const byHandle = await getProductByHandle(key);
-    if (byHandle) {
-      return byHandle;
+  for (const handleKey of handleLookupKeys(key)) {
+    try {
+      const byHandle = await getProductByHandle(handleKey);
+      if (byHandle) {
+        return byHandle;
+      }
+    } catch (error) {
+      console.warn(
+        "Shopify product by handle failed, trying fallbacks:",
+        handleKey,
+        error
+      );
     }
-  } catch (error) {
-    console.warn("Shopify product by handle failed, trying fallbacks:", key, error);
   }
 
   const staticMatch = staticFallbackProducts.find(
-    (p) => p.slug === key || p.id === key || p.handle === key
+    (p) =>
+      handleLookupKeys(key).some(
+        (k) => p.slug === k || p.id === k || p.handle === k
+      )
   );
   if (
     staticMatch &&

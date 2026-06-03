@@ -1303,7 +1303,55 @@ function buildShopifyProductsSearchQuery(q: string, category: string): string | 
         parts.push("title:*earring*");
         break;
       case "bracelets":
-        parts.push("title:*bracelet* OR title:*bangle*");
+      case "bracelet":
+        parts.push(
+          "title:*bracelet* OR product_type:*bracelet* OR tag:bracelet"
+        );
+        break;
+      case "ring":
+        parts.push("title:*ring* OR product_type:*ring* OR tag:ring");
+        break;
+      case "earring":
+        parts.push(
+          "title:*earring* OR title:*stud* OR product_type:*earring* OR tag:earring"
+        );
+        break;
+      case "bangle":
+        parts.push("title:*bangle* OR product_type:*bangle* OR tag:bangle");
+        break;
+      case "necklace":
+        parts.push(
+          "title:*necklace* OR product_type:*necklace* OR tag:necklace"
+        );
+        break;
+      case "necklace-set":
+        parts.push("title:*necklace*set* OR title:*necklace set*");
+        break;
+      case "pendant":
+        parts.push("title:*pendant* OR product_type:*pendant* OR tag:pendant");
+        break;
+      case "pendant-set":
+        parts.push("title:*pendant*set* OR title:*pendant set*");
+        break;
+      case "chain":
+        parts.push("title:*chain* OR product_type:*chain* OR tag:chain");
+        break;
+      case "anklet":
+        parts.push("title:*anklet* OR product_type:*anklet* OR tag:anklet");
+        break;
+      case "kada":
+        parts.push("title:*kada* OR tag:kada");
+        break;
+      case "charm":
+        parts.push("title:*charm* OR product_type:*charm* OR tag:charm");
+        break;
+      case "mangalsutra":
+        parts.push("title:*mangalsutra* OR tag:mangalsutra");
+        break;
+      case "nose-pin":
+        parts.push(
+          "title:*nose* OR title:*nath* OR product_type:*nose* OR tag:nose-pin"
+        );
         break;
       default:
         break;

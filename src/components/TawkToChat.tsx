@@ -3,6 +3,7 @@
 import Script from 'next/script';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import LiveChatLauncher from '@/components/LiveChatLauncher';
+import { parseJsonResponse } from '@/lib/parseJsonResponse';
 import { getTawkEmbedConfig } from '@/lib/tawkConfig';
 
 const TAWK_EMBED = getTawkEmbedConfig();
@@ -301,7 +302,20 @@ export default function TawkToChat() {
 
     try {
       const response = await fetch('/api/tawk/customer', { cache: 'no-store' });
-      const data = await response.json();
+      if (!response.ok) {
+        return;
+      }
+      const data = await parseJsonResponse<{
+        isAuthenticated?: boolean;
+        customer?: {
+          name?: string;
+          email?: string;
+          phone?: string;
+        };
+      }>(response);
+      if (!data) {
+        return;
+      }
 
       if (data.isAuthenticated && data.customer) {
         const storedPhone =

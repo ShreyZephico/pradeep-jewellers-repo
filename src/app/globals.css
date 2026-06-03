@@ -81,6 +81,14 @@ html {
   --header-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --header-recent-transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 
+  /* Category nav row — gold bar, white labels */
+  --category-nav-bg: #a8813e;
+  --category-nav-bg-hover: #8f6c32;
+  --category-nav-bg-active: #96753a;
+  --category-nav-text: #ffffff;
+  --category-nav-text-hover: #ffffff;
+  --category-nav-border: rgb(255 255 255 / 0.2);
+
   /* Hero section — uses shared palette above */
   --hero-slider-height: clamp(22rem, 58svh, 36rem);
   --hero-slider-height-mobile: clamp(16rem, 48svh, 28rem);

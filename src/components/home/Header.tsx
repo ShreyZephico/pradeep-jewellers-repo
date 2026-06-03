@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { LogIn, Menu, Phone, ShoppingBag, X } from "lucide-react";
 
+import CategoryNavBar from "@/components/home/CategoryNavBar";
 import HeaderNavSearch from "@/components/home/HeaderNavSearch";
 import { useCart } from "@/contexts/CartContext";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
@@ -396,6 +397,8 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      <CategoryNavBar />
 
       {isMenuOpen ? (
         <>

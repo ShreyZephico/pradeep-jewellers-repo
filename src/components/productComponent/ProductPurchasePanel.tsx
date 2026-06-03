@@ -11,6 +11,7 @@ import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
 import ProductCommerceActions from "@/components/productComponent/ProductCommerceActions";
 import PriceCalculationBreakdown from "@/components/productComponent/PriceCalculationBreakdown";
 import { useCart } from "@/contexts/CartContext";
+import { parsePriceCalculateResponse } from "@/lib/priceCalculateResponse";
 import {
   addProductToCart,
   startProductCheckout,
@@ -237,21 +238,10 @@ export default function ProductPurchasePanel({
             makingChargePercent: product.makingChargePercent ?? null,
           }),
         });
-        const data = await response.json();
-        if (!cancelled && data.success && typeof data.finalPrice === "number") {
-          setLivePrice(data.finalPrice);
-          setPriceBreakdown({
-            purity: data.purity,
-            karat: data.karat,
-            base24KGoldPrice: data.base24KGoldPrice,
-            adjustedGoldPrice: data.adjustedGoldPrice,
-            perGramRate: data.perGramRate,
-            actualGoldPrice: data.actualGoldPrice,
-            makingCharge: data.makingCharge,
-            subtotal: data.subtotal,
-            gst: data.gst,
-            finalPrice: data.finalPrice,
-          });
+        const pricing = await parsePriceCalculateResponse(response);
+        if (!cancelled && pricing) {
+          setLivePrice(pricing.finalPrice);
+          setPriceBreakdown(pricing.breakdown);
         } else if (!cancelled) {
           setLivePrice(variantPrice);
           setPriceBreakdown(null);
