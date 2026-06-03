@@ -237,10 +237,6 @@ export default function CategoryNavBar() {
               );
             })}
           </ul>
-
-          <Link href="/products" className="category-nav__view-all">
-            View all
-          </Link>
         </div>
       </div>
 

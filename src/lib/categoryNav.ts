@@ -137,7 +137,7 @@ function baseFeatured(id: string, plural: string): CategoryNavLink[] {
   return [
     { label: "Latest designs", href: buildProductsListUrl(id) },
     { label: "Bestsellers", href: buildProductsListUrl(id, { sort: "featured" }) },
-    { label: "View all", href: buildProductsListUrl(id) },
+    
   ];
 }
 
