@@ -10,6 +10,8 @@ import { getShopifyStorefrontApiVersion } from "@/lib/shopifyApiVersion";
 import type { Product, ProductVariant } from "@/types/product";
 import calculateVariantPrice from "@/utils/calculateVariantPrice";
 import getGoldPrice from "@/utils/goldPrice";
+import { parseMakingChargeFromMetafields } from "@/utils/makingCharge";
+import { fetchMakingChargeFromShopifyAdmin } from "@/lib/shopifyMakingCharge";
 
 let missingGoldPriceLogged = false;
 
@@ -117,6 +119,8 @@ type ShopifyProductNode = {
       };
     }[];
   };
+  makingChargeType?: { value: string | null } | null;
+  makingChargeValue?: { value: string | null } | null;
 };
 
 const productNodeFields = `
@@ -171,6 +175,12 @@ const productNodeFields = `
               }
             }
           }
+          makingChargeType: metafield(namespace: "custom", key: "making_charge_type") {
+            value
+          }
+          makingChargeValue: metafield(namespace: "custom", key: "making_charge") {
+            value
+          }
 `;
 
 /** Smaller payload for grids — variant count + sample variants for “from” price only. */
@@ -222,6 +232,12 @@ const productListNodeFields = `
                 }
               }
             }
+          }
+          makingChargeType: metafield(namespace: "custom", key: "making_charge_type") {
+            value
+          }
+          makingChargeValue: metafield(namespace: "custom", key: "making_charge") {
+            value
           }
 `;
 
@@ -440,6 +456,21 @@ function deriveListBadge({
   return undefined;
 }
 
+async function resolveShopifyMakingChargePercent(
+  node: ShopifyProductNode
+): Promise<number | undefined> {
+  const fromStorefront = parseMakingChargeFromMetafields([
+    { key: "making_charge_type", value: node.makingChargeType?.value ?? null },
+    { key: "making_charge", value: node.makingChargeValue?.value ?? null },
+  ]);
+  if (fromStorefront) {
+    return fromStorefront.percent;
+  }
+
+  const fromAdmin = await fetchMakingChargeFromShopifyAdmin(node.id);
+  return fromAdmin?.percent;
+}
+
 /** Listing/card mapping: one gold fetch, min price across sample variants (no full variant list). */
 async function mapShopifyProductListItem(
   node: ShopifyProductNode,
@@ -461,7 +492,7 @@ async function mapShopifyProductListItem(
 
   let price = 0;
   let variantId = node.variants.edges[0]?.node.id ?? "";
-  let makingChargePercent: number | undefined;
+  const makingChargePercent = await resolveShopifyMakingChargePercent(node);
   const goldRate = await getGoldPrice();
 
   if (goldRate == null) {
@@ -489,7 +520,11 @@ async function mapShopifyProductListItem(
     const weight = resolveVariantWeight(gramsFromApi);
     const carat = extractCaratFromSelectedOptions(variant.selectedOptions);
 
-    const pricing = await calculateVariantPrice({ weight, carat });
+    const pricing = await calculateVariantPrice({
+      weight,
+      carat,
+      makingChargePercent,
+    });
     if (price === 0 || pricing.finalPrice < price) {
       price = pricing.finalPrice;
       variantId = variant.id;
@@ -575,6 +610,8 @@ async function mapShopifyProduct(
     logMissingGoldPriceOnce();
   }
 
+  const makingChargePercent = await resolveShopifyMakingChargePercent(node);
+
   const variants = await Promise.all(
     node.variants.edges.map(async ({ node: variant }) => {
       const gramsFromApi = shopifyWeightToGrams(
@@ -595,7 +632,11 @@ async function mapShopifyProduct(
         };
       }
 
-      const pricing = await calculateVariantPrice({ weight, carat });
+      const pricing = await calculateVariantPrice({
+        weight,
+        carat,
+        makingChargePercent,
+      });
 
       return {
         id: variant.id,
@@ -623,6 +664,7 @@ async function mapShopifyProduct(
     description: node.description || fallback.description,
     price,
     compareAtPrice,
+    makingChargePercent,
     image: primaryImage,
     images: images.length > 0 ? images : [primaryImage],
     variantId: defaultVariant?.id ?? node.variants.edges[0]?.node.id,
@@ -797,6 +839,8 @@ export function mergeShopifyVariantGids(
 
   return {
     ...catalog,
+    makingChargePercent:
+      storefront.makingChargePercent ?? catalog.makingChargePercent,
     variants: mergedVariants,
     variantId: primary?.id ?? catalog.variantId,
     price: primary?.price ?? catalog.price,

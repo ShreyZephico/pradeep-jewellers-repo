@@ -2,12 +2,14 @@ import { PJ_BREAKDOWN_ATTR } from "@/lib/cartConstants";
 import type { CheckoutAttribute } from "@/lib/shopify";
 import type { ClientCartLine } from "@/types/cart";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
+import type { PriceBreakdownOptionLine } from "@/utils/priceBreakdownOptions";
 
 export type CartLineBreakdownData = {
   weightGrams: number;
   karatLabel: string | null;
   breakdown: VariantPriceBreakdown;
   optionAdjustments: number;
+  optionLines?: PriceBreakdownOptionLine[];
   unitPrice: number;
 };
 

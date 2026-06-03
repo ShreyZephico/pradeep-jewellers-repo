@@ -1,9 +1,10 @@
-import getGoldPrice from "./goldPrice";
+import { getGoldPricingForKarat } from "./goldPrice";
 import { parseKaratNumber } from "./karat";
+import { resolveMakingChargeRate } from "./makingCharge";
 
 export class GoldPriceUnavailableError extends Error {
   constructor() {
-    super("No manual 24K gold price in database");
+    super("No manual gold price in database");
     this.name = "GoldPriceUnavailableError";
   }
 }
@@ -24,28 +25,33 @@ export type VariantPriceBreakdown = {
 type CalculateVariantPriceProps = {
   weight: number;
   carat?: string | null;
+  /** Shopify metafield or catalog % (e.g. 15). Falls back to 7% when omitted. */
+  makingChargePercent?: number | null;
 };
 
 async function calculateVariantPrice({
   weight,
   carat,
+  makingChargePercent,
 }: CalculateVariantPriceProps) {
-  const base24KGoldPrice = await getGoldPrice();
-  if (base24KGoldPrice == null) {
+  const karat = parseKaratNumber(carat);
+  const goldPricing = await getGoldPricingForKarat(karat);
+  if (goldPricing == null) {
     throw new GoldPriceUnavailableError();
   }
 
-  const karat = parseKaratNumber(carat);
-
-  const purityPercentage = Math.round((karat / 24) * 100);
-
-  const adjustedGoldPrice = (base24KGoldPrice * purityPercentage) / 100;
-
-  const perGramRate = Math.ceil(adjustedGoldPrice);
+  const {
+    purity: purityPercentage,
+    karat: resolvedKarat,
+    base24KGoldPrice,
+    adjustedGoldPrice,
+    perGramRate,
+  } = goldPricing;
 
   const actualGoldPrice = weight * perGramRate;
 
-  const makingCharge = actualGoldPrice * 0.07;
+  const makingRate = resolveMakingChargeRate(makingChargePercent);
+  const makingCharge = actualGoldPrice * makingRate;
 
   const subtotal = actualGoldPrice + makingCharge;
 
@@ -55,9 +61,9 @@ async function calculateVariantPrice({
 
   const result: VariantPriceBreakdown = {
     purity: purityPercentage,
-    karat,
+    karat: resolvedKarat,
     base24KGoldPrice,
-    adjustedGoldPrice: Math.round(adjustedGoldPrice),
+    adjustedGoldPrice,
     perGramRate,
     actualGoldPrice: Math.round(actualGoldPrice),
     makingCharge: Math.round(makingCharge),

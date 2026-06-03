@@ -41,11 +41,18 @@ export const SUPABASE_PRODUCT_WITH_VARIANTS = `
  */
 export async function mapSupabaseProductRowToProduct(product: any): Promise<Product> {
   const variantRows = product.variants ?? [];
+  const catalogMaking = Number(product.making_charge);
+  const makingChargePercent =
+    Number.isFinite(catalogMaking) && catalogMaking >= 0
+      ? catalogMaking
+      : undefined;
+
   const variants = await Promise.all(
     variantRows.map(async (variant: any) => {
       const pricing = await calculateVariantPrice({
         weight: Number(variant.weight || 0),
         carat: variant.gold_carats?.name,
+        makingChargePercent,
       });
 
       const catalogVariantId = String(variant.id);
@@ -230,6 +237,8 @@ export async function mapSupabaseProductRowToProduct(product: any): Promise<Prod
 
     customizable:
       product.customizable || false,
+
+    makingChargePercent,
 
     handle:
       product.shopify_handle,

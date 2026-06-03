@@ -13,8 +13,17 @@ export async function POST(request: Request) {
       typeof body.carat === "string" && body.carat.trim()
         ? body.carat.trim()
         : null;
+    const makingChargePercent =
+      typeof body.makingChargePercent === "number" &&
+      Number.isFinite(body.makingChargePercent)
+        ? body.makingChargePercent
+        : null;
 
-    const pricing = await calculateVariantPrice({ weight, carat });
+    const pricing = await calculateVariantPrice({
+      weight,
+      carat,
+      makingChargePercent,
+    });
 
     return NextResponse.json({
       success: true,

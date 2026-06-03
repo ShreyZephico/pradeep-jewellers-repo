@@ -16,12 +16,12 @@
 }
 
 .header-search--compact .header-search-form {
-  width: 2.75rem;
+  width: 2.25rem;
   transition: width 0.25s ease;
 }
 
 .header-search--compact.header-search--open .header-search-form {
-  width: min(16rem, 42vw);
+  width: min(14rem, 36vw);
 }
 
 .header-search--expanded .header-search-form {
@@ -43,8 +43,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.25rem;
+  height: 2.25rem;
   padding: 0;
   border: 1px solid transparent;
   border-radius: 9999px;
@@ -74,8 +74,8 @@
   align-items: center;
   flex: 1;
   min-width: 0;
-  height: 2.5rem;
-  padding: 0 0.75rem 0 0.65rem;
+  height: 2.125rem;
+  padding: 0 0.6rem 0 0.5rem;
   border: 1px solid #e5e7eb;
   border-radius: 9999px;
   background: #fff;
@@ -98,6 +98,21 @@
   font-size: 0.8125rem;
   color: #1f2937;
   outline: none;
+}
+
+/* Prevent browser-native clear icon (duplicate of .header-search-clear) */
+.header-search-input::-webkit-search-cancel-button,
+.header-search-input::-webkit-search-decoration,
+.header-search-input::-webkit-search-results-button {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+.header-search-input::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .header-search-input::placeholder {

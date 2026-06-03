@@ -2,14 +2,24 @@
 
 import { formatProductPrice } from "@/utils/formatPrice";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
-import productContent, { formatProductCopy } from "@/lib/productContent";
+import type { PriceBreakdownOptionLine } from "@/utils/priceBreakdownOptions";
+import productContent from "@/lib/productContent";
+import {
+  buildGoldBreakupLabel,
+  extractDiamondQualityLabel,
+  getReferenceBreakupAmounts,
+  splitBreakupOptionLines,
+} from "@/utils/priceBreakupDisplay";
 
 type PriceCalculationBreakdownProps = {
   breakdown: VariantPriceBreakdown | null;
   weightGrams: number;
   karatLabel: string | null;
+  metalLabel?: string | null;
+  diamondLabel?: string | null;
   loading?: boolean;
   optionAdjustments?: number;
+  optionLines?: PriceBreakdownOptionLine[];
   displayTotal: number;
   /** When true, omits outer section chrome (for content modals). */
   embedded?: boolean;
@@ -17,55 +27,50 @@ type PriceCalculationBreakdownProps = {
 
 const copy = productContent.priceBreakdown;
 
-function BreakdownRow({
-  label,
-  value,
-  hint,
-  emphasize,
+function BreakupPrices({
+  current,
+  original,
 }: {
-  label: string;
-  value: string;
-  hint?: string;
-  emphasize?: boolean;
+  current: number;
+  original?: number;
 }) {
+  const showCompare = original != null && original > current;
   return (
-    <div className={`product-breakdown-row${emphasize ? " product-breakdown-row--emphasize" : ""}`}>
-      <div>
-        <span
-          className={`product-breakdown-row-label${
-            emphasize ? " product-breakdown-row-label--emphasize" : ""
-          }`}
-        >
-          {label}
+    <span className="product-breakup-prices">
+      {showCompare ? (
+        <span className="product-breakup-price product-breakup-price--was">
+          {formatProductPrice(original)}
         </span>
-        {hint ? <span className="product-breakdown-row-hint">{hint}</span> : null}
-      </div>
-      <span
-        className={`product-breakdown-row-value${
-          emphasize ? " product-breakdown-row-value--emphasize" : ""
-        }`}
-      >
-        {value}
-      </span>
-    </div>
+      ) : null}
+      <span className="product-breakup-price">{formatProductPrice(current)}</span>
+    </span>
   );
+}
+
+function formatWeightGrams(weight: number): string {
+  const w = Math.round(weight * 1000) / 1000;
+  return `${w} ${copy.weightUnit}`;
 }
 
 export default function PriceCalculationBreakdown({
   breakdown,
   weightGrams,
   karatLabel,
+  metalLabel = null,
+  diamondLabel = null,
   loading,
-  optionAdjustments = 0,
+  optionLines = [],
   displayTotal,
   embedded = false,
 }: PriceCalculationBreakdownProps) {
-  const rootClass = embedded ? "product-breakdown product-breakdown--embedded" : "product-breakdown";
+  const rootClass = embedded
+    ? "product-breakdown product-breakdown--embedded product-breakup"
+    : "product-breakdown product-breakup";
 
   if (loading && !breakdown) {
     return (
       <section className={rootClass}>
-        <p className="product-breakdown-title product-breakdown-title--muted">
+        <p className="product-breakup-heading product-breakup-heading--muted">
           {copy.loadingTitle}
         </p>
         <p className="product-breakdown-loading">{copy.loading}</p>
@@ -77,58 +82,80 @@ export default function PriceCalculationBreakdown({
     return null;
   }
 
-  const purityLabel = karatLabel?.trim() || `${breakdown.karat}K`;
+  const { diamond, goldExtras, otherExtras } = splitBreakupOptionLines(optionLines);
+  const diamondAmount = diamond?.amount ?? 0;
+  const goldTotal = breakdown.actualGoldPrice + goldExtras;
+  const goldLineLabel = buildGoldBreakupLabel(
+    karatLabel,
+    metalLabel,
+    breakdown.karat
+  );
+  const diamondLineLabel =
+    diamondLabel?.trim() ||
+    (diamond ? extractDiamondQualityLabel(diamond.label) : "");
+
+  const refs = getReferenceBreakupAmounts(breakdown, {
+    diamondAmount,
+    otherExtras,
+  });
+  const baseGrand = breakdown.finalPrice + diamondAmount + otherExtras;
+  const grandOriginalCandidate = Math.max(refs.referenceGrand, baseGrand);
+  const grandOriginal =
+    grandOriginalCandidate > displayTotal ? grandOriginalCandidate : undefined;
 
   return (
-    <section className={rootClass}>
+    <section className={rootClass} aria-label={copy.title}>
       {!embedded ? (
         <>
-          <p className="product-breakdown-title product-breakdown-title--accent">{copy.title}</p>
-          <p className="product-breakdown-subtitle">{copy.subtitle}</p>
+          <p className="product-breakup-heading">{copy.title}</p>
+          {copy.subtitle ? (
+            <p className="product-breakdown-subtitle">{copy.subtitle}</p>
+          ) : null}
         </>
       ) : null}
 
-      <div className="product-breakdown-table">
-        <BreakdownRow
-          label={copy.goldRate24k}
-          value={formatProductPrice(breakdown.base24KGoldPrice)}
-        />
-        <BreakdownRow
-          label={formatProductCopy(copy.goldPurity, { purity: purityLabel })}
-          value={formatProductPrice(breakdown.adjustedGoldPrice)}
-        />
-        <BreakdownRow
-          label={copy.weight}
-          value={`${weightGrams} ${copy.weightUnit}`}
-        />
-        <BreakdownRow
-          label={copy.ratePerGram}
-          value={`${formatProductPrice(breakdown.perGramRate)}${copy.perGramSuffix}`}
-        />
-        <BreakdownRow
-          label={copy.makingCharge}
-          value={formatProductPrice(breakdown.makingCharge)}
-        />
-        <BreakdownRow label={copy.subtotal} value={formatProductPrice(breakdown.subtotal)} />
-        <BreakdownRow label={copy.gst} value={formatProductPrice(breakdown.gst)} />
-        <BreakdownRow
-          label={copy.calculatedTotal}
-          value={formatProductPrice(breakdown.finalPrice)}
-          emphasize
-        />
-        {optionAdjustments !== 0 ? (
-          <>
-            <BreakdownRow
-              label={copy.optionAdjustments}
-              value={formatProductPrice(optionAdjustments)}
-            />
-            <BreakdownRow
-              label={copy.yourPrice}
-              value={formatProductPrice(displayTotal)}
-              emphasize
-            />
-          </>
+      <div className="product-breakup-table">
+        <div className="product-breakup-block product-breakup-block--gold">
+          <div className="product-breakup-row product-breakup-row--head">
+            <span className="product-breakup-label">{goldLineLabel}</span>
+            <span className="product-breakup-weight">{formatWeightGrams(weightGrams)}</span>
+          </div>
+          <div className="product-breakup-row product-breakup-row--meta">
+            <span className="product-breakup-rate">
+              {formatProductPrice(breakdown.perGramRate)}
+              {copy.perGramSuffix}
+            </span>
+            <span className="product-breakup-amount">{formatProductPrice(goldTotal)}</span>
+          </div>
+        </div>
+
+        {diamondAmount > 0 && diamondLineLabel ? (
+          <div className="product-breakup-row">
+            <span className="product-breakup-label">{diamondLineLabel}</span>
+            <span className="product-breakup-amount">{formatProductPrice(diamondAmount)}</span>
+          </div>
         ) : null}
+
+        <div className="product-breakup-row">
+          <span className="product-breakup-label">{copy.makingCharge}</span>
+          <BreakupPrices
+            current={breakdown.makingCharge}
+            original={refs.showMakingCompare ? refs.referenceMaking : undefined}
+          />
+        </div>
+
+        <div className="product-breakup-row">
+          <span className="product-breakup-label">{copy.gst}</span>
+          <BreakupPrices
+            current={breakdown.gst}
+            original={refs.showGstCompare ? refs.referenceGst : undefined}
+          />
+        </div>
+
+        <div className="product-breakup-row product-breakup-row--grand">
+          <span className="product-breakup-label">{copy.grandTotal}</span>
+          <BreakupPrices current={displayTotal} original={grandOriginal} />
+        </div>
       </div>
     </section>
   );
