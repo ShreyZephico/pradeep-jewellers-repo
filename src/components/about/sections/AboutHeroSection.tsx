@@ -44,6 +44,30 @@ export default function AboutHeroSection() {
         <p className="about-hero__desc" data-reveal data-stagger="3">
           {s.description}
         </p>
+        {"ctaLabel" in s && s.ctaLabel && "ctaHref" in s && s.ctaHref ? (
+          <div className="about-hero__actions" data-reveal data-stagger="4">
+            <a
+              href={s.ctaHref}
+              className="about-btn about-btn--primary about-btn--on-dark"
+              {...(s.ctaHref.startsWith("http")
+                ? { target: "_blank", rel: "noopener noreferrer" }
+                : {})}
+            >
+              {s.ctaLabel}
+            </a>
+            {"secondaryCtaLabel" in s &&
+            s.secondaryCtaLabel &&
+            "secondaryCtaHref" in s &&
+            s.secondaryCtaHref ? (
+              <Link
+                href={s.secondaryCtaHref}
+                className="about-btn about-btn--outline about-btn--on-dark"
+              >
+                {s.secondaryCtaLabel}
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </header>
   );

@@ -1,37 +1,41 @@
 {
   "meta": {
     "title": "About Us",
-    "description": "Pradeep Jewellers — custom gold, diamond, and silver jewellery made in Nadiad. Skilled karigars, transparent specs, and fast estimates on WhatsApp."
+    "description": "Pradeep Jewellers — crafting gold and silver jewellery in Nadiad since 1983. 100+ families served as wholesaler and retailer. Contact us for custom work."
   },
   "hero": {
     "backLabel": "Back to home",
     "backHref": "/",
-    "badge": "ABOUT PRADEEP JEWELLERS",
-    "title": "Craftsmanship you can trust.",
+    "badge": "CRAFTING JEWELLERY SINCE 1983",
+    "title": "Gold & silver craftsmanship you can trust.",
     "highlightText": "you can trust.",
-    "description": "Made-to-order gold, diamonds, and silver in Nadiad — from your sketch or photo to a finished piece, with clarity on metal, purity, and weight at every step.",
+    "description": "We have been building jewellery since 1983 — serving more than 100 families across Gujarat as wholesaler and retailer. Contact us for custom gold and silver, bridal sets, and everyday pieces made with care in Nadiad.",
+    "ctaLabel": "Contact us",
+    "ctaHref": "https://wa.me/918866873390",
+    "secondaryCtaLabel": "Request a callback",
+    "secondaryCtaHref": "#callback",
     "image": "https://images.unsplash.com/photo-1533734685302-aee5a945845a?q=80&w=1600&auto=format&fit=crop",
     "imageAlt": "Custom jewellery craftsmanship at Pradeep Jewellers, Nadiad"
   },
   "brandIntro": {
     "badge": "WHO WE ARE",
-    "title": "More than a counter — a custom workshop.",
-    "description": "Pradeep Jewellers is a gold, diamond, and silver store in Nadiad where families commission rings, mangalsutras, bridal sets, and everyday pieces — built around your design, not a fixed catalogue.",
+    "title": "Since 1983 — gold & silver, wholesale & retail.",
+    "description": "Pradeep Jewellers is a Nadiad workshop and showroom trusted by more than 100 families. We craft gold and silver jewellery to order, supply retailers wholesale, and welcome walk-in customers — with the same honesty at the counter since 1983.",
     "points": [
-      "Upload a photo or sketch — get a tailored estimate on WhatsApp",
-      "Metal, purity, weight, stones, and finish locked before we start",
-      "Suvarna Vriddhi savings plans (12+1, 18+2, 24+3) for jewellery purchase"
+      "Building gold & silver jewellery since 1983 — mangalsutras, bridal sets, rings & more",
+      "Wholesaler and retailer — trade partners and families under one roof",
+      "Contact us on WhatsApp or in store — specs on metal, purity & weight before we start"
     ],
     "image": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1200&auto=format&fit=crop",
     "imageAlt": "Gold rings crafted to order"
   },
   "ourStory": {
     "badge": "OUR STORY",
-    "title": "Rooted in Nadiad. Built on craft.",
+    "title": "1983 to today — craft that families rely on.",
     "paragraphs": [
-      "From Santh Bazzar to families across Gujarat, we grew by doing one thing well: turning your inspiration into jewellery you can wear with confidence.",
-      "Our karigars handle consult, specs, model approval, casting, setting, polish, and quality checks under one roof — so you always know who is making your piece.",
-      "Today we serve Nadiad and customers nationwide with transparent pricing, live gold rates, and the same custom-first approach that built our name on the high street."
+      "We started crafting jewellery in 1983 at Santh Bazzar, Nadiad — gold and silver work done by skilled karigars, one piece at a time.",
+      "Over four decades we have served more than 100 families — as wholesaler to jewellers and retailers, and as a retail counter where you can walk in, call, or message us on WhatsApp.",
+      "That dual role still defines us: wholesale discipline on purity and weight, retail warmth at the counter, and the same gold-and-silver craftsmanship whether you order one ring or a full bridal set."
     ],
     "image": "https://images.unsplash.com/photo-1533734685302-aee5a945845a?q=80&w=1200&auto=format&fit=crop",
     "imageAlt": "Jeweller at the workbench in Nadiad"
@@ -39,57 +43,57 @@
   "founder": {
     "id": "founder",
     "image": "/images/placeholders/jewellery.svg",
-    "imageAlt": "Custom jewellery at Pradeep Jewellers",
-    "establishedYear": "Nadiad",
-    "establishedText": "MADE-TO-ORDER IN GUJARAT",
-    "sectionLabel": "OUR PROMISE",
-    "heading": "Your design. Our bench.",
-    "quote": "We don't push ready stock — we start from what you want to wear, and build clarity on weight, purity, and finish before a single gram is cast.",
-    "description": "Pradeep Jewellers began as a neighbourhood gold and silver store trusted for honest conversations at the counter. That promise still guides every custom commission — whether you walk in at Amdavadi Bazar or send a design on WhatsApp.",
+    "imageAlt": "Gold and silver jewellery craftsmanship at Pradeep Jewellers",
+    "establishedYear": "1983",
+    "establishedText": "CRAFTING JEWELLERY",
+    "sectionLabel": "OUR LEGACY",
+    "heading": "Gold & silver craftsmanship since 1983.",
+    "quote": "More than 100 families have trusted us — as wholesaler, as retailer, and as karigars who never compromise on purity or finish. Contact us; we are still at the same bench in Nadiad.",
+    "description": "From 1983 we built Pradeep Jewellers on hand-finished gold and silver, transparent weight, and relationships that span generations. Whether you need wholesale supply or a custom piece for your family, call, WhatsApp, or visit Santh Bazzar — we are here.",
     "name": "Pradeep Jewellers",
-    "role": "Custom Gold · Diamond · Silver — Nadiad"
+    "role": "Wholesale · Retail · Gold & Silver — Nadiad"
   },
   "heritageTimeline": {
-    "badge": "HOW WE WORK",
-    "title": "From sketch to delivery.",
-    "description": "The same steps whether you visit the store or message us online — consult first, specs locked, then craft.",
+    "badge": "OUR HERITAGE",
+    "title": "Building jewellery since 1983.",
+    "description": "Four decades of gold and silver craftsmanship — wholesaler, retailer, and partner to more than 100 families across Gujarat.",
     "items": [
       {
-        "year": "01",
-        "title": "Consult",
-        "description": "We understand your design, budget, and timeline — photos, Pinterest boards, or heirloom references welcome."
+        "year": "1983",
+        "title": "Craft begins in Nadiad",
+        "description": "We open at Santh Bazzar with a focus on gold and silver — hand work, honest weight, and pieces families wear for life."
       },
       {
-        "year": "02",
-        "title": "Specs lock",
-        "description": "Metal, purity, weight, stones, finish, and sizes agreed before production begins."
+        "year": "100+",
+        "title": "Families served",
+        "description": "Generations of customers — retail walk-ins, wholesale partners, and custom commissions on WhatsApp and at the counter."
       },
       {
-        "year": "03",
-        "title": "Model & craft",
-        "description": "3D or hand sketch when needed, then casting, setting, polish, and quality checks by our karigars."
+        "year": "B2B & B2C",
+        "title": "Wholesaler & retailer",
+        "description": "Supply to jewellers and shops wholesale; welcome families and designers at our retail showroom with the same purity standards."
       },
       {
-        "year": "04",
-        "title": "Delivery & care",
-        "description": "Final polish, secure packaging, and aftercare — resize, repair, and polish support when you need it."
+        "year": "Today",
+        "title": "Contact us anytime",
+        "description": "Call, WhatsApp, or visit for gold and silver craftsmanship — custom orders, schemes, repairs, and live-rate estimates."
       }
     ]
   },
   "brandStats": {
     "badge": "BY THE NUMBERS",
-    "title": "Trust you can see.",
+    "title": "Heritage you can count on.",
     "stats": [
-      { "number": 4.9, "suffix": "", "label": "GOOGLE RATING" },
-      { "number": 25, "suffix": "+", "label": "GOOGLE REVIEWS" },
-      { "number": 100, "suffix": "%", "label": "CUSTOM-FIRST" },
-      { "number": 1, "suffix": "", "label": "STORE IN NADIAD" }
+      { "number": 1983, "suffix": "", "label": "CRAFTING SINCE" },
+      { "number": 100, "suffix": "+", "label": "FAMILIES SERVED" },
+      { "number": 2, "suffix": "", "label": "WHOLESALE & RETAIL" },
+      { "number": 4.9, "suffix": "", "label": "GOOGLE RATING" }
     ]
   },
   "craftsmanship": {
     "badge": "CRAFTSMANSHIP",
-    "title": "How your custom piece comes to life.",
-    "description": "Every order follows our atelier flow — material clarity first, hallmark and invoice last.",
+    "title": "Gold & silver craftsmanship, end to end.",
+    "description": "Since 1983 our karigars have cast, finished, and hallmarked gold and silver under one roof — wholesale batches or a single custom ring.",
     "steps": [
       {
         "step": "01",
@@ -113,7 +117,7 @@
   "team": {
     "badge": "MEET OUR ARTISANS",
     "title": "The hands behind every piece.",
-    "description": "Head goldsmiths, diamond setters, and polishers — many seasons of craft on our bench in Nadiad.",
+    "description": "Gold and silver karigars, setters, and polishers — decades of bench craft in Nadiad since 1983, serving families and trade partners alike.",
     "members": [
       {
         "name": "Gold karigar team",
@@ -140,22 +144,22 @@
   },
   "whyChoose": {
     "badge": "WHY CHOOSE US",
-    "title": "Three promises on every order.",
+    "title": "Wholesale, retail, and craft since 1983.",
     "items": [
       {
         "icon": "scale",
-        "title": "Material clarity",
-        "description": "Purity, weight, stone grades, and finish discussed before we start — no surprises at billing."
+        "title": "Gold & silver expertise",
+        "description": "Hand-finished gold and silver — purity, weight, and finish agreed before we cast, for retail and wholesale orders."
       },
       {
         "icon": "shield",
-        "title": "BIS hallmarked gold",
-        "description": "Hallmark registration and purity documentation on applicable gold jewellery."
+        "title": "Wholesaler & retailer",
+        "description": "Trade supply for jewellers plus a family-friendly counter in Nadiad — one standard of quality for both."
       },
       {
         "icon": "heart",
-        "title": "Custom-first care",
-        "description": "Mangalsutras, bridal sets, couple rings, and redesigns treated like family milestones."
+        "title": "100+ families served",
+        "description": "Generations of trust since 1983 — contact us for custom work, schemes, repairs, or wholesale enquiries."
       }
     ]
   },
@@ -184,8 +188,8 @@
   },
   "bespoke": {
     "badge": "CUSTOM JEWELLERY",
-    "title": "Your design. Our craft.",
-    "description": "Upload inspiration on WhatsApp, lock specs with our team, and collect in Nadiad — rings, mangalsutras, bridal sets, and more.",
+    "title": "Your design. Our gold & silver craft.",
+    "description": "Since 1983 we have turned sketches into finished gold and silver — contact us on WhatsApp, lock specs with our team, and collect in Nadiad.",
     "features": [
       "Free design consultation",
       "Live gold rate at order time",
@@ -199,13 +203,13 @@
     "imageAlt": "Custom jewellery being crafted"
   },
   "showroom": {
-    "badge": "VISIT THE STORE",
-    "title": "Pradeep Jewellers, Nadiad.",
-    "description": "Walk in at Santh Bazzar for viewing, scheme enrolment, and custom consultations — or message us first on WhatsApp.",
+    "badge": "CONTACT US",
+    "title": "Visit, call, or WhatsApp — we are in Nadiad.",
+    "description": "Since 1983 we have welcomed families and wholesale buyers at Santh Bazzar. Contact us for gold and silver craftsmanship, scheme enrolment, or a custom quote.",
     "highlights": [
-      "Gold, diamond & silver under one roof",
-      "Suvarna Vriddhi scheme desk",
-      "Get Directions · Call · WhatsApp from the footer"
+      "Crafting gold & silver jewellery since 1983",
+      "Wholesaler & retailer — 100+ families served",
+      "Call · WhatsApp · directions below"
     ],
     "address": "Santh Bazzar, Amdavadi Bazar Road, Nadiad, Gujarat 387001",
     "phone": "+91 88668 73390",
@@ -228,13 +232,13 @@
     "useHomeComponent": true
   },
   "finalCta": {
-    "title": "Send a design & get an estimate.",
-    "description": "Share your inspiration, metal choice, and timeline — we respond fastest on WhatsApp.",
+    "title": "Contact us — gold & silver since 1983.",
+    "description": "Wholesaler or retailer, custom or catalogue — message us on WhatsApp or request a callback. We have served 100+ families; we would be glad to help yours.",
     "links": [
-      { "label": "Shop collection", "href": "/products", "variant": "primary" },
-      { "label": "Suvarna Vriddhi", "href": "/scheme", "variant": "outline" },
-      { "label": "Custom quote", "href": "/bespoke", "variant": "outline" },
-      { "label": "Live gold rates", "href": "/rates", "variant": "outline" }
+      { "label": "Contact us on WhatsApp", "href": "https://wa.me/918866873390", "variant": "primary" },
+      { "label": "Request a callback", "href": "#callback", "variant": "outline" },
+      { "label": "Shop collection", "href": "/products", "variant": "outline" },
+      { "label": "Suvarna Vriddhi", "href": "/scheme", "variant": "outline" }
     ]
   }
 }
