@@ -1,8 +1,8 @@
 {
   "imageFallbackPhotoId": "photo-1617038220319-276d3cfab638",
   "hero": {
-    "headline": "Bespoke Jewellery, Made for You",
-    "subheadline": "Explore what we have crafted for our customers — then tell us your design",
+    "headline": "Custom Jewellery Made in Nadiad",
+    "subheadline": "Our skilled karigars can create any design — upload a photo or sketch and get a quotation on WhatsApp",
     "cta": "Request a Custom Quote",
     "secondaryCta": "View customer work",
     "secondaryCtaHref": "#craft",
@@ -229,7 +229,7 @@
       },
       {
         "q": "Do you ship across India?",
-        "a": "Yes, fully insured shipping nationwide with tracking."
+        "a": "Yes — collect in Nadiad or arrange insured delivery across Gujarat and India with tracking."
       },
       {
         "q": "Is there a design consultation fee?",
@@ -246,8 +246,8 @@
     ]
   },
   "finalCta": {
-    "headline": "Ready to Create Something Special?",
-    "subtext": "Get your personalized quote in 24 hours",
+    "headline": "Send a design & get an estimate",
+    "subtext": "Share your inspiration, metal choice, and timeline — we respond fastest on WhatsApp",
     "cta": "Request Quote Now",
     "photoId": "photo-1605100804763-247f67b3557e"
   },

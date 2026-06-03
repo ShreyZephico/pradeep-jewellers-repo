@@ -1,24 +1,24 @@
 {
   "brand": {
     "name": "Pradeep Jewellers",
-    "tagline": "Crafting Dreams Since 1972",
+    "tagline": "Custom Gold · Diamond · Silver",
     "logo": "zephico_pj_logo_ocwt5g"
   },
   "header": {
-    "promoText": "✨ 20% off diamond price on your chosen design",
+    "promoText": "✨ Upload your design — get a fast estimate on WhatsApp",
     "recentlyViewed": "ANNIVERSARY SCHEME ✨",
     "videoCallText": "Video Call Consultation",
     "videoCallUrl": "https://calendly.com/panjasaurabh/30min"
   },
   "contact": {
-    "phone": "+91 9265075114",
-    "email": "hello@pradeepjewellers.com"
+    "phone": "+91 88668 73390",
+    "email": "hello@pradeepjewellers.in"
   },
   "social": {
-    "instagram": "https://instagram.com/pradeepjewellers",
+    "instagram": "https://instagram.com/pradeepjewellers_nadiad",
     "facebook": "https://facebook.com/pradeepjewellers",
     "youtube": "https://youtube.com/pradeepjewellers",
-    "whatsapp": "https://wa.me/919265075114"
+    "whatsapp": "https://wa.me/918866873390"
   },
   "navigation": [
     {
@@ -90,8 +90,8 @@
         "down": "#dc2626",
         "neutral": "#6b7280"
       },
-      "location": "LIVE • AHMEDABAD",
-      "city": "Ahmedabad",
+      "location": "LIVE • NADIAD",
+      "city": "Nadiad",
       "chartLink": "/rates",
       "refreshIntervalMinutes": 5
     }
@@ -132,9 +132,9 @@
   },
   "legacySection": {
     "badge": "OUR HERITAGE",
-    "title": "Four decades of trust, weighed in pure gold.",
-    "highlightText": "pure gold.",
-    "description": "From a single workshop to thousands of families across India — every Pradeep Jewellers piece carries the legacy of generations.",
+    "title": "Trusted in Nadiad, crafted to your design.",
+    "highlightText": "your design.",
+    "description": "From Santh Bazzar to families across Gujarat — every Pradeep Jewellers piece starts with your inspiration and ends with clarity on metal, purity, and weight.",
     "astroCard": {
       "tag": "TODAY'S READING",
       "name": "Pandit Aditya Sharma",
@@ -148,24 +148,24 @@
     },
     "stats": [
       {
-        "number": 1984,
+        "number": 4.9,
         "suffix": "",
-        "label": "ESTABLISHED"
+        "label": "GOOGLE RATING"
       },
       {
-        "number": 40,
+        "number": 25,
         "suffix": "+",
-        "label": "YEARS OF CRAFT"
-      },
-      {
-        "number": 10000,
-        "suffix": "+",
-        "label": "FAMILIES SERVED"
+        "label": "GOOGLE REVIEWS"
       },
       {
         "number": 100,
         "suffix": "%",
-        "label": "BIS HALLMARKED"
+        "label": "CUSTOM-FIRST"
+      },
+      {
+        "number": 1,
+        "suffix": "",
+        "label": "STORE IN NADIAD"
       }
     ]
   },
@@ -177,44 +177,44 @@
     "collections": [
       {
         "id": "01",
-        "title": "Gold Jewellery",
-        "subtitle": "84 designs",
-        "image": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=1200&auto=format&fit=crop",
-        "link": "/products"
-      },
-      {
-        "id": "02",
-        "title": "Diamond Jewellery",
-        "subtitle": "61 designs",
+        "title": "Rings",
+        "subtitle": "Custom & ready",
         "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=1200&auto=format&fit=crop",
         "link": "/products"
       },
       {
+        "id": "02",
+        "title": "Earrings",
+        "subtitle": "Studs to jhumkas",
+        "image": "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=1200&auto=format&fit=crop",
+        "link": "/products"
+      },
+      {
         "id": "03",
-        "title": "Silver",
-        "subtitle": "120 designs",
-        "image": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=1200&auto=format&fit=crop",
+        "title": "Necklace Sets",
+        "subtitle": "Daily & bridal",
+        "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1200&auto=format&fit=crop",
         "link": "/products"
       },
       {
         "id": "04",
-        "title": "Gemstones",
-        "subtitle": "Astrological & fashion",
-        "image": "https://images.unsplash.com/photo-1611085583191-a3b181a88401?q=80&w=1200&auto=format&fit=crop",
+        "title": "Bangles",
+        "subtitle": "Gold & kada",
+        "image": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=1200&auto=format&fit=crop",
         "link": "/products"
       },
       {
         "id": "05",
-        "title": "Bespoke",
+        "title": "Mangalsutra",
         "subtitle": "Made to order",
         "image": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1200&auto=format&fit=crop",
         "link": "/products"
       },
       {
         "id": "06",
-        "title": "Spiritual",
-        "subtitle": "Sacred adornments",
-        "image": "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?q=80&w=1200&auto=format&fit=crop",
+        "title": "Bridal Sets",
+        "subtitle": "Wedding suites",
+        "image": "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=1200&auto=format&fit=crop",
         "link": "/products"
       }
     ]
@@ -257,7 +257,7 @@
     "subtitle": "BESPOKE ATELIER",
     "titleLine1": "Your vision,",
     "titleLine2": "our craft.",
-    "description": "From sketch to sacred heirloom in 21 days. Transparent pricing — pay only for the gold weight plus a flat 12% making charge on bespoke orders.",
+    "description": "Our skilled karigars create any design. Upload a photo or sketch, share specs, and get a quotation on WhatsApp — metal, purity, weight, and finish agreed upfront.",
     "backgroundImage": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=2400&auto=format&fit=crop",
     "ctaPrimary": {
       "text": "START YOUR DESIGN",
@@ -265,7 +265,7 @@
     },
     "ctaSecondary": {
       "text": "WHATSAPP CONSULT",
-      "link": "https://wa.me/919265075114"
+      "link": "https://wa.me/918866873390"
     },
     "ctaTertiary": {
       "text": "WATCH THE CRAFT",
@@ -405,7 +405,7 @@
       {
         "icon": "hammer",
         "title": "Craft",
-        "description": "Kolkata's master carvers",
+        "description": "Nadiad's skilled karigars",
         "percentage": "+ 4%"
       },
       {
@@ -460,9 +460,9 @@
   },
   "goldSchemeSection": {
     "schemeCard": {
-      "badge": "11 + 1 GOLD SCHEME",
-      "title": "Pay 11. Get 12.",
-      "description": "Choose your monthly contribution. We add the final month — in pure gold value.",
+      "badge": "SUVARNA VRIDDHI YOJANA",
+      "title": "Save monthly. Redeem in gold.",
+      "description": "Join 12+1, 18+2, or 24+3 plans — pay monthly and redeem with bonus month benefits for jewellery purchase.",
       "paidMonthsCount": 11,
       "monthPrefix": "M",
       "sliderLabel": "Monthly contribution",
@@ -475,7 +475,7 @@
       "totalCaption": "TOTAL VALUE",
       "whatsappCta": {
         "text": "JOIN VIA WHATSAPP",
-        "href": "https://wa.me/919265075114"
+        "href": "https://wa.me/918866873390"
       }
     },
     "clearancePanel": {
@@ -555,20 +555,20 @@
     ]
   },
   "founderSection": {
-    "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=900&auto=format&fit=crop",
-    "imageAlt": "Portrait of the founder",
-    "establishedYear": "1984",
-    "establishedText": "THE FIRST HAMMER FELL",
-    "sectionLabel": "THE FOUNDER",
-    "heading": "A goldsmith's son. A father's promise.",
-    "quote": "We don't sell jewellery. We hand over a piece of someone's wedding day, their daughter's first earrings, their grandmother's memory.",
-    "description": "Ramesh Agarwal opened a single bench in Bowbazar in 1984 with three karigars and one promise: every gram, weighed honestly. Forty years on, his sons run the same bench — and the same promise.",
+    "image": "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?q=80&w=900&auto=format&fit=crop",
+    "imageAlt": "Karigar at the bench in Nadiad",
+    "establishedYear": "Nadiad",
+    "establishedText": "MADE-TO-ORDER IN GUJARAT",
+    "sectionLabel": "CRAFTSMANSHIP",
+    "heading": "Craftsmanship & trust.",
+    "quote": "From sketches to stone-setting, every step is handled by skilled karigars with attention to detail.",
+    "description": "We start from your design and optimize for wear, comfort, and longevity — with purity, weight, and finish discussed before we begin.",
     "linkText": "READ OUR FULL STORY",
     "linkHref": "/about"
   },
   "testimonialsSection": {
     "badge": "IN THEIR WORDS",
-    "title": "Loved by ten thousand families.",
+    "title": "Loved by customers in Nadiad.",
     "initialVisibleCount": 3,
     "viewMoreLabel": "View more reviews",
     "viewLessLabel": "Show fewer",
@@ -576,68 +576,64 @@
       "score": "4.9",
       "outOf": "5",
       "starCount": 5,
-      "reviewsLabel": "2,418 GOOGLE REVIEWS"
+      "reviewsLabel": "25 GOOGLE REVIEWS"
     },
     "items": [
       {
-        "quote": "The temple choker they crafted for my wedding was beyond what I sketched. Every aunt asked which family heirloom it was.",
-        "author": "Priya Banerjee",
+        "quote": "Shared a Pinterest photo and got a gorgeous mangalsutra made in 2 weeks. Responsive on WhatsApp.",
+        "author": "Priya S.",
         "tags": [
-          "BRIDAL SET",
-          "CUSTOM BRIDAL SET",
+          "CUSTOM MANGALSUTRA",
           "22K"
         ],
         "image": "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=200&auto=format&fit=crop",
-        "imageAlt": "Priya Banerjee"
+        "imageAlt": "Priya S."
       },
       {
-        "quote": "Three generations of my family have bought from Pradeep Jewellers. The trust is in every gram — exactly what's billed is exactly what you wear.",
-        "author": "Mrs. Sengupta",
+        "quote": "They matched my ring size perfectly and gave clarity on gold weight before production.",
+        "author": "Rohan M.",
         "tags": [
-          "ANNIVERSARY",
-          "DIAMOND SOLITAIRE",
+          "COUPLE RINGS",
+          "18K"
+        ],
+        "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop",
+        "imageAlt": "Rohan M."
+      },
+      {
+        "quote": "Transparent pricing, quick estimate, and the craftsmanship is superb.",
+        "author": "Hetal P.",
+        "tags": [
+          "DIAMOND EARRINGS",
           "18K"
         ],
         "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop",
-        "imageAlt": "Mrs. Sengupta"
+        "imageAlt": "Hetal P."
       },
       {
-        "quote": "From design call on WhatsApp to delivery in 19 days. The making charges were a third of what we were quoted elsewhere.",
-        "author": "Riya & Arjun",
+        "quote": "From WhatsApp quote to pickup in Nadiad — specs were clear and the finish was exactly what we discussed.",
+        "author": "Kiran & Meera",
         "tags": [
-          "WEDDING",
-          "MANGALSUTRA",
+          "BRIDAL SET",
           "22K"
         ],
         "image": "https://images.unsplash.com/photo-1522673607260-14d3b7361e9a?q=80&w=200&auto=format&fit=crop",
-        "imageAlt": "Riya and Arjun"
+        "imageAlt": "Kiran and Meera"
       },
       {
-        "quote": "Their festive collection felt curated for our pujo — the necklace sat perfectly without a single adjustment. Transparent pricing made the whole family comfortable.",
-        "author": "Ananya Deshmukh",
-        "tags": [
-          "FESTIVAL",
-          "NECKLACE",
-          "22K"
-        ],
-        "image": "https://images.unsplash.com/photo-1580489944761-945a83b0b8b0?q=80&w=200&auto=format&fit=crop",
-        "imageAlt": "Ananya Deshmukh"
-      },
-      {
-        "quote": "I joined the 11+1 scheme and redeemed on my daughter's ring. The team explained every month's credit — no surprises, only trust.",
-        "author": "Vikram Mehta",
+        "quote": "Joined Suvarna Vriddhi and redeemed for my daughter's ring. Every month's credit was explained — no surprises.",
+        "author": "Vikram P.",
         "tags": [
           "GOLD SCHEME",
           "RING",
           "22K"
         ],
         "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop",
-        "imageAlt": "Vikram Mehta"
+        "imageAlt": "Vikram P."
       }
     ]
   },
   "socialSection": {
-    "handle": "@pradeepjewellers",
+    "handle": "@pradeepjewellers_nadiad",
     "title": "Follow the journey of every piece.",
     "description": "Behind-the-bench reels, festive lookbooks, and first looks at new collections — across Instagram and our WhatsApp Broadcast.",
     "gridImages": [
@@ -681,8 +677,8 @@
     }
   },
   "footerSection": {
-    "brandDescription": "Heirloom jewellery, hand-finished in India since 1972. BIS hallmarked. Every gram weighed honestly — the way Pradeep Jewellers has always done it.",
-    "complianceLine": "GST 24ASDPP5488Q2ZU",
+    "brandDescription": "Custom gold, diamond, and silver jewellery made in Nadiad. Upload your design — get a fast estimate on WhatsApp.",
+    "complianceLine": "GST-registered jeweller · Nadiad, Gujarat",
     "newsletter": {
       "placeholder": "Your email",
       "mailtoSubject": "Newsletter signup"
@@ -736,14 +732,14 @@
       }
     ],
     "visit": {
-      "address": "24, Ranganathan Street, T. Nagar, Chennai 600017",
+      "address": "Santh Bazzar, Amdavadi Bazar Road, Nadiad, Gujarat 387001",
       "mapLabel": "VIEW ON MAP",
-      "mapHref": "https://maps.app.goo.gl/ryRkHi6wxcVVxnuh7",
-      "mapEmbedUrl": "https://www.google.com/maps?q=22.695693,72.865441&z=17&output=embed",
-      "hours": "Mon-Sat · 11 AM – 8 PM"
+      "mapHref": "https://www.google.com/maps?q=22.667084,72.855967",
+      "mapEmbedUrl": "https://www.google.com/maps?q=22.667084,72.855967&z=17&output=embed",
+      "hours": "Mon–Sat · 10 AM – 8 PM · Sun closed"
     },
     "copyrightBrand": "Pradeep Jewellers",
-    "copyrightExtras": "GST 24ASDPP5488Q2ZU",
+    "copyrightExtras": "Nadiad, Gujarat 387001",
     "legalLinks": [
       {
         "label": "Privacy",

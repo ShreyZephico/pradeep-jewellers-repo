@@ -109,7 +109,7 @@ export default function CraftsmanshipSection() {
 
               <div className={styles.signature}>
                 <div className={styles.signatureLine} />
-                <span>Since 1972</span>
+                <span>Made in Nadiad</span>
                 <div className={styles.signatureLine} />
               </div>
             </div>

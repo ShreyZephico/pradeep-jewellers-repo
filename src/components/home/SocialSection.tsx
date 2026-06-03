@@ -77,7 +77,7 @@ export default function SocialSection() {
 
   const waBase = useMemo(() => {
     const m = social.whatsapp.match(/wa\.me\/(\d+)/);
-    return m ? m[1] : "919876543210";
+    return m ? m[1] : "918866873390";
   }, [social.whatsapp]);
 
   useEffect(() => {

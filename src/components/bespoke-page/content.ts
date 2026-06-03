@@ -193,7 +193,7 @@ export const BESPOKE_WHY_US: Array<{
   {
     icon: "📦",
     title: "Insured delivery",
-    body: "Fully insured shipping across India with tracking and secure packaging.",
+    body: "Collect in Nadiad or arrange insured delivery across Gujarat and India with secure packaging.",
   },
 ];
 
@@ -204,28 +204,28 @@ export const BESPOKE_TESTIMONIALS: Array<{
   image: string;
 }> = [
   {
-    name: "Priya Banerjee",
+    name: "Priya S.",
     rating: 5,
-    text: "The temple choker they crafted for my wedding was beyond what I sketched. Every aunt asked which family heirloom it was.",
+    text: "Shared a Pinterest photo and got a gorgeous mangalsutra made in 2 weeks. Responsive on WhatsApp.",
     image: bespokeImageUrl("photo-1594633312681-425c7b97ccd1", 400),
   },
   {
-    name: "Riya & Arjun",
+    name: "Rohan M.",
     rating: 5,
-    text: "From design call on WhatsApp to delivery in 19 days. The making charges were a third of what we were quoted elsewhere.",
-    image: bespokeImageUrl("photo-1522673607260-14d3b7361e9a", 400),
+    text: "They matched my ring size perfectly and gave clarity on gold weight before production.",
+    image: bespokeImageUrl("photo-1472099645785-5658abf4ff4e", 400),
   },
   {
-    name: "Mrs. Sengupta",
+    name: "Hetal P.",
     rating: 5,
-    text: "Three generations of my family have bought from Pradeep Jewellers. The trust is in every gram — exactly what's billed is exactly what you wear.",
+    text: "Transparent pricing, quick estimate, and the craftsmanship is superb.",
     image: bespokeImageUrl("photo-1573496359142-b8d87734a5a2", 400),
   },
   {
-    name: "Ananya Deshmukh",
+    name: "Kiran & Meera",
     rating: 5,
-    text: "Their bespoke necklace sat perfectly without a single adjustment. Transparent pricing made the whole family comfortable.",
-    image: bespokeImageUrl("photo-1580489944761-945a83b0b8b0", 400),
+    text: "From WhatsApp quote to pickup in Nadiad — specs were clear and the finish was exactly what we discussed.",
+    image: bespokeImageUrl("photo-1522673607260-14d3b7361e9a", 400),
   },
 ];
 

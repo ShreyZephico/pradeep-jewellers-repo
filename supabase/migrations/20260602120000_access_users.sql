@@ -30,7 +30,7 @@ insert into dev.access_users (name, email, mobile)
 values (
   'shrey',
   'shreyshahworld@gmail.com',
-  '9265075114'
+  '8866873390'
 )
 on conflict (email) do update
 set name = excluded.name,
