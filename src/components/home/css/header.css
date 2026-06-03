@@ -3,7 +3,7 @@
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 100;
   background: var(--header-bg);
   transition:
     background var(--header-transition),
@@ -703,6 +703,13 @@
 }
 
 @media (min-width: 768px) {
+  .site-header__main-inner {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    justify-content: initial;
+  }
+
   .site-header__nav {
     display: flex;
   }

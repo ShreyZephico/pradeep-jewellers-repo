@@ -48,7 +48,7 @@ export async function GET(request: Request) {
       exp: Date.now() + 7 * 24 * 60 * 60 * 1000
     })).toString('base64');
 
-    const response = NextResponse.redirect(new URL('/landing', request.url));
+    const response = NextResponse.redirect(new URL('/', request.url));
     
     response.cookies.set('customerAccessToken', sessionToken, {
       httpOnly: true,

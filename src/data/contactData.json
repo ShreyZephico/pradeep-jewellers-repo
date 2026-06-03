@@ -35,11 +35,11 @@
   ],
   "footer": {
     "quickLinks": [
-      { "label": "Home", "url": "/landing#home" },
-      { "label": "Collections", "url": "/landing#collections" },
+      { "label": "Home", "url": "/" },
+      { "label": "Collections", "url": "/#featured-products" },
       { "label": "Shop", "url": "/products" },
-      { "label": "Testimonials", "url": "/landing#testimonials" },
-      { "label": "Contact Us", "url": "/landing#contact" }
+      { "label": "Testimonials", "url": "/#testimonials-section-heading" },
+      { "label": "Contact Us", "url": "/#callback" }
     ],
     "collections": [
       { "label": "Engagement Rings", "url": "/collections/engagement-rings" },

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import styles from "./css/Navbar.module.css";
 import { getImageUrl } from "@/utils/cloudinary";
 
@@ -19,8 +19,23 @@ const menuItems = [
   { label: "Contact", href: "/landing#contact" },
 ];
 
+function scrollToHash(href: string) {
+  const hashIndex = href.indexOf("#");
+  if (hashIndex === -1) return false;
+
+  const id = href.slice(hashIndex + 1);
+  if (!id) return false;
+
+  const target = document.getElementById(id);
+  if (!target) return false;
+
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  return true;
+}
+
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [logoError, setLogoError] = useState(false);
@@ -55,6 +70,30 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (pathname !== "/landing" || !window.location.hash) return;
+
+    const id = window.location.hash.slice(1);
+    if (!id) return;
+
+    window.requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [pathname]);
+
+  const handleNavClick = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    if (pathname !== "/landing" || !href.includes("#")) return;
+
+    if (scrollToHash(href)) {
+      event.preventDefault();
+      window.history.replaceState(null, "", href);
+      setIsMenuOpen(false);
+    }
+  };
+
   const handleLogout = async () => {
     await fetch("/api/logout", { method: "POST" }).catch(() => null);
     localStorage.removeItem("customerAccessToken");
@@ -77,7 +116,12 @@ export default function Navbar() {
       className={`${styles.navbar} ${isScrolled ? styles.navbarScrolled : ""}`}
     >
       <div className={styles.container}>
-        <Link href="/landing#home" className={styles.brand} aria-label="Go to homepage">
+        <Link
+          href="/landing#home"
+          className={styles.brand}
+          aria-label="Go to homepage"
+          onClick={(event) => handleNavClick(event, "/landing#home")}
+        >
           <div className={styles.logoWrap}>
             {!logoError ? (
               <Image
@@ -100,7 +144,12 @@ export default function Navbar() {
 
         <nav className={styles.desktopMenu} aria-label="Primary">
           {menuItems.map((item) => (
-            <Link key={item.href} href={item.href} className={styles.link}>
+            <Link
+              key={item.href}
+              href={item.href}
+              className={styles.link}
+              onClick={(event) => handleNavClick(event, item.href)}
+            >
               {item.label}
             </Link>
           ))}
@@ -110,7 +159,11 @@ export default function Navbar() {
           <Link href="/products" className={styles.secondaryAction}>
             Discover Pieces
           </Link>
-          <Link href="/landing#contact" className={styles.primaryAction}>
+          <Link
+            href="/landing#contact"
+            className={styles.primaryAction}
+            onClick={(event) => handleNavClick(event, "/landing#contact")}
+          >
             Book Appointment
           </Link>
 
@@ -159,7 +212,10 @@ export default function Navbar() {
             key={item.href}
             href={item.href}
             className={styles.mobileLink}
-            onClick={() => setIsMenuOpen(false)}
+            onClick={(event) => {
+              handleNavClick(event, item.href);
+              setIsMenuOpen(false);
+            }}
           >
             {item.label}
           </Link>

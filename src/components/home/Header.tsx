@@ -76,6 +76,11 @@ function TickerItem({
 function RatesTicker() {
   const { payload, loading } = useGoldRates();
   const live = payload?.data;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const items = (
     <>
@@ -112,7 +117,7 @@ function RatesTicker() {
       aria-label="Live gold and silver rates"
     >
       <div className="site-header__ticker-viewport">
-        {loading && !live ? (
+        {!mounted || (loading && !live) ? (
           <span className="site-header__ticker-skeleton" aria-busy="true" />
         ) : (
           <div className="site-header__ticker-track" aria-live="polite">
