@@ -98,10 +98,6 @@ export default function PriceCalculationBreakdown({
     diamondAmount,
     otherExtras,
   });
-  const baseGrand = breakdown.finalPrice + diamondAmount + otherExtras;
-  const grandOriginalCandidate = Math.max(refs.referenceGrand, baseGrand);
-  const grandOriginal =
-    grandOriginalCandidate > displayTotal ? grandOriginalCandidate : undefined;
 
   return (
     <section className={rootClass} aria-label={copy.title}>
@@ -154,7 +150,9 @@ export default function PriceCalculationBreakdown({
 
         <div className="product-breakup-row product-breakup-row--grand">
           <span className="product-breakup-label">{copy.grandTotal}</span>
-          <BreakupPrices current={displayTotal} original={grandOriginal} />
+          <span className="product-breakup-price product-breakup-price--grand">
+            {formatProductPrice(displayTotal)}
+          </span>
         </div>
       </div>
     </section>

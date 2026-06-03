@@ -9,9 +9,21 @@ type ProductModalProps = {
   product: Product | null;
   open: boolean;
   onClose: () => void;
+  initialSelection?: import("@/utils/productCustomization").CustomizationSelections;
+  selectionSyncKey?: string | number;
+  onConfirm?: (
+    snapshot: import("@/utils/productCustomization").ConfirmedCustomizationSnapshot
+  ) => void;
 };
 
-export default function ProductModal({ product, open, onClose }: ProductModalProps) {
+export default function ProductModal({
+  product,
+  open,
+  onClose,
+  initialSelection,
+  selectionSyncKey,
+  onConfirm,
+}: ProductModalProps) {
   useEffect(() => {
     if (!open) {
       return;
@@ -48,6 +60,9 @@ export default function ProductModal({ product, open, onClose }: ProductModalPro
             showDesignSummary
             priceHeaderVariant="modal"
             onClose={onClose}
+            initialSelection={initialSelection}
+            selectionSyncKey={selectionSyncKey}
+            onConfirm={onConfirm}
           />
         </div>
       </div>

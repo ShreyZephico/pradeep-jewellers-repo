@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type RefObject } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/types/product";
@@ -20,8 +20,19 @@ import "@/styles/ProductPurchasePanel.css";
 import { buildPriceBreakdownOptionLines } from "@/utils/priceBreakdownOptions";
 import {
   getCustomizationValidationError,
+  getDefaultProductCustomization,
+  getProductCustomizationPickers,
+  buildCustomizationLineAttributes,
+  type ConfirmedCustomizationSnapshot,
   type CustomizationField,
+  type CustomizationSelections,
 } from "@/utils/productCustomization";
+import { isStandardRingSize } from "@/utils/customizePickerCatalog";
+import {
+  getSizeSpecLabel,
+  getSizeValidationMessage,
+  inferJewelryCategory,
+} from "@/utils/productCustomizationLabels";
 
 export { formatProductPrice };
 
@@ -45,6 +56,9 @@ export type ProductPurchasePanelProps = {
   onClose?: () => void;
   checkoutButtonLabel?: string;
   checkoutFlow?: "customer-session" | "storefront-cart";
+  initialSelection?: CustomizationSelections;
+  selectionSyncKey?: string | number;
+  onConfirm?: (snapshot: ConfirmedCustomizationSnapshot) => void;
 };
 
 export default function ProductPurchasePanel({
@@ -52,6 +66,9 @@ export default function ProductPurchasePanel({
   showDesignSummary = true,
   priceHeaderVariant = "modal",
   onClose,
+  initialSelection,
+  selectionSyncKey,
+  onConfirm,
 }: ProductPurchasePanelProps) {
   const { refreshCart, goToCart } = useCart();
   const [buyLoading, setBuyLoading] = useState(false);
@@ -66,24 +83,38 @@ export default function ProductPurchasePanel({
   const sizeRef = useRef<HTMLElement>(null);
   const footerRef = useRef<HTMLElement>(null);
 
-  const karatPickerOptions =
-    product.caratOptions?.length
-      ? product.caratOptions
-      : product.metalOptions?.every((o) => isKaratLabel(o.label))
-        ? product.metalOptions
-        : [];
+  const customSizeInputId = useId();
+  const pickers = getProductCustomizationPickers(product);
 
-  const metalPickerOptions =
-    product.metalOptions?.filter((o) => !isKaratLabel(o.label)) ?? [];
+  const defaultSelection = getDefaultProductCustomization(product);
+  const resolvedInitial: CustomizationSelections = initialSelection ?? defaultSelection;
 
-  const [selectedMetal, setSelectedMetal] = useState("");
-  const [selectedCarat, setSelectedCarat] = useState("");
-  const [selectedQuality, setSelectedQuality] = useState("");
-  const [selectedSize, setSelectedSize] = useState("");
-  const hasMetalOptions = metalPickerOptions.length > 0;
-  const hasCaratOptions = karatPickerOptions.length > 0;
-  const hasDiamondOptions = Boolean(product.diamondQualities?.length);
-  const hasSizeOptions = Boolean(product.sizeOptions?.length);
+  const [selectedMetal, setSelectedMetal] = useState(resolvedInitial.metal);
+  const [selectedCarat, setSelectedCarat] = useState(resolvedInitial.carat);
+  const [selectedQuality, setSelectedQuality] = useState(resolvedInitial.quality);
+  const isRingProduct = inferJewelryCategory(product) === "ring";
+  const [selectedSize, setSelectedSize] = useState(() =>
+    isRingProduct && resolvedInitial.size && isStandardRingSize(resolvedInitial.size)
+      ? resolvedInitial.size
+      : isRingProduct
+        ? "5"
+        : resolvedInitial.size
+  );
+  const [customSizeActive, setCustomSizeActive] = useState(
+    () =>
+      isRingProduct &&
+      Boolean(resolvedInitial.size) &&
+      !isStandardRingSize(resolvedInitial.size)
+  );
+  const [customSizeInput, setCustomSizeInput] = useState(() =>
+    customSizeActive ? resolvedInitial.size : ""
+  );
+  const effectiveSize = customSizeActive ? customSizeInput.trim() : selectedSize;
+
+  const hasMetalOptions = pickers.showMetal;
+  const hasCaratOptions = pickers.showCarat;
+  const hasDiamondOptions = pickers.showDiamond;
+  const hasSizeOptions = pickers.showSize;
 
   const selectKarat = (label: string) => {
     setSelectedCarat(label);
@@ -98,19 +129,19 @@ export default function ProductPurchasePanel({
   const selectedCaratOption = product.caratOptions?.find(
     (option) => option.label === selectedCarat
   );
-  const selectedQualityOption = product.diamondQualities?.find(
+  const selectedQualityOption = pickers.diamond.find(
     (option) => option.label === selectedQuality
   );
-  const selectedSizeOption = product.sizeOptions?.find(
-    (option) => option.size === selectedSize
-  );
+  const selectedSizeOption =
+    pickers.sizes.find((option) => option.size === effectiveSize) ??
+    (effectiveSize ? { size: effectiveSize, priceAdjustment: 0 } : undefined);
   const karatLabel = resolveKaratFromSelection(selectedMetal, selectedCarat);
 
   const selectedVariant = findBestMatchingVariant(product.variants, {
     metal: selectedMetal,
     carat: selectedCarat,
     quality: selectedQuality,
-    size: selectedSize,
+    size: effectiveSize,
     karatLabel,
   });
 
@@ -139,6 +170,7 @@ export default function ProductPurchasePanel({
     carat: selectedCaratOption ?? null,
     quality: selectedQualityOption ?? null,
     size: selectedSizeOption ?? null,
+    product,
   });
 
   const isPage = priceHeaderVariant === "page";
@@ -164,6 +196,26 @@ export default function ProductPurchasePanel({
     setCartToast("");
     setErrorField(null);
   }, []);
+
+  useEffect(() => {
+    if (selectionSyncKey === undefined || !initialSelection) return;
+    setSelectedMetal(initialSelection.metal);
+    setSelectedCarat(initialSelection.carat);
+    setSelectedQuality(initialSelection.quality);
+    const nextSize = initialSelection.size;
+    if (isRingProduct && nextSize && !isStandardRingSize(nextSize)) {
+      setCustomSizeActive(true);
+      setCustomSizeInput(nextSize);
+      setSelectedSize("");
+    } else {
+      setCustomSizeActive(false);
+      setCustomSizeInput("");
+      setSelectedSize(
+        isRingProduct && nextSize && isStandardRingSize(nextSize) ? nextSize : nextSize
+      );
+    }
+    clearFeedback();
+  }, [selectionSyncKey, initialSelection, clearFeedback, isRingProduct]);
 
   useEffect(() => {
     clearFeedback();
@@ -226,7 +278,7 @@ export default function ProductPurchasePanel({
     selectedMetal,
     selectedCarat,
     selectedQuality,
-    selectedSize,
+    effectiveSize,
     variantPrice,
     product.makingChargePercent,
   ]);
@@ -245,16 +297,13 @@ export default function ProductPurchasePanel({
   const selectedImage = selectedVariant?.image ?? product.image;
   const listPrice = product.compareAtPrice ?? 0;
 
-  const buildLineAttributes = () => {
-    const attributes: { key: string; value: string }[] = [];
-    if (selectedMetal) attributes.push({ key: "Metal", value: selectedMetal });
-    if (selectedCarat) attributes.push({ key: "Carat", value: selectedCarat });
-    if (selectedQuality) {
-      attributes.push({ key: "Diamond Quality", value: selectedQuality });
-    }
-    if (selectedSize) attributes.push({ key: "Ring Size", value: selectedSize });
-    return attributes;
-  };
+  const buildLineAttributes = () =>
+    buildCustomizationLineAttributes(product, {
+      metal: selectedMetal,
+      carat: selectedCarat,
+      quality: selectedQuality,
+      size: effectiveSize,
+    });
 
   const showValidationError = (message: string, field: CustomizationField) => {
     setCheckoutError(message);
@@ -264,15 +313,37 @@ export default function ProductPurchasePanel({
     footerRef.current?.focus({ preventScroll: true });
   };
 
+  const validateSizeSelection = (): boolean => {
+    if (!hasSizeOptions) {
+      return true;
+    }
+    if (customSizeActive) {
+      if (!customSizeInput.trim()) {
+        showValidationError(copy.errorCustomSize, "size");
+        return false;
+      }
+      return true;
+    }
+    if (!selectedSize.trim()) {
+      showValidationError(getSizeValidationMessage(product), "size");
+      return false;
+    }
+    return true;
+  };
+
   const handleCheckout = async (redirect: boolean) => {
     const validation = getCustomizationValidationError(product, {
       metal: selectedMetal,
       carat: selectedCarat,
       quality: selectedQuality,
-      size: selectedSize,
+      size: effectiveSize,
     });
     if (validation) {
       showValidationError(validation.message, validation.field);
+      return;
+    }
+
+    if (!validateSizeSelection()) {
       return;
     }
 
@@ -294,6 +365,10 @@ export default function ProductPurchasePanel({
         catalogVariantId: catalogVariantIdForCheckout,
         customPrice: estimatedPrice,
         attributes: buildLineAttributes(),
+        priceBreakdown: priceBreakdown ?? undefined,
+        weightGrams: baseWeight,
+        karatLabel,
+        optionAdjustments,
         redirect: true,
       });
       setLoading(false);
@@ -330,6 +405,49 @@ export default function ProductPurchasePanel({
     setCartToast(productContent.commerce.addedToCart);
     window.setTimeout(() => setCartToast(""), 3200);
     goToCart();
+  };
+
+  const handleConfirm = () => {
+    const validation = getCustomizationValidationError(product, {
+      metal: selectedMetal,
+      carat: selectedCarat,
+      quality: selectedQuality,
+      size: effectiveSize,
+    });
+    if (validation) {
+      showValidationError(validation.message, validation.field);
+      return;
+    }
+
+    if (!validateSizeSelection()) {
+      return;
+    }
+
+    if (!selectedVariantId) {
+      showValidationError(copy.selectOptionsError, hasSizeOptions ? "size" : "metal");
+      return;
+    }
+
+    const snapshot: ConfirmedCustomizationSnapshot = {
+      selections: {
+        metal: selectedMetal,
+        carat: selectedCarat,
+        quality: selectedQuality,
+        size: effectiveSize,
+      },
+      estimatedPrice,
+      priceBreakdown,
+      weightGrams: baseWeight,
+      karatLabel,
+      optionAdjustments,
+      variantId: selectedVariantId,
+      catalogVariantId: catalogVariantIdForCheckout,
+    };
+
+    setCheckoutError("");
+    setErrorField(null);
+    onConfirm?.(snapshot);
+    onClose?.();
   };
 
   const sectionInvalid = (field: CustomizationField) => errorField === field;
@@ -391,6 +509,17 @@ export default function ProductPurchasePanel({
 
       {isModal ? (
         <p className="product-purchase-footer-note">{copy.footerSecureNote}</p>
+      ) : null}
+
+      {isModal && onConfirm ? (
+        <button
+          type="button"
+          onClick={handleConfirm}
+          disabled={buyLoading || cartLoading || priceLoading}
+          className="product-commerce-btn-confirm"
+        >
+          {copy.confirmSelection}
+        </button>
       ) : null}
 
       <ProductCommerceActions
@@ -488,7 +617,7 @@ export default function ProductPurchasePanel({
               </span>
             </h3>
             <div className="product-purchase-options product-purchase-options--metal">
-              {metalPickerOptions.map((option) => {
+              {pickers.metal.map((option) => {
                 const isSelected = selectedMetal === option.label;
                 return (
                   <button
@@ -524,7 +653,7 @@ export default function ProductPurchasePanel({
             </h3>
             <p className="product-purchase-section-hint">{copy.caratHint}</p>
             <div className="product-purchase-options product-purchase-options--metal">
-              {karatPickerOptions.map((option) => {
+              {pickers.carat.map((option) => {
                 const isSelected =
                   selectedCarat === option.label ||
                   (isKaratLabel(option.label) && selectedMetal === option.label);
@@ -571,7 +700,7 @@ export default function ProductPurchasePanel({
               </Link>
             </div>
             <div className="product-purchase-options product-purchase-options--diamond">
-              {product.diamondQualities?.map((option) => {
+              {pickers.diamond.map((option) => {
                 const isSelected = selectedQuality === option.label;
                 return (
                   <button
@@ -601,7 +730,7 @@ export default function ProductPurchasePanel({
           >
             <div className="product-purchase-section-header">
               <h3 className="product-purchase-section-title">
-                {product.sizeOptionName ?? copy.sizeOptionDefault}
+                {product.sizeOptionName ?? getSizeSpecLabel(product)}
                 <span className="product-purchase-required" aria-hidden>
                   *
                 </span>
@@ -616,13 +745,17 @@ export default function ProductPurchasePanel({
               </a>
             </div>
             <div className="product-purchase-options product-purchase-options--size">
-              {product.sizeOptions?.map((option) => {
-                const isSelected = selectedSize === option.size;
+              {pickers.sizes.map((option) => {
+                const isSelected = !customSizeActive && selectedSize === option.size;
                 return (
                   <button
                     key={option.size}
                     type="button"
-                    onClick={() => setSelectedSize(option.size)}
+                    onClick={() => {
+                      setCustomSizeActive(false);
+                      setCustomSizeInput("");
+                      setSelectedSize(option.size);
+                    }}
                     className={optionClass(isSelected, true, sectionInvalid("size"))}
                     aria-pressed={isSelected}
                   >
@@ -638,7 +771,45 @@ export default function ProductPurchasePanel({
                   </button>
                 );
               })}
+              {isRingProduct ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomSizeActive(true);
+                    setSelectedSize("");
+                  }}
+                  className={optionClass(
+                    customSizeActive,
+                    true,
+                    sectionInvalid("size")
+                  )}
+                  aria-pressed={customSizeActive}
+                >
+                  <span className="product-option-btn-label">{copy.myCustomSize}</span>
+                </button>
+              ) : null}
             </div>
+            {isRingProduct && customSizeActive ? (
+              <div className="product-purchase-custom-size-field">
+                <label
+                  htmlFor={customSizeInputId}
+                  className="product-purchase-custom-size-label"
+                >
+                  {copy.customSizeLabel}
+                </label>
+                <input
+                  id={customSizeInputId}
+                  type="text"
+                  inputMode="decimal"
+                  value={customSizeInput}
+                  onChange={(event) => setCustomSizeInput(event.target.value)}
+                  placeholder={copy.customSizePlaceholder}
+                  className="product-purchase-custom-size-input"
+                  aria-invalid={sectionInvalid("size")}
+                  autoComplete="off"
+                />
+              </div>
+            ) : null}
           </section>
         ) : null}
       </div>

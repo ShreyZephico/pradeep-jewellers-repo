@@ -256,6 +256,7 @@
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
+  overflow: visible;
 }
 
 .site-header__phone {
@@ -333,6 +334,7 @@
   align-items: center;
   flex-shrink: 0;
   min-width: 0;
+  overflow: visible;
 }
 
 .site-header__search-slot .header-search--compact:not(.header-search--open) {
@@ -828,6 +830,7 @@
   .site-header__main-inner {
     display: grid;
     grid-template-columns: 1fr auto;
+    align-items: center;
   }
 
   .site-header__nav {
@@ -840,6 +843,20 @@
 
   .site-header__search-submit {
     display: none;
+  }
+
+  .site-header__search-slot .header-search--compact.header-search--open {
+    position: relative;
+    z-index: 121;
+    max-width: none;
+    width: 100%;
+  }
+
+  .site-header__actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.35rem;
+    max-width: 100%;
   }
 
   .site-header__ticker-group {

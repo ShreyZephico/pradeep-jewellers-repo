@@ -1,7 +1,20 @@
 import productContent from "@/lib/productContent";
 import type { Product } from "@/types/product";
-import { isKaratLabel } from "@/utils/karat";
+import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
+import { isKaratLabel, resolveKaratFromSelection } from "@/utils/karat";
 import { getProductHref } from "@/utils/productUrl";
+import { findBestMatchingVariant } from "@/utils/variantOptionMatch";
+import {
+  getDiamondPickerOptions,
+  getSizePickerOptions,
+} from "@/utils/customizePickerCatalog";
+import {
+  filterSizeOptionsForProduct,
+  getDefaultSizeSelection,
+  getSizeAttributeKey,
+  getSizeSpecLabel,
+  getSizeValidationMessage,
+} from "@/utils/productCustomizationLabels";
 
 export type CustomizationSelections = {
   metal: string;
@@ -17,22 +30,202 @@ export type CustomizationValidationResult = {
   field: CustomizationField;
 };
 
-export function productHasCustomizationOptions(product: Product): boolean {
-  const metalPicker =
-    product.metalOptions?.filter((o) => !isKaratLabel(o.label)) ?? [];
-  const karatPicker =
-    product.caratOptions?.length
-      ? product.caratOptions
-      : product.metalOptions?.every((o) => isKaratLabel(o.label))
-        ? product.metalOptions
-        : [];
+export type ConfirmedCustomizationSnapshot = {
+  selections: CustomizationSelections;
+  estimatedPrice: number;
+  priceBreakdown: VariantPriceBreakdown | null;
+  weightGrams: number;
+  karatLabel: string | null;
+  optionAdjustments: number;
+  variantId: string;
+  catalogVariantId?: string;
+};
 
-  return Boolean(
-    product.customizable ||
-    metalPicker.length ||
-    karatPicker.length ||
-    product.diamondQualities?.length ||
-    product.sizeOptions?.length
+export function karatPickerOptions(product: Product) {
+  return product.caratOptions?.length
+    ? product.caratOptions
+    : product.metalOptions?.every((o) => isKaratLabel(o.label))
+      ? product.metalOptions
+      : [];
+}
+
+export function metalPickerOptions(product: Product) {
+  return product.metalOptions?.filter((o) => !isKaratLabel(o.label)) ?? [];
+}
+
+export type ProductCustomizationPickers = {
+  metal: ReturnType<typeof metalPickerOptions>;
+  carat: ReturnType<typeof karatPickerOptions>;
+  diamond: NonNullable<Product["diamondQualities"]>;
+  sizes: NonNullable<Product["sizeOptions"]>;
+  showMetal: boolean;
+  showCarat: boolean;
+  showDiamond: boolean;
+  showSize: boolean;
+};
+
+/** Only pickers that exist in catalog/Shopify and need a customer choice (>1 value). */
+export function getProductCustomizationPickers(product: Product): ProductCustomizationPickers {
+  const metal = metalPickerOptions(product);
+  const carat = karatPickerOptions(product);
+  const diamond = getDiamondPickerOptions(product);
+  const sizes = getSizePickerOptions(product);
+
+  return {
+    metal,
+    carat,
+    diamond,
+    sizes,
+    showMetal: metal.length > 1,
+    showCarat: carat.length > 1,
+    showDiamond: diamond.length > 1,
+    showSize: sizes.length > 1,
+  };
+}
+
+function pickByPattern<T>(
+  items: T[],
+  match: (item: T) => boolean
+): T | undefined {
+  return items.find(match) ?? items[0];
+}
+
+/** Default customization: first/preferred values for each option Shopify provides. */
+export function getDefaultProductCustomization(product: Product): CustomizationSelections {
+  const pickers = getProductCustomizationPickers(product);
+
+  const metal =
+    pickers.metal.length > 0
+      ? (pickByPattern(pickers.metal, (o) => /yellow/i.test(o.label))?.label ??
+        pickers.metal[0]?.label ??
+        "")
+      : "";
+  const carat =
+    pickers.carat.length > 0
+      ? (pickByPattern(pickers.carat, (o) => /18\s*k/i.test(o.label))?.label ??
+        pickers.carat[0]?.label ??
+        "")
+      : "";
+  const quality =
+    pickers.diamond.length > 0
+      ? (pickByPattern(pickers.diamond, (o) => /ij[-\s]*si/i.test(o.label))?.label ??
+        pickers.diamond[0]?.label ??
+        "")
+      : "";
+  const size =
+    pickers.sizes.length > 0 ? getDefaultSizeSelection(product, pickers.sizes) : "";
+
+  return { metal, carat, quality, size };
+}
+
+export function buildCustomizationLineAttributes(
+  product: Product,
+  selected: CustomizationSelections
+): { key: string; value: string }[] {
+  const attributes: { key: string; value: string }[] = [];
+  if (selected.metal.trim()) {
+    attributes.push({ key: "Metal", value: selected.metal });
+  }
+  if (selected.carat.trim()) {
+    attributes.push({ key: "Carat", value: selected.carat });
+  }
+  if (selected.quality.trim()) {
+    attributes.push({ key: "Diamond Quality", value: selected.quality });
+  }
+  if (selected.size.trim()) {
+    attributes.push({
+      key: getSizeAttributeKey(product),
+      value: selected.size,
+    });
+  }
+  return attributes;
+}
+
+export function resolveCustomizationOptions(
+  product: Product,
+  selected: CustomizationSelections
+) {
+  const metalOption = product.metalOptions?.find((o) => o.label === selected.metal);
+  const caratOption = product.caratOptions?.find((o) => o.label === selected.carat);
+  const qualityOption = getDiamondPickerOptions(product).find(
+    (o) => o.label === selected.quality
+  );
+  const sizeOption = getSizePickerOptions(product).find(
+    (o) => o.size === selected.size
+  );
+  const karatLabel = resolveKaratFromSelection(selected.metal, selected.carat);
+  const variant = findBestMatchingVariant(product.variants, {
+    metal: selected.metal,
+    carat: selected.carat,
+    quality: selected.quality,
+    size: selected.size,
+    karatLabel,
+  });
+  const baseWeight =
+    variant?.weight ??
+    product.variants?.find((v) => v.weight && v.weight > 0)?.weight ??
+    5;
+
+  return {
+    metalOption: metalOption ?? null,
+    caratOption: caratOption ?? null,
+    qualityOption: qualityOption ?? null,
+    sizeOption: sizeOption ?? null,
+    karatLabel,
+    variant,
+    baseWeight,
+  };
+}
+
+export function buildSpecRowsFromSelections(
+  product: Product,
+  selected: CustomizationSelections
+): { label: string; value: string }[] {
+  const rows: { label: string; value: string }[] = [];
+  const metals = metalPickerOptions(product);
+  const karats = karatPickerOptions(product);
+
+  if (metals.length && selected.metal.trim()) {
+    rows.push({ label: "Metal", value: selected.metal });
+  }
+  if (karats.length && selected.carat.trim()) {
+    rows.push({ label: "Carat", value: selected.carat });
+  } else if (
+    selected.metal.trim() &&
+    isKaratLabel(selected.metal) &&
+    !rows.some((r) => r.label === "Carat")
+  ) {
+    rows.push({ label: "Carat", value: selected.metal });
+  }
+  const pickers = getProductCustomizationPickers(product);
+
+  if (pickers.diamond.length && selected.quality.trim()) {
+    rows.push({ label: "Diamond quality", value: selected.quality });
+  }
+  if (pickers.sizes.length && selected.size.trim()) {
+    rows.push({ label: getSizeSpecLabel(product), value: selected.size });
+  }
+
+  if (rows.length > 0) {
+    return rows;
+  }
+
+  return (
+    product.variants?.[0]?.selectedOptions?.map((o) => ({
+      label: o.name,
+      value: o.value,
+    })) ?? []
+  );
+}
+
+/** True when Shopify/catalog exposes at least one option the customer must choose. */
+export function productHasCustomizationOptions(product: Product): boolean {
+  const pickers = getProductCustomizationPickers(product);
+  return (
+    pickers.showMetal ||
+    pickers.showCarat ||
+    pickers.showDiamond ||
+    pickers.showSize
   );
 }
 
@@ -47,16 +240,9 @@ export function getCustomizationValidationError(
 ): CustomizationValidationResult | null {
   const copy = productContent.purchase;
 
-  const metalPicker =
-    product.metalOptions?.filter((o) => !isKaratLabel(o.label)) ?? [];
-  const karatPicker =
-    product.caratOptions?.length
-      ? product.caratOptions
-      : product.metalOptions?.every((o) => isKaratLabel(o.label))
-        ? product.metalOptions
-        : [];
+  const pickers = getProductCustomizationPickers(product);
 
-  if (metalPicker.length && !selected.metal.trim()) {
+  if (pickers.showMetal && !selected.metal.trim()) {
     return { message: copy.errorMetal, field: "metal" };
   }
 
@@ -64,16 +250,16 @@ export function getCustomizationValidationError(
     selected.carat.trim() ||
     (selected.metal.trim() && isKaratLabel(selected.metal));
 
-  if (karatPicker.length && !karatChosen) {
+  if (pickers.showCarat && !karatChosen) {
     return { message: copy.errorCarat, field: "carat" };
   }
 
-  if (product.diamondQualities?.length && !selected.quality.trim()) {
+  if (pickers.showDiamond && !selected.quality.trim()) {
     return { message: copy.errorDiamond, field: "diamond" };
   }
 
-  if (product.sizeOptions?.length && !selected.size.trim()) {
-    return { message: copy.errorSize, field: "size" };
+  if (pickers.showSize && !selected.size.trim()) {
+    return { message: getSizeValidationMessage(product), field: "size" };
   }
 
   return null;

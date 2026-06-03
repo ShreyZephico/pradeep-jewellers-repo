@@ -105,13 +105,17 @@ export default function CartPageClient() {
 
   return (
     <div className="cart-page">
-      <div className="cart-page-container">
+      <div className="cart-page-breadcrumb-bar">
         <nav className="cart-page-breadcrumb" aria-label="Breadcrumb">
           <Link href="/">{breadcrumb.home}</Link>
           <span aria-hidden>{breadcrumb.separator}</span>
-          <span>{copy.pageTitle}</span>
+          <Link href="/products">{breadcrumb.shop}</Link>
+          <span aria-hidden>{breadcrumb.separator}</span>
+          <span aria-current="page">{copy.pageTitle}</span>
         </nav>
+      </div>
 
+      <div className="cart-page-container cart-page-main">
         <header className="cart-page-header">
           <div>
             <h1 className="cart-page-title">{copy.pageTitle}</h1>
@@ -121,10 +125,12 @@ export default function CartPageClient() {
               </p>
             ) : null}
           </div>
-          <Link href="/products" className="cart-page-continue-link">
-            <ArrowLeft size={18} aria-hidden />
-            {copy.continueShopping}
-          </Link>
+          {!isEmpty && !loading ? (
+            <Link href="/products" className="cart-page-continue-link">
+              <ArrowLeft size={16} aria-hidden />
+              {copy.continueShopping}
+            </Link>
+          ) : null}
         </header>
 
         {error ? (
@@ -141,7 +147,7 @@ export default function CartPageClient() {
         ) : isEmpty ? (
           <div className="cart-page-empty">
             <div className="cart-page-empty-icon" aria-hidden>
-              <ShoppingBag size={40} strokeWidth={1.5} />
+              <ShoppingBag size={36} strokeWidth={1.25} />
             </div>
             <h2 className="cart-page-empty-title">{copy.emptyTitle}</h2>
             <p className="cart-page-empty-desc">{copy.emptyDescription}</p>
@@ -152,6 +158,7 @@ export default function CartPageClient() {
         ) : (
           <div className="cart-page-layout">
             <section className="cart-page-items" aria-label={copy.itemsLabel}>
+              <p className="cart-page-items-label">{copy.itemsLabel}</p>
               <ul className="cart-page-lines">
                 {cart.lines.map((line) => (
                   <CartPageLine
@@ -194,6 +201,9 @@ export default function CartPageClient() {
                     <dd>{formatProductPrice(cart.subtotalInr)}</dd>
                   </div>
                 </dl>
+                {copy.gstNote ? (
+                  <p className="cart-page-summary-gst">{copy.gstNote}</p>
+                ) : null}
                 <button
                   type="button"
                   className="cart-page-checkout-btn"
@@ -209,8 +219,10 @@ export default function CartPageClient() {
                     copy.checkout
                   )}
                 </button>
-                <p className="cart-page-secure">{copy.secureNote}</p>
-                <p className="cart-page-login-note">{copy.loginAtCheckoutNote}</p>
+                <ul className="cart-page-trust" aria-label="Checkout assurances">
+                  {copy.secureNote ? <li>{copy.secureNote}</li> : null}
+                  {copy.loginAtCheckoutNote ? <li>{copy.loginAtCheckoutNote}</li> : null}
+                </ul>
               </div>
             </aside>
           </div>
@@ -238,115 +250,117 @@ function CartPageLine({
   onRemove: () => void;
 }) {
   const href = line.productHandle ? `/products/${line.productHandle}` : "/products";
-  const visibleAttributes = line.attributes.filter(
-    (a) => !a.key.startsWith("_pj_") && a.key !== "Design"
-  );
+  const visibleAttributes = line.attributes.filter((a) => {
+    if (a.key.startsWith("_pj_") || a.key === "Design") return false;
+    if (/estimated|custom\s*price|^price$/i.test(a.key)) return false;
+    return true;
+  });
 
   return (
     <li className={`cart-page-line${busy ? " cart-page-line--busy" : ""}`}>
-      <Link href={href} className="cart-page-line-media">
-        <CartLineImage src={line.imageUrl} alt={line.title} size="page" />
-      </Link>
+      <div className="cart-page-line-main">
+        <Link href={href} className="cart-page-line-media">
+          <CartLineImage src={line.imageUrl} alt={line.title} size="page" />
+        </Link>
 
-      <div className="cart-page-line-body">
-        <div className="cart-page-line-top">
-          <div>
+        <div className="cart-page-line-body">
+          <div className="cart-page-line-top">
             <Link href={href} className="cart-page-line-title">
               {line.title}
             </Link>
+            <p className="cart-page-line-price">
+              {formatProductPrice(line.lineTotalInr)}
+            </p>
             {visibleAttributes.length > 0 ? (
               <ul className="cart-page-line-attrs">
                 {visibleAttributes.map((attr) => (
                   <li key={`${attr.key}-${attr.value}`}>
                     <span className="cart-page-line-attr-key">{attr.key}</span>
-                    {attr.value}
+                    <span className="cart-page-line-attr-value">{attr.value}</span>
                   </li>
                 ))}
               </ul>
             ) : null}
           </div>
-          <p className="cart-page-line-price">
-            {formatProductPrice(line.lineTotalInr)}
-          </p>
-        </div>
 
-        {lineBreakdown || breakdownLoading ? (
-          <details className="cart-page-line-breakdown">
-            <summary className="cart-page-line-breakdown-toggle">
-              {copy.lineBreakdownToggle}
-              {line.quantity > 1 ? (
-                <span className="cart-page-line-breakdown-qty">
-                  {" "}
-                  (×{line.quantity})
-                </span>
-              ) : null}
-            </summary>
-            <div className="cart-page-line-breakdown-body">
-              {lineBreakdown ? (
-                <PriceCalculationBreakdown
-                  embedded
-                  breakdown={lineBreakdown.breakdown}
-                  weightGrams={lineBreakdown.weightGrams}
-                  karatLabel={lineBreakdown.karatLabel}
-                  optionAdjustments={lineBreakdown.optionAdjustments}
-                  optionLines={lineBreakdown.optionLines}
-                  displayTotal={lineBreakdown.unitPrice}
-                />
-              ) : (
-                <p className="cart-page-breakdown-loading">
-                  {productContent.priceBreakdown.loading}
-                </p>
-              )}
-              {line.quantity > 1 && lineBreakdown ? (
-                <p className="cart-page-line-breakdown-line-total">
-                  {formatProductCopy(copy.lineTotalLabel, {
-                    count: line.quantity,
-                  })}
-                  : {formatProductPrice(line.lineTotalInr)}
-                </p>
-              ) : null}
+          <div className="cart-page-line-footer">
+            <div className="cart-page-qty" aria-label={copy.quantityLabel}>
+              <button
+                type="button"
+                className="cart-page-qty-btn"
+                disabled={busy || line.quantity <= 1}
+                onClick={onDecrease}
+                aria-label={copy.decreaseQty}
+              >
+                −
+              </button>
+              <span className="cart-page-qty-value">{line.quantity}</span>
+              <button
+                type="button"
+                className="cart-page-qty-btn"
+                disabled={busy}
+                onClick={onIncrease}
+                aria-label={copy.increaseQty}
+              >
+                +
+              </button>
             </div>
-          </details>
-        ) : null}
-
-        <div className="cart-page-line-footer">
-          <div className="cart-page-qty" aria-label={copy.quantityLabel}>
-            <button
-              type="button"
-              className="cart-page-qty-btn"
-              disabled={busy || line.quantity <= 1}
-              onClick={onDecrease}
-              aria-label={copy.decreaseQty}
-            >
-              −
-            </button>
-            <span className="cart-page-qty-value">{line.quantity}</span>
-            <button
-              type="button"
-              className="cart-page-qty-btn"
-              disabled={busy}
-              onClick={onIncrease}
-              aria-label={copy.increaseQty}
-            >
-              +
-            </button>
-          </div>
-          <div className="cart-page-line-links">
-            <Link href={href} className="cart-page-line-link">
-              {copy.viewProduct}
-            </Link>
-            <button
-              type="button"
-              className="cart-page-line-remove"
-              disabled={busy}
-              onClick={onRemove}
-            >
-              <Trash2 size={14} aria-hidden />
-              {copy.remove}
-            </button>
+            <div className="cart-page-line-links">
+              <Link href={href} className="cart-page-line-link">
+                {copy.viewProduct}
+              </Link>
+              <button
+                type="button"
+                className="cart-page-line-remove"
+                disabled={busy}
+                onClick={onRemove}
+              >
+                <Trash2 size={14} aria-hidden />
+                {copy.remove}
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {lineBreakdown || breakdownLoading ? (
+        <details className="cart-page-line-breakdown">
+          <summary className="cart-page-line-breakdown-toggle">
+            {copy.lineBreakdownToggle}
+            {line.quantity > 1 ? (
+              <span className="cart-page-line-breakdown-qty">
+                {" "}
+                (×{line.quantity})
+              </span>
+            ) : null}
+          </summary>
+          <div className="cart-page-line-breakdown-body">
+            {lineBreakdown ? (
+              <PriceCalculationBreakdown
+                embedded
+                breakdown={lineBreakdown.breakdown}
+                weightGrams={lineBreakdown.weightGrams}
+                karatLabel={lineBreakdown.karatLabel}
+                optionAdjustments={lineBreakdown.optionAdjustments}
+                optionLines={lineBreakdown.optionLines}
+                displayTotal={lineBreakdown.unitPrice}
+              />
+            ) : (
+              <p className="cart-page-breakdown-loading">
+                {productContent.priceBreakdown.loading}
+              </p>
+            )}
+            {line.quantity > 1 && lineBreakdown ? (
+              <p className="cart-page-line-breakdown-line-total">
+                {formatProductCopy(copy.lineTotalLabel, {
+                  count: line.quantity,
+                })}
+                : {formatProductPrice(line.lineTotalInr)}
+              </p>
+            ) : null}
+          </div>
+        </details>
+      ) : null}
     </li>
   );
 }

@@ -16,13 +16,19 @@ import {
 } from "@/lib/productCheckout";
 import PriceCalculationBreakdown from "@/components/productComponent/PriceCalculationBreakdown";
 import {
-  useProductBasePrice,
-  type UseProductBasePriceResult,
-} from "@/hooks/useProductBasePrice";
+  useProductConfiguredPrice,
+  type UseProductConfiguredPriceResult,
+} from "@/hooks/useProductConfiguredPrice";
 import { formatProductPrice } from "@/utils/formatPrice";
 import productContent from "@/lib/productContent";
-import { productHasCustomizationOptions } from "@/utils/productCustomization";
-import { buildPriceBreakdownOptionLines, sumOptionLineAmounts } from "@/utils/priceBreakdownOptions";
+import {
+  buildSpecRowsFromSelections,
+  buildCustomizationLineAttributes,
+  getDefaultProductCustomization,
+  productHasCustomizationOptions,
+  resolveCustomizationOptions,
+  type CustomizationSelections,
+} from "@/utils/productCustomization";
 
 type ProductDetailClientProps = {
   slug: string;
@@ -132,26 +138,33 @@ function ProductDetailSummary({
   pricing,
   onCustomize,
   onPriceBreakdown,
+  showConfiguredPrice,
+  showCustomizeButton,
 }: {
-  pricing: UseProductBasePriceResult;
+  pricing: UseProductConfiguredPriceResult;
   onCustomize: () => void;
   onPriceBreakdown: () => void;
+  showConfiguredPrice: boolean;
+  showCustomizeButton: boolean;
 }) {
-  const { estimatedPrice, listPrice, loading } = pricing;
+  const { totalPrice, listPrice, loading } = pricing;
+  const priceLabel = showConfiguredPrice
+    ? productContent.purchase.yourPrice
+    : copy.startingPrice;
 
   return (
     <>
       <div className="product-detail-price-preview">
-        <p className="product-detail-price-label">{copy.startingPrice}</p>
+        <p className="product-detail-price-label">{priceLabel}</p>
         <div className="product-detail-price-row">
           <span
             className={`product-detail-price-value${
               loading ? " product-detail-price-value--loading" : ""
             }`}
           >
-            {loading ? copy.priceLoading : formatProductPrice(estimatedPrice)}
+            {loading ? copy.priceLoading : formatProductPrice(totalPrice)}
           </span>
-          {listPrice > estimatedPrice ? (
+          {listPrice > totalPrice ? (
             <span className="product-detail-price-compare">
               {formatProductPrice(listPrice)}
             </span>
@@ -164,13 +177,15 @@ function ProductDetailSummary({
       </div>
 
       <div className="product-detail-actions product-detail-actions--secondary">
-        <button
-          type="button"
-          onClick={onCustomize}
-          className="product-detail-btn-secondary"
-        >
-          {copy.customizeAndBuy}
-        </button>
+        {showCustomizeButton ? (
+          <button
+            type="button"
+            onClick={onCustomize}
+            className="product-detail-btn-secondary"
+          >
+            {copy.customizeAndBuy}
+          </button>
+        ) : null}
         <button
           type="button"
           onClick={onPriceBreakdown}
@@ -223,15 +238,17 @@ function ProductDetailLoaded({
   const [buyLoading, setBuyLoading] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
   const [commerceToast, setCommerceToast] = useState("");
+  const hasCustomization = productHasCustomizationOptions(product);
+  const [confirmedSelection, setConfirmedSelection] = useState<CustomizationSelections>(
+    () => getDefaultProductCustomization(product)
+  );
+  const [customizeSyncKey, setCustomizeSyncKey] = useState(0);
 
-  const pricing = useProductBasePrice(product);
-  const defaultBreakupLines = buildPriceBreakdownOptionLines({
-    metal: product.metalOptions?.[0] ?? null,
-    carat: product.caratOptions?.[0] ?? null,
-    quality: product.diamondQualities?.[0] ?? null,
-    size: null,
-  });
-  const defaultBreakupAdjustments = sumOptionLineAmounts(defaultBreakupLines);
+  const pricing = useProductConfiguredPrice(product, confirmedSelection);
+
+  useEffect(() => {
+    setConfirmedSelection(getDefaultProductCustomization(product));
+  }, [product.id]);
 
   useEffect(() => {
     writeCachedProduct(slug, product);
@@ -239,10 +256,13 @@ function ProductDetailLoaded({
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("buy") === "1" || params.get("customize") === "1") {
+    if (
+      hasCustomization &&
+      (params.get("buy") === "1" || params.get("customize") === "1")
+    ) {
       setCustomizeOpen(true);
     }
-  }, []);
+  }, [hasCustomization]);
 
   useEffect(() => {
     // If product changes (or images load), keep active image valid.
@@ -256,13 +276,77 @@ function ProductDetailLoaded({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product.id]);
 
+  useEffect(() => {
+    if (customizeOpen) {
+      setCustomizeSyncKey((key) => key + 1);
+    }
+  }, [customizeOpen]);
+
   const runQuickCheckout = async (redirect: boolean) => {
-    if (productHasCustomizationOptions(product)) {
-      setCustomizeOpen(true);
-      if (!redirect) {
-        setCommerceToast(productContent.purchase.customizeBeforeCartError);
-        window.setTimeout(() => setCommerceToast(""), 4000);
+    if (hasCustomization) {
+      const resolved = resolveCustomizationOptions(product, confirmedSelection);
+      const variantId = resolved.variant?.id ?? product.variantId;
+      if (!variantId) {
+        setCustomizeOpen(true);
+        return;
       }
+
+      const catalogVariantId =
+        variantId.startsWith("gid://shopify/ProductVariant/")
+          ? undefined
+          : resolved.variant?.catalogVariantId ??
+            product.variants?.find(
+              (v) =>
+                v.catalogVariantId === variantId || v.id === variantId
+            )?.catalogVariantId;
+
+      const attributes = buildCustomizationLineAttributes(product, confirmedSelection);
+
+      const setLoading = redirect ? setBuyLoading : setCartLoading;
+      setLoading(true);
+      setCommerceToast("");
+
+      if (redirect) {
+        const result = await startProductCheckout({
+          product,
+          variantId,
+          catalogVariantId,
+          customPrice: pricing.totalPrice,
+          attributes,
+          priceBreakdown: pricing.breakdown ?? undefined,
+          weightGrams: pricing.weightGrams,
+          karatLabel: pricing.karatLabel,
+          optionAdjustments: pricing.optionAdjustments,
+          redirect: true,
+        });
+        setLoading(false);
+        if (!result.ok) setCommerceToast(result.error);
+        return;
+      }
+
+      const result = await addProductToCart({
+        product,
+        variantId,
+        catalogVariantId,
+        customPrice: pricing.totalPrice,
+        attributes,
+        priceBreakdown: pricing.breakdown ?? undefined,
+        weightGrams: pricing.weightGrams,
+        karatLabel: pricing.karatLabel,
+        optionAdjustments: pricing.optionAdjustments,
+      });
+
+      setLoading(false);
+
+      if (!result.ok) {
+        setCommerceToast(result.error);
+        return;
+      }
+
+      await refreshCart();
+      goToCart();
+      setCommerceToast(productContent.commerce.addedToCart);
+      window.setTimeout(() => setCommerceToast(""), 3200);
       return;
     }
 
@@ -281,7 +365,11 @@ function ProductDetailLoaded({
         product,
         variantId,
         catalogVariantId,
-        customPrice: pricing.estimatedPrice,
+        customPrice: pricing.totalPrice,
+        priceBreakdown: pricing.breakdown ?? undefined,
+        weightGrams: pricing.weightGrams,
+        karatLabel: pricing.karatLabel,
+        optionAdjustments: pricing.optionAdjustments,
         redirect: true,
       });
       setLoading(false);
@@ -293,7 +381,11 @@ function ProductDetailLoaded({
       product,
       variantId,
       catalogVariantId,
-      customPrice: pricing.estimatedPrice,
+      customPrice: pricing.totalPrice,
+      priceBreakdown: pricing.breakdown ?? undefined,
+      weightGrams: pricing.weightGrams,
+      karatLabel: pricing.karatLabel,
+      optionAdjustments: pricing.optionAdjustments,
     });
 
     setLoading(false);
@@ -309,11 +401,12 @@ function ProductDetailLoaded({
     window.setTimeout(() => setCommerceToast(""), 3200);
   };
 
-  const specRows =
-    product.variants?.[0]?.selectedOptions?.map((o) => ({
-      label: o.name,
-      value: o.value,
-    })) ?? [];
+  const specRows = hasCustomization
+    ? buildSpecRowsFromSelections(product, confirmedSelection)
+    : product.variants?.[0]?.selectedOptions?.map((o) => ({
+        label: o.name,
+        value: o.value,
+      })) ?? [];
 
   const MAX_THUMBS = 5;
   const thumbImages = gallery.slice(0, MAX_THUMBS);
@@ -512,6 +605,8 @@ function ProductDetailLoaded({
               <div className="product-detail-card-body">
                 <ProductDetailSummary
                   pricing={pricing}
+                  showConfiguredPrice={hasCustomization}
+                  showCustomizeButton={hasCustomization}
                   onCustomize={() => setCustomizeOpen(true)}
                   onPriceBreakdown={() => setBreakdownOpen(true)}
                 />
@@ -600,8 +695,13 @@ function ProductDetailLoaded({
 
       <ProductModal
         product={product}
-        open={customizeOpen}
+        open={hasCustomization && customizeOpen}
         onClose={() => setCustomizeOpen(false)}
+        initialSelection={confirmedSelection}
+        selectionSyncKey={customizeSyncKey}
+        onConfirm={(snapshot) => {
+          setConfirmedSelection(snapshot.selections);
+        }}
       />
 
       <ProductContentModal
@@ -613,12 +713,12 @@ function ProductDetailLoaded({
           breakdown={pricing.breakdown}
           weightGrams={pricing.weightGrams}
           karatLabel={pricing.karatLabel}
-          metalLabel={product.metalOptions?.[0]?.label}
-          diamondLabel={product.diamondQualities?.[0]?.label}
+          metalLabel={pricing.metalLabel}
+          diamondLabel={pricing.diamondLabel}
           loading={pricing.loading}
-          optionLines={defaultBreakupLines}
-          optionAdjustments={defaultBreakupAdjustments}
-          displayTotal={pricing.estimatedPrice + defaultBreakupAdjustments}
+          optionLines={pricing.optionLines}
+          optionAdjustments={pricing.optionAdjustments}
+          displayTotal={pricing.totalPrice}
           embedded
         />
       </ProductContentModal>

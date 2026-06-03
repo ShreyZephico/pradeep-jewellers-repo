@@ -1,8 +1,7 @@
 import { handleGoogleShopifyAuth } from '@/lib/googleShopifyAuth';
+import { getGoogleOAuthRedirectUri } from '@/lib/siteUrl';
 
-const REDIRECT_URI =
-  process.env.GOOGLE_REDIRECT_URI ||
-  'http://localhost:3000/api/auth/google/callback';
+const REDIRECT_URI = getGoogleOAuthRedirectUri();
 
 export async function GET(request: Request) {
   return handleGoogleShopifyAuth(request, REDIRECT_URI);
