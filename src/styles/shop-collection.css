@@ -678,6 +678,69 @@
   color: var(--shop-text-muted);
 }
 
+.collection-scroll-sentinel {
+  width: 100%;
+  height: 1px;
+  margin-top: 0.5rem;
+  pointer-events: none;
+}
+
+.collection-end-note {
+  margin: 1.5rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--shop-border);
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--shop-text-muted);
+}
+
+/* Card skeleton (infinite scroll) */
+.collection-card--skeleton {
+  pointer-events: none;
+}
+
+.collection-card-skeleton-media {
+  aspect-ratio: 1;
+  margin-bottom: 0.75rem;
+  background: var(--shop-bg-highlight);
+  animation: collection-shimmer 1.25s ease-in-out infinite;
+  animation-delay: calc(var(--skeleton-index, 0) * 80ms);
+}
+
+.collection-card-skeleton-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.collection-card-skeleton-line {
+  height: 0.65rem;
+  border-radius: 0.125rem;
+  background: var(--shop-bg-highlight);
+  animation: collection-shimmer 1.25s ease-in-out infinite;
+  animation-delay: calc(var(--skeleton-index, 0) * 80ms + 80ms);
+}
+
+.collection-card-skeleton-line--short {
+  width: 38%;
+}
+
+.collection-card-skeleton-line--title {
+  height: 1rem;
+  width: 85%;
+}
+
+.collection-card-skeleton-line--price {
+  height: 0.85rem;
+  width: 42%;
+}
+
+@keyframes collection-shimmer {
+  50% {
+    opacity: 0.55;
+  }
+}
+
 .collection-empty,
 .product-state-card {
   padding: 3rem 1rem;
@@ -796,7 +859,9 @@
   .collection-grid-item,
   .collection-sidebar--open,
   .collection-filter-backdrop,
-  .collection-card-img {
+  .collection-card-img,
+  .collection-card-skeleton-media,
+  .collection-card-skeleton-line {
     animation: none;
     transition: none;
   }
