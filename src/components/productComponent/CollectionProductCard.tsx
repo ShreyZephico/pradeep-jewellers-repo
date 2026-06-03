@@ -8,6 +8,7 @@ import {
   getProductMakingLabel,
   getProductMaterialLabel,
 } from "@/lib/productDisplay";
+import productContent from "@/lib/productContent";
 import { formatProductPrice } from "@/utils/formatPrice";
 import { getProductHref } from "@/utils/productUrl";
 
@@ -22,6 +23,7 @@ export default function CollectionProductCard({
   imageSrc,
   onImageError,
 }: CollectionProductCardProps) {
+  const copy = productContent.list;
   const href = getProductHref(product);
   const cornerBadge = getProductCornerBadge(product);
   const material = getProductMaterialLabel(product);

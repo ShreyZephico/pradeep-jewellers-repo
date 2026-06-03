@@ -145,6 +145,90 @@ export const BESPOKE_CATEGORIES: Array<{
     imageAlt: "Custom earrings design",
   },
 ];
+export const BESPOKE_PRICING_ROWS: Array<{
+  type: string;
+  metal: string;
+  price: string;
+}> = [
+  { type: "Engagement ring", metal: "18K Gold", price: "From ₹35,000" },
+  { type: "Wedding band", metal: "22K Gold", price: "From ₹25,000" },
+  { type: "Solitaire ring", metal: "18K Gold + diamond", price: "From ₹75,000" },
+  { type: "Necklace / choker", metal: "22K Gold", price: "From ₹60,000" },
+  { type: "Pendant", metal: "18K Gold", price: "From ₹30,000" },
+  { type: "Stud earrings", metal: "18K Gold", price: "From ₹18,000" },
+  { type: "Jhumka / chandelier", metal: "22K Gold", price: "From ₹45,000" },
+  { type: "Bracelet / bangle", metal: "22K Gold", price: "From ₹50,000" },
+];
+
+export const BESPOKE_WHY_US: Array<{
+  title: string;
+  body: string;
+  icon: string;
+}> = [
+  {
+    icon: "◆",
+    title: "Hallmarked gold",
+    body: "BIS-certified purity on every piece — weighed and documented before you approve.",
+  },
+  {
+    icon: "✦",
+    title: "Free 3D previews",
+    body: "See your design in detail before we craft. Revisions included until you love it.",
+  },
+  {
+    icon: "⚒",
+    title: "Master karigars",
+    body: "Four decades of bench craft — traditional techniques with modern finishing.",
+  },
+  {
+    icon: "₹",
+    title: "Transparent pricing",
+    body: "Metal, making charges, and stones broken down clearly — no hidden fees.",
+  },
+  {
+    icon: "↺",
+    title: "Old gold exchange",
+    body: "Redesign heirloom pieces or apply old gold value toward your new commission.",
+  },
+  {
+    icon: "📦",
+    title: "Insured delivery",
+    body: "Fully insured shipping across India with tracking and secure packaging.",
+  },
+];
+
+export const BESPOKE_TESTIMONIALS: Array<{
+  name: string;
+  rating: number;
+  text: string;
+  image: string;
+}> = [
+  {
+    name: "Priya Banerjee",
+    rating: 5,
+    text: "The temple choker they crafted for my wedding was beyond what I sketched. Every aunt asked which family heirloom it was.",
+    image: bespokeImageUrl("photo-1594633312681-425c7b97ccd1", 400),
+  },
+  {
+    name: "Riya & Arjun",
+    rating: 5,
+    text: "From design call on WhatsApp to delivery in 19 days. The making charges were a third of what we were quoted elsewhere.",
+    image: bespokeImageUrl("photo-1522673607260-14d3b7361e9a", 400),
+  },
+  {
+    name: "Mrs. Sengupta",
+    rating: 5,
+    text: "Three generations of my family have bought from Pradeep Jewellers. The trust is in every gram — exactly what's billed is exactly what you wear.",
+    image: bespokeImageUrl("photo-1573496359142-b8d87734a5a2", 400),
+  },
+  {
+    name: "Ananya Deshmukh",
+    rating: 5,
+    text: "Their bespoke necklace sat perfectly without a single adjustment. Transparent pricing made the whole family comfortable.",
+    image: bespokeImageUrl("photo-1580489944761-945a83b0b8b0", 400),
+  },
+];
+
 export const BESPOKE_BUDGET_OPTIONS = data.form.budgetOptions;
 export const BESPOKE_CONTACT_METHODS = data.form.contactMethods;
 
