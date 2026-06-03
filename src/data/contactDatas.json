@@ -132,9 +132,9 @@
   },
   "legacySection": {
     "badge": "OUR HERITAGE",
-    "title": "Trusted in Nadiad, crafted to your design.",
+    "title": "Modern Kolkata fusion, crafted to your design.",
     "highlightText": "your design.",
-    "description": "From Santh Bazzar to families across Gujarat — every Pradeep Jewellers piece starts with your inspiration and ends with clarity on metal, purity, and weight.",
+    "description": "Heritage gold craft since 1983, reimagined with contemporary Kolkata-fusion styling — every piece starts with your inspiration and ends with clarity on metal, purity, and weight.",
     "astroCard": {
       "tag": "TODAY'S READING",
       "name": "Pandit Aditya Sharma",
@@ -165,7 +165,7 @@
       {
         "number": 1,
         "suffix": "",
-        "label": "STORE IN NADIAD"
+        "label": "SINCE 1983"
       }
     ]
   },
@@ -405,7 +405,7 @@
       {
         "icon": "hammer",
         "title": "Craft",
-        "description": "Nadiad's skilled karigars",
+        "description": "Kolkata-fusion atelier craft",
         "percentage": "+ 4%"
       },
       {
@@ -556,8 +556,8 @@
   },
   "founderSection": {
     "image": "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?q=80&w=900&auto=format&fit=crop",
-    "imageAlt": "Karigar at the bench in Nadiad",
-    "establishedYear": "Nadiad",
+    "imageAlt": "Karigar at the bench — modern gold craft",
+    "establishedYear": "1983",
     "establishedText": "MADE-TO-ORDER IN GUJARAT",
     "sectionLabel": "CRAFTSMANSHIP",
     "heading": "Craftsmanship & trust.",
@@ -568,7 +568,7 @@
   },
   "testimonialsSection": {
     "badge": "IN THEIR WORDS",
-    "title": "Loved by customers in Nadiad.",
+    "title": "Loved by families across India.",
     "initialVisibleCount": 3,
     "viewMoreLabel": "View more reviews",
     "viewLessLabel": "Show fewer",
@@ -610,7 +610,7 @@
         "imageAlt": "Hetal P."
       },
       {
-        "quote": "From WhatsApp quote to pickup in Nadiad — specs were clear and the finish was exactly what we discussed.",
+        "quote": "From WhatsApp quote to pickup at the store — specs were clear and the finish was exactly what we discussed.",
         "author": "Kiran & Meera",
         "tags": [
           "BRIDAL SET",
@@ -677,7 +677,7 @@
     }
   },
   "footerSection": {
-    "brandDescription": "Custom gold, diamond, and silver jewellery made in Nadiad. Upload your design — get a fast estimate on WhatsApp.",
+    "brandDescription": "Modern Kolkata fusion gold, diamond, and silver since 1983. Upload your design — get a fast estimate on WhatsApp.",
     "complianceLine": "GST-registered jeweller · Nadiad, Gujarat",
     "newsletter": {
       "placeholder": "Your email",

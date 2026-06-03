@@ -37,9 +37,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pradeep Jewellers | Custom Gold, Diamond & Silver — Nadiad",
+  title: "Pradeep Jewellers | Modern Kolkata Fusion Gold & Silver",
   description:
-    "Custom jewellery made in Nadiad. Upload your design and get a fast estimate on WhatsApp. Gold, diamond & silver. Suvarna Vriddhi savings plans.",
+    "Contemporary jewellery with Kolkata fusion design since 1983. Upload your design for a fast WhatsApp estimate — gold, diamond & silver. Suvarna Vriddhi savings plans.",
   icons: {
     icon: "/logo.png",
   },

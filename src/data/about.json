@@ -1,22 +1,22 @@
 {
   "meta": {
     "title": "About Us",
-    "description": "Pradeep Jewellers — custom gold, diamond, and silver jewellery made in Nadiad. Skilled karigars, transparent specs, and fast estimates on WhatsApp."
+    "description": "Pradeep Jewellers — modern Kolkata fusion gold, diamond, and silver since 1983. Skilled karigars, transparent specs, and fast estimates on WhatsApp."
   },
   "hero": {
     "backLabel": "Back to home",
     "backHref": "/",
-    "badge": "ABOUT PRADEEP JEWELLERS",
-    "title": "Craftsmanship you can trust.",
+    "badge": "KOLKATA FUSION · EST. 1983",
+    "title": "Modern craft you can trust.",
     "highlightText": "you can trust.",
-    "description": "Made-to-order gold, diamonds, and silver in Nadiad — from your sketch or photo to a finished piece, with clarity on metal, purity, and weight at every step.",
+    "description": "Made-to-order gold, diamonds, and silver with a contemporary Kolkata fusion aesthetic — from your sketch or photo to a finished piece, with clarity on metal, purity, and weight at every step.",
     "image": "https://images.unsplash.com/photo-1533734685302-aee5a945845a?q=80&w=1600&auto=format&fit=crop",
-    "imageAlt": "Custom jewellery craftsmanship at Pradeep Jewellers, Nadiad"
+    "imageAlt": "Modern Kolkata fusion jewellery craftsmanship at Pradeep Jewellers"
   },
   "brandIntro": {
     "badge": "WHO WE ARE",
-    "title": "More than a counter — a custom workshop.",
-    "description": "Pradeep Jewellers is a gold, diamond, and silver store in Nadiad where families commission rings, mangalsutras, bridal sets, and everyday pieces — built around your design, not a fixed catalogue.",
+    "title": "Kolkata fusion meets modern gold craft.",
+    "description": "Pradeep Jewellers blends heritage bench work since 1983 with contemporary Kolkata-fusion design — rings, mangalsutras, bridal sets, and everyday pieces built around your brief, not a fixed catalogue.",
     "points": [
       "Upload a photo or sketch — get a tailored estimate on WhatsApp",
       "Metal, purity, weight, stones, and finish locked before we start",
@@ -27,27 +27,27 @@
   },
   "ourStory": {
     "badge": "OUR STORY",
-    "title": "Rooted in Nadiad. Built on craft.",
+    "title": "Heritage craft. Kolkata fusion finish.",
     "paragraphs": [
-      "From Santh Bazzar to families across Gujarat, we grew by doing one thing well: turning your inspiration into jewellery you can wear with confidence.",
-      "Our karigars handle consult, specs, model approval, casting, setting, polish, and quality checks under one roof — so you always know who is making your piece.",
-      "Today we serve Nadiad and customers nationwide with transparent pricing, live gold rates, and the same custom-first approach that built our name on the high street."
+      "Since 1983 we have served more than 100 families as wholesaler and retailer — turning your inspiration into gold and silver you can wear with confidence.",
+      "Our karigars handle consult, specs, model approval, casting, setting, polish, and quality checks under one roof — Kolkata fusion styling with transparent weight and purity.",
+      "Today we work with customers nationwide: live gold rates, WhatsApp estimates, and the same custom-first approach that built our name in fine jewellery."
     ],
     "image": "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?q=80&w=1200&auto=format&fit=crop",
-    "imageAlt": "Jeweller at the workbench in Nadiad"
+    "imageAlt": "Jeweller at the workbench — modern gold craft"
   },
   "founder": {
     "id": "founder",
     "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=900&auto=format&fit=crop",
     "imageAlt": "Master karigar at Pradeep Jewellers",
-    "establishedYear": "Nadiad",
-    "establishedText": "MADE-TO-ORDER IN GUJARAT",
+    "establishedYear": "1983",
+    "establishedText": "KOLKATA FUSION CRAFT",
     "sectionLabel": "OUR PROMISE",
     "heading": "Your design. Our bench.",
     "quote": "We don't push ready stock — we start from what you want to wear, and build clarity on weight, purity, and finish before a single gram is cast.",
     "description": "Pradeep Jewellers began as a neighbourhood gold and silver store trusted for honest conversations at the counter. That promise still guides every custom commission — whether you walk in at Amdavadi Bazar or send a design on WhatsApp.",
     "name": "Pradeep Jewellers",
-    "role": "Custom Gold · Diamond · Silver — Nadiad"
+    "role": "Wholesale · Retail · Gold & Silver"
   },
   "heritageTimeline": {
     "badge": "HOW WE WORK",
@@ -83,13 +83,13 @@
       { "number": 4.9, "suffix": "", "label": "GOOGLE RATING" },
       { "number": 25, "suffix": "+", "label": "GOOGLE REVIEWS" },
       { "number": 100, "suffix": "%", "label": "CUSTOM-FIRST" },
-      { "number": 1, "suffix": "", "label": "STORE IN NADIAD" }
+      { "number": 1983, "suffix": "", "label": "CRAFTING SINCE" }
     ]
   },
   "craftsmanship": {
     "badge": "CRAFTSMANSHIP",
-    "title": "How your custom piece comes to life.",
-    "description": "Every order follows our atelier flow — material clarity first, hallmark and invoice last.",
+    "title": "Kolkata fusion — how your piece comes to life.",
+    "description": "Modern design language, heritage gold craft — material clarity first, hallmark and invoice last.",
     "steps": [
       {
         "step": "01",
@@ -113,7 +113,7 @@
   "team": {
     "badge": "MEET OUR ARTISANS",
     "title": "The hands behind every piece.",
-    "description": "Head goldsmiths, diamond setters, and polishers — many seasons of craft on our bench in Nadiad.",
+    "description": "Head goldsmiths, diamond setters, and polishers — Kolkata fusion finishing on our bench since 1983.",
     "members": [
       {
         "name": "Gold karigar team",
@@ -185,7 +185,7 @@
   "bespoke": {
     "badge": "CUSTOM JEWELLERY",
     "title": "Your design. Our craft.",
-    "description": "Upload inspiration on WhatsApp, lock specs with our team, and collect in Nadiad — rings, mangalsutras, bridal sets, and more.",
+    "description": "Upload inspiration on WhatsApp, lock specs with our team — rings, mangalsutras, bridal sets, and more in modern Kolkata-fusion styling.",
     "features": [
       "Free design consultation",
       "Live gold rate at order time",
@@ -198,8 +198,8 @@
   },
   "showroom": {
     "badge": "VISIT THE STORE",
-    "title": "Pradeep Jewellers, Nadiad.",
-    "description": "Walk in at Santh Bazzar for viewing, scheme enrolment, and custom consultations — or message us first on WhatsApp.",
+    "title": "Visit our showroom.",
+    "description": "Walk in for viewing, scheme enrolment, and custom consultations — or message us first on WhatsApp. Address and hours below.",
     "highlights": [
       "Gold, diamond & silver under one roof",
       "Suvarna Vriddhi scheme desk",

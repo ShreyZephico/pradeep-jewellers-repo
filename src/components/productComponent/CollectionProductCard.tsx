@@ -30,7 +30,7 @@ export default function CollectionProductCard({
   const makingLabel = getProductMakingLabel(product);
 
   return (
-    <article className="collection-card group">
+    <article className="collection-card collection-card--shine group">
       <Link href={href} className="collection-card-media">
         {imageSrc !== "/placeholder.jpg" ? (
           <Image
@@ -53,14 +53,20 @@ export default function CollectionProductCard({
       </Link>
 
       <div className="collection-card-body">
-        <p className="collection-card-material">{material}</p>
+        {material ? (
+          <p className="collection-card-material collection-card-material--desktop">
+            {material}
+          </p>
+        ) : null}
         <Link href={href}>
           <h3 className="collection-card-name">{product.name}</h3>
         </Link>
         <div className="collection-card-price-row">
           <p className="collection-card-price">{formatProductPrice(product.price)}</p>
           {makingLabel ? (
-            <p className="collection-card-making">{makingLabel}</p>
+            <p className="collection-card-making collection-card-making--desktop">
+              {makingLabel}
+            </p>
           ) : null}
         </div>
       </div>

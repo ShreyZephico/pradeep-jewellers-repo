@@ -109,7 +109,7 @@ export default function CraftsmanshipSection() {
 
               <div className={styles.signature}>
                 <div className={styles.signatureLine} />
-                <span>Made in Nadiad</span>
+                <span>Kolkata fusion craft</span>
                 <div className={styles.signatureLine} />
               </div>
             </div>

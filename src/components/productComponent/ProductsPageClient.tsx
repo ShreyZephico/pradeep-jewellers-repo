@@ -10,7 +10,7 @@ import CollectionProductCard from "@/components/productComponent/CollectionProdu
 import CollectionProductCardSkeleton from "@/components/productComponent/CollectionProductCardSkeleton";
 import ProductsFilterSidebar from "@/components/productComponent/ProductsFilterSidebar";
 import { isValidCategoryNavId } from '@/lib/categoryNav';
-import productContent from '@/lib/productContent';
+import productContent, { formatProductCopy } from '@/lib/productContent';
 import type { ProductSort } from '@/lib/productFilters';
 import { priceTierToRange } from '@/lib/productFilters';
 
@@ -113,6 +113,25 @@ export default function ProductsPageClient({
   const pageRef = useRef(1);
   const fetchGenRef = useRef(0);
   const loadingMoreRef = useRef(false);
+
+  const categoryHero = useMemo(() => {
+    if (selectedCategory === 'all') {
+      return {
+        title: copy.heroTitle,
+        description: copy.heroDescription?.trim() ?? '',
+      };
+    }
+    const cat = productContent.categories.find((c) => c.id === selectedCategory);
+    const name = cat?.name ?? copy.heroTitle;
+    const description = formatProductCopy(copy.heroDescriptionCategory, {
+      category: name,
+      categoryLower: name.toLowerCase(),
+    }).trim();
+    return {
+      title: formatProductCopy(copy.heroTitleCategory, { category: name }),
+      description: description || copy.heroDescription?.trim() || '',
+    };
+  }, [selectedCategory]);
 
   const hasActiveFilters =
     selectedCategory !== 'all' ||
@@ -390,7 +409,10 @@ export default function ProductsPageClient({
   return (
     <div className="product-page product-page--collection">
       <div className="collection-wrap">
-        <nav className="collection-breadcrumb" aria-label="Breadcrumb">
+        <nav
+          className="collection-breadcrumb collection-breadcrumb--desktop"
+          aria-label="Breadcrumb"
+        >
           <Link href="/">Home</Link>
           <span className="collection-breadcrumb__sep" aria-hidden>
             /
@@ -398,14 +420,15 @@ export default function ProductsPageClient({
           <span className="collection-breadcrumb__current">Shop</span>
         </nav>
 
-        <header className="collection-header">
+        <header className="collection-header collection-header--animate">
           <div className="collection-header-intro">
-            <div className="collection-eyebrow">
-              <span className="collection-eyebrow-line" aria-hidden />
-              <span className="collection-eyebrow-text">{copy.collectionLabel}</span>
-            </div>
-            <h1 className="collection-title">{copy.heroTitle}</h1>
-            <p className="collection-subtitle">{copy.heroDescription}</p>
+            <p className="collection-eyebrow-text collection-eyebrow-text--solo">
+              {copy.heroEyebrow ?? copy.collectionLabel}
+            </p>
+            <h1 className="collection-title">{categoryHero.title}</h1>
+            {categoryHero.description ? (
+              <p className="collection-subtitle">{categoryHero.description}</p>
+            ) : null}
           </div>
 
           <div className="collection-header-tools">
@@ -506,14 +529,21 @@ export default function ProductsPageClient({
                 copy.noPiecesInView
               ) : (
                 <>
-                  {copy.showingPrefix}{' '}
-                  <strong>{total}</strong> {copy.showingPieces}
-                  {products.length < total ? (
-                    <>
-                      {' '}
-                      · {products.length} {copy.loadedSoFar}
-                    </>
-                  ) : null}
+                  <span className="collection-count__short">
+                    {formatProductCopy(copy.countShort ?? '{total} pieces', {
+                      total,
+                    })}
+                  </span>
+                  <span className="collection-count__full" aria-hidden>
+                    {copy.showingPrefix}{' '}
+                    <strong>{total}</strong> {copy.showingPieces}
+                    {products.length < total ? (
+                      <>
+                        {' '}
+                        · {products.length} {copy.loadedSoFar}
+                      </>
+                    ) : null}
+                  </span>
                 </>
               )}
             </p>
@@ -565,7 +595,9 @@ export default function ProductsPageClient({
                 <div ref={loadMoreRef} className="collection-scroll-sentinel" aria-hidden />
 
                 {!hasMore && !loading && !loadingMore && products.length > 0 ? (
-                  <p className="collection-end-note">{copy.endOfCollection}</p>
+                  <p className="collection-end-note collection-end-note--desktop">
+                    {copy.endOfCollection}
+                  </p>
                 ) : null}
 
                 {loadingMore ? (
