@@ -5,7 +5,8 @@ import AboutCallbackSection from "@/components/about/sections/AboutCallbackSecti
 import AboutCertificationsSection from "@/components/about/sections/AboutCertificationsSection";
 import AboutCraftsmanshipSection from "@/components/about/sections/AboutCraftsmanshipSection";
 import AboutFinalCtaSection from "@/components/about/sections/AboutFinalCtaSection";
-import AboutFounderSection from "@/components/about/sections/AboutFounderSection";
+// Founder section — re-enable when ready (see AboutFounderSection.tsx)
+// import AboutFounderSection from "@/components/about/sections/AboutFounderSection";
 import AboutHeritageTimelineSection from "@/components/about/sections/AboutHeritageTimelineSection";
 import AboutHeroSection from "@/components/about/sections/AboutHeroSection";
 import AboutOurStorySection from "@/components/about/sections/AboutOurStorySection";
@@ -23,7 +24,7 @@ export default function AboutPage() {
       <AboutHeroSection />
       <AboutBrandIntroSection />
       <AboutOurStorySection />
-      <AboutFounderSection />
+      {/* <AboutFounderSection /> */}
       <AboutHeritageTimelineSection />
       <AboutBrandStatsSection />
       <AboutCraftsmanshipSection />

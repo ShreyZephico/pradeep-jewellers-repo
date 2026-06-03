@@ -1,3 +1,4 @@
+/** Home founder block — import in HomePageClient when ready. */
 "use client";
 
 import Image from "next/image";

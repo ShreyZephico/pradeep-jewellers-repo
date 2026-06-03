@@ -1,3 +1,4 @@
+/** Founder block for /about — enable from AboutPage.tsx when ready. */
 import Image from "next/image";
 
 import aboutData from "@/data/about.json";
