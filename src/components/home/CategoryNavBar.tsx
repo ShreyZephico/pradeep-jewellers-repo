@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
@@ -139,6 +139,9 @@ function MegaMenuPanel({ item }: { item: CategoryNavItem }) {
 
 export default function CategoryNavBar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const selectedCategoryId =
+    pathname === "/products" ? searchParams.get("category")?.trim().toLowerCase() : null;
   const [activeId, setActiveId] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -214,7 +217,8 @@ export default function CategoryNavBar() {
 
           <ul className="category-nav__list" role="menubar" aria-label="Shop by category">
             {CATEGORY_NAV_ITEMS.map((item) => {
-              const isActive = activeId === item.id;
+              const isHoverActive = activeId === item.id;
+              const isSelected = selectedCategoryId === item.id;
               return (
                 <li
                   key={item.id}
@@ -227,8 +231,11 @@ export default function CategoryNavBar() {
                     href={`/products?category=${item.id}`}
                     role="menuitem"
                     aria-haspopup="true"
-                    aria-expanded={isActive}
-                    className={`category-nav__tab${isActive ? " category-nav__tab--active" : ""}`}
+                    aria-expanded={isHoverActive}
+                    aria-current={isSelected ? "page" : undefined}
+                    className={`category-nav__tab${
+                      isHoverActive ? " category-nav__tab--active" : ""
+                    }${isSelected ? " category-nav__tab--selected" : ""}`}
                     onClick={() => setActiveId(null)}
                   >
                     {item.pluralLabel}

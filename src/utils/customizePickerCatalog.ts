@@ -4,18 +4,13 @@ import {
   filterSizeOptionsForProduct,
   inferJewelryCategory,
 } from "@/utils/productCustomizationLabels";
+import {
+  getRingSizePickerOptions,
+  isStandardRingSize,
+  STANDARD_RING_SIZES,
+} from "@/utils/ringSizeChart";
 
-/** Standard ring sizes shown in the customize modal (5–12). */
-export const STANDARD_RING_SIZES = [
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "10",
-  "11",
-  "12",
-] as const;
+export { isStandardRingSize, STANDARD_RING_SIZES };
 
 /** Always offer three diamond grades when the product has any diamond option. */
 export const STANDARD_DIAMOND_QUALITIES: ProductOption[] = [
@@ -23,11 +18,6 @@ export const STANDARD_DIAMOND_QUALITIES: ProductOption[] = [
   { label: "GH-VS" },
   { label: "EF-VVS" },
 ];
-
-export function isStandardRingSize(size: string): boolean {
-  const value = size.trim();
-  return (STANDARD_RING_SIZES as readonly string[]).includes(value);
-}
 
 function normalizeDiamondLabel(label: string): string {
   return label.trim().toUpperCase().replace(/\s+/g, "");
@@ -62,7 +52,7 @@ export function productShouldOfferDiamondPicker(product: Product): boolean {
     return true;
   }
 
-  // Full ring customize flow (metal colours + sizes 5–12) always includes diamond grade.
+  // Full ring customize flow (metal colours + sizes 5–25) always includes diamond grade.
   if (
     inferJewelryCategory(product) === "ring" &&
     metalPickerCount(product) > 0 &&
@@ -106,7 +96,7 @@ export function getDiamondPickerOptions(product: Product): ProductOption[] {
 
 export function getSizePickerOptions(product: Product): ProductSizeOption[] {
   if (inferJewelryCategory(product) === "ring") {
-    return STANDARD_RING_SIZES.map((size) => ({ size }));
+    return getRingSizePickerOptions();
   }
 
   return filterSizeOptionsForProduct(product, product.sizeOptions ?? []);

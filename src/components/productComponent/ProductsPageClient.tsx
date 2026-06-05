@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react';
 
 import type { Product } from '@/types/product';
 import CollectionProductCard from "@/components/productComponent/CollectionProductCard";
@@ -13,6 +13,70 @@ import { isValidCategoryNavId } from '@/lib/categoryNav';
 import productContent, { formatProductCopy } from '@/lib/productContent';
 import type { ProductSort } from '@/lib/productFilters';
 import { priceTierToRange } from '@/lib/productFilters';
+import { buildActiveFilterChips } from '@/lib/collectionActiveFilters';
+import {
+  countActiveCollectionFacets,
+  EMPTY_COLLECTION_FACETS,
+  parseCollectionFacetFilters,
+  serializeCollectionFacetFilters,
+  toggleFacetSelection,
+  type CollectionFacetFilters,
+} from '@/lib/shopCollectionFilters';
+import {
+  categoryShowsRingSizeFilter,
+  parseRingSizesQueryParam,
+  serializeRingSizesQueryParam,
+} from '@/utils/ringSizeChart';
+
+type ListUrlState = {
+  category: string;
+  price: string;
+  q: string;
+  sizes: string[];
+  facets: CollectionFacetFilters;
+};
+
+function applyListStateToUrlParams(
+  params: URLSearchParams,
+  next: ListUrlState
+): void {
+  if (next.q) params.set('q', next.q);
+  else params.delete('q');
+
+  if (next.category && next.category !== 'all') {
+    params.set('category', next.category);
+  } else {
+    params.delete('category');
+  }
+
+  if (next.price && next.price !== 'any') {
+    params.set('price', next.price);
+  } else {
+    params.delete('price');
+  }
+
+  const sizesParam = categoryShowsRingSizeFilter(next.category)
+    ? serializeRingSizesQueryParam(next.sizes)
+    : '';
+  if (sizesParam) params.set('sizes', sizesParam);
+  else params.delete('sizes');
+
+  for (const key of [
+    'discount',
+    'weight',
+    'material',
+    'metal',
+    'shop',
+    'occasion',
+    'searchTag',
+  ] as const) {
+    params.delete(key);
+  }
+  const facetParams = serializeCollectionFacetFilters(next.facets);
+  for (const [key, value] of Object.entries(facetParams)) {
+    params.set(key, value);
+  }
+}
 
 const PAGE_SIZE = 12;
 const FETCH_TIMEOUT_MS = 25_000;
@@ -32,6 +96,8 @@ type ProductsPageClientProps = {
   initialQuery?: string;
   initialCategory?: string;
   initialPriceTier?: string;
+  initialRingSizes?: string;
+  initialFacets?: CollectionFacetFilters;
   /** Bumped after checkout (bfcache return) to refetch without remounting the tree. */
   refreshToken?: number;
 };
@@ -77,6 +143,8 @@ export default function ProductsPageClient({
   initialQuery = '',
   initialCategory = '',
   initialPriceTier = '',
+  initialRingSizes = '',
+  initialFacets = EMPTY_COLLECTION_FACETS,
   refreshToken = 0,
 }: ProductsPageClientProps) {
   const router = useRouter();
@@ -98,6 +166,10 @@ export default function ProductsPageClient({
   const [selectedPriceTier, setSelectedPriceTier] = useState(() =>
     normalizePriceTierId(initialPriceTier)
   );
+  const [selectedRingSizes, setSelectedRingSizes] = useState<string[]>(() =>
+    parseRingSizesQueryParam(initialRingSizes)
+  );
+  const [facets, setFacets] = useState<CollectionFacetFilters>(initialFacets);
   const [sort, setSort] = useState<ProductSort>('featured');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
@@ -133,31 +205,56 @@ export default function ProductsPageClient({
     };
   }, [selectedCategory]);
 
+  const hasSidebarFilters =
+    selectedPriceTier !== 'any' ||
+    selectedRingSizes.length > 0 ||
+    countActiveCollectionFacets(facets) > 0;
+
   const hasActiveFilters =
     selectedCategory !== 'all' ||
-    selectedPriceTier !== 'any' ||
+    hasSidebarFilters ||
     sort !== 'featured' ||
-    Boolean(searchTerm.trim());
+    Boolean(debouncedQ.trim());
+
+  const activeFilterChips = useMemo(
+    () =>
+      buildActiveFilterChips({
+        categoryId: selectedCategory,
+        priceTierId: selectedPriceTier,
+        ringSizeIds: selectedRingSizes,
+        facets,
+      }),
+    [selectedCategory, selectedPriceTier, selectedRingSizes, facets]
+  );
+
+  const filterBadgeCount =
+    activeFilterChips.length + (debouncedQ.trim() ? 1 : 0);
 
   const syncListUrl = useCallback(
-    (next: { category: string; price: string; q: string }) => {
+    (next: ListUrlState) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (next.q) params.set('q', next.q);
-      else params.delete('q');
-      if (next.category && next.category !== 'all') {
-        params.set('category', next.category);
-      } else {
-        params.delete('category');
-      }
-      if (next.price && next.price !== 'any') {
-        params.set('price', next.price);
-      } else {
-        params.delete('price');
-      }
+      applyListStateToUrlParams(params, next);
       const qs = params.toString();
       router.replace(qs ? `/products?${qs}` : '/products', { scroll: false });
     },
     [router, searchParams]
+  );
+
+  const currentListUrlState = useCallback(
+    (): ListUrlState => ({
+      category: selectedCategory,
+      price: selectedPriceTier,
+      q: debouncedQ,
+      sizes: selectedRingSizes,
+      facets,
+    }),
+    [
+      selectedCategory,
+      selectedPriceTier,
+      debouncedQ,
+      selectedRingSizes,
+      facets,
+    ]
   );
 
   useEffect(() => {
@@ -167,14 +264,41 @@ export default function ProductsPageClient({
   }, [urlQuery]);
 
   useEffect(() => {
-    setSelectedCategory(normalizeCategoryId(initialCategory));
+    const categoryFromUrl = normalizeCategoryId(searchParams.get('category') ?? '');
+    setSelectedCategory((prev) =>
+      prev === categoryFromUrl ? prev : categoryFromUrl
+    );
     pageRef.current = 1;
-  }, [initialCategory]);
+  }, [searchParams, initialCategory]);
 
   useEffect(() => {
     setSelectedPriceTier(normalizePriceTierId(initialPriceTier));
     pageRef.current = 1;
   }, [initialPriceTier]);
+
+  useEffect(() => {
+    setSelectedRingSizes(parseRingSizesQueryParam(initialRingSizes));
+    pageRef.current = 1;
+  }, [initialRingSizes]);
+
+  const initialFacetsKey = useMemo(
+    () =>
+      [
+        initialFacets.discounts.join(','),
+        initialFacets.weights.join(','),
+        initialFacets.materials.join(','),
+        initialFacets.metals.join(','),
+        initialFacets.shopFor.join(','),
+        initialFacets.occasions.join(','),
+        initialFacets.searchTags.join(','),
+      ].join('|'),
+    [initialFacets]
+  );
+
+  useEffect(() => {
+    setFacets(initialFacets);
+    pageRef.current = 1;
+  }, [initialFacetsKey, initialFacets]);
 
   useEffect(() => {
     if (searchTerm.trim() === urlQuery) {
@@ -185,13 +309,17 @@ export default function ProductsPageClient({
       setDebouncedQ(searchTerm.trim());
       pageRef.current = 1;
       setSelectedPriceTier('any');
+      setSelectedRingSizes([]);
+      setFacets(EMPTY_COLLECTION_FACETS);
     }, 400);
 
     return () => window.clearTimeout(timer);
   }, [searchTerm, urlQuery]);
 
   useEffect(() => {
-    setSelectedPriceTier('any');
+    if (!categoryShowsRingSizeFilter(selectedCategory)) {
+      setSelectedRingSizes([]);
+    }
   }, [selectedCategory]);
 
   const fetchProducts = useCallback(
@@ -223,6 +351,16 @@ export default function ProductsPageClient({
         }
         if (priceRange.max != null) {
           params.set('maxPrice', String(priceRange.max));
+        }
+        if (
+          categoryShowsRingSizeFilter(selectedCategory) &&
+          selectedRingSizes.length > 0
+        ) {
+          params.set('sizes', serializeRingSizesQueryParam(selectedRingSizes));
+        }
+        const facetParams = serializeCollectionFacetFilters(facets);
+        for (const [key, value] of Object.entries(facetParams)) {
+          params.set(key, value);
         }
 
         const response = await fetch(`/api/products?${params.toString()}`, {
@@ -282,6 +420,8 @@ export default function ProductsPageClient({
     [
       debouncedQ,
       selectedCategory,
+      selectedRingSizes,
+      facets,
       sort,
       priceRange.min,
       priceRange.max,
@@ -339,25 +479,32 @@ export default function ProductsPageClient({
     gridTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const selectCategory = (id: string) => {
-    setSelectedCategory(id);
+  const setCategoryAll = () => {
+    setSelectedCategory('all');
     resetList();
-    setFiltersOpen(false);
     syncListUrl({
-      category: id,
-      price: selectedPriceTier,
-      q: debouncedQ,
+      ...currentListUrlState(),
+      category: 'all',
+      sizes: [],
     });
+  };
+
+  const handleRingSizesChange = (sizes: string[]) => {
+    setSelectedRingSizes(sizes);
+    resetList();
+    syncListUrl({ ...currentListUrlState(), sizes });
+  };
+
+  const handleFacetsChange = (next: CollectionFacetFilters) => {
+    setFacets(next);
+    resetList();
+    syncListUrl({ ...currentListUrlState(), facets: next });
   };
 
   const handlePriceTierChange = (id: string) => {
     setSelectedPriceTier(id);
     resetList();
-    syncListUrl({
-      category: selectedCategory,
-      price: id,
-      q: debouncedQ,
-    });
+    syncListUrl({ ...currentListUrlState(), price: id });
   };
 
   const handleSortChange = (next: ProductSort) => {
@@ -365,15 +512,136 @@ export default function ProductsPageClient({
     resetList();
   };
 
+  const clearSidebarFilters = () => {
+    setSelectedPriceTier('any');
+    setSelectedRingSizes([]);
+    setFacets(EMPTY_COLLECTION_FACETS);
+    resetList();
+    setFiltersOpen(false);
+    syncListUrl({
+      ...currentListUrlState(),
+      price: 'any',
+      sizes: [],
+      facets: EMPTY_COLLECTION_FACETS,
+    });
+  };
+
   const clearAllFilters = () => {
     setSearchTerm('');
     setDebouncedQ('');
     setSelectedCategory('all');
     setSelectedPriceTier('any');
+    setSelectedRingSizes([]);
+    setFacets(EMPTY_COLLECTION_FACETS);
     setSort('featured');
     resetList();
     setFiltersOpen(false);
-    syncListUrl({ category: 'all', price: 'any', q: '' });
+    syncListUrl({
+      category: 'all',
+      price: 'any',
+      q: '',
+      sizes: [],
+      facets: EMPTY_COLLECTION_FACETS,
+    });
+  };
+
+  const removeActiveFilter = (chipId: string) => {
+    resetList();
+
+    if (chipId === 'category') {
+      setCategoryAll();
+      return;
+    }
+
+    if (chipId === 'price') {
+      setSelectedPriceTier('any');
+      syncListUrl({ ...currentListUrlState(), price: 'any' });
+      return;
+    }
+
+    if (chipId.startsWith('ring-size-')) {
+      const sizeId = chipId.slice('ring-size-'.length);
+      const nextSizes = selectedRingSizes.filter((value) => value !== sizeId);
+      setSelectedRingSizes(nextSizes);
+      syncListUrl({ ...currentListUrlState(), sizes: nextSizes });
+      return;
+    }
+
+    if (chipId.startsWith('discount-')) {
+      const id = chipId.slice('discount-'.length);
+      const next = {
+        ...facets,
+        discounts: toggleFacetSelection(facets.discounts, id),
+      };
+      setFacets(next);
+      syncListUrl({ ...currentListUrlState(), facets: next });
+      return;
+    }
+
+    if (chipId.startsWith('weight-')) {
+      const id = chipId.slice('weight-'.length);
+      const next = {
+        ...facets,
+        weights: toggleFacetSelection(facets.weights, id),
+      };
+      setFacets(next);
+      syncListUrl({ ...currentListUrlState(), facets: next });
+      return;
+    }
+
+    if (chipId.startsWith('material-')) {
+      const id = chipId.slice('material-'.length);
+      const next = {
+        ...facets,
+        materials: toggleFacetSelection(facets.materials, id),
+      };
+      setFacets(next);
+      syncListUrl({ ...currentListUrlState(), facets: next });
+      return;
+    }
+
+    if (chipId.startsWith('metal-')) {
+      const id = chipId.slice('metal-'.length);
+      const next = {
+        ...facets,
+        metals: toggleFacetSelection(facets.metals, id),
+      };
+      setFacets(next);
+      syncListUrl({ ...currentListUrlState(), facets: next });
+      return;
+    }
+
+    if (chipId.startsWith('shop-')) {
+      const id = chipId.slice('shop-'.length);
+      const next = {
+        ...facets,
+        shopFor: toggleFacetSelection(facets.shopFor, id),
+      };
+      setFacets(next);
+      syncListUrl({ ...currentListUrlState(), facets: next });
+      return;
+    }
+
+    if (chipId.startsWith('occasion-')) {
+      const id = chipId.slice('occasion-'.length);
+      const next = {
+        ...facets,
+        occasions: toggleFacetSelection(facets.occasions, id),
+      };
+      setFacets(next);
+      syncListUrl({ ...currentListUrlState(), facets: next });
+      return;
+    }
+
+    if (chipId.startsWith('search-tag-')) {
+      const id = chipId.slice('search-tag-'.length);
+      const next = {
+        ...facets,
+        searchTags: toggleFacetSelection(facets.searchTags, id),
+      };
+      setFacets(next);
+      syncListUrl({ ...currentListUrlState(), facets: next });
+    }
   };
 
   const sortLabel =
@@ -512,16 +780,66 @@ export default function ProductsPageClient({
         <div className="collection-body">
           <ProductsFilterSidebar
             selectedCategory={selectedCategory}
-            onCategoryChange={selectCategory}
+            filterBadgeCount={filterBadgeCount}
             selectedPriceTier={selectedPriceTier}
             onPriceTierChange={handlePriceTierChange}
-            onClearAll={clearAllFilters}
-            hasActiveFilters={hasActiveFilters}
+            selectedRingSizes={selectedRingSizes}
+            onRingSizesChange={handleRingSizesChange}
+            facets={facets}
+            onFacetsChange={handleFacetsChange}
+            onClearSidebarFilters={clearSidebarFilters}
+            hasSidebarFilters={hasSidebarFilters}
             mobileOpen={filtersOpen}
             onMobileOpenChange={setFiltersOpen}
           />
 
           <main className="collection-main">
+            {filterBadgeCount > 0 ? (
+              <div
+                className="collection-active-filters"
+                aria-label={copy.activeFiltersLabel ?? 'Active filters'}
+              >
+                {activeFilterChips.map((chip) => (
+                  <span key={chip.id} className="collection-active-filter">
+                    <span className="collection-active-filter__label">{chip.label}</span>
+                    <button
+                      type="button"
+                      className="collection-active-filter__remove"
+                      onClick={() => removeActiveFilter(chip.id)}
+                      aria-label={formatProductCopy(
+                        copy.activeFilterRemove ?? 'Remove {filter}',
+                        { filter: chip.label }
+                      )}
+                    >
+                      <X size={14} aria-hidden />
+                    </button>
+                  </span>
+                ))}
+                {debouncedQ.trim() ? (
+                  <span key="search" className="collection-active-filter">
+                    <span className="collection-active-filter__label">
+                      {debouncedQ.trim()}
+                    </span>
+                    <button
+                      type="button"
+                      className="collection-active-filter__remove"
+                      onClick={() => {
+                        setSearchTerm('');
+                        setDebouncedQ('');
+                        resetList();
+                      }}
+                      aria-label={formatProductCopy(
+                        copy.activeFilterRemove ?? 'Remove {filter}',
+                        { filter: debouncedQ.trim() }
+                      )}
+                    >
+                      <X size={14} aria-hidden />
+                    </button>
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+
             <p className="collection-count" ref={gridTopRef}>
               {showInitialSkeleton ? (
                 copy.loading

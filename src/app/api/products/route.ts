@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { parsePriceParam, parseProductSort } from "@/lib/productFilters";
+import { parseCollectionFacetFilters } from "@/lib/shopCollectionFilters";
+import { parseRingSizesQueryParam } from "@/utils/ringSizeChart";
 import { getProductsPage } from "@/lib/shopify";
 
 const DEFAULT_LIMIT = 10;
@@ -25,8 +27,25 @@ export async function GET(request: NextRequest) {
     const minPrice = parsePriceParam(searchParams.get("minPrice"));
     const maxPrice = parsePriceParam(searchParams.get("maxPrice"));
     const sort = parseProductSort(searchParams.get("sort"));
+    const ringSizes = parseRingSizesQueryParam(searchParams.get("sizes"));
+    const facets = parseCollectionFacetFilters({
+      discount: searchParams.get("discount"),
+      weight: searchParams.get("weight"),
+      material: searchParams.get("material"),
+      metal: searchParams.get("metal"),
+      shop: searchParams.get("shop"),
+      occasion: searchParams.get("occasion"),
+      searchTag: searchParams.get("searchTag"),
+    });
 
-    const { products, total, totalPages, priceBounds } = await getProductsPage({
+    const {
+      products,
+      total,
+      totalPages,
+      priceBounds,
+      searchTagOptions,
+      searchTagSuggestions,
+    } = await getProductsPage({
       page,
       limit,
       q,
@@ -34,6 +53,8 @@ export async function GET(request: NextRequest) {
       minPrice,
       maxPrice,
       sort,
+      ringSizes,
+      facets,
     });
 
     return NextResponse.json(
@@ -45,6 +66,8 @@ export async function GET(request: NextRequest) {
         totalPages,
         products,
         priceBounds,
+        searchTagOptions,
+        searchTagSuggestions,
       },
       {
         headers: {

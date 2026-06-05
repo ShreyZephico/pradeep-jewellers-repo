@@ -140,7 +140,7 @@
   margin: 0 auto;
   padding: 0.45rem clamp(0.75rem, 2vw, 1.5rem);
   position: relative;
-  z-index: 2;
+  z-index: 3;
   background: var(--header-bg);
 }
 
@@ -462,6 +462,7 @@
 
 .site-header__profile-wrap {
   position: relative;
+  z-index: 4;
 }
 
 .site-header__profile-btn {
@@ -497,7 +498,7 @@
     opacity var(--header-transition),
     visibility var(--header-transition),
     transform var(--header-transition);
-  z-index: 60;
+  z-index: 20;
 }
 
 .site-header__profile-wrap:hover .site-header__dropdown,

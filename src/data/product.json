@@ -14,6 +14,7 @@
     "unavailableFallback": "We could not load this item.",
     "backToShop": "Back to shop",
     "aboutTitle": "About this piece",
+    "searchTagsTitle": "Shop by style",
     "specsTitle": "Specifications",
     "ratingStars": "★★★★★",
     "ratingLabel": "4.8 (studio rated)",
@@ -32,6 +33,10 @@
     "buyNow": "Buy now",
     "addToCart": "Add to cart",
     "customizeAndBuy": "Customize & buy",
+    "customizeCta": "Customise",
+    "summarySizeLabel": "Size",
+    "summaryMetalLabel": "Metal",
+    "summaryDiamondLabel": "Diamond",
     "addedToCart": "Added to cart",
     "viewPriceBreakdown": "View price breakdown",
     "viewAbout": "About this piece",
@@ -40,7 +45,49 @@
     "priceLoading": "…",
     "priceHint": "Final price updates when you customize metal, karat, and size.",
     "closeModal": "Close",
-    "placeholderSymbol": "✦"
+    "placeholderSymbol": "✦",
+    "recommended": {
+      "title": "Recommended for you",
+      "subtitle": "Pieces similar to this design",
+      "subtitleTemplate": "Mostly {categoryLower} — plus a few other styles",
+      "limit": 10,
+      "limitMobile": 20,
+      "error": "Could not load recommendations.",
+      "retry": "Try again",
+      "shopLink": "View all jewellery",
+      "viewLabel": "View",
+      "categoryLabels": {
+        "ring": "Ring",
+        "earring": "Earring",
+        "bracelet": "Bracelet",
+        "bangle": "Bangle",
+        "necklace": "Necklace",
+        "pendant": "Pendant",
+        "necklace-set": "Set",
+        "pendant-set": "Set",
+        "mangalsutra": "Mangalsutra",
+        "chain": "Chain",
+        "anklet": "Anklet",
+        "kada": "Kada",
+        "charm": "Charm",
+        "nose-pin": "Nose pin"
+      }
+    }
+  },
+  "delivery": {
+    "title": "Delivery estimate",
+    "subtitle": "Enter your delivery pincode to see location and expected dispatch timeline.",
+    "pincodeLabel": "Delivery pincode",
+    "pincodePlaceholder": "e.g. 380015",
+    "pincodeHint": "6-digit Indian pincode",
+    "checkButton": "Check",
+    "checking": "Checking…",
+    "errorInvalid": "Enter a valid 6-digit Indian pincode.",
+    "locationLabel": "Delivering to",
+    "pincodeRef": "Pincode {pincode}",
+    "estimateLabel": "Estimated delivery",
+    "estimateRegion": "Based on shipping to {region}",
+    "disclaimer": "Timelines are estimates after your order is confirmed. Custom or made-to-order pieces may need extra time."
   },
   "list": {
     "loading": "Loading collection…",
@@ -86,10 +133,21 @@
     "pageNumbersLabel": "Page numbers",
     "placeholderSymbol": "✦",
     "filtersTitle": "Filters",
+    "filtersClearAll": "Clear all",
     "filtersClose": "Close filters",
     "filtersOpen": "Filters",
-    "categoryTitle": "Category",
-    "priceTitle": "Price Range",
+    "categoryTitle": "Product type",
+    "filterMoreCount": "{count} more",
+    "filterShowLess": "Show less",
+    "activeFiltersLabel": "Active filters",
+    "activeFilterRemove": "Remove {filter}",
+    "categoryShowMore": "Show more",
+    "categoryShowLess": "Show less",
+    "ringSizeTitle": "Ring size",
+    "ringSizeViewAll": "View all",
+    "ringSizeViewLess": "View less",
+    "ringSizeMoreCount": "{count} more",
+    "priceTitle": "Price range",
     "priceMinLabel": "Min price",
     "priceMaxLabel": "Max price",
     "sortTitle": "Sort by",
@@ -108,7 +166,9 @@
     "searching": "Searching…",
     "noResults": "No products found",
     "viewAllResults": "View all results for “{query}”",
-    "viewProduct": "View product"
+    "viewProduct": "View product",
+    "relatedTags": "Related searches",
+    "browseTag": "Shop “{tag}”"
   },
   "categories": [
     { "id": "all", "name": "All" },
@@ -165,9 +225,19 @@
     "sizeOptionNecklace": "Necklace length",
     "sizeGuide": "Size guide",
     "myCustomSize": "My custom size",
-    "customSizeLabel": "Your custom ring size",
-    "customSizePlaceholder": "e.g. 5.5 or 13",
+    "customSizeModeGroup": "How do you want to enter your size?",
+    "customSizeModeIndian": "Ring size",
+    "customSizeModeMm": "Diameter (mm)",
+    "customSizeLabelIndian": "Enter your ring size (Indian)",
+    "customSizeLabelMm": "Enter inner diameter in millimetres",
+    "customSizePlaceholderIndian": "e.g. 11 or 10.5",
+    "customSizePlaceholderMm": "e.g. 50.9",
+    "customSizeHintMm": "Matches size {size} ({mm})",
+    "customSizeHintStandard": "Size {size} · {mm}",
+    "customSizeHintHalf": "Half size {size} · approx. {mm}",
     "errorCustomSize": "Please enter your custom size to continue.",
+    "errorCustomSizeInvalidIndian": "Enter a ring size from 5 to 25, or a half size (e.g. 10.5).",
+    "errorCustomSizeInvalidMm": "Enter a diameter between 40 and 70 mm (e.g. 50.9).",
     "checkoutOpening": "Opening checkout…",
     "checkoutDefault": "Proceed to payment",
     "addToCart": "Add to cart",
@@ -243,5 +313,63 @@
     "optionAdjustments": "Option adjustments",
     "yourPrice": "Your price",
     "perGramSuffix": "/g"
+  },
+  "collectionFilters": {
+    "visibleOptionCount": 4,
+    "discountTitle": "Discounts",
+    "weightTitle": "Weight ranges",
+    "materialTitle": "Material",
+    "metalTitle": "Metal",
+    "shopForTitle": "Shop for",
+    "occasionTitle": "Occasion",
+    "searchTagsTitle": "Search tags",
+    "discounts": [
+      {
+        "id": "sale",
+        "label": "On sale",
+        "keywords": ["sale", "discount", "offer"]
+      },
+      {
+        "id": "making-50",
+        "label": "Flat 50% off on making charges",
+        "keywords": ["making", "making charge", "making-charge"]
+      }
+    ],
+    "weightRanges": [
+      { "id": "0-2", "label": "0–2 g", "min": 0, "max": 2 },
+      { "id": "2-5", "label": "2–5 g", "min": 2, "max": 5 },
+      { "id": "5-10", "label": "5–10 g", "min": 5, "max": 10 },
+      { "id": "10-20", "label": "10–20 g", "min": 10, "max": 20 },
+      { "id": "20-plus", "label": "20 g & above", "min": 20, "max": null }
+    ],
+    "materials": [
+      { "id": "platinum", "label": "Platinum", "swatch": "platinum", "keywords": ["platinum", "pt"] },
+      { "id": "gold", "label": "Gold", "swatch": "gold", "keywords": ["gold"] },
+      { "id": "diamond", "label": "Diamond", "swatch": "diamond", "keywords": ["diamond", "solitaire"] },
+      { "id": "silver", "label": "Silver", "swatch": "silver", "keywords": ["silver", "925"] },
+      { "id": "gemstone", "label": "Gemstone", "swatch": "gemstone", "keywords": ["gemstone", "gem", "ruby", "emerald", "sapphire", "pearl"] }
+    ],
+    "metals": [
+      { "id": "22kt-yellow", "label": "22 KT Yellow", "swatch": "#d4af37", "keywords": ["22", "22k", "22kt", "22 kt"] },
+      { "id": "18kt-yellow", "label": "18 KT Yellow", "swatch": "#e8c56a", "keywords": ["18", "18k", "18kt", "18 kt"] },
+      { "id": "14kt-yellow", "label": "14 KT Yellow", "swatch": "#f0d878", "keywords": ["14", "14k", "14kt", "14 kt"] },
+      { "id": "9kt-yellow", "label": "9 KT Yellow", "swatch": "#f5e6a8", "keywords": ["9", "9k", "9kt", "9 kt"] },
+      { "id": "silver-925", "label": "Silver 925", "swatch": "#c0c0c0", "keywords": ["925", "silver", "sterling"] },
+      { "id": "rose-gold", "label": "Rose gold", "swatch": "#b76e79", "keywords": ["rose", "pink gold"] },
+      { "id": "white-gold", "label": "White gold", "swatch": "#e8e8e8", "keywords": ["white gold", "white-gold"] }
+    ],
+    "shopFor": [
+      { "id": "women", "label": "Women", "keywords": ["women", "woman", "ladies", "female", "her"] },
+      { "id": "men", "label": "Men", "keywords": ["men", "man", "male", "gents", "him"] },
+      { "id": "kids", "label": "Kids", "keywords": ["kid", "kids", "child", "children", "baby"] }
+    ],
+    "occasions": [
+      { "id": "work", "label": "Work wear", "keywords": ["work", "office", "daily"] },
+      { "id": "wedding", "label": "Wedding", "keywords": ["wedding", "bridal", "bride", "groom"] },
+      { "id": "anniversary", "label": "Anniversary", "keywords": ["anniversary"] },
+      { "id": "birthday", "label": "Birthday", "keywords": ["birthday", "gift"] },
+      { "id": "festive", "label": "Festive", "keywords": ["festive", "festival", "diwali", "puja"] },
+      { "id": "engagement", "label": "Engagement", "keywords": ["engagement", "proposal"] }
+    ]
   }
 }

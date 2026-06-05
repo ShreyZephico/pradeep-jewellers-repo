@@ -1,10 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/types/product";
 import ProductCommerceActions from "@/components/productComponent/ProductCommerceActions";
+import ProductCustomizeSummaryBar from "@/components/productComponent/ProductCustomizeSummaryBar";
+import ProductDeliveryEstimate from "@/components/productComponent/ProductDeliveryEstimate";
+import ProductRecommendedSection from "@/components/productComponent/ProductRecommendedSection";
 import ProductContentModal from "@/components/productComponent/ProductContentModal";
 import ProductModal from "@/components/productComponent/ProductModal";
 import { useCart } from "@/contexts/CartContext";
@@ -30,6 +40,7 @@ import {
   resolveCustomizationOptions,
   type CustomizationSelections,
 } from "@/utils/productCustomization";
+import { getGalleryImagesForMetalSelection } from "@/utils/productGalleryByMetal";
 
 type ProductDetailClientProps = {
   slug: string;
@@ -136,17 +147,21 @@ function CertifiedAuthenticity() {
 }
 
 function ProductDetailSummary({
+  product,
+  selection,
   pricing,
   onCustomize,
   onPriceBreakdown,
   showConfiguredPrice,
-  showCustomizeButton,
+  showCustomizeBar,
 }: {
+  product: Product;
+  selection: CustomizationSelections;
   pricing: UseProductConfiguredPriceResult;
   onCustomize: () => void;
   onPriceBreakdown: () => void;
   showConfiguredPrice: boolean;
-  showCustomizeButton: boolean;
+  showCustomizeBar: boolean;
 }) {
   const { totalPrice, listPrice, loading } = pricing;
   const priceLabel = showConfiguredPrice
@@ -178,14 +193,12 @@ function ProductDetailSummary({
       </div>
 
       <div className="product-detail-actions product-detail-actions--secondary">
-        {showCustomizeButton ? (
-          <button
-            type="button"
-            onClick={onCustomize}
-            className="product-detail-btn-secondary"
-          >
-            {copy.customizeAndBuy}
-          </button>
+        {showCustomizeBar ? (
+          <ProductCustomizeSummaryBar
+            product={product}
+            selection={selection}
+            onCustomize={onCustomize}
+          />
         ) : null}
         <button
           type="button"
@@ -210,6 +223,46 @@ function ProductDetailSummary({
   );
 }
 
+type ProductDetailCommerceBlockProps = {
+  buyLoading: boolean;
+  cartLoading: boolean;
+  commerceToast: string;
+  onBuyNow: () => void;
+  onAddToCart: () => void;
+  variant: "inline" | "dock";
+};
+
+function ProductDetailCommerceBlock({
+  buyLoading,
+  cartLoading,
+  commerceToast,
+  onBuyNow,
+  onAddToCart,
+  variant,
+}: ProductDetailCommerceBlockProps) {
+  const wrapperClass =
+    variant === "dock"
+      ? "product-detail-commerce-dock"
+      : "product-detail-commerce-bottom product-detail-commerce-bottom--inline";
+
+  return (
+    <div className={wrapperClass}>
+      <ProductCommerceActions
+        layout="row"
+        buyLoading={buyLoading}
+        cartLoading={cartLoading}
+        onBuyNow={onBuyNow}
+        onAddToCart={onAddToCart}
+      />
+      {commerceToast ? (
+        <p className="product-detail-commerce-toast product-animate-in" role="status">
+          {commerceToast}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function ProductDetailLoaded({
   product,
   slug,
@@ -218,32 +271,42 @@ function ProductDetailLoaded({
   slug: string;
 }) {
   const { refreshCart, goToCart } = useCart();
-  const gallery = (() => {
-    const list = (product.images ?? []).filter(
-      (src): src is string => typeof src === "string" && src.trim().length > 0
-    );
-    const primary =
-      typeof product.image === "string" && product.image.trim().length > 0
-        ? [product.image]
-        : [];
-    // De-dupe while keeping order (so if product.image is also in images, it won't repeat).
-    const merged = [...primary, ...list];
-    return Array.from(new Set(merged));
-  })();
-  const hasGallery = gallery.length > 0;
-
-  const [activeImage, setActiveImage] = useState(gallery[0] ?? "");
+  const hasCustomization = productHasCustomizationOptions(product);
+  const [confirmedSelection, setConfirmedSelection] = useState<CustomizationSelections>(
+    () => getDefaultProductCustomization(product)
+  );
+  const [liveSelection, setLiveSelection] = useState<CustomizationSelections | null>(
+    null
+  );
   const [customizeOpen, setCustomizeOpen] = useState(false);
+  const [activeImage, setActiveImage] = useState("");
   const [breakdownOpen, setBreakdownOpen] = useState(false);
   const [galleryDialogOpen, setGalleryDialogOpen] = useState(false);
   const [buyLoading, setBuyLoading] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
   const [commerceToast, setCommerceToast] = useState("");
-  const hasCustomization = productHasCustomizationOptions(product);
-  const [confirmedSelection, setConfirmedSelection] = useState<CustomizationSelections>(
-    () => getDefaultProductCustomization(product)
-  );
   const [customizeSyncKey, setCustomizeSyncKey] = useState(0);
+
+  const galleryMetalLabel =
+    customizeOpen && liveSelection?.metal
+      ? liveSelection.metal
+      : confirmedSelection.metal;
+
+  const gallery = useMemo(
+    () => getGalleryImagesForMetalSelection(product, galleryMetalLabel),
+    [product, galleryMetalLabel]
+  );
+  const hasGallery = gallery.length > 0;
+
+  useEffect(() => {
+    if (!hasGallery) {
+      setActiveImage("");
+      return;
+    }
+    if (!activeImage || !gallery.includes(activeImage)) {
+      setActiveImage(gallery[0] ?? "");
+    }
+  }, [gallery, hasGallery, activeImage]);
 
   const pricing = useProductConfiguredPrice(product, confirmedSelection);
 
@@ -266,16 +329,10 @@ function ProductDetailLoaded({
   }, [hasCustomization]);
 
   useEffect(() => {
-    // If product changes (or images load), keep active image valid.
-    if (!hasGallery) {
-      if (activeImage) setActiveImage("");
-      return;
+    if (!customizeOpen) {
+      setLiveSelection(null);
     }
-    if (!gallery.includes(activeImage)) {
-      setActiveImage(gallery[0] ?? "");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product.id]);
+  }, [customizeOpen]);
 
   useEffect(() => {
     if (customizeOpen) {
@@ -605,30 +662,27 @@ function ProductDetailLoaded({
 
               <div className="product-detail-card-body">
                 <ProductDetailSummary
+                  product={product}
+                  selection={
+                    customizeOpen && liveSelection
+                      ? liveSelection
+                      : confirmedSelection
+                  }
                   pricing={pricing}
                   showConfiguredPrice={hasCustomization}
-                  showCustomizeButton={hasCustomization}
+                  showCustomizeBar={hasCustomization}
                   onCustomize={() => setCustomizeOpen(true)}
                   onPriceBreakdown={() => setBreakdownOpen(true)}
                 />
 
-                <div className="product-detail-commerce-bottom">
-                  <ProductCommerceActions
-                    buyLoading={buyLoading}
-                    cartLoading={cartLoading}
-                    onBuyNow={() => void runQuickCheckout(true)}
-                    onAddToCart={() => void runQuickCheckout(false)}
-                  />
-
-                  {commerceToast ? (
-                    <p
-                      className="product-detail-commerce-toast product-animate-in"
-                      role="status"
-                    >
-                      {commerceToast}
-                    </p>
-                  ) : null}
-                </div>
+                <ProductDetailCommerceBlock
+                  variant="inline"
+                  buyLoading={buyLoading}
+                  cartLoading={cartLoading}
+                  commerceToast={commerceToast}
+                  onBuyNow={() => void runQuickCheckout(true)}
+                  onAddToCart={() => void runQuickCheckout(false)}
+                />
               </div>
             </div>
           </aside>
@@ -666,7 +720,20 @@ function ProductDetailLoaded({
 
         {/* ===== CERTIFIED AUTHENTICITY SECTION - ADDED HERE ===== */}
         <CertifiedAuthenticity />
+
+        <ProductDeliveryEstimate />
+
+        <ProductRecommendedSection slug={slug} product={product} />
       </div>
+
+      <ProductDetailCommerceBlock
+        variant="dock"
+        buyLoading={buyLoading}
+        cartLoading={cartLoading}
+        commerceToast={commerceToast}
+        onBuyNow={() => void runQuickCheckout(true)}
+        onAddToCart={() => void runQuickCheckout(false)}
+      />
 
       <ProductContentModal
         open={galleryDialogOpen}
@@ -700,8 +767,10 @@ function ProductDetailLoaded({
         onClose={() => setCustomizeOpen(false)}
         initialSelection={confirmedSelection}
         selectionSyncKey={customizeSyncKey}
+        onSelectionChange={setLiveSelection}
         onConfirm={(snapshot) => {
           setConfirmedSelection(snapshot.selections);
+          setLiveSelection(null);
         }}
       />
 
@@ -727,7 +796,7 @@ function ProductDetailLoaded({
   );
 }
 
-const productDetailCacheKey = (slug: string) => `pj-product-detail:${slug}`;
+const productDetailCacheKey = (slug: string) => `pj-product-detail:v2:${slug}`;
 const PRODUCT_DETAIL_CACHE_TTL_MS = 5 * 60 * 1000;
 
 type CachedProductEntry = {

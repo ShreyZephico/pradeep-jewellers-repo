@@ -14,6 +14,9 @@ type ProductModalProps = {
   onConfirm?: (
     snapshot: import("@/utils/productCustomization").ConfirmedCustomizationSnapshot
   ) => void;
+  onSelectionChange?: (
+    selection: import("@/utils/productCustomization").CustomizationSelections
+  ) => void;
 };
 
 export default function ProductModal({
@@ -23,6 +26,7 @@ export default function ProductModal({
   initialSelection,
   selectionSyncKey,
   onConfirm,
+  onSelectionChange,
 }: ProductModalProps) {
   useEffect(() => {
     if (!open) {
@@ -63,6 +67,7 @@ export default function ProductModal({
             initialSelection={initialSelection}
             selectionSyncKey={selectionSyncKey}
             onConfirm={onConfirm}
+            onSelectionChange={onSelectionChange}
           />
         </div>
       </div>

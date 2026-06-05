@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState, type RefObject } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/types/product";
@@ -16,7 +24,7 @@ import {
   addProductToCart,
   startProductCheckout,
 } from "@/lib/productCheckout";
-import productContent from "@/lib/productContent";
+import productContent, { formatProductCopy } from "@/lib/productContent";
 import "@/styles/ProductPurchasePanel.css";
 import { buildPriceBreakdownOptionLines } from "@/utils/priceBreakdownOptions";
 import {
@@ -28,7 +36,13 @@ import {
   type CustomizationField,
   type CustomizationSelections,
 } from "@/utils/productCustomization";
-import { isStandardRingSize } from "@/utils/customizePickerCatalog";
+import {
+  formatRingSizeMm,
+  parseRingSizeInput,
+  parseStoredRingSize,
+  resolveRingSizeSelection,
+  type RingSizeInputMode,
+} from "@/utils/ringSizeChart";
 import {
   getSizeSpecLabel,
   getSizeValidationMessage,
@@ -60,6 +74,8 @@ export type ProductPurchasePanelProps = {
   initialSelection?: CustomizationSelections;
   selectionSyncKey?: string | number;
   onConfirm?: (snapshot: ConfirmedCustomizationSnapshot) => void;
+  /** Live picker values (e.g. gallery preview while customize modal is open). */
+  onSelectionChange?: (selection: CustomizationSelections) => void;
 };
 
 export default function ProductPurchasePanel({
@@ -70,6 +86,7 @@ export default function ProductPurchasePanel({
   initialSelection,
   selectionSyncKey,
   onConfirm,
+  onSelectionChange,
 }: ProductPurchasePanelProps) {
   const { refreshCart, goToCart } = useCart();
   const [buyLoading, setBuyLoading] = useState(false);
@@ -94,23 +111,82 @@ export default function ProductPurchasePanel({
   const [selectedCarat, setSelectedCarat] = useState(resolvedInitial.carat);
   const [selectedQuality, setSelectedQuality] = useState(resolvedInitial.quality);
   const isRingProduct = inferJewelryCategory(product) === "ring";
+  const initialRingSize = isRingProduct
+    ? parseStoredRingSize(resolvedInitial.size)
+    : null;
   const [selectedSize, setSelectedSize] = useState(() =>
-    isRingProduct && resolvedInitial.size && isStandardRingSize(resolvedInitial.size)
-      ? resolvedInitial.size
-      : isRingProduct
-        ? "5"
-        : resolvedInitial.size
+    isRingProduct
+      ? initialRingSize?.selectedSize || "5"
+      : resolvedInitial.size
   );
   const [customSizeActive, setCustomSizeActive] = useState(
-    () =>
-      isRingProduct &&
-      Boolean(resolvedInitial.size) &&
-      !isStandardRingSize(resolvedInitial.size)
+    () => (isRingProduct && initialRingSize?.customActive) ?? false
   );
-  const [customSizeInput, setCustomSizeInput] = useState(() =>
-    customSizeActive ? resolvedInitial.size : ""
+  const [customSizeInput, setCustomSizeInput] = useState(
+    () => (isRingProduct ? initialRingSize?.customInput : "") ?? ""
   );
-  const effectiveSize = customSizeActive ? customSizeInput.trim() : selectedSize;
+  const [customSizeInputMode, setCustomSizeInputMode] = useState<RingSizeInputMode>(
+    () => initialRingSize?.customInputMode ?? "indian"
+  );
+
+  const ringSizeResolution = useMemo(() => {
+    if (!isRingProduct) {
+      return null;
+    }
+    return resolveRingSizeSelection({
+      customActive: customSizeActive,
+      customInput: customSizeInput,
+      selectedSize,
+      customInputMode: customSizeInputMode,
+    });
+  }, [
+    isRingProduct,
+    customSizeActive,
+    customSizeInput,
+    selectedSize,
+    customSizeInputMode,
+  ]);
+
+  const effectiveSize = isRingProduct
+    ? (ringSizeResolution?.orderValue ?? "")
+    : customSizeActive
+      ? customSizeInput.trim()
+      : selectedSize;
+  const sizeForVariantMatch = isRingProduct
+    ? (ringSizeResolution?.matchValue ?? selectedSize)
+    : effectiveSize;
+
+  const customSizeHint = useMemo(() => {
+    if (!isRingProduct || !customSizeActive) {
+      return null;
+    }
+    const parsed = parseRingSizeInput(customSizeInput, customSizeInputMode);
+    if (parsed.kind === "empty") {
+      return null;
+    }
+    if (parsed.kind === "invalid") {
+      return null;
+    }
+    if (parsed.kind === "standard") {
+      return formatProductCopy(copy.customSizeHintStandard, {
+        size: parsed.size,
+        mm: formatRingSizeMm(parsed.mm),
+      });
+    }
+    if (parsed.kind === "half") {
+      return formatProductCopy(copy.customSizeHintHalf, {
+        size: parsed.size,
+        mm: formatRingSizeMm(parsed.mm),
+      });
+    }
+    if (parsed.nearestSize && parsed.nearestMm != null) {
+      return formatProductCopy(copy.customSizeHintMm, {
+        size: parsed.nearestSize,
+        mm: formatRingSizeMm(parsed.nearestMm),
+      });
+    }
+    return formatRingSizeMm(parsed.mm);
+  }, [isRingProduct, customSizeActive, customSizeInput, customSizeInputMode, copy]);
 
   const hasMetalOptions = pickers.showMetal;
   const hasCaratOptions = pickers.showCarat;
@@ -133,8 +209,12 @@ export default function ProductPurchasePanel({
   const selectedQualityOption = pickers.diamond.find(
     (option) => option.label === selectedQuality
   );
+  const selectedSizeLookup =
+    isRingProduct && ringSizeResolution?.standardSize
+      ? ringSizeResolution.standardSize
+      : effectiveSize;
   const selectedSizeOption =
-    pickers.sizes.find((option) => option.size === effectiveSize) ??
+    pickers.sizes.find((option) => option.size === selectedSizeLookup) ??
     (effectiveSize ? { size: effectiveSize, priceAdjustment: 0 } : undefined);
   const karatLabel = resolveKaratFromSelection(selectedMetal, selectedCarat);
 
@@ -142,7 +222,7 @@ export default function ProductPurchasePanel({
     metal: selectedMetal,
     carat: selectedCarat,
     quality: selectedQuality,
-    size: effectiveSize,
+    size: sizeForVariantMatch,
     karatLabel,
   });
 
@@ -204,16 +284,16 @@ export default function ProductPurchasePanel({
     setSelectedCarat(initialSelection.carat);
     setSelectedQuality(initialSelection.quality);
     const nextSize = initialSelection.size;
-    if (isRingProduct && nextSize && !isStandardRingSize(nextSize)) {
-      setCustomSizeActive(true);
-      setCustomSizeInput(nextSize);
-      setSelectedSize("");
+    if (isRingProduct) {
+      const restored = parseStoredRingSize(nextSize);
+      setCustomSizeActive(restored.customActive);
+      setCustomSizeInput(restored.customInput);
+      setCustomSizeInputMode(restored.customInputMode);
+      setSelectedSize(restored.selectedSize);
     } else {
       setCustomSizeActive(false);
       setCustomSizeInput("");
-      setSelectedSize(
-        isRingProduct && nextSize && isStandardRingSize(nextSize) ? nextSize : nextSize
-      );
+      setSelectedSize(nextSize);
     }
     clearFeedback();
   }, [selectionSyncKey, initialSelection, clearFeedback, isRingProduct]);
@@ -221,6 +301,21 @@ export default function ProductPurchasePanel({
   useEffect(() => {
     clearFeedback();
   }, [selectedMetal, selectedCarat, selectedQuality, selectedSize, clearFeedback]);
+
+  useEffect(() => {
+    onSelectionChange?.({
+      metal: selectedMetal,
+      carat: selectedCarat,
+      quality: selectedQuality,
+      size: effectiveSize,
+    });
+  }, [
+    selectedMetal,
+    selectedCarat,
+    selectedQuality,
+    effectiveSize,
+    onSelectionChange,
+  ]);
 
   useEffect(() => {
     let cancelled = false;
@@ -310,6 +405,15 @@ export default function ProductPurchasePanel({
     if (customSizeActive) {
       if (!customSizeInput.trim()) {
         showValidationError(copy.errorCustomSize, "size");
+        return false;
+      }
+      if (isRingProduct && ringSizeResolution?.inputKind === "invalid") {
+        showValidationError(
+          customSizeInputMode === "mm"
+            ? copy.errorCustomSizeInvalidMm
+            : copy.errorCustomSizeInvalidIndian,
+          "size"
+        );
         return false;
       }
       return true;
@@ -512,13 +616,13 @@ export default function ProductPurchasePanel({
         </button>
       ) : null}
 
-      <ProductCommerceActions
+      {/* <ProductCommerceActions
         layout="row"
         buyLoading={buyLoading}
         cartLoading={cartLoading}
         onBuyNow={() => void handleCheckout(true)}
         onAddToCart={() => void handleCheckout(false)}
-      />
+      /> */}
     </footer>
   );
 
@@ -767,6 +871,7 @@ export default function ProductPurchasePanel({
                   onClick={() => {
                     setCustomSizeActive(true);
                     setSelectedSize("");
+                    setCustomSizeInputMode("indian");
                   }}
                   className={optionClass(
                     customSizeActive,
@@ -781,11 +886,49 @@ export default function ProductPurchasePanel({
             </div>
             {isRingProduct && customSizeActive ? (
               <div className="product-purchase-custom-size-field">
+                <div
+                  className="product-purchase-custom-size-mode"
+                  role="group"
+                  aria-label={copy.customSizeModeGroup}
+                >
+                  <button
+                    type="button"
+                    className={`product-purchase-custom-size-mode-btn${
+                      customSizeInputMode === "indian"
+                        ? " product-purchase-custom-size-mode-btn--active"
+                        : ""
+                    }`}
+                    aria-pressed={customSizeInputMode === "indian"}
+                    onClick={() => {
+                      setCustomSizeInputMode("indian");
+                      setCustomSizeInput("");
+                    }}
+                  >
+                    {copy.customSizeModeIndian}
+                  </button>
+                  <button
+                    type="button"
+                    className={`product-purchase-custom-size-mode-btn${
+                      customSizeInputMode === "mm"
+                        ? " product-purchase-custom-size-mode-btn--active"
+                        : ""
+                    }`}
+                    aria-pressed={customSizeInputMode === "mm"}
+                    onClick={() => {
+                      setCustomSizeInputMode("mm");
+                      setCustomSizeInput("");
+                    }}
+                  >
+                    {copy.customSizeModeMm}
+                  </button>
+                </div>
                 <label
                   htmlFor={customSizeInputId}
                   className="product-purchase-custom-size-label"
                 >
-                  {copy.customSizeLabel}
+                  {customSizeInputMode === "mm"
+                    ? copy.customSizeLabelMm
+                    : copy.customSizeLabelIndian}
                 </label>
                 <input
                   id={customSizeInputId}
@@ -793,11 +936,26 @@ export default function ProductPurchasePanel({
                   inputMode="decimal"
                   value={customSizeInput}
                   onChange={(event) => setCustomSizeInput(event.target.value)}
-                  placeholder={copy.customSizePlaceholder}
+                  placeholder={
+                    customSizeInputMode === "mm"
+                      ? copy.customSizePlaceholderMm
+                      : copy.customSizePlaceholderIndian
+                  }
                   className="product-purchase-custom-size-input"
                   aria-invalid={sectionInvalid("size")}
+                  aria-describedby={
+                    customSizeHint ? `${customSizeInputId}-hint` : undefined
+                  }
                   autoComplete="off"
                 />
+                {customSizeHint ? (
+                  <p
+                    id={`${customSizeInputId}-hint`}
+                    className="product-purchase-custom-size-hint"
+                  >
+                    {customSizeHint}
+                  </p>
+                ) : null}
               </div>
             ) : null}
           </section>

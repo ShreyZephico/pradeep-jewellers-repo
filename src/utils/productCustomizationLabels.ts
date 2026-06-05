@@ -174,7 +174,7 @@ function isLikelyRingSizeValue(size: string): boolean {
     return false;
   }
   const n = Number(trimmed);
-  return n >= 3 && n <= 15;
+  return n >= 3 && n <= 25;
 }
 
 /** Drop ring-size values on necklaces when Shopify has no real chain lengths. */

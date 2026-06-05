@@ -25,7 +25,7 @@ export type VariantPriceBreakdown = {
 type CalculateVariantPriceProps = {
   weight: number;
   carat?: string | null;
-  /** Shopify metafield or catalog % (e.g. 15). Falls back to 7% when omitted. */
+  /** Shopify metafield or catalog % (e.g. 15). Falls back to 15% when omitted. */
   makingChargePercent?: number | null;
 };
 

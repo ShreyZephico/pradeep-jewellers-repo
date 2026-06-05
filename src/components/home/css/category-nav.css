@@ -2,7 +2,8 @@
 
 .category-nav {
   position: relative;
-  z-index: 90;
+  /* Below .site-header__main (z-index: 3) so profile/cart dropdowns stay on top */
+  z-index: 1;
   color: var(--category-nav-text, #fff);
   background: var(--category-nav-bg, #a8813e);
   border-top: none;
@@ -61,7 +62,8 @@
 }
 
 .category-nav__tab:hover,
-.category-nav__tab--active {
+.category-nav__tab--active,
+.category-nav__tab--selected {
   color: var(--category-nav-text-hover, #fff);
   background: var(--category-nav-bg-active, #96753a);
   border-bottom-color: #fff;
@@ -121,6 +123,7 @@
   left: 0;
   right: 0;
   top: 100%;
+  z-index: 5;
   background: var(--header-bg-scrolled);
   box-shadow: var(--header-dropdown-shadow);
   border-bottom: 1px solid var(--category-nav-border);

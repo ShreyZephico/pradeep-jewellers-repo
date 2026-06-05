@@ -1,5 +1,5 @@
 /** Fallback when Shopify / catalog making % is missing. */
-export const DEFAULT_MAKING_CHARGE_PERCENT = 7;
+export const DEFAULT_MAKING_CHARGE_PERCENT = 15;
 
 export type MakingChargeSource = "shopify" | "catalog" | "default";
 

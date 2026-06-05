@@ -1,4 +1,8 @@
 import type { Product } from "@/types/product";
+import {
+  productMatchesCollectionFacets,
+  type CollectionFacetFilters,
+} from "@/lib/shopCollectionFilters";
 
 export type ProductSort =
   | "featured"
@@ -16,6 +20,11 @@ export type ProductListFilters = {
   minPrice?: number;
   maxPrice?: number;
   sort?: ProductSort;
+  /** Indian ring sizes (5–15) when browsing Rings / All. */
+  ringSizes?: string[];
+  /** On “All”, only list products that declare matching ring sizes. */
+  ringSizeMatchStrict?: boolean;
+  facets?: CollectionFacetFilters;
 };
 
 const SORT_VALUES: ProductSort[] = [
@@ -95,6 +104,23 @@ function sortProducts(products: Product[], sort: ProductSort): Product[] {
   }
 }
 
+export function productMatchesRingSizeFilter(
+  product: Product,
+  selectedSizes: string[],
+  options?: { strict?: boolean }
+): boolean {
+  if (!selectedSizes.length) {
+    return true;
+  }
+
+  const available = product.availableRingSizes ?? [];
+  if (!available.length) {
+    return options?.strict ? false : true;
+  }
+
+  return selectedSizes.some((size) => available.includes(size));
+}
+
 export function applyProductListFilters(
   products: Product[],
   filters: ProductListFilters
@@ -107,6 +133,19 @@ export function applyProductListFilters(
   }
   if (filters.maxPrice != null) {
     list = list.filter((p) => p.price <= filters.maxPrice!);
+  }
+
+  if (filters.ringSizes?.length) {
+    const sizes = filters.ringSizes;
+    list = list.filter((p) =>
+      productMatchesRingSizeFilter(p, sizes, {
+        strict: filters.ringSizeMatchStrict,
+      })
+    );
+  }
+
+  if (filters.facets) {
+    list = list.filter((p) => productMatchesCollectionFacets(p, filters.facets!));
   }
 
   return sortProducts(list, sort);

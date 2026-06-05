@@ -8,6 +8,7 @@ import { Search, X } from "lucide-react";
 
 import productContent, { formatProductCopy } from "@/lib/productContent";
 import type { Product } from "@/types/product";
+import type { CollectionFilterOption } from "@/lib/shopCollectionFilters";
 import { formatProductPrice } from "@/utils/formatPrice";
 import { getProductHref } from "@/utils/productUrl";
 
@@ -70,6 +71,7 @@ export default function HeaderNavSearch({
   const [query, setQuery] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
   const [results, setResults] = useState<Product[]>([]);
+  const [tagSuggestions, setTagSuggestions] = useState<CollectionFilterOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -85,6 +87,7 @@ export default function HeaderNavSearch({
   const fetchResults = useCallback(async (q: string) => {
     if (q.length < MIN_QUERY_LENGTH) {
       setResults([]);
+      setTagSuggestions([]);
       setLoading(false);
       return;
     }
@@ -102,12 +105,17 @@ export default function HeaderNavSearch({
 
       if (!response.ok || !data.success) {
         setResults([]);
+        setTagSuggestions([]);
         return;
       }
 
       setResults((data.products as Product[]) ?? []);
+      setTagSuggestions(
+        (data.searchTagSuggestions as CollectionFilterOption[]) ?? []
+      );
     } catch {
       setResults([]);
+      setTagSuggestions([]);
     } finally {
       setLoading(false);
     }
@@ -116,6 +124,7 @@ export default function HeaderNavSearch({
   useEffect(() => {
     if (debouncedQ.length < MIN_QUERY_LENGTH) {
       setResults([]);
+      setTagSuggestions([]);
       setLoading(false);
       setActiveIndex(-1);
       return;
@@ -127,12 +136,15 @@ export default function HeaderNavSearch({
   useEffect(() => {
     const showPanel =
       debouncedQ.length >= MIN_QUERY_LENGTH &&
-      (loading || results.length > 0 || (!loading && query.trim().length >= MIN_QUERY_LENGTH));
+      (loading ||
+        results.length > 0 ||
+        tagSuggestions.length > 0 ||
+        (!loading && query.trim().length >= MIN_QUERY_LENGTH));
     setPanelOpen(showPanel && (layoutVariant === "mobile" || isOpen));
     if (!showPanel) {
       setActiveIndex(-1);
     }
-  }, [debouncedQ, loading, results.length, query, layoutVariant, isOpen]);
+  }, [debouncedQ, loading, results.length, tagSuggestions.length, query, layoutVariant, isOpen]);
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -156,6 +168,19 @@ export default function HeaderNavSearch({
       setPanelOpen(false);
     }
   }, [layoutVariant]);
+
+  const goToProductsWithTag = (tag: CollectionFilterOption) => {
+    onNavigate?.();
+    setPanelOpen(false);
+    if (layoutVariant === "compact") {
+      setIsOpen(false);
+    }
+    const params = new URLSearchParams({
+      searchTag: tag.id,
+      q: tag.label,
+    });
+    router.push(`/products?${params.toString()}`);
+  };
 
   const goToProductsPage = (term: string) => {
     const trimmed = term.trim();
@@ -313,6 +338,7 @@ export default function HeaderNavSearch({
                   setQuery("");
                   setDebouncedQ("");
                   setResults([]);
+                  setTagSuggestions([]);
                   setPanelOpen(false);
                   inputRef.current?.focus();
                 }}
@@ -335,6 +361,25 @@ export default function HeaderNavSearch({
             <p className="header-search-status" role="status">
               {statusMessage}
             </p>
+          ) : null}
+
+          {tagSuggestions.length > 0 ? (
+            <div className="header-search-tags" role="group" aria-label={copy.relatedTags}>
+              <p className="header-search-tags-label">{copy.relatedTags}</p>
+              <div className="header-search-tags-list">
+                {tagSuggestions.map((tag) => (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    className="header-search-tag"
+                    suppressHydrationWarning
+                    onClick={() => goToProductsWithTag(tag)}
+                  >
+                    {formatProductCopy(copy.browseTag, { tag: tag.label })}
+                  </button>
+                ))}
+              </div>
+            </div>
           ) : null}
 
           {results.length > 0 ? (

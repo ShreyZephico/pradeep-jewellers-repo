@@ -65,6 +65,8 @@ export type Product = {
   handle?: string;
   productType?: string;
   tags?: string[];
+  /** Shopify `custom.search_tags` metafield (listing search & filters). */
+  searchTags?: string[];
   metalOptionName?: string;
   caratOptionName?: string;
   diamondOptionName?: string;
@@ -73,5 +75,9 @@ export type Product = {
   caratOptions?: ProductOption[];
   diamondQualities?: ProductOption[];
   sizeOptions?: ProductSizeOption[];
+  /** Ring sizes available on this listing (from Shopify options / variants). */
+  availableRingSizes?: string[];
+  /** Representative variant weight (grams) for collection filters. */
+  listingWeightGrams?: number;
   colorOptions?: ProductOption[];
 };
