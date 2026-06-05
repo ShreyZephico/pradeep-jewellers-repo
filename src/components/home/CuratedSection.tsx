@@ -2,17 +2,17 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import data from "@/data/contactDatas.json";
-import { useHomeDataRefetch } from "@/hooks/useHomeDataRefetch";
+import { useHomeCatalogProducts } from "@/hooks/useHomeCatalogProducts";
 import {
   filterProductsForCuratedTab,
   formatMakingChargeLabel,
   productCardBadge,
   productTypeLabel,
 } from "@/lib/curatedProducts";
-import type { Product } from "@/types/product";
+import { productLinkWarmHandlers } from "@/lib/productDetailNavigation";
 import { getProductHref } from "@/utils/productUrl";
 
 import "./css/curated.css";
@@ -45,47 +45,9 @@ export default function CuratedSection() {
   const section = data.curatedSection;
   const tabs = section.tabs as CuratedTab[];
   const limitPerTab = section.productLimitPerTab ?? 6;
-  const fetchLimit = section.fetchLimit ?? 50;
 
   const [activeTabId, setActiveTabId] = useState(tabs[0]?.id ?? "new-arrivals");
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadProducts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const params = new URLSearchParams({
-        page: "1",
-        limit: String(fetchLimit),
-        category: "all",
-      });
-      const res = await fetch(`/api/products?${params.toString()}`, {
-        credentials: "omit",
-        cache: "no-store",
-      });
-      const json = (await res.json()) as {
-        success?: boolean;
-        products?: Product[];
-        error?: string;
-      };
-
-      if (!res.ok || !json.success) {
-        throw new Error(json.error ?? section.errorMessage);
-      }
-
-      setProducts(json.products ?? []);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : section.errorMessage);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchLimit, section.errorMessage]);
-
-  useHomeDataRefetch(loadProducts);
+  const { products, loading, error } = useHomeCatalogProducts();
 
   const visibleProducts = useMemo(
     () => filterProductsForCuratedTab(products, activeTabId, limitPerTab),
@@ -141,6 +103,8 @@ export default function CuratedSection() {
                 const badge = productCardBadge(product);
                 const makingLabel = formatMakingChargeLabel(product);
 
+                const warm = productLinkWarmHandlers(product);
+
                 return (
                   <Link
                     key={product.id}
@@ -148,6 +112,7 @@ export default function CuratedSection() {
                     className="curated-section__card"
                     role="listitem"
                     style={{ "--card-index": index } as CSSProperties}
+                    {...warm}
                   >
                     <div className="curated-section__card-media">
                       <Image

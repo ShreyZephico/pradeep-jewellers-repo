@@ -1,5 +1,6 @@
 import type { NextResponse } from "next/server";
 
+import { applyCustomerSessionCookies } from "@/lib/customerSessionCookies";
 import {
   createCustomer,
   createCustomerTokenWithPasswords,
@@ -129,39 +130,13 @@ export function applyGoogleAuthCookies(
   response: NextResponse,
   session: GoogleAuthResult
 ): void {
-  const expires = new Date(session.expiresAt);
-
-  response.cookies.set("customerAccessToken", session.accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    expires,
-    path: "/",
+  applyCustomerSessionCookies(response, {
+    accessToken: session.accessToken,
+    expiresAt: session.expiresAt,
+    email: session.email,
+    loginMethod: "google",
+    name: session.name,
   });
-  response.cookies.set("customerEmail", session.email, {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    expires,
-    path: "/",
-  });
-  response.cookies.set("loginMethod", "google", {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    expires,
-    path: "/",
-  });
-
-  if (session.name.trim()) {
-    response.cookies.set("customerName", session.name.trim(), {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      expires,
-      path: "/",
-    });
-  }
 }
 
 export async function verifyGoogleIdToken(

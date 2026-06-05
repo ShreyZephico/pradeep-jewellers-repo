@@ -7,6 +7,7 @@ import { inferProductCategoryId } from "@/lib/productRecommendations";
 import productContent from "@/lib/productContent";
 import type { Product } from "@/types/product";
 import { formatProductPrice } from "@/utils/formatPrice";
+import { productLinkWarmHandlers } from "@/lib/productDetailNavigation";
 import { getProductHref } from "@/utils/productUrl";
 
 type RecommendedProductCardProps = {
@@ -22,6 +23,7 @@ export default function RecommendedProductCard({
 }: RecommendedProductCardProps) {
   const copy = productContent.detail.recommended;
   const href = getProductHref(product);
+  const warm = productLinkWarmHandlers(product);
   const categoryId = inferProductCategoryId(product);
   const categoryLabel =
     categoryId && copy.categoryLabels
@@ -30,7 +32,7 @@ export default function RecommendedProductCard({
 
   return (
     <article className="product-rec-card">
-      <Link href={href} className="product-rec-card__link">
+      <Link href={href} className="product-rec-card__link" {...warm}>
         <span className="product-rec-card__media">
           {imageSrc !== "/placeholder.jpg" ? (
             <Image

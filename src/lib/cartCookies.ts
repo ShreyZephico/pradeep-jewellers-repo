@@ -45,7 +45,14 @@ export function setCartIdCookie(response: NextResponse, cartId: string) {
 }
 
 export function clearCartIdCookie(response: NextResponse) {
-  response.cookies.delete(CART_ID_COOKIE);
+  response.cookies.set(CART_ID_COOKIE, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    expires: new Date(0),
+    maxAge: 0,
+  });
 }
 
 export function setPendingDraftOrderCookie(
@@ -62,5 +69,12 @@ export function setPendingDraftOrderCookie(
 }
 
 export function clearPendingDraftOrderCookie(response: NextResponse) {
-  response.cookies.delete(PENDING_DRAFT_ORDER_COOKIE);
+  response.cookies.set(PENDING_DRAFT_ORDER_COOKIE, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    expires: new Date(0),
+    maxAge: 0,
+  });
 }

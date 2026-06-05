@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -18,6 +19,11 @@ import ProductRecommendedSection from "@/components/productComponent/ProductReco
 import ProductContentModal from "@/components/productComponent/ProductContentModal";
 import ProductModal from "@/components/productComponent/ProductModal";
 import { useCart } from "@/contexts/CartContext";
+import { resolveProductDetailSeed } from "@/lib/productDetailNavigation";
+import {
+  readProductDetailCache,
+  writeProductDetailCache,
+} from "@/lib/productDetailCache";
 import { parseJsonResponse } from "@/lib/parseJsonResponse";
 import "@/styles/product-details.css";
 import {
@@ -35,6 +41,8 @@ import productContent from "@/lib/productContent";
 import {
   buildSpecRowsFromSelections,
   buildCustomizationLineAttributes,
+  applyCustomizationDefaults,
+  customizationCatalogRevision,
   getDefaultProductCustomization,
   productHasCustomizationOptions,
   resolveCustomizationOptions,
@@ -44,6 +52,7 @@ import { getGalleryImagesForMetalSelection } from "@/utils/productGalleryByMetal
 
 type ProductDetailClientProps = {
   slug: string;
+  initialProduct?: Product | null;
 };
 
 const copy = productContent.detail;
@@ -152,16 +161,26 @@ function ProductDetailSummary({
   pricing,
   onCustomize,
   onPriceBreakdown,
+  onBuyNow,
+  onAddToCart,
   showConfiguredPrice,
   showCustomizeBar,
+  buyLoading,
+  cartLoading,
+  commerceToast,
 }: {
   product: Product;
   selection: CustomizationSelections;
   pricing: UseProductConfiguredPriceResult;
   onCustomize: () => void;
   onPriceBreakdown: () => void;
+  onBuyNow: () => void;
+  onAddToCart: () => void;
   showConfiguredPrice: boolean;
   showCustomizeBar: boolean;
+  buyLoading: boolean;
+  cartLoading: boolean;
+  commerceToast: string;
 }) {
   const { totalPrice, listPrice, loading } = pricing;
   const priceLabel = showConfiguredPrice
@@ -200,6 +219,23 @@ function ProductDetailSummary({
             onCustomize={onCustomize}
           />
         ) : null}
+
+        <div className="product-detail-commerce-inline">
+          <ProductCommerceActions
+            layout="row"
+            buyLoading={buyLoading}
+            cartLoading={cartLoading}
+            onBuyNow={onBuyNow}
+            onAddToCart={onAddToCart}
+          />
+
+          {commerceToast ? (
+            <p className="product-detail-commerce-toast product-animate-in" role="status">
+              {commerceToast}
+            </p>
+          ) : null}
+        </div>
+
         <button
           type="button"
           onClick={onPriceBreakdown}
@@ -207,6 +243,8 @@ function ProductDetailSummary({
         >
           {copy.viewPriceBreakdown}
         </button>
+
+        <ProductDeliveryEstimate variant="compact" />
       </div>
 
       <ul className="product-detail-trust-list product-detail-trust-list--compact">
@@ -220,46 +258,6 @@ function ProductDetailSummary({
         ))}
       </ul>
     </>
-  );
-}
-
-type ProductDetailCommerceBlockProps = {
-  buyLoading: boolean;
-  cartLoading: boolean;
-  commerceToast: string;
-  onBuyNow: () => void;
-  onAddToCart: () => void;
-  variant: "inline" | "dock";
-};
-
-function ProductDetailCommerceBlock({
-  buyLoading,
-  cartLoading,
-  commerceToast,
-  onBuyNow,
-  onAddToCart,
-  variant,
-}: ProductDetailCommerceBlockProps) {
-  const wrapperClass =
-    variant === "dock"
-      ? "product-detail-commerce-dock"
-      : "product-detail-commerce-bottom product-detail-commerce-bottom--inline";
-
-  return (
-    <div className={wrapperClass}>
-      <ProductCommerceActions
-        layout="row"
-        buyLoading={buyLoading}
-        cartLoading={cartLoading}
-        onBuyNow={onBuyNow}
-        onAddToCart={onAddToCart}
-      />
-      {commerceToast ? (
-        <p className="product-detail-commerce-toast product-animate-in" role="status">
-          {commerceToast}
-        </p>
-      ) : null}
-    </div>
   );
 }
 
@@ -308,14 +306,15 @@ function ProductDetailLoaded({
     }
   }, [gallery, hasGallery, activeImage]);
 
+  const catalogRevision = customizationCatalogRevision(product);
   const pricing = useProductConfiguredPrice(product, confirmedSelection);
 
   useEffect(() => {
-    setConfirmedSelection(getDefaultProductCustomization(product));
-  }, [product.id]);
+    setConfirmedSelection((prev) => applyCustomizationDefaults(prev, product));
+  }, [catalogRevision, product]);
 
   useEffect(() => {
-    writeCachedProduct(slug, product);
+    writeProductDetailCache(slug, product);
   }, [product, slug]);
 
   useEffect(() => {
@@ -671,15 +670,11 @@ function ProductDetailLoaded({
                   pricing={pricing}
                   showConfiguredPrice={hasCustomization}
                   showCustomizeBar={hasCustomization}
-                  onCustomize={() => setCustomizeOpen(true)}
-                  onPriceBreakdown={() => setBreakdownOpen(true)}
-                />
-
-                <ProductDetailCommerceBlock
-                  variant="inline"
                   buyLoading={buyLoading}
                   cartLoading={cartLoading}
                   commerceToast={commerceToast}
+                  onCustomize={() => setCustomizeOpen(true)}
+                  onPriceBreakdown={() => setBreakdownOpen(true)}
                   onBuyNow={() => void runQuickCheckout(true)}
                   onAddToCart={() => void runQuickCheckout(false)}
                 />
@@ -721,19 +716,23 @@ function ProductDetailLoaded({
         {/* ===== CERTIFIED AUTHENTICITY SECTION - ADDED HERE ===== */}
         <CertifiedAuthenticity />
 
-        <ProductDeliveryEstimate />
-
         <ProductRecommendedSection slug={slug} product={product} />
       </div>
 
-      <ProductDetailCommerceBlock
-        variant="dock"
-        buyLoading={buyLoading}
-        cartLoading={cartLoading}
-        commerceToast={commerceToast}
-        onBuyNow={() => void runQuickCheckout(true)}
-        onAddToCart={() => void runQuickCheckout(false)}
-      />
+      <div className="product-detail-commerce-dock">
+        <ProductCommerceActions
+          layout="row"
+          buyLoading={buyLoading}
+          cartLoading={cartLoading}
+          onBuyNow={() => void runQuickCheckout(true)}
+          onAddToCart={() => void runQuickCheckout(false)}
+        />
+        {commerceToast ? (
+          <p className="product-detail-commerce-toast product-animate-in" role="status">
+            {commerceToast}
+          </p>
+        ) : null}
+      </div>
 
       <ProductContentModal
         open={galleryDialogOpen}
@@ -796,85 +795,45 @@ function ProductDetailLoaded({
   );
 }
 
-const productDetailCacheKey = (slug: string) => `pj-product-detail:v2:${slug}`;
-const PRODUCT_DETAIL_CACHE_TTL_MS = 5 * 60 * 1000;
-
-type CachedProductEntry = {
-  product: Product;
-  cachedAt: number;
-};
-
-function readCachedProduct(slug: string): Product | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = sessionStorage.getItem(productDetailCacheKey(slug));
-    if (!raw) return null;
-    const entry = JSON.parse(raw) as CachedProductEntry | Product;
-    const parsed =
-      entry && typeof entry === "object" && "product" in entry && "cachedAt" in entry
-        ? (entry as CachedProductEntry).product
-        : (entry as Product);
-    const cachedAt =
-      entry && typeof entry === "object" && "cachedAt" in entry
-        ? (entry as CachedProductEntry).cachedAt
-        : 0;
-    if (cachedAt && Date.now() - cachedAt > PRODUCT_DETAIL_CACHE_TTL_MS) {
-      sessionStorage.removeItem(productDetailCacheKey(slug));
-      return null;
-    }
-    const handle = parsed.slug ?? parsed.handle;
-    return handle === slug || parsed.id === slug ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function writeCachedProduct(slug: string, product: Product): void {
-  if (typeof window === "undefined") return;
-  try {
-    const payload: CachedProductEntry = { product, cachedAt: Date.now() };
-    sessionStorage.setItem(productDetailCacheKey(slug), JSON.stringify(payload));
-  } catch {
-    // ignore quota / private mode
-  }
-}
-
-export default function ProductDetailClient({ slug }: ProductDetailClientProps) {
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function ProductDetailClient({
+  slug,
+  initialProduct = null,
+}: ProductDetailClientProps) {
+  // SSR-safe: only use props for the first render so server HTML matches the client.
+  const [product, setProduct] = useState<Product | null>(initialProduct);
+  const [loading, setLoading] = useState(!initialProduct);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
-  const productRef = useRef<Product | null>(null);
+  const productRef = useRef<Product | null>(initialProduct);
   const mountFetchDone = useRef(false);
 
-  const applySessionCache = useCallback((): boolean => {
-    const cached = readCachedProduct(slug);
-    if (!cached) return false;
-    setProduct(cached);
-    productRef.current = cached;
+  // Apply list/cache seed after hydration, before paint (client navigation stays instant).
+  useLayoutEffect(() => {
+    const seed = resolveProductDetailSeed(slug, initialProduct);
+    if (!seed) return;
+    setProduct(seed);
+    productRef.current = seed;
     setError("");
     setLoading(false);
-    return true;
-  }, [slug]);
+    writeProductDetailCache(slug, seed);
+  }, [slug, initialProduct]);
 
-  const fetchProduct = useCallback(
+  const refreshProduct = useCallback(
     async (options?: { silent?: boolean; signal?: AbortSignal }) => {
       const silent = options?.silent === true;
-      if (!silent) {
+      const hasProduct = Boolean(productRef.current);
+
+      if (!hasProduct) {
         setLoading(true);
         setError("");
+      } else if (silent) {
+        setRefreshing(true);
       }
 
-      const ownController = options?.signal ? null : new AbortController();
-      const signal = options?.signal ?? ownController!.signal;
-      const timeoutId = ownController
-        ? window.setTimeout(() => ownController.abort(), 45_000)
-        : null;
-
       try {
-        const response = await fetch(
-          `/api/product/${encodeURIComponent(slug)}`,
-          { signal, cache: "no-store" }
-        );
+        const response = await fetch(`/api/product/${encodeURIComponent(slug)}`, {
+          signal: options?.signal,
+        });
         const data = await parseJsonResponse<{
           success?: boolean;
           error?: string;
@@ -888,26 +847,19 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
         }
 
         const next = data.product;
-        writeCachedProduct(slug, next);
+        writeProductDetailCache(slug, next);
         setProduct(next);
         productRef.current = next;
         setError("");
       } catch (e: unknown) {
-        if (signal.aborted) {
-          if (!silent && !productRef.current) {
-            setError(
-              "Product took too long to load. Please refresh or try again."
-            );
-          }
-          return;
-        }
+        if (options?.signal?.aborted) return;
         const message = e instanceof Error ? e.message : "Something went wrong";
-        if (!silent || !productRef.current) {
+        if (!silent && !productRef.current) {
           setError(message);
           setProduct(null);
         }
       } finally {
-        if (timeoutId) window.clearTimeout(timeoutId);
+        setRefreshing(false);
         setLoading(false);
       }
     },
@@ -915,88 +867,39 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
   );
 
   const handleHistoryReturn = useCallback(() => {
-    const hadCache = applySessionCache();
-    void fetchProduct({ silent: hadCache || !!productRef.current });
-  }, [applySessionCache, fetchProduct]);
+    const cached = readProductDetailCache(slug);
+    if (cached) {
+      setProduct(cached);
+      productRef.current = cached;
+      setError("");
+      setLoading(false);
+    }
+    void refreshProduct({ silent: true });
+  }, [slug, refreshProduct]);
 
-  // Primary mount effect — single source of truth for initial load
   useEffect(() => {
     let cancelled = false;
     const controller = new AbortController();
     mountFetchDone.current = false;
 
-    const run = async () => {
-      // If returning from Shopify, use cache immediately and refresh silently
-      const comingFromShopify = document.referrer.includes(
-        "f4hvea-e6.myshopify.com"
-      );
-      if (comingFromShopify) {
-        applySessionCache();
+    const hasSeed = Boolean(productRef.current ?? initialProduct);
+
+    if (!hasSeed) {
+      setLoading(true);
+      setError("");
+    }
+
+    void refreshProduct({ silent: hasSeed, signal: controller.signal }).then(() => {
+      if (!cancelled) {
         mountFetchDone.current = true;
-        if (!cancelled) void fetchProduct({ silent: true });
-        return;
       }
-
-      const hadCache = applySessionCache();
-      if (!hadCache) {
-        setLoading(true);
-        setError("");
-      }
-
-      try {
-        const response = await fetch(
-          `/api/product/${encodeURIComponent(slug)}`,
-          { signal: controller.signal, cache: "no-store" }
-        );
-        const data = await parseJsonResponse<{
-          success?: boolean;
-          error?: string;
-          product?: Product;
-        }>(response);
-
-        if (cancelled) return;
-
-        if (!response.ok || !data?.success || !data.product) {
-          throw new Error(
-            typeof data?.error === "string" ? data.error : "Product not found"
-          );
-        }
-
-        const next = data.product;
-        writeCachedProduct(slug, next);
-        setProduct(next);
-        productRef.current = next;
-        setError("");
-      } catch (e: unknown) {
-        if (cancelled) return;
-        if (e instanceof Error && e.name === "AbortError") {
-          if (!productRef.current) {
-            setError(
-              "Product took too long to load. Please refresh or try again."
-            );
-          }
-          return;
-        }
-        const message = e instanceof Error ? e.message : "Something went wrong";
-        if (!productRef.current) {
-          setError(message);
-          setProduct(null);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-          mountFetchDone.current = true;
-        }
-      }
-    };
-
-    void run();
+    });
 
     return () => {
       cancelled = true;
       controller.abort();
     };
-  }, [slug, applySessionCache, fetchProduct]);
+  }, [slug, initialProduct, refreshProduct]);
 
   // bfcache restore and SPA popstate handler
   useEffect(() => {
@@ -1039,7 +942,12 @@ export default function ProductDetailClient({ slug }: ProductDetailClientProps) 
   }
 
   return (
-    <div className="product-detail-page">
+    <div
+      className={`product-detail-page${refreshing ? " product-detail-page--refreshing" : ""}`}
+    >
+      {refreshing ? (
+        <span className="product-detail-refresh-bar" aria-hidden />
+      ) : null}
       <div className="product-breadcrumb-bar">
         <nav className="product-breadcrumb" aria-label="Breadcrumb">
           <Link href="/">{breadcrumb.home}</Link>

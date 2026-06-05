@@ -18,7 +18,12 @@ import {
 } from "@/utils/searchTags";
 import type { CollectionFilterOption } from "@/lib/shopCollectionFilters";
 import calculateVariantPrice from "@/utils/calculateVariantPrice";
-import getGoldPrice from "@/utils/goldPrice";
+import getGoldPrice, {
+  getGoldPricingForKarat,
+  type GoldKaratPricing,
+} from "@/utils/goldPrice";
+import { parseKaratNumber } from "@/utils/karat";
+import { resolveMakingChargeRate } from "@/utils/makingCharge";
 import { parseMakingChargeFromMetafields } from "@/utils/makingCharge";
 import { fetchMakingChargeFromShopifyAdmin } from "@/lib/shopifyMakingCharge";
 import { getSiteOrigin } from "@/lib/siteUrl";
@@ -483,15 +488,27 @@ function deriveListBadge({
   return undefined;
 }
 
-async function resolveShopifyMakingChargePercent(
+function resolveShopifyMakingChargePercentFromStorefront(
   node: ShopifyProductNode
-): Promise<number | undefined> {
+): number | undefined {
   const fromStorefront = parseMakingChargeFromMetafields([
     { key: "making_charge_type", value: node.makingChargeType?.value ?? null },
     { key: "making_charge", value: node.makingChargeValue?.value ?? null },
   ]);
-  if (fromStorefront) {
-    return fromStorefront.percent;
+  return fromStorefront?.percent;
+}
+
+async function resolveShopifyMakingChargePercent(
+  node: ShopifyProductNode,
+  options?: { allowAdminFallback?: boolean }
+): Promise<number | undefined> {
+  const fromStorefront = resolveShopifyMakingChargePercentFromStorefront(node);
+  if (fromStorefront != null) {
+    return fromStorefront;
+  }
+
+  if (options?.allowAdminFallback === false) {
+    return undefined;
   }
 
   const fromAdmin = await fetchMakingChargeFromShopifyAdmin(node.id);
@@ -528,17 +545,54 @@ function extractAvailableRingSizesFromNode(node: ShopifyProductNode): string[] {
   return [...sizes].sort((a, b) => Number(a) - Number(b));
 }
 
-async function resolveSearchTagsForNode(node: ShopifyProductNode): Promise<string[]> {
-  const fromStorefront = parseSearchTagsMetafield(node.searchTagsMetafield?.value);
+function resolveSearchTagsFromStorefront(node: ShopifyProductNode): string[] {
+  return parseSearchTagsMetafield(node.searchTagsMetafield?.value);
+}
+
+async function resolveSearchTagsForNode(
+  node: ShopifyProductNode,
+  options?: { allowAdminFallback?: boolean }
+): Promise<string[]> {
+  const fromStorefront = resolveSearchTagsFromStorefront(node);
   if (fromStorefront.length > 0) {
     return fromStorefront;
+  }
+
+  if (options?.allowAdminFallback === false) {
+    return [];
   }
 
   const fromAdmin = await fetchSearchTagsFromShopifyAdmin(node.id);
   return fromAdmin ?? [];
 }
 
-/** Listing/card mapping: one gold fetch, min price across sample variants (no full variant list). */
+const LIST_VARIANT_SAMPLE = 4;
+const listKaratPricingCache = new Map<number, GoldKaratPricing | null>();
+
+function clearListKaratPricingCache(): void {
+  listKaratPricingCache.clear();
+}
+
+async function getListKaratPricing(karat: number): Promise<GoldKaratPricing | null> {
+  if (!listKaratPricingCache.has(karat)) {
+    listKaratPricingCache.set(karat, await getGoldPricingForKarat(karat));
+  }
+  return listKaratPricingCache.get(karat) ?? null;
+}
+
+function computeListVariantFinalPrice(
+  weight: number,
+  karatPricing: GoldKaratPricing,
+  makingChargePercent?: number
+): number {
+  const actualGoldPrice = weight * karatPricing.perGramRate;
+  const makingCharge = actualGoldPrice * resolveMakingChargeRate(makingChargePercent);
+  const subtotal = actualGoldPrice + makingCharge;
+  const gst = subtotal * 0.03;
+  return Math.round(subtotal + gst);
+}
+
+/** Listing/card mapping: storefront metafields only, sample variants (fast path). */
 async function mapShopifyProductListItem(
   node: ShopifyProductNode,
   index: number
@@ -560,14 +614,17 @@ async function mapShopifyProductListItem(
   let price = 0;
   let listingWeightGrams: number | undefined;
   let variantId = node.variants.edges[0]?.node.id ?? "";
-  const makingChargePercent = await resolveShopifyMakingChargePercent(node);
+  const makingChargePercent =
+    resolveShopifyMakingChargePercentFromStorefront(node);
   const goldRate = await getGoldPrice();
 
   if (goldRate == null) {
     logMissingGoldPriceOnce();
   }
 
-  for (const { node: variant } of node.variants.edges) {
+  const variantSample = node.variants.edges.slice(0, LIST_VARIANT_SAMPLE);
+
+  for (const { node: variant } of variantSample) {
     const shopifyVariantPrice = Number(variant.price?.amount ?? 0);
 
     if (goldRate == null) {
@@ -588,20 +645,27 @@ async function mapShopifyProductListItem(
     const weight = resolveVariantWeight(gramsFromApi);
     const carat = extractCaratFromSelectedOptions(variant.selectedOptions);
 
-    if (weight > 0) {
-      listingWeightGrams =
-        listingWeightGrams == null
-          ? weight
-          : Math.min(listingWeightGrams, weight);
+    if (weight <= 0) {
+      continue;
     }
 
-    const pricing = await calculateVariantPrice({
+    listingWeightGrams =
+      listingWeightGrams == null
+        ? weight
+        : Math.min(listingWeightGrams, weight);
+
+    const karatPricing = await getListKaratPricing(parseKaratNumber(carat));
+    if (!karatPricing) {
+      continue;
+    }
+
+    const finalPrice = computeListVariantFinalPrice(
       weight,
-      carat,
-      makingChargePercent,
-    });
-    if (price === 0 || pricing.finalPrice < price) {
-      price = pricing.finalPrice;
+      karatPricing,
+      makingChargePercent
+    );
+    if (price === 0 || finalPrice < price) {
+      price = finalPrice;
       variantId = variant.id;
     }
   }
@@ -612,7 +676,7 @@ async function mapShopifyProductListItem(
   }
 
   const tags = node.tags ?? [];
-  const searchTags = await resolveSearchTagsForNode(node);
+  const searchTags = resolveSearchTagsFromStorefront(node);
   const badge = deriveListBadge({ tags, compareAtPrice, price });
   const availableRingSizes = extractAvailableRingSizesFromNode(node);
 
@@ -719,7 +783,11 @@ async function mapShopifyProduct(
     logMissingGoldPriceOnce();
   }
 
-  const makingChargePercent = await resolveShopifyMakingChargePercent(node);
+  const makingChargePercent =
+    resolveShopifyMakingChargePercentFromStorefront(node) ??
+    (await resolveShopifyMakingChargePercent(node, { allowAdminFallback: true }));
+
+  clearListKaratPricingCache();
 
   const variants = await Promise.all(
     node.variants.edges.map(async ({ node: variant }) => {
@@ -731,7 +799,7 @@ async function mapShopifyProduct(
       const carat = extractCaratFromSelectedOptions(variant.selectedOptions);
       const shopifyVariantPrice = Math.round(Number(variant.price?.amount ?? 0));
 
-      if (goldRate == null) {
+      if (goldRate == null || weight <= 0) {
         return {
           id: variant.id,
           image: variant.image?.url,
@@ -741,22 +809,34 @@ async function mapShopifyProduct(
         };
       }
 
-      const pricing = await calculateVariantPrice({
-        weight,
-        carat,
-        makingChargePercent,
-      });
+      const karatPricing = await getListKaratPricing(parseKaratNumber(carat));
+      if (!karatPricing) {
+        return {
+          id: variant.id,
+          image: variant.image?.url,
+          price: shopifyVariantPrice,
+          weight,
+          selectedOptions: variant.selectedOptions,
+        };
+      }
+
+      const actualGoldPrice = Math.round(weight * karatPricing.perGramRate);
+      const makingRate = resolveMakingChargeRate(makingChargePercent);
+      const makingCharge = Math.round(actualGoldPrice * makingRate);
+      const subtotal = actualGoldPrice + makingCharge;
+      const gst = Math.round(subtotal * 0.03);
+      const finalPrice = Math.round(subtotal + gst);
 
       return {
         id: variant.id,
         image: variant.image?.url,
-        price: pricing.finalPrice,
+        price: finalPrice,
         weight,
-        actualGoldPrice: pricing.actualGoldPrice,
-        makingCharge: pricing.makingCharge,
-        gst: pricing.gst,
-        perGramRate: pricing.perGramRate,
-        purity: pricing.purity,
+        actualGoldPrice,
+        makingCharge,
+        gst,
+        perGramRate: karatPricing.perGramRate,
+        purity: karatPricing.purity,
         selectedOptions: variant.selectedOptions,
       };
     })
@@ -777,7 +857,7 @@ async function mapShopifyProduct(
     ? sizeOption.values.map((value) => ({ size: value }))
     : undefined;
 
-  const searchTags = await resolveSearchTagsForNode(node);
+  const searchTags = resolveSearchTagsFromStorefront(node);
 
   const mapped: Product = {
     id: node.id,
@@ -1454,7 +1534,7 @@ type NodesCacheEntry = {
 };
 
 let shopifyNodesCache: NodesCacheEntry | null = null;
-const NODES_CACHE_MS = 30_000;
+const NODES_CACHE_MS = 120_000;
 
 export function clearShopifyNodesCache(): void {
   shopifyNodesCache = null;
@@ -1624,6 +1704,7 @@ export async function getProductsPage(options: {
       });
     }
 
+    clearListKaratPricingCache();
     let allProducts = await Promise.all(
       nodes.map((node, index) => mapShopifyProductListItem(node, index))
     );
@@ -1671,6 +1752,7 @@ export async function getProductByHandle(handle: string): Promise<Product | null
       return null;
     }
 
+    clearListKaratPricingCache();
     return await mapShopifyProduct(data.product, 0);
   } catch (error) {
     console.error("getProductByHandle failed:", handle, error);
@@ -1697,6 +1779,7 @@ export async function getProductById(id: string): Promise<Product | null> {
       return null;
     }
 
+    clearListKaratPricingCache();
     return await mapShopifyProduct(data.product, 0);
   } catch (error) {
     console.error("getProductById failed:", id, error);

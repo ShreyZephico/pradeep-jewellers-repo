@@ -12,6 +12,8 @@ type Props = {
   compare?: {
     gold24: string;
     gold22: string;
+    gold14: string;
+    gold9: string;
     gold18: string;
     silver1kg: string;
   };
@@ -144,6 +146,8 @@ export default function MetalPricesGoldmeterPanel({ compare }: Props) {
                   [
                     ["24K gold (per gram)", compare.gold24, refRowForMetal("24k")?.perGram ?? null],
                     ["22K gold (per gram)", compare.gold22, refRowForMetal("22k")?.perGram ?? null],
+                    ["14K gold (per gram)", compare.gold14, null],
+                    ["9K gold (per gram)", compare.gold9, null],
                     ["18K gold (per gram)", compare.gold18, refRowForMetal("18k")?.perGram ?? null],
                     ["Silver (1 kg)", compare.silver1kg, silver1kg],
                   ] as const

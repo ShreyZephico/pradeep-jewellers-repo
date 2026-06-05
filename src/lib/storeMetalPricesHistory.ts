@@ -12,6 +12,8 @@ export type StoreMetalHistoryDayRow = {
   timeLabel: string;
   gold24: number | null;
   gold22: number | null;
+  gold14: number | null;
+  gold9: number | null;
   gold18: number | null;
   silver1kg: number | null;
 };
@@ -136,6 +138,8 @@ export async function fetchStoreMetalPricesHistory(
       timeLabel: formatTimeLabel(acc.timeIso),
       gold24: acc.prices.gold24 ?? null,
       gold22: acc.prices.gold22 ?? null,
+      gold14: acc.prices.gold14 ?? null,
+      gold9: acc.prices.gold9 ?? null,
       gold18: acc.prices.gold18 ?? null,
       silver1kg: acc.prices.silver1kg ?? null,
     }))

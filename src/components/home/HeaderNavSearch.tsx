@@ -10,6 +10,7 @@ import productContent, { formatProductCopy } from "@/lib/productContent";
 import type { Product } from "@/types/product";
 import type { CollectionFilterOption } from "@/lib/shopCollectionFilters";
 import { formatProductPrice } from "@/utils/formatPrice";
+import { seedProductDetailFromList } from "@/lib/productDetailNavigation";
 import { getProductHref } from "@/utils/productUrl";
 
 const copy = productContent.nav;
@@ -197,6 +198,7 @@ export default function HeaderNavSearch({
   };
 
   const goToProduct = (product: Product) => {
+    seedProductDetailFromList(product);
     onNavigate?.();
     setQuery("");
     setDebouncedQ("");

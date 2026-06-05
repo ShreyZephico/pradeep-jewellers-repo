@@ -63,8 +63,8 @@ export default function MetalPricesHistoryTable({ refreshKey = 0 }: Props) {
             Saved price history
           </h2>
           <p className="metal-prices-card__hint">
-            Last {days} day{days === 1 ? "" : "s"} (IST) — latest 24K, 22K, 18K, and silver
-            per day.
+            Last {days} day{days === 1 ? "" : "s"} (IST) — latest 24K, 22K, 14K, 9K, 18K,
+            and silver per day.
           </p>
         </div>
       </div>
@@ -96,6 +96,8 @@ export default function MetalPricesHistoryTable({ refreshKey = 0 }: Props) {
                 <th scope="col">Time</th>
                 <th scope="col">24K / g</th>
                 <th scope="col">22K / g</th>
+                <th scope="col">14K / g</th>
+                <th scope="col">9K / g</th>
                 <th scope="col">18K / g</th>
                 <th scope="col">Silver / 1 kg</th>
               </tr>
@@ -112,6 +114,12 @@ export default function MetalPricesHistoryTable({ refreshKey = 0 }: Props) {
                   </td>
                   <td className="metal-prices-history__price">
                     {formatMoney(row.gold22)}
+                  </td>
+                  <td className="metal-prices-history__price">
+                    {formatMoney(row.gold14)}
+                  </td>
+                  <td className="metal-prices-history__price">
+                    {formatMoney(row.gold9)}
                   </td>
                   <td className="metal-prices-history__price">
                     {formatMoney(row.gold18)}

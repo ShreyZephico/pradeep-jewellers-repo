@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
-import { verifyCheckoutCustomer } from '@/lib/checkoutAuth';
+import {
+  customerDisplayName,
+  verifyCheckoutCustomer,
+} from '@/lib/checkoutAuth';
 import { attachGuestCartToCustomer } from '@/lib/cartCustomerLink';
+import { applyCustomerSessionCookies } from '@/lib/customerSessionCookies';
 import {
   getShopifyStorefrontGraphqlUrl,
 } from '@/lib/shopifyApiVersion';
@@ -113,7 +117,6 @@ export async function POST(request: Request) {
 
     console.log('✅ Login successful:', email);
 
-    // ⭐ CRITICAL FIX: Set HTTP-only cookie
     const responseData = NextResponse.json({
       success: true,
       message: 'Login successful',
@@ -121,44 +124,17 @@ export async function POST(request: Request) {
       loginMethod: 'email',
     });
 
-    // Set the access token as an HTTP-only cookie
-    responseData.cookies.set('customerAccessToken', accessToken, {
-      httpOnly: true,           // Can't be accessed by JavaScript (more secure)
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      expires: expiresAt ? new Date(expiresAt) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      path: '/',
-    });
-
-    // Set email for client-side display (not HTTP-only so JS can read it)
-    responseData.cookies.set('customerEmail', email, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      expires: expiresAt ? new Date(expiresAt) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      path: '/',
-    });
-
-    // Set login method
-    responseData.cookies.set('loginMethod', 'email', {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      expires: expiresAt ? new Date(expiresAt) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      path: '/',
-    });
-
     const profile = await verifyCheckoutCustomer(accessToken);
-    const displayName = profile?.displayName?.trim();
-    if (displayName) {
-      responseData.cookies.set('customerName', displayName, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        expires: expiresAt ? new Date(expiresAt) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        path: '/',
-      });
-    }
+    const tokenExpires =
+      expiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    applyCustomerSessionCookies(responseData, {
+      accessToken,
+      expiresAt: tokenExpires,
+      email,
+      loginMethod: 'email',
+      name: profile ? customerDisplayName(profile) : email.split('@')[0],
+    });
 
     await attachGuestCartToCustomer(request, accessToken);
 

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { fetchSingleCatalogProduct } from "@/lib/fetchSingleCatalogProduct";
+import {
+  readProductDetailApiCache,
+  writeProductDetailApiCache,
+} from "@/lib/productDetailApiCache";
 
 export async function GET(
   _request: Request,
@@ -17,6 +21,19 @@ export async function GET(
       );
     }
 
+    const cachedBody = readProductDetailApiCache(productId);
+    if (cachedBody) {
+      return new NextResponse(cachedBody, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control":
+            "public, s-maxage=120, stale-while-revalidate=300",
+          "X-Cache": "HIT",
+        },
+      });
+    }
+
     const product = await fetchSingleCatalogProduct(productId);
 
     if (!product) {
@@ -26,17 +43,18 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        product,
+    const body = JSON.stringify({ success: true, product });
+    writeProductDetailApiCache(productId, body);
+
+    return new NextResponse(body, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control":
+          "public, s-maxage=120, stale-while-revalidate=300",
+        "X-Cache": "MISS",
       },
-      {
-        headers: {
-          "Cache-Control": "private, no-store",
-        },
-      }
-    );
+    });
   } catch (error: unknown) {
     console.error("GET /api/product/[productId]:", error);
     return NextResponse.json(

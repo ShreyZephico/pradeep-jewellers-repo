@@ -1,22 +1,23 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["192.168.0.106"],
+  allowedDevOrigins: [
+    "192.168.0.106",
+    "paramount-oxford-bleak.ngrok-free.dev",
+  ],
 
   experimental: {
     staleTimes: {
-      dynamic: 0,
-      static: 30,
+      dynamic: 30,
+      static: 180,
     },
   },
 
   env: {
     NEXT_CLOUDINARY_CLOUD_NAME:
-     
       process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-
-
   },
+
   async redirects() {
     return [
       {
@@ -33,20 +34,23 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
-  return [
-    {
-      source: "/products/:slug*",
-      headers: [
-        {
-          key: "Cache-Control",
-          value: "private, no-store",
-        },
-      ],
-    },
-  ];
-},
+    return [
+      {
+        source: "/products/:slug*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-store",
+          },
+        ],
+      },
+    ];
+  },
 
   images: {
+    unoptimized: process.env.NODE_ENV === "development",
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24,
     remotePatterns: [
       {
         protocol: "https",
