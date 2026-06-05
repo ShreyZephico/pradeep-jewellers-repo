@@ -46,7 +46,7 @@ export default function RatesAnalyticsPage({
 
   const [payload, setPayload] = useState(initialPayload);
   const [loading, setLoading] = useState(false);
-  const [visible, setVisible] = useState(true);
+  const [visible] = useState(true);
   const loadedDaysRef = useRef(initialPayload.days ?? defaultDays);
 
   const days = Number(searchParams.get("days") ?? defaultDays) || defaultDays;
@@ -137,6 +137,26 @@ export default function RatesAnalyticsPage({
       fill: "rgba(197, 160, 89, 0.22)",
       points: series.gold22k.points,
     },
+    ...(series.gold14k
+      ? [
+          {
+            key: "14K",
+            color: "#e4b84a",
+            fill: "rgba(228, 184, 74, 0.2)",
+            points: series.gold14k.points,
+          },
+        ]
+      : []),
+    ...(series.gold9k
+      ? [
+          {
+            key: "9K",
+            color: "#f2d58f",
+            fill: "rgba(242, 213, 143, 0.2)",
+            points: series.gold9k.points,
+          },
+        ]
+      : []),
   ];
 
   const silverChartLines = [
@@ -147,6 +167,9 @@ export default function RatesAnalyticsPage({
       points: series.silver1kg.points,
     },
   ];
+
+  const goldCardCount =
+    2 + (series.gold14k ? 1 : 0) + (series.gold9k ? 1 : 0);
 
   return (
     <section ref={rootRef} className={pageClass}>
@@ -259,6 +282,22 @@ export default function RatesAnalyticsPage({
                   accentClass="rates-stat-card--gold22"
                   index={1}
                 />
+                {series.gold14k ? (
+                  <RatesStatCard
+                    series={series.gold14k}
+                    trendColor={trendColor(series.gold14k.stats.status, trendColors)}
+                    accentClass="rates-stat-card--gold14"
+                    index={2}
+                  />
+                ) : null}
+                {series.gold9k ? (
+                  <RatesStatCard
+                    series={series.gold9k}
+                    trendColor={trendColor(series.gold9k.stats.status, trendColors)}
+                    accentClass="rates-stat-card--gold9"
+                    index={3}
+                  />
+                ) : null}
               </>
             ) : null}
             {showSilver ? (
@@ -266,7 +305,7 @@ export default function RatesAnalyticsPage({
                 series={series.silver1kg}
                 trendColor={trendColor(series.silver1kg.stats.status, trendColors)}
                 accentClass="rates-stat-card--silver"
-                index={showGold ? 2 : 0}
+                index={showGold ? goldCardCount : 0}
               />
             ) : null}
           </div>
@@ -278,7 +317,10 @@ export default function RatesAnalyticsPage({
               <section className="rates-page__panel">
                 <h2 className="rates-page__section-heading">{copy.chartTitle}</h2>
                 <p className="rates-page__section-lead">{copy.chartSubtitle}</p>
-                <p className="rates-page__panel-tag">Gold (24K & 22K)</p>
+                <p className="rates-page__panel-tag">
+                  Gold (24K, 22K{series.gold14k ? ", 14K" : ""}
+                  {series.gold9k ? ", 9K" : ""})
+                </p>
                 <RatesAnalyticsChart
                   lines={goldChartLines}
                   animate={visible}
@@ -303,6 +345,8 @@ export default function RatesAnalyticsPage({
                 <RatesComparisonTable
                   rows={table}
                   showGold={showGold}
+                  showGold14={showGold && Boolean(series.gold14k)}
+                  showGold9={showGold && Boolean(series.gold9k)}
                   showSilver={showSilver}
                 />
               </section>

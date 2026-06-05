@@ -3,6 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Product } from "@/types/product";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
+import { parseKaratNumber } from "@/utils/karat";
+
+function parseKaratFromLabel(label: string | null): number {
+  if (!label) return 22;
+  return parseKaratNumber(label);
+}
 import { parsePriceCalculateResponse } from "@/lib/priceCalculateResponse";
 import {
   resolveCustomizationOptions,
@@ -59,6 +65,36 @@ export function useProductConfiguredPrice(
 
   useEffect(() => {
     let cancelled = false;
+    const variant = resolved.variant;
+
+    const useVariantBreakdown =
+      variant &&
+      variant.price > 0 &&
+      resolved.baseWeight > 0 &&
+      variant.actualGoldPrice != null &&
+      variant.makingCharge != null &&
+      variant.gst != null;
+
+    if (useVariantBreakdown) {
+      setLivePrice(variant.price);
+      setBreakdown({
+        purity: variant.purity ?? 0,
+        karat: parseKaratFromLabel(resolved.karatLabel),
+        base24KGoldPrice: 0,
+        adjustedGoldPrice: 0,
+        perGramRate: variant.perGramRate ?? 0,
+        actualGoldPrice: variant.actualGoldPrice ?? 0,
+        makingCharge: variant.makingCharge ?? 0,
+        subtotal: (variant.actualGoldPrice ?? 0) + (variant.makingCharge ?? 0),
+        gst: variant.gst ?? 0,
+        finalPrice: variant.price,
+      });
+      setLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
     setLivePrice(variantPrice);
 
     const recalculate = async () => {

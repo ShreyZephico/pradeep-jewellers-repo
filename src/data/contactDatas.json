@@ -92,6 +92,28 @@
           "priceMultiplier": 1
         }
       },
+      "gold14k": {
+        "label": "14K GOLD",
+        "unitSuffix": "/ gram",
+        "fractionDigits": 2,
+        "db": {
+          "metal": "gold",
+          "purityLabel": "14K",
+          "unit": "gram",
+          "priceMultiplier": 1
+        }
+      },
+      "gold9k": {
+        "label": "9K GOLD",
+        "unitSuffix": "/ gram",
+        "fractionDigits": 2,
+        "db": {
+          "metal": "gold",
+          "purityLabel": "9K",
+          "unit": "gram",
+          "priceMultiplier": 1
+        }
+      },
       "silver1kg": {
         "label": "SILVER (1 KG)",
         "unitSuffix": "",

@@ -4,6 +4,10 @@ import type { NextRequest } from "next/server";
 import { parsePriceParam, parseProductSort } from "@/lib/productFilters";
 import { parseCollectionFacetFilters } from "@/lib/shopCollectionFilters";
 import { parseRingSizesQueryParam } from "@/utils/ringSizeChart";
+import {
+  readProductsApiCache,
+  writeProductsApiCache,
+} from "@/lib/productsApiCache";
 import { getProductsPage } from "@/lib/shopify";
 
 const DEFAULT_LIMIT = 10;
@@ -17,6 +21,19 @@ function sanitizeSearchInput(value: string): string {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const cacheKey = searchParams.toString();
+    const cachedBody = readProductsApiCache(cacheKey);
+    if (cachedBody) {
+      return new NextResponse(cachedBody, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control":
+            "public, s-maxage=120, stale-while-revalidate=300",
+          "X-Cache": "HIT",
+        },
+      });
+    }
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
     const limitRaw =
       parseInt(searchParams.get("limit") || String(DEFAULT_LIMIT), 10) ||
@@ -57,24 +74,29 @@ export async function GET(request: NextRequest) {
       facets,
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        total,
-        page,
-        limit,
-        totalPages,
-        products,
-        priceBounds,
-        searchTagOptions,
-        searchTagSuggestions,
+    const payload = {
+      success: true,
+      total,
+      page,
+      limit,
+      totalPages,
+      products,
+      priceBounds,
+      searchTagOptions,
+      searchTagSuggestions,
+    };
+    const body = JSON.stringify(payload);
+    writeProductsApiCache(cacheKey, body);
+
+    return new NextResponse(body, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control":
+          "public, s-maxage=120, stale-while-revalidate=300",
+        "X-Cache": "MISS",
       },
-      {
-        headers: {
-          "Cache-Control": "private, no-store",
-        },
-      }
-    );
+    });
   } catch (error: unknown) {
     console.error("Products API Error:", error);
 

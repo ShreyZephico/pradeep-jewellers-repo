@@ -23,6 +23,8 @@ export function buildRatesDbConfig(
 ): FetchMetalRatesConfig {
   return {
     gold22k: metalQuery(ratesConfig.gold22k.db),
+    gold14k: metalQuery(ratesConfig.gold14k.db),
+    gold9k: metalQuery(ratesConfig.gold9k.db),
     silver1kg: metalQuery(ratesConfig.silver1kg.db),
     compareDays,
   };
@@ -37,10 +39,14 @@ export function buildRatesAnalyticsConfig(): RatesAnalyticsDbConfig {
     labels: {
       gold24k: gold24k.label,
       gold22k: ratesConfig.gold22k.label,
+      gold14k: ratesConfig.gold14k.label,
+      gold9k: ratesConfig.gold9k.label,
       silver1kg: ratesConfig.silver1kg.label,
     },
     gold24k: metalQuery(gold24k.db),
     gold22k: metalQuery(ratesConfig.gold22k.db),
+    gold14k: metalQuery(ratesConfig.gold14k.db),
+    gold9k: metalQuery(ratesConfig.gold9k.db),
     silver1kg: metalQuery(ratesConfig.silver1kg.db),
   };
 }
@@ -57,6 +63,16 @@ export function getRatesDisplayMeta() {
       label: ratesConfig.gold22k.label,
       unitSuffix: ratesConfig.gold22k.unitSuffix,
       fractionDigits: ratesConfig.gold22k.fractionDigits ?? 2,
+    },
+    gold14k: {
+      label: ratesConfig.gold14k.label,
+      unitSuffix: ratesConfig.gold14k.unitSuffix,
+      fractionDigits: ratesConfig.gold14k.fractionDigits ?? 2,
+    },
+    gold9k: {
+      label: ratesConfig.gold9k.label,
+      unitSuffix: ratesConfig.gold9k.unitSuffix,
+      fractionDigits: ratesConfig.gold9k.fractionDigits ?? 2,
     },
     silver1kg: {
       label: ratesConfig.silver1kg.label,

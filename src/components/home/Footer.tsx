@@ -14,13 +14,11 @@ import {
 import data from "@/data/contactDatas.json";
 import { useGoldRates } from "@/contexts/GoldRatesContext";
 import { formatInr } from "@/lib/goldRates";
+import { buildLiveRateDisplayItems } from "@/lib/liveRatesDisplay";
 import type { GoldRateApiResponse } from "@/types/goldRate";
 import { getImageUrl } from "@/utils/cloudinary";
 
 import "./css/footer.css";
-
-type LiveRates = NonNullable<GoldRateApiResponse["data"]>;
-type RateTickerKey = keyof Pick<LiveRates, "gold22k" | "silver1kg">;
 
 type TickerItem = {
   key: string;
@@ -30,24 +28,13 @@ type TickerItem = {
 };
 
 function buildFooterTickerItems(
-  ratesConfig: (typeof data.heroSection)["rates"],
-  live: LiveRates | undefined
+  live: GoldRateApiResponse["data"] | undefined
 ): TickerItem[] {
-  const entries: { key: RateTickerKey; config: (typeof ratesConfig)["gold22k"] }[] =
-    [];
-
-  if (ratesConfig?.gold22k) {
-    entries.push({ key: "gold22k", config: ratesConfig.gold22k });
-  }
-  if (ratesConfig?.silver1kg) {
-    entries.push({ key: "silver1kg", config: ratesConfig.silver1kg });
-  }
-
-  return entries.map(({ key, config }) => ({
-    key,
-    label: config.label,
-    price: live?.[key] ? formatInr(live[key].current) : "—",
-    unitSuffix: config.unitSuffix?.trim() ?? "",
+  return buildLiveRateDisplayItems(live).map((item) => ({
+    key: item.key,
+    label: item.label,
+    price: item.rate ? formatInr(item.rate.current) : "—",
+    unitSuffix: item.unitSuffix.trim(),
   }));
 }
 
@@ -210,7 +197,6 @@ export default function Footer() {
   const brand = data.brand;
   const contact = data.contact;
   const social = data.social;
-  const ratesConfig = data.heroSection.rates;
   const { payload } = useGoldRates();
   const live = payload?.data;
 
@@ -219,7 +205,7 @@ export default function Footer() {
   const [logoError, setLogoError] = useState(false);
   const year = new Date().getFullYear();
 
-  const tickerItems = buildFooterTickerItems(ratesConfig, live);
+  const tickerItems = buildFooterTickerItems(live);
 
   useEffect(() => {
     const el = footerRef.current;

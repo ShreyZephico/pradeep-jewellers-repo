@@ -11,19 +11,16 @@ type Snackbar = {
 } | null;
 
 export default function MetalPricesPage() {
-  const [hydrated, setHydrated] = useState(false);
   const [gold24, setGold24] = useState("");
   const [gold22, setGold22] = useState("");
+  const [gold14, setGold14] = useState("");
+  const [gold9, setGold9] = useState("");
   const [gold18, setGold18] = useState("");
   const [silver1kg, setSilver1kg] = useState("");
   const [saving, setSaving] = useState(false);
   const [snackbar, setSnackbar] = useState<Snackbar>(null);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
-
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
 
   const showSnackbar = useCallback((type: "success" | "error", text: string) => {
     setSnackbar({ type, text });
@@ -48,6 +45,8 @@ export default function MetalPricesPage() {
     const n = Number(value);
     if (Number.isFinite(n) && n > 0) {
       setGold22(String(Math.round(n * 0.92 * 100) / 100));
+      setGold14(String(Math.round(n * 0.58 * 100) / 100));
+      setGold9(String(Math.round(n * 0.38 * 100) / 100));
       setGold18(String(Math.round(n * 0.76 * 100) / 100));
     }
   }
@@ -62,6 +61,8 @@ export default function MetalPricesPage() {
         body: JSON.stringify({
           gold24: Number(gold24),
           gold22: Number(gold22),
+          gold14: Number(gold14),
+          gold9: Number(gold9),
           gold18: Number(gold18),
           silver1kg: Number(silver1kg),
         }),
@@ -75,6 +76,8 @@ export default function MetalPricesPage() {
       setHistoryRefreshKey((k) => k + 1);
       setGold24("");
       setGold22("");
+      setGold14("");
+      setGold9("");
       setGold18("");
       setSilver1kg("");
     } catch {
@@ -120,119 +123,147 @@ export default function MetalPricesPage() {
 
       <div className="metal-prices-body">
         <div className="metal-prices-body__inner">
-          {!hydrated ? (
-            <div className="metal-prices-card" aria-busy="true" aria-live="polite">
-              <p className="metal-prices-card__hint">Loading…</p>
-            </div>
-          ) : (
-            <div className="metal-prices-grid">
-              <MetalPricesGoldmeterPanel
-                compare={{ gold24, gold22, gold18, silver1kg }}
-              />
+          <div className="metal-prices-grid">
+            <MetalPricesGoldmeterPanel
+              compare={{ gold24, gold22, gold14, gold9, gold18, silver1kg }}
+            />
 
-              <form
-                className="metal-prices-card"
-                onSubmit={onSave}
-                aria-labelledby="form-title"
-                autoComplete="off"
-              >
-                <div className="metal-prices-card__head">
-                  <span
-                    className="metal-prices-card__icon metal-prices-card__icon--form"
-                    aria-hidden="true"
-                  >
-                    Add
+            <form
+              className="metal-prices-card"
+              onSubmit={onSave}
+              aria-labelledby="form-title"
+              autoComplete="off"
+            >
+              <div className="metal-prices-card__head">
+                <span
+                  className="metal-prices-card__icon metal-prices-card__icon--form"
+                  aria-hidden="true"
+                >
+                  Add
+                </span>
+                <div>
+                  <h2 id="form-title" className="metal-prices-card__title">
+                    Your store prices
+                  </h2>
+                  <p className="metal-prices-card__hint">
+                    All fields required. Saved with your email and mobile.
+                  </p>
+                </div>
+              </div>
+
+              <div className="metal-prices-form-grid">
+                <label className="metal-prices-field">
+                  <span className="metal-prices-field__label">24K gold (₹ / gram)</span>
+                  <input
+                    className="metal-prices-field__input"
+                    type="number"
+                    step="0.01"
+                    required
+                    placeholder="e.g. 15943"
+                    value={gold24}
+                    disabled={inputsDisabled}
+                    autoComplete="off"
+                    onChange={(e) => onGold24Change(e.target.value)}
+                  />
+                </label>
+
+                <label className="metal-prices-field">
+                  <span className="metal-prices-field__label">Silver (₹ / 1 kg)</span>
+                  <input
+                    className="metal-prices-field__input"
+                    type="number"
+                    step="0.01"
+                    required
+                    placeholder="e.g. 285000"
+                    value={silver1kg}
+                    disabled={inputsDisabled}
+                    autoComplete="off"
+                    onChange={(e) => setSilver1kg(e.target.value)}
+                  />
+                </label>
+
+                <label className="metal-prices-field">
+                  <span className="metal-prices-field__label">
+                    22K gold (₹ / gram)
+                    <span className="metal-prices-field__note">Auto: 24K × 0.92</span>
                   </span>
-                  <div>
-                    <h2 id="form-title" className="metal-prices-card__title">
-                      Your store prices
-                    </h2>
-                    <p className="metal-prices-card__hint">
-                      All fields required. Saved with your email and mobile.
-                    </p>
-                  </div>
+                  <input
+                    className="metal-prices-field__input"
+                    type="number"
+                    step="0.01"
+                    required
+                    placeholder="Auto calculated"
+                    value={gold22}
+                    disabled={inputsDisabled}
+                    autoComplete="off"
+                    onChange={(e) => setGold22(e.target.value)}
+                  />
+                </label>
+
+                <label className="metal-prices-field">
+                  <span className="metal-prices-field__label">
+                    14K gold (₹ / gram)
+                    <span className="metal-prices-field__note">Auto: 24K × 0.58</span>
+                  </span>
+                  <input
+                    className="metal-prices-field__input"
+                    type="number"
+                    step="0.01"
+                    required
+                    placeholder="Auto calculated"
+                    value={gold14}
+                    disabled={inputsDisabled}
+                    autoComplete="off"
+                    onChange={(e) => setGold14(e.target.value)}
+                  />
+                </label>
+
+                <label className="metal-prices-field">
+                  <span className="metal-prices-field__label">
+                    9K gold (₹ / gram)
+                    <span className="metal-prices-field__note">Auto: 24K × 0.38</span>
+                  </span>
+                  <input
+                    className="metal-prices-field__input"
+                    type="number"
+                    step="0.01"
+                    required
+                    placeholder="Auto calculated"
+                    value={gold9}
+                    disabled={inputsDisabled}
+                    autoComplete="off"
+                    onChange={(e) => setGold9(e.target.value)}
+                  />
+                </label>
+
+                <label className="metal-prices-field">
+                  <span className="metal-prices-field__label">
+                    18K gold (₹ / gram)
+                    <span className="metal-prices-field__note">Auto: 24K × 0.76</span>
+                  </span>
+                  <input
+                    className="metal-prices-field__input"
+                    type="number"
+                    step="0.01"
+                    required
+                    placeholder="Auto calculated"
+                    value={gold18}
+                    disabled={inputsDisabled}
+                    autoComplete="off"
+                    onChange={(e) => setGold18(e.target.value)}
+                  />
+                </label>
+
+                <div className="metal-prices-field metal-prices-field--full">
+                  <button className="metal-prices-submit" type="submit" disabled={saving}>
+                    {saving ? "Saving…" : "Save to database"}
+                  </button>
                 </div>
+              </div>
+            </form>
+          </div>
 
-                <div className="metal-prices-form-grid">
-                  <label className="metal-prices-field">
-                    <span className="metal-prices-field__label">24K gold (₹ / gram)</span>
-                    <input
-                      className="metal-prices-field__input"
-                      type="number"
-                      step="0.01"
-                      required
-                      placeholder="e.g. 15943"
-                      value={gold24}
-                      disabled={inputsDisabled}
-                      autoComplete="off"
-                      onChange={(e) => onGold24Change(e.target.value)}
-                    />
-                  </label>
-
-                  <label className="metal-prices-field">
-                    <span className="metal-prices-field__label">Silver (₹ / 1 kg)</span>
-                    <input
-                      className="metal-prices-field__input"
-                      type="number"
-                      step="0.01"
-                      required
-                      placeholder="e.g. 285000"
-                      value={silver1kg}
-                      disabled={inputsDisabled}
-                      autoComplete="off"
-                      onChange={(e) => setSilver1kg(e.target.value)}
-                    />
-                  </label>
-
-                  <label className="metal-prices-field">
-                    <span className="metal-prices-field__label">
-                      22K gold (₹ / gram)
-                      <span className="metal-prices-field__note">Auto: 24K × 0.92</span>
-                    </span>
-                    <input
-                      className="metal-prices-field__input"
-                      type="number"
-                      step="0.01"
-                      required
-                      placeholder="Auto calculated"
-                      value={gold22}
-                      disabled={inputsDisabled}
-                      autoComplete="off"
-                      onChange={(e) => setGold22(e.target.value)}
-                    />
-                  </label>
-
-                  <label className="metal-prices-field">
-                    <span className="metal-prices-field__label">
-                      18K gold (₹ / gram)
-                      <span className="metal-prices-field__note">Auto: 24K × 0.76</span>
-                    </span>
-                    <input
-                      className="metal-prices-field__input"
-                      type="number"
-                      step="0.01"
-                      required
-                      placeholder="Auto calculated"
-                      value={gold18}
-                      disabled={inputsDisabled}
-                      autoComplete="off"
-                      onChange={(e) => setGold18(e.target.value)}
-                    />
-                  </label>
-
-                  <div className="metal-prices-field metal-prices-field--full">
-                    <button className="metal-prices-submit" type="submit" disabled={saving}>
-                      {saving ? "Saving…" : "Save to database"}
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {hydrated ? (
-            <MetalPricesHistoryTable refreshKey={historyRefreshKey} />
-          ) : null}
+          <MetalPricesHistoryTable refreshKey={historyRefreshKey} />
         </div>
       </div>
     </div>

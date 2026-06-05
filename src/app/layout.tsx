@@ -3,15 +3,14 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import Script from "next/script";
 
+import DeferredSiteExtras from "@/components/DeferredSiteExtras";
 import NavigationGuard from "@/components/NavigationGuard";
-import TawkToChat from "@/components/TawkToChat";
-import GoogleOneTapShell from "@/components/GoogleOneTapShell";
+import CouponPopupLazy from "@/components/coupon/CouponPopupLazy";
 import Header from "@/components/home/Header";
 import Footer from "@/components/home/Footer";
-
-import CheckoutFinalizeBridge from "@/components/CheckoutFinalizeBridge";
 import { CartProvider } from "@/contexts/CartContext";
 import { CustomerAuthProvider } from "@/contexts/CustomerAuthContext";
+import { DeliveryLocationProvider } from "@/contexts/DeliveryLocationContext";
 import { GoldRatesProvider } from "@/contexts/GoldRatesContext";
 
 import data from "@/data/contactDatas.json";
@@ -69,12 +68,13 @@ export default function RootLayout({
       >
         <Script
           id="home-back-navigation"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{ __html: HOME_BACK_NAV_SCRIPT }}
         />
         <GoldRatesProvider refreshMs={goldRatesRefreshMs}>
           <CustomerAuthProvider>
-            <CartProvider>
+            <DeliveryLocationProvider>
+              <CartProvider>
               <NavigationGuard />
               <Header />
 
@@ -87,9 +87,10 @@ export default function RootLayout({
               </div>
 
               <Footer />
-              <GoogleOneTapShell />
-              <TawkToChat />
-            </CartProvider>
+              <CouponPopupLazy />
+              <DeferredSiteExtras />
+              </CartProvider>
+            </DeliveryLocationProvider>
           </CustomerAuthProvider>
         </GoldRatesProvider>
       </body>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react';
 
+import { rememberListProducts } from '@/lib/productListSnapshot';
 import type { Product } from '@/types/product';
 import CollectionProductCard from "@/components/productComponent/CollectionProductCard";
 import CollectionProductCardSkeleton from "@/components/productComponent/CollectionProductCardSkeleton";
@@ -365,7 +366,6 @@ export default function ProductsPageClient({
 
         const response = await fetch(`/api/products?${params.toString()}`, {
           signal: controller.signal,
-          cache: 'no-store',
         });
         const data = await response.json();
 
@@ -386,6 +386,7 @@ export default function ProductsPageClient({
 
         setTotal(nextTotal);
         setProducts((prev) => (append ? mergeProducts(prev, incoming) : incoming));
+        rememberListProducts(incoming);
         setHasMore(page < totalPages && incoming.length > 0);
         pageRef.current = page;
       } catch (e) {
@@ -428,17 +429,35 @@ export default function ProductsPageClient({
     ]
   );
 
+  const listQueryKey = useMemo(
+    () =>
+      JSON.stringify({
+        debouncedQ,
+        selectedCategory,
+        selectedRingSizes,
+        facets,
+        sort,
+        min: priceRange.min,
+        max: priceRange.max,
+      }),
+    [
+      debouncedQ,
+      selectedCategory,
+      selectedRingSizes,
+      facets,
+      sort,
+      priceRange.min,
+      priceRange.max,
+    ]
+  );
+
   useEffect(() => {
     const generation = ++fetchGenRef.current;
     pageRef.current = 1;
     setProducts([]);
     setHasMore(false);
     void fetchProducts(1, false, generation);
-  }, [
-    fetchProducts,
-    retryCount,
-    refreshToken,
-  ]);
+  }, [listQueryKey, retryCount, refreshToken, fetchProducts]);
 
   useEffect(() => {
     const sentinel = loadMoreRef.current;

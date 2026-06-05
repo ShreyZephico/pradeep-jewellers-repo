@@ -29,20 +29,8 @@ export function proxy(request: NextRequest) {
     );
   }
 
-  if (token && (pathname === "/login" || pathname === "/signup")) {
-    const returnTo = request.nextUrl.searchParams.get("returnTo");
-    const safeReturn =
-      returnTo &&
-      returnTo.startsWith("/") &&
-      !returnTo.startsWith("//") &&
-      !returnTo.startsWith("/login") &&
-      !returnTo.startsWith("/signup");
-
-    if (safeReturn) {
-      return NextResponse.redirect(new URL(returnTo, request.url));
-    }
-    return NextResponse.redirect(new URL("/", request.url));
-  }
+  // Login/signup redirect when a cookie exists is handled client-side via
+  // /api/auth/check so expired or stale tokens do not block the login page.
 
   return NextResponse.next({ request });
 }

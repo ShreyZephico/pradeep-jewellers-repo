@@ -136,6 +136,28 @@ function tawkAttributesForProfile(profile: VisitorProfile) {
   };
 }
 
+function getTawkErrorText(error: unknown): string {
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  const record = error as { code?: string; name?: string; message?: string };
+  return record?.code || record?.name || record?.message || '';
+}
+
+function isIgnorableTawkError(errorText: string): boolean {
+  const upper = errorText.toUpperCase();
+  return upper.includes('INVALID_EMAIL') || upper.includes('RATE_LIMITED');
+}
+
+function profileSignature(profile: VisitorProfile): string {
+  return `${profile.name}|${profile.email ?? ''}|${profile.phone}`;
+}
+
+/** Tawk limits how often setAttributes can run — keep a safe gap between calls. */
+const TAWK_APPLY_MIN_INTERVAL_MS = 8_000;
+const TAWK_APPLY_DEBOUNCE_MS = 1_500;
+
 export default function TawkToChat() {
   const [profile, setProfile] = useState<VisitorProfile | null>(null);
   const [needsProfile, setNeedsProfile] = useState(false);
@@ -143,7 +165,6 @@ export default function TawkToChat() {
   const [phoneInput, setPhoneInput] = useState('');
   const [fieldErrors, setFieldErrors] = useState<ChatFormErrors>({});
   const shouldOpenAfterProfile = useRef(false);
-  const hasLoadedProfile = useRef(false);
   const profileRef = useRef<VisitorProfile | null>(null);
   const needsProfileRef = useRef(false);
   const [launcherCollapsed, setLauncherCollapsed] = useState(false);
@@ -154,6 +175,11 @@ export default function TawkToChat() {
   const openChatAttemptRef = useRef(false);
   const pendingChatOpenRef = useRef(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const lastAppliedProfileKeyRef = useRef<string | null>(null);
+  const lastApplyAtRef = useRef(0);
+  const applyDebounceRef = useRef<number | null>(null);
+  const profileEventSentRef = useRef(false);
+  const customerProfileLoadRef = useRef(false);
 
   const setTawkChatOpen = useCallback((open: boolean) => {
     setChatOpen(open);
@@ -172,89 +198,74 @@ export default function TawkToChat() {
     setProfile(nextProfile);
   }, []);
 
-  const applyTawkProfile = useCallback((nextProfile: VisitorProfile) => {
-  if (!window.Tawk_API?.setAttributes) {
-    return;
-  }
-
-  // Proper email validation
-  const isValidEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  };
-
-  // Clean email safely
-  const cleanEmail = nextProfile.email?.trim()
-    ? safeDecode(nextProfile.email.trim())
-    : undefined;
-
-  // Build attributes safely
-  const attributes: Record<string, string> = {
-    name: nextProfile.name || 'Visitor',
-    phone: nextProfile.phone,
-    mobile: nextProfile.phone,
-    'phone-number': nextProfile.phone,
-  };
-
-  // Only add email if valid
-  if (cleanEmail && isValidEmail(cleanEmail)) {
-    attributes.email = cleanEmail;
-  }
-
-  window.Tawk_API.setAttributes(attributes, (error) => {
-    if (!error) {
+  const applyTawkProfileNow = useCallback((nextProfile: VisitorProfile) => {
+    if (!window.Tawk_API?.setAttributes) {
       return;
     }
 
-    const errorText =
-      typeof error === 'string'
-        ? error
-        : (
-            error as {
-              code?: string;
-              name?: string;
-              message?: string;
-            }
-          )?.code ||
-          (
-            error as {
-              code?: string;
-              name?: string;
-              message?: string;
-            }
-          )?.name ||
-          (
-            error as {
-              code?: string;
-              name?: string;
-              message?: string;
-            }
-          )?.message ||
-          '';
+    const signature = profileSignature(nextProfile);
+    const now = Date.now();
 
-    // Ignore invalid email errors completely
-    // because Tawk may cache old visitor email internally
-    if (errorText.includes('INVALID_EMAIL')) {
-      console.warn('Tawk ignored invalid email.');
+    if (
+      lastAppliedProfileKeyRef.current === signature &&
+      now - lastApplyAtRef.current < TAWK_APPLY_MIN_INTERVAL_MS
+    ) {
       return;
     }
 
-    console.error('Unable to set Tawk visitor attributes:', error);
-  });
+    if (now - lastApplyAtRef.current < TAWK_APPLY_MIN_INTERVAL_MS) {
+      return;
+    }
 
-  // Optional analytics event
-  window.Tawk_API.addEvent?.(
-    'visitor-profile-collected',
-    {
-      source: nextProfile.isAuthenticated
-        ? 'shopify-customer'
-        : 'guest-form',
-      hasPhone: nextProfile.phone ? 'yes' : 'no',
-      phone: nextProfile.phone,
-      mobile: nextProfile.phone,
+    const attributes = tawkAttributesForProfile(nextProfile);
+
+    lastAppliedProfileKeyRef.current = signature;
+    lastApplyAtRef.current = now;
+
+    window.Tawk_API.setAttributes(attributes, (error) => {
+      if (!error) {
+        return;
+      }
+
+      const errorText = getTawkErrorText(error);
+      if (isIgnorableTawkError(errorText)) {
+        return;
+      }
+
+      console.warn('Unable to set Tawk visitor attributes:', errorText);
+    });
+
+    if (!profileEventSentRef.current) {
+      profileEventSentRef.current = true;
+      window.Tawk_API.addEvent?.(
+        'visitor-profile-collected',
+        {
+          source: nextProfile.isAuthenticated ? 'shopify-customer' : 'guest-form',
+          hasPhone: nextProfile.phone ? 'yes' : 'no',
+        },
+        (error) => {
+          const errorText = getTawkErrorText(error);
+          if (error && !isIgnorableTawkError(errorText)) {
+            console.warn('Unable to send Tawk visitor event:', errorText);
+          }
+        }
+      );
+    }
+  }, []);
+
+  const applyTawkProfile = useCallback(
+    (nextProfile: VisitorProfile) => {
+      if (applyDebounceRef.current != null) {
+        window.clearTimeout(applyDebounceRef.current);
+      }
+
+      applyDebounceRef.current = window.setTimeout(() => {
+        applyDebounceRef.current = null;
+        applyTawkProfileNow(nextProfile);
+      }, TAWK_APPLY_DEBOUNCE_MS);
     },
-    () => {}
+    [applyTawkProfileNow]
   );
-}, []);
 
   const maximizeTawkChat = useCallback(() => {
     if (!profileRef.current?.phone) {
@@ -298,6 +309,11 @@ export default function TawkToChat() {
   }, [applyTawkProfile, showProfileForm]);
 
   const loadCustomerProfile = useCallback(async () => {
+    if (customerProfileLoadRef.current) {
+      return;
+    }
+    customerProfileLoadRef.current = true;
+
     const storedProfile = getStoredGuestProfile();
 
     try {
@@ -437,7 +453,7 @@ export default function TawkToChat() {
 
     if (typeof window.Tawk_API.showWidget === 'function') {
       tawkReadyRef.current = true;
-      loadCustomerProfile();
+      void loadCustomerProfile();
       hideNativeTawkBubble();
     }
 
@@ -445,7 +461,7 @@ export default function TawkToChat() {
       openChatAttemptRef.current = false;
 
       if (profileRef.current?.phone) {
-        applyTawkProfile(profileRef.current);
+        applyTawkProfileNow(profileRef.current);
         setTawkChatOpen(true);
         return;
       }
@@ -463,7 +479,7 @@ export default function TawkToChat() {
       hideNativeTawkBubble();
     };
   }, [
-    applyTawkProfile,
+    applyTawkProfileNow,
     hideNativeTawkBubble,
     loadCustomerProfile,
     maximizeTawkChat,
@@ -478,11 +494,12 @@ export default function TawkToChat() {
 
     configureTawk();
 
-    if (!hasLoadedProfile.current) {
-      hasLoadedProfile.current = true;
-      loadCustomerProfile();
-    }
-  }, [configureTawk, loadCustomerProfile]);
+    return () => {
+      if (applyDebounceRef.current != null) {
+        window.clearTimeout(applyDebounceRef.current);
+      }
+    };
+  }, [configureTawk]);
 
   useEffect(() => {
     try {
@@ -554,7 +571,7 @@ export default function TawkToChat() {
 
     setFieldErrors({});
     updateProfile(nextProfile);
-    applyTawkProfile(nextProfile);
+    applyTawkProfileNow(nextProfile);
 
     localStorage.setItem(
       TAWK_PROFILE_STORAGE_KEY,

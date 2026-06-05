@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useMemo } from "react";
 import type { CSSProperties } from "react";
 
 import data from "@/data/contactDatas.json";
-import { useHomeDataRefetch } from "@/hooks/useHomeDataRefetch";
-import type { Product } from "@/types/product";
+import { useHomeCatalogProducts } from "@/hooks/useHomeCatalogProducts";
+import { productLinkWarmHandlers } from "@/lib/productDetailNavigation";
 import { getProductHref } from "@/utils/productUrl";
 
 import "./css/featured-products.css";
@@ -37,45 +37,8 @@ function ProductCardSkeleton({ index }: { index: number }) {
 export default function FeaturedProductsSection() {
   const s = data.featuredProductsSection;
   const limit = s.productLimit ?? 4;
-
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadProducts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const params = new URLSearchParams({
-        page: "1",
-        limit: String(limit),
-        category: "all",
-      });
-      const res = await fetch(`/api/products?${params.toString()}`, {
-        credentials: "omit",
-        cache: "no-store",
-      });
-      const json = (await res.json()) as {
-        success?: boolean;
-        products?: Product[];
-        error?: string;
-      };
-
-      if (!res.ok || !json.success) {
-        throw new Error(json.error ?? s.errorMessage);
-      }
-
-      setProducts(json.products ?? []);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : s.errorMessage);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [limit, s.errorMessage]);
-
-  useHomeDataRefetch(loadProducts);
+  const { products: catalog, loading, error } = useHomeCatalogProducts();
+  const products = useMemo(() => catalog.slice(0, limit), [catalog, limit]);
 
   return (
     <section
@@ -129,12 +92,15 @@ export default function FeaturedProductsSection() {
                 const typeLabel =
                   product.productType?.trim() || "Fine Jewellery";
 
+                const warm = productLinkWarmHandlers(product);
+
                 return (
                   <Link
                     key={product.id}
                     href={getProductHref(product)}
                     className="featured-section__card"
                     style={{ "--card-index": index } as CSSProperties}
+                    {...warm}
                   >
                     <div className="featured-section__card-media">
                       <Image

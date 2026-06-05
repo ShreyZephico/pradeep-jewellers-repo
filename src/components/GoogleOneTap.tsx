@@ -4,7 +4,10 @@ import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { notifyAuthChanged } from "@/contexts/CustomerAuthContext";
+import {
+  notifyAuthChanged,
+  useCustomerAuth,
+} from "@/contexts/CustomerAuthContext";
 import { parseJsonResponse } from "@/lib/parseJsonResponse";
 
 const DISMISS_KEY = "googleOneTapDismissed";
@@ -59,8 +62,8 @@ export default function GoogleOneTap({
   siteName = "Pradeep Jewellers",
 }: Props) {
   const pathname = usePathname();
+  const { isLoggedIn, loading: authLoading } = useCustomerAuth();
   const [gsiReady, setGsiReady] = useState(false);
-  const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
   const [showCard, setShowCard] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +96,6 @@ export default function GoogleOneTap({
       }
       localStorage.setItem("loginMethod", "google");
       setShowCard(false);
-      setLoggedIn(true);
       notifyAuthChanged();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Google sign-in failed");
@@ -123,7 +125,6 @@ export default function GoogleOneTap({
       ) {
         localStorage.setItem("loginMethod", "google");
         setShowCard(false);
-        setLoggedIn(true);
         setLoading(false);
         window.removeEventListener("message", onMsg);
         notifyAuthChanged();
@@ -141,35 +142,14 @@ export default function GoogleOneTap({
   }, []);
 
   useEffect(() => {
-    if (skip) return;
-    let cancelled = false;
-    fetch("/api/auth/check", { credentials: "include" })
-      .then((r) =>
-        parseJsonResponse<{
-          isAuthenticated?: boolean;
-          name?: string;
-          email?: string;
-        }>(r)
-      )
-      .then((d) => {
-          if (cancelled) return;
-          if (d?.isAuthenticated) {
-            setLoggedIn(true);
-            return;
-          }
-          setLoggedIn(false);
-        }
-      )
-      .catch(() => {
-        if (!cancelled) setLoggedIn(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [skip, pathname]);
-
-  useEffect(() => {
-    if (skip || !gsiReady || loggedIn !== false || isDismissed() || prompted.current) {
+    if (
+      skip ||
+      authLoading ||
+      isLoggedIn ||
+      !gsiReady ||
+      isDismissed() ||
+      prompted.current
+    ) {
       return;
     }
 
@@ -199,9 +179,9 @@ export default function GoogleOneTap({
         setShowCard(true);
       }
     });
-  }, [skip, gsiReady, loggedIn, clientId, finishLogin]);
+  }, [skip, authLoading, isLoggedIn, gsiReady, clientId, finishLogin]);
 
-  if (skip || loggedIn !== false || isDismissed()) {
+  if (skip || authLoading || isLoggedIn || isDismissed()) {
     return null;
   }
 

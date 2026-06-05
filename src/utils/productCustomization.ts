@@ -13,7 +13,9 @@ import { getProductHref } from "@/utils/productUrl";
 import { findBestMatchingVariant } from "@/utils/variantOptionMatch";
 import {
   getDiamondPickerOptions,
+  getProductVariantCount,
   getSizePickerOptions,
+  productHasMultipleShopifyOptions,
 } from "@/utils/customizePickerCatalog";
 import {
   filterSizeOptionsForProduct,
@@ -98,15 +100,68 @@ function pickByPattern<T>(
   return items.find(match) ?? items[0];
 }
 
-/** Default customization: first/preferred values for each option Shopify provides. */
+export const PREFERRED_CUSTOMIZATION_DEFAULTS = {
+  metal: "Yellow Gold",
+  quality: "IJ-SI",
+  ringSize: "5",
+} as const;
+
+function pickValidOptionLabel(
+  current: string,
+  options: { label: string }[],
+  fallback: string
+): string {
+  const trimmed = current.trim();
+  const labels = options.map((option) => option.label);
+  if (trimmed && labels.includes(trimmed)) {
+    return trimmed;
+  }
+  if (fallback && labels.includes(fallback)) {
+    return fallback;
+  }
+  return labels[0] ?? fallback;
+}
+
+function pickValidSizeOption(
+  current: string,
+  options: Product["sizeOptions"],
+  fallback: string
+): string {
+  const sizes = options ?? [];
+  const trimmed = current.trim();
+  const values = sizes.map((option) => option.size);
+  if (trimmed && values.includes(trimmed)) {
+    return trimmed;
+  }
+  if (fallback && values.includes(fallback)) {
+    return fallback;
+  }
+  return values[0] ?? fallback;
+}
+
+/** Stable key for when catalog option axes become available (e.g. after detail fetch). */
+export function customizationCatalogRevision(product: Product): string {
+  const pickers = getProductCustomizationPickers(product);
+  return [
+    product.id,
+    product.variantCount ?? 0,
+    pickers.metal.map((option) => option.label).join(","),
+    pickers.diamond.map((option) => option.label).join(","),
+    pickers.carat.map((option) => option.label).join(","),
+    pickers.sizes.map((option) => option.size).join(","),
+  ].join("|");
+}
+
+/** Default customization: Yellow Gold, IJ-SI, ring size 5, 18K carat when available. */
 export function getDefaultProductCustomization(product: Product): CustomizationSelections {
   const pickers = getProductCustomizationPickers(product);
+  const isRing = inferJewelryCategory(product) === "ring";
 
   const metal =
     pickers.metal.length > 0
       ? (pickByPattern(pickers.metal, (o) => /yellow/i.test(o.label))?.label ??
         pickers.metal[0]?.label ??
-        "")
+        PREFERRED_CUSTOMIZATION_DEFAULTS.metal)
       : "";
   const carat =
     pickers.carat.length > 0
@@ -118,12 +173,42 @@ export function getDefaultProductCustomization(product: Product): CustomizationS
     pickers.diamond.length > 0
       ? (pickByPattern(pickers.diamond, (o) => /ij[-\s]*si/i.test(o.label))?.label ??
         pickers.diamond[0]?.label ??
-        "")
-      : "";
+        PREFERRED_CUSTOMIZATION_DEFAULTS.quality)
+      : pickers.showDiamond
+        ? PREFERRED_CUSTOMIZATION_DEFAULTS.quality
+        : "";
   const size =
-    pickers.sizes.length > 0 ? getDefaultSizeSelection(product, pickers.sizes) : "";
+    pickers.sizes.length > 0
+      ? getDefaultSizeSelection(product, pickers.sizes)
+      : isRing
+        ? PREFERRED_CUSTOMIZATION_DEFAULTS.ringSize
+        : "";
 
   return { metal, carat, quality, size };
+}
+
+/** Fill empty or invalid picker values with catalog defaults (keeps valid user choices). */
+export function applyCustomizationDefaults(
+  selection: CustomizationSelections,
+  product: Product
+): CustomizationSelections {
+  const defaults = getDefaultProductCustomization(product);
+  const pickers = getProductCustomizationPickers(product);
+
+  return {
+    metal: pickers.showMetal
+      ? pickValidOptionLabel(selection.metal, pickers.metal, defaults.metal)
+      : selection.metal.trim() || defaults.metal,
+    carat: pickers.showCarat
+      ? pickValidOptionLabel(selection.carat, pickers.carat, defaults.carat)
+      : selection.carat.trim() || defaults.carat,
+    quality: pickers.showDiamond
+      ? pickValidOptionLabel(selection.quality, pickers.diamond, defaults.quality)
+      : selection.quality.trim() || defaults.quality,
+    size: pickers.showSize
+      ? pickValidSizeOption(selection.size, pickers.sizes, defaults.size)
+      : selection.size.trim() || defaults.size,
+  };
 }
 
 export function buildCustomizationLineAttributes(
@@ -342,12 +427,27 @@ export function getCustomizationSummarySegments(
 
 export function productHasCustomizationOptions(product: Product): boolean {
   const pickers = getProductCustomizationPickers(product);
-  return (
+  const hasAnyPicker =
     pickers.showMetal ||
     pickers.showCarat ||
     pickers.showDiamond ||
-    pickers.showSize
-  );
+    pickers.showSize;
+
+  if (!hasAnyPicker) {
+    return false;
+  }
+
+  // Single Shopify variant with no real option axes → direct purchase only.
+  if (getProductVariantCount(product) <= 1) {
+    const ringWithConfiguredSizes =
+      pickers.showSize && inferJewelryCategory(product) === "ring";
+
+    if (!productHasMultipleShopifyOptions(product) && !ringWithConfiguredSizes) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export function getProductCustomizeHref(product: Product): string {

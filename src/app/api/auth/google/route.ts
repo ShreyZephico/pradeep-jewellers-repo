@@ -1,8 +1,9 @@
 import { handleGoogleShopifyAuth } from '@/lib/googleShopifyAuth';
-import { getGoogleOAuthRedirectUri } from '@/lib/siteUrl';
-
-const REDIRECT_URI = getGoogleOAuthRedirectUri();
+import { getGoogleOAuthRedirectUriFromRequest } from '@/lib/siteUrl';
 
 export async function GET(request: Request) {
-  return handleGoogleShopifyAuth(request, REDIRECT_URI);
+  return handleGoogleShopifyAuth(
+    request,
+    getGoogleOAuthRedirectUriFromRequest(request)
+  );
 }

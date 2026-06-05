@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState, Fragment } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { LogIn, Menu, Phone, ShoppingBag, X } from "lucide-react";
 
 import CategoryNavBar from "@/components/home/CategoryNavBar";
+import HeaderDeliveryLocation from "@/components/home/HeaderDeliveryLocation";
 import HeaderNavSearch from "@/components/home/HeaderNavSearch";
 import { useCart } from "@/contexts/CartContext";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
@@ -14,6 +15,7 @@ import { useGoldRates } from "@/contexts/GoldRatesContext";
 import { saveReturnPath } from "@/lib/authRedirect";
 import productContent from "@/lib/productContent";
 import { formatInr, formatPercentChange } from "@/lib/goldRates";
+import { buildLiveRateDisplayItems } from "@/lib/liveRatesDisplay";
 import type { MetalRateItem } from "@/types/goldRate";
 import { getImageUrl } from "@/utils/cloudinary";
 import contactData from "@/data/contactDatas.json";
@@ -83,25 +85,26 @@ function RatesTicker() {
     setMounted(true);
   }, []);
 
+  const rateItems = buildLiveRateDisplayItems(live);
+
   const items = (
     <>
-      <TickerItem
-        label={ratesConfig.gold22k.label}
-        rate={live?.gold22k}
-        loading={loading}
-        unitSuffix={ratesConfig.gold22k.unitSuffix}
-        fractionDigits={ratesConfig.gold22k.fractionDigits ?? 2}
-      />
-      <span className="site-header__ticker-sep" aria-hidden>
-        ◆
-      </span>
-      <TickerItem
-        label={ratesConfig.silver1kg.label}
-        rate={live?.silver1kg}
-        loading={loading}
-        unitSuffix={ratesConfig.silver1kg.unitSuffix}
-        fractionDigits={ratesConfig.silver1kg.fractionDigits ?? 2}
-      />
+      {rateItems.map((item, index) => (
+        <Fragment key={item.key}>
+          {index > 0 ? (
+            <span className="site-header__ticker-sep" aria-hidden>
+              ◆
+            </span>
+          ) : null}
+          <TickerItem
+            label={item.label}
+            rate={item.rate}
+            loading={loading}
+            unitSuffix={item.unitSuffix}
+            fractionDigits={item.fractionDigits}
+          />
+        </Fragment>
+      ))}
       <span className="site-header__ticker-sep" aria-hidden>
         ◆
       </span>
@@ -136,7 +139,7 @@ function RatesTicker() {
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const { cart, goToCart, setAuthenticated } = useCart();
+  const { cart, goToCart } = useCart();
   const {
     isLoggedIn,
     userName,
@@ -154,10 +157,6 @@ export default function Header() {
 
   const RECENT_SCROLL_DELTA = 12;
   const RECENT_TOP_SHOW_Y = 20;
-
-  useEffect(() => {
-    setAuthenticated(isLoggedIn);
-  }, [isLoggedIn, setAuthenticated]);
 
   useEffect(() => {
     lastScrollY.current = window.scrollY;
@@ -194,7 +193,6 @@ export default function Header() {
 
   const handleLogout = async () => {
     await logout();
-    setAuthenticated(false);
     router.push("/");
   };
 
@@ -284,8 +282,11 @@ export default function Header() {
             })}
           </nav>
 
-          <div className="site-header__actions">
-            <Link
+          <div className="site-header__toolbar">
+            <HeaderDeliveryLocation />
+
+            <div className="site-header__actions">
+              <Link
               href={contactData.social.whatsapp}
               target="_blank"
               rel="noopener noreferrer"
@@ -399,11 +400,14 @@ export default function Header() {
             >
               {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <CategoryNavBar />
+      <Suspense fallback={<div className="category-nav category-nav--skeleton" aria-hidden />}>
+        <CategoryNavBar />
+      </Suspense>
 
       {isMenuOpen ? (
         <>

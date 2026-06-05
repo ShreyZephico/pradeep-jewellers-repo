@@ -9,6 +9,8 @@ import type { RatesTableRow } from "@/types/goldRate";
 type Props = {
   rows: RatesTableRow[];
   showGold: boolean;
+  showGold14: boolean;
+  showGold9: boolean;
   showSilver: boolean;
 };
 
@@ -26,6 +28,8 @@ function ChangeCell({ value }: { value?: number }) {
 export default function RatesComparisonTable({
   rows,
   showGold,
+  showGold14,
+  showGold9,
   showSilver,
 }: Props) {
   const copy = RATES_PAGE_COPY.tableHeaders;
@@ -43,12 +47,20 @@ export default function RatesComparisonTable({
               <th className="rates-table__sticky-col">{copy.date}</th>
               {showGold ? <th>{copy.gold24k}</th> : null}
               {showGold ? <th>{copy.gold22k}</th> : null}
+              {showGold14 ? <th>{copy.gold14k}</th> : null}
+              {showGold9 ? <th>{copy.gold9k}</th> : null}
               {showSilver ? <th>{copy.silver}</th> : null}
               {showGold ? (
                 <th className="rates-table__change-col">{copy.change} 24K</th>
               ) : null}
               {showGold ? (
                 <th className="rates-table__change-col">{copy.change} 22K</th>
+              ) : null}
+              {showGold14 ? (
+                <th className="rates-table__change-col">{copy.change} 14K</th>
+              ) : null}
+              {showGold9 ? (
+                <th className="rates-table__change-col">{copy.change} 9K</th>
               ) : null}
               {showSilver ? (
                 <th className="rates-table__change-col">{copy.change} Ag</th>
@@ -75,6 +87,20 @@ export default function RatesComparisonTable({
                       : "—"}
                   </td>
                 ) : null}
+                {showGold14 ? (
+                  <td>
+                    {row.gold14k != null
+                      ? formatInr(row.gold14k, 2)
+                      : "—"}
+                  </td>
+                ) : null}
+                {showGold9 ? (
+                  <td>
+                    {row.gold9k != null
+                      ? formatInr(row.gold9k, 2)
+                      : "—"}
+                  </td>
+                ) : null}
                 {showSilver ? (
                   <td>
                     {row.silver1kg != null
@@ -90,6 +116,16 @@ export default function RatesComparisonTable({
                 {showGold ? (
                   <td className="rates-table__change-col">
                     <ChangeCell value={row.gold22kChange} />
+                  </td>
+                ) : null}
+                {showGold14 ? (
+                  <td className="rates-table__change-col">
+                    <ChangeCell value={row.gold14kChange} />
+                  </td>
+                ) : null}
+                {showGold9 ? (
+                  <td className="rates-table__change-col">
+                    <ChangeCell value={row.gold9kChange} />
                   </td>
                 ) : null}
                 {showSilver ? (

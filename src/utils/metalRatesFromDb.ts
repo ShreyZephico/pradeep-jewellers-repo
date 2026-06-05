@@ -16,6 +16,8 @@ export type MetalDbQueryConfig = StoreMetalDbQueryConfig;
 
 export type FetchMetalRatesConfig = {
   gold22k: MetalDbQueryConfig;
+  gold14k: MetalDbQueryConfig;
+  gold9k: MetalDbQueryConfig;
   silver1kg: MetalDbQueryConfig;
   compareDays: number;
 };
@@ -71,15 +73,27 @@ export async function fetchMetalRatesFromDb(
   const compareDays = Math.max(1, config.compareDays);
   const historyDays = compareDays + 2;
 
-  const [goldRows, silverRows] = await Promise.all([
+  const [gold22Rows, gold14Rows, gold9Rows, silverRows] = await Promise.all([
     fetchStoreMetalPriceRows(config.gold22k, historyDays),
+    fetchStoreMetalPriceRows(config.gold14k, historyDays),
+    fetchStoreMetalPriceRows(config.gold9k, historyDays),
     fetchStoreMetalPriceRows(config.silver1kg, historyDays),
   ]);
 
   const gold22k = buildMetalRate(
-    goldRows,
+    gold22Rows,
     compareDays,
     config.gold22k.priceMultiplier ?? 1
+  );
+  const gold14k = buildMetalRate(
+    gold14Rows,
+    compareDays,
+    config.gold14k.priceMultiplier ?? 1
+  );
+  const gold9k = buildMetalRate(
+    gold9Rows,
+    compareDays,
+    config.gold9k.priceMultiplier ?? 1
   );
   const silver1kg = buildMetalRate(
     silverRows,
@@ -97,7 +111,15 @@ export async function fetchMetalRatesFromDb(
     };
   }
 
-  const latestFetchedAt = [gold22k.fetchedAt, silver1kg.fetchedAt].sort().pop()!;
+  const latestFetchedAt = [
+    gold22k.fetchedAt,
+    gold14k?.fetchedAt,
+    gold9k?.fetchedAt,
+    silver1kg.fetchedAt,
+  ]
+    .filter(Boolean)
+    .sort()
+    .pop()!;
 
   const updatedAt = new Intl.DateTimeFormat("en-IN", {
     timeZone: "Asia/Kolkata",
@@ -124,6 +146,32 @@ export async function fetchMetalRatesFromDb(
         currentAt: gold22k.currentAt,
         oldAt: gold22k.oldAt,
       },
+      ...(gold14k
+        ? {
+            gold14k: {
+              current: gold14k.current,
+              old: gold14k.old,
+              difference: gold14k.difference,
+              percentChange: gold14k.percentChange,
+              status: gold14k.status,
+              currentAt: gold14k.currentAt,
+              oldAt: gold14k.oldAt,
+            },
+          }
+        : {}),
+      ...(gold9k
+        ? {
+            gold9k: {
+              current: gold9k.current,
+              old: gold9k.old,
+              difference: gold9k.difference,
+              percentChange: gold9k.percentChange,
+              status: gold9k.status,
+              currentAt: gold9k.currentAt,
+              oldAt: gold9k.oldAt,
+            },
+          }
+        : {}),
       silver1kg: {
         current: silver1kg.current,
         old: silver1kg.old,

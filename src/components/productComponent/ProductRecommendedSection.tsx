@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
+import { useInView } from "react-intersection-observer";
 
 import RecommendedProductCard from "@/components/productComponent/RecommendedProductCard";
 import RecommendedProductCardSkeleton from "@/components/productComponent/RecommendedProductCardSkeleton";
@@ -104,6 +105,10 @@ export default function ProductRecommendedSection({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const { ref: sectionRef, inView } = useInView({
+    rootMargin: "200px 0px",
+    triggerOnce: true,
+  });
 
   const loadRecommended = useCallback(async () => {
     setLoading(true);
@@ -114,9 +119,7 @@ export default function ProductRecommendedSection({
         slug,
         limit: String(fetchLimit),
       });
-      const response = await fetch(`/api/products/recommended?${params.toString()}`, {
-        cache: "no-store",
-      });
+      const response = await fetch(`/api/products/recommended?${params.toString()}`);
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -135,8 +138,9 @@ export default function ProductRecommendedSection({
   }, [slug, product, fetchLimit]);
 
   useEffect(() => {
+    if (!inView) return;
     void loadRecommended();
-  }, [loadRecommended]);
+  }, [inView, loadRecommended]);
 
   if (!loading && !error && products.length === 0) {
     return null;
@@ -170,6 +174,7 @@ export default function ProductRecommendedSection({
 
   return (
     <section
+      ref={sectionRef}
       className="product-recommended"
       aria-labelledby="product-recommended-heading"
     >

@@ -6,27 +6,27 @@ export function isKaratLabel(value: string): boolean {
   }
   return (
     /\d+\s*k(t)?\b/i.test(v) ||
-    /\b(14|18|22|24)\s*karat\b/i.test(v) ||
-    /\b(14|18|22|24)\s*k\b/i.test(v)
+    /\b(9|14|18|22|24)\s*karat\b/i.test(v) ||
+    /\b(9|14|18|22|24)\s*k\b/i.test(v)
   );
 }
 
-/** Numeric karat from labels like 18K, 22 KT, 18kt, 24 Karat (defaults to 24). */
+/** Numeric karat from labels like 9K, 14 KT, 18kt, 24 Karat (defaults to 22). */
 export function parseKaratNumber(carat: string | null | undefined): number {
   const v = carat?.trim();
   if (!v) {
-    return 24;
+    return 22;
   }
-  const explicit = v.match(/\b(14|18|22|24)\b/i) ?? v.match(/(14|18|22|24)/);
+  const explicit = v.match(/\b(9|14|18|22|24)\b/i) ?? v.match(/(9|14|18|22|24)/);
   if (explicit) {
     return Number(explicit[1]);
   }
   const digits = v.replace(/\D/g, "");
   const n = Number(digits);
-  if (n >= 14 && n <= 24) {
+  if (n === 9 || (n >= 14 && n <= 24)) {
     return n;
   }
-  return 24;
+  return 22;
 }
 
 /** Pick the active karat string from metal/carat selections (18K, 22K, etc.). */

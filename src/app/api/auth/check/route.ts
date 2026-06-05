@@ -1,25 +1,30 @@
 import { NextResponse } from "next/server";
 
 import {
-  getCheckoutAuthFromRequest,
-  verifyCheckoutCustomer,
+  applyResolvedSessionToResponse,
+  resolveCustomerSession,
 } from "@/lib/checkoutAuth";
+import { clearCustomerSessionCookies } from "@/lib/customerSessionCookies";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const auth = getCheckoutAuthFromRequest(request);
-  if (!auth) {
-    return NextResponse.json({ isAuthenticated: false });
+  const session = await resolveCustomerSession(request);
+
+  if (!session) {
+    const response = NextResponse.json({ isAuthenticated: false });
+    clearCustomerSessionCookies(response);
+    return response;
   }
 
-  const customer = await verifyCheckoutCustomer(auth.customerAccessToken);
-  if (!customer) {
-    return NextResponse.json({ isAuthenticated: false });
-  }
-
-  return NextResponse.json({
+  const response = NextResponse.json({
     isAuthenticated: true,
-    email: customer.email ?? auth.email,
-    name: auth.name,
-    loginMethod: auth.loginMethod,
+    email: session.email,
+    name: session.name,
+    loginMethod: session.loginMethod,
   });
+
+  applyResolvedSessionToResponse(response, session);
+  return response;
 }

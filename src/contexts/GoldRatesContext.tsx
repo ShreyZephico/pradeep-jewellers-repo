@@ -43,11 +43,10 @@ export function GoldRatesProvider({
       if (forceFresh) {
         params.set("fresh", "1");
       }
-      params.set("_", String(Date.now()));
 
-      const res = await fetch(`/api/gold-rate?${params.toString()}`, {
-        cache: "no-store",
-      });
+      const res = await fetch(
+        params.size > 0 ? `/api/gold-rate?${params.toString()}` : "/api/gold-rate"
+      );
       const json = (await res.json()) as GoldRateApiResponse;
 
       if (!json.success || !json.data) {

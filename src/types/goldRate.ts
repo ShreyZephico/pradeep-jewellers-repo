@@ -33,6 +33,8 @@ export type GoldRateApiResponse = {
   compareDays?: number;
   data?: {
     gold22k: MetalRateItem;
+    gold14k?: MetalRateItem;
+    gold9k?: MetalRateItem;
     silver1kg: MetalRateItem;
   };
   error?: string;
@@ -62,9 +64,13 @@ export type RatesTableRow = {
   dateLabel: string;
   gold24k: number | null;
   gold22k: number | null;
+  gold14k?: number | null;
+  gold9k?: number | null;
   silver1kg: number | null;
   gold24kChange?: number;
   gold22kChange?: number;
+  gold14kChange?: number;
+  gold9kChange?: number;
   silver1kgChange?: number;
 };
 
@@ -79,6 +85,8 @@ export type RatesAnalyticsApiResponse = {
   series?: {
     gold24k: MetalHistorySeries;
     gold22k: MetalHistorySeries;
+    gold14k?: MetalHistorySeries;
+    gold9k?: MetalHistorySeries;
     silver1kg: MetalHistorySeries;
   };
   table?: RatesTableRow[];

@@ -231,6 +231,14 @@
   border-top: 3px solid var(--rates-page-gold22-line);
 }
 
+.rates-stat-card--gold14 {
+  border-top: 3px solid var(--rates-page-gold22-line);
+}
+
+.rates-stat-card--gold9 {
+  border-top: 3px solid var(--rates-page-gold22-line);
+}
+
 .rates-stat-card--silver {
   border-top: 3px solid var(--rates-page-silver-line);
 }

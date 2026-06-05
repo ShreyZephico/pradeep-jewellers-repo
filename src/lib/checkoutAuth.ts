@@ -1,3 +1,11 @@
+import type { NextResponse } from "next/server";
+
+import {
+  applyCustomerAccessTokenCookie,
+  clearCustomerSessionCookies,
+} from "@/lib/customerSessionCookies";
+import { getShopifyStorefrontApiVersion } from "@/lib/shopifyApiVersion";
+
 export type CheckoutAuth = {
   customerAccessToken: string;
   email: string | null;
@@ -5,7 +13,27 @@ export type CheckoutAuth = {
   loginMethod: string | null;
 };
 
-function getCookieValue(cookieHeader: string | null, name: string): string | null {
+export type VerifiedCustomer = {
+  id: string;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  displayName: string | null;
+};
+
+export type ResolvedCustomerSession = {
+  customer: VerifiedCustomer;
+  accessToken: string;
+  expiresAt: string | null;
+  email: string | null;
+  name: string | null;
+  loginMethod: string | null;
+};
+
+function getCookieValue(
+  cookieHeader: string | null,
+  name: string
+): string | null {
   if (!cookieHeader) return null;
   const match = cookieHeader
     .split(";")
@@ -19,30 +47,65 @@ function getCookieValue(cookieHeader: string | null, name: string): string | nul
   }
 }
 
-/** Read Shopify customer session + profile hints from request cookies. */
-export function getCheckoutAuthFromRequest(request: Request): CheckoutAuth | null {
-  const cookieHeader = request.headers.get("cookie");
-  const token = getCookieValue(cookieHeader, "customerAccessToken")?.trim();
-  if (!token) return null;
-
-  // Shopify merchant OAuth stores a base64 JSON blob — not a Storefront customer token.
+function isMerchantOAuthToken(token: string): boolean {
   try {
     const parsed = JSON.parse(
       Buffer.from(token, "base64").toString("utf8")
     ) as { shop?: string; accessToken?: string };
-    if (parsed.shop && parsed.accessToken) {
-      return null;
-    }
+    return Boolean(parsed.shop && parsed.accessToken);
   } catch {
-    /* valid Storefront customer access token */
+    return false;
+  }
+}
+
+export function getShopifyStoreDomain(): string | null {
+  const raw =
+    process.env.SHOPIFY_STORE_DOMAIN?.trim() ||
+    process.env.NEXT_SHOPIFY_STORE?.trim() ||
+    process.env.SHOPIFY_STORE?.trim();
+  if (!raw) return null;
+  return raw.replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+}
+
+export function getShopifyStorefrontToken(): string | null {
+  const token =
+    process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN?.trim() ||
+    process.env.NEXT_SHOPIFY_STOREFRONT_TOKEN?.trim() ||
+    process.env.SHOPIFY_STOREFRONT_TOKEN?.trim();
+  if (!token || token.startsWith("shpat_")) return null;
+  return token;
+}
+
+function storefrontGraphqlUrl(): string | null {
+  const domain = getShopifyStoreDomain();
+  if (!domain) return null;
+  return `https://${domain}/api/${getShopifyStorefrontApiVersion()}/graphql.json`;
+}
+
+async function storefrontFetch<T>(
+  query: string,
+  variables?: Record<string, unknown>
+): Promise<T | null> {
+  const url = storefrontGraphqlUrl();
+  const token = getShopifyStorefrontToken();
+  if (!url || !token) return null;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": token,
+    },
+    body: JSON.stringify({ query, variables }),
+    cache: "no-store",
+  });
+
+  const json = await response.json();
+  if (!response.ok || json.errors?.length) {
+    return null;
   }
 
-  return {
-    customerAccessToken: token,
-    email: getCookieValue(cookieHeader, "customerEmail"),
-    name: getCookieValue(cookieHeader, "customerName"),
-    loginMethod: getCookieValue(cookieHeader, "loginMethod"),
-  };
+  return json.data as T;
 }
 
 const VERIFY_CUSTOMER_QUERY = `
@@ -57,45 +120,148 @@ const VERIFY_CUSTOMER_QUERY = `
   }
 `;
 
-/** Returns verified customer profile when the cookie token is a valid Storefront session. */
-export async function verifyCheckoutCustomer(
-  customerAccessToken: string
-): Promise<{
-  id: string;
-  email: string | null;
-  displayName: string | null;
-} | null> {
-  const domain = process.env.SHOPIFY_STORE_DOMAIN;
-  const storefrontToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
-  const apiVersion =
-    process.env.SHOPIFY_STOREFRONT_API_VERSION?.trim() || "2026-04";
-
-  if (!domain || !storefrontToken) {
-    return null;
-  }
-
-  const response = await fetch(
-    `https://${domain.replace(/^https?:\/\//i, "").replace(/\/+$/, "")}/api/${apiVersion}/graphql.json`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Storefront-Access-Token": storefrontToken,
-      },
-      body: JSON.stringify({
-        query: VERIFY_CUSTOMER_QUERY,
-        variables: { customerAccessToken },
-      }),
+const RENEW_TOKEN_MUTATION = `
+  mutation RenewCustomerAccessToken($customerAccessToken: String!) {
+    customerAccessTokenRenew(customerAccessToken: $customerAccessToken) {
+      customerAccessToken {
+        accessToken
+        expiresAt
+      }
+      userErrors {
+        field
+        message
+      }
     }
-  );
+  }
+`;
 
-  const data = await response.json();
-  const customer = data.data?.customer;
+function mapCustomer(
+  customer: {
+    id: string;
+    email?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    displayName?: string | null;
+  } | null | undefined
+): VerifiedCustomer | null {
   if (!customer?.id) return null;
-
   return {
     id: customer.id,
     email: customer.email ?? null,
+    firstName: customer.firstName ?? null,
+    lastName: customer.lastName ?? null,
     displayName: customer.displayName ?? null,
   };
+}
+
+export function customerDisplayName(customer: VerifiedCustomer): string {
+  const full = [customer.firstName, customer.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  return (
+    full ||
+    customer.displayName?.trim() ||
+    customer.email?.split("@")[0] ||
+    "User"
+  );
+}
+
+/** Read Shopify customer session from request cookies. */
+export function getCheckoutAuthFromRequest(
+  request: Request
+): CheckoutAuth | null {
+  const cookieHeader = request.headers.get("cookie");
+  const token = getCookieValue(cookieHeader, "customerAccessToken")?.trim();
+  if (!token || isMerchantOAuthToken(token)) return null;
+
+  return {
+    customerAccessToken: token,
+    email: getCookieValue(cookieHeader, "customerEmail"),
+    name: getCookieValue(cookieHeader, "customerName"),
+    loginMethod: getCookieValue(cookieHeader, "loginMethod"),
+  };
+}
+
+/** Returns verified customer profile when the cookie token is valid. */
+export async function verifyCheckoutCustomer(
+  customerAccessToken: string
+): Promise<VerifiedCustomer | null> {
+  const data = await storefrontFetch<{
+    customer: VerifiedCustomer | null;
+  }>(VERIFY_CUSTOMER_QUERY, { customerAccessToken });
+
+  return mapCustomer(data?.customer);
+}
+
+async function renewCustomerAccessToken(
+  customerAccessToken: string
+): Promise<{ accessToken: string; expiresAt: string } | null> {
+  const data = await storefrontFetch<{
+    customerAccessTokenRenew: {
+      customerAccessToken: { accessToken: string; expiresAt: string } | null;
+      userErrors: { message: string }[];
+    };
+  }>(RENEW_TOKEN_MUTATION, { customerAccessToken });
+
+  const renewed = data?.customerAccessTokenRenew?.customerAccessToken;
+  if (!renewed?.accessToken || !renewed.expiresAt) {
+    return null;
+  }
+
+  return renewed;
+}
+
+/**
+ * Verify session; renew Shopify token when expired.
+ * Returns null when the session is invalid.
+ */
+export async function resolveCustomerSession(
+  request: Request
+): Promise<ResolvedCustomerSession | null> {
+  const auth = getCheckoutAuthFromRequest(request);
+  if (!auth) return null;
+
+  let accessToken = auth.customerAccessToken;
+  let expiresAt: string | null = null;
+
+  let customer = await verifyCheckoutCustomer(accessToken);
+
+  if (!customer) {
+    const renewed = await renewCustomerAccessToken(accessToken);
+    if (!renewed) return null;
+
+    accessToken = renewed.accessToken;
+    expiresAt = renewed.expiresAt;
+    customer = await verifyCheckoutCustomer(accessToken);
+    if (!customer) return null;
+  }
+
+  return {
+    customer,
+    accessToken,
+    expiresAt,
+    email: customer.email ?? auth.email,
+    name: customerDisplayName(customer) || auth.name,
+    loginMethod: auth.loginMethod,
+  };
+}
+
+/** Attach renewed token cookies or clear invalid session on the response. */
+export function applyResolvedSessionToResponse(
+  response: NextResponse,
+  session: ResolvedCustomerSession | null
+): void {
+  if (!session) {
+    clearCustomerSessionCookies(response);
+    return;
+  }
+
+  if (session.expiresAt) {
+    applyCustomerAccessTokenCookie(
+      response,
+      session.accessToken,
+      session.expiresAt
+    );
+  }
 }

@@ -23,8 +23,17 @@ export type PincodeLookupError = {
   code: "invalid" | "not_found" | "upstream" | "network";
 };
 
-const GUJARAT_DELIVERY = { min: 5, max: 7, label: "Gujarat" } as const;
-const INDIA_DELIVERY = { min: 9, max: 13, label: "Rest of India" } as const;
+export const GUJARAT_DELIVERY_DAYS = { min: 5, max: 7 } as const;
+export const REST_OF_INDIA_DELIVERY_DAYS = { min: 9, max: 13 } as const;
+
+const GUJARAT_DELIVERY = {
+  ...GUJARAT_DELIVERY_DAYS,
+  label: "Gujarat",
+} as const;
+const INDIA_DELIVERY = {
+  ...REST_OF_INDIA_DELIVERY_DAYS,
+  label: "Rest of India",
+} as const;
 
 export function normalizePincodeInput(raw: string): string {
   return raw.replace(/\D/g, "").slice(0, 6);
@@ -35,7 +44,8 @@ export function isValidPincodeFormat(pincode: string): boolean {
 }
 
 function isGujaratState(state: string): boolean {
-  return state.trim().toLowerCase() === "gujarat";
+  const normalized = state.trim().toLowerCase().replace(/\s+/g, " ");
+  return normalized === "gujarat" || normalized === "gujrat";
 }
 
 export function getDeliveryWindowForState(state: string): {
@@ -56,6 +66,41 @@ export function getDeliveryWindowForState(state: string): {
 
 export function formatDeliveryDays(min: number, max: number): string {
   return `${min}–${max} days`;
+}
+
+export function formatDeliveryEstimateSummary(
+  result: Pick<
+    PincodeLookupResult,
+    "isGujarat" | "deliveryDaysMin" | "deliveryDaysMax" | "deliveryRegionLabel"
+  >
+): { headline: string; regionNote: string; daysLabel: string } {
+  const daysLabel = formatDeliveryDays(
+    result.deliveryDaysMin,
+    result.deliveryDaysMax
+  );
+
+  if (result.isGujarat) {
+    return {
+      daysLabel,
+      headline: `Free delivery in ${daysLabel}`,
+      regionNote: "Within Gujarat",
+    };
+  }
+
+  return {
+    daysLabel,
+    headline: `Delivery in ${daysLabel}`,
+    regionNote: result.deliveryRegionLabel,
+  };
+}
+
+export function formatEstimatedDeliveryDate(minDays: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + minDays);
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+  });
 }
 
 type PostalApiEntry = {

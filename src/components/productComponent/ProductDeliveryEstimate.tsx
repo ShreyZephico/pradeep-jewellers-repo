@@ -1,12 +1,20 @@
 "use client";
 
-import { useCallback, useId, useState, type FormEvent } from "react";
-import { MapPin, Package, Truck } from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import { Crosshair, MapPin, Package, Truck } from "lucide-react";
 
+import { useDeliveryLocation } from "@/contexts/DeliveryLocationContext";
 import productContent, { formatProductCopy } from "@/lib/productContent";
 import {
-  fetchPincodeLookup,
   formatDeliveryDays,
+  formatEstimatedDeliveryDate,
   isValidPincodeFormat,
   normalizePincodeInput,
   type PincodeLookupResult,
@@ -14,22 +22,84 @@ import {
 
 const copy = productContent.delivery;
 
-export default function ProductDeliveryEstimate() {
+type ProductDeliveryEstimateProps = {
+  variant?: "full" | "compact";
+};
+
+function DeliveryResultCompact({
+  result,
+  resultId,
+}: {
+  result: PincodeLookupResult;
+  resultId: string;
+}) {
+  return (
+    <div
+      id={resultId}
+      className="product-delivery-compact__result"
+      role="status"
+      aria-live="polite"
+    >
+      <span className="product-delivery-compact__result-icon" aria-hidden>
+        <Package size={18} strokeWidth={1.75} />
+      </span>
+      <div className="product-delivery-compact__result-body">
+        <p className="product-delivery-compact__estimate">
+          {formatProductCopy(
+            result.isGujarat
+              ? copy.compactEstimateGujarat
+              : copy.compactEstimateIndia,
+            {
+              days: formatDeliveryDays(
+                result.deliveryDaysMin,
+                result.deliveryDaysMax
+              ),
+            }
+          )}
+        </p>
+        <p className="product-delivery-compact__estimate-by">
+          {formatProductCopy(copy.compactEstimateBy, {
+            date: formatEstimatedDeliveryDate(result.deliveryDaysMin),
+          })}
+          {" – "}
+          {formatEstimatedDeliveryDate(result.deliveryDaysMax)}
+        </p>
+        <p className="product-delivery-compact__location">
+          {result.areaLabel}
+          <span className="product-delivery-compact__pincode">
+            {" "}
+            · {result.pincode}
+          </span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default function ProductDeliveryEstimate({
+  variant = "full",
+}: ProductDeliveryEstimateProps) {
   const inputId = useId();
   const hintId = useId();
   const errorId = useId();
   const resultId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const {
+    pincode: sitePincode,
+    status: siteLocationStatus,
+    deliveryResult: siteDeliveryResult,
+    updatePincode,
+  } = useDeliveryLocation();
 
   const [pincode, setPincode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<PincodeLookupResult | null>(null);
 
-  const checkDelivery = useCallback(async () => {
-    const normalized = normalizePincodeInput(pincode);
+  const lookupPincode = useCallback(async (raw: string) => {
+    const normalized = normalizePincodeInput(raw);
     setPincode(normalized);
     setError("");
-    setResult(null);
 
     if (!isValidPincodeFormat(normalized)) {
       setError(copy.errorInvalid);
@@ -38,21 +108,140 @@ export default function ProductDeliveryEstimate() {
 
     setLoading(true);
     try {
-      const lookup = await fetchPincodeLookup(normalized);
-      if ("code" in lookup) {
-        setError(lookup.message);
+      const ok = await updatePincode(normalized);
+      if (!ok) {
+        setError(copy.errorInvalid);
+        setResult(null);
         return;
       }
-      setResult(lookup);
     } finally {
       setLoading(false);
     }
-  }, [pincode]);
+  }, [updatePincode]);
+
+  useEffect(() => {
+    if (!sitePincode) {
+      return;
+    }
+    setPincode(sitePincode);
+    if (siteDeliveryResult?.pincode === sitePincode) {
+      setResult(siteDeliveryResult);
+    }
+  }, [sitePincode, siteDeliveryResult]);
+
+  useEffect(() => {
+    if (variant !== "compact") {
+      return;
+    }
+    if (!isValidPincodeFormat(pincode)) {
+      return;
+    }
+    if (result?.pincode === pincode || loading || siteLocationStatus === "locating") {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      void lookupPincode(pincode);
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [pincode, variant, result?.pincode, loading, siteLocationStatus, lookupPincode]);
+
+  const locating = siteLocationStatus === "locating";
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    void checkDelivery();
+    void lookupPincode(pincode);
   };
+
+  const handleChangePincode = () => {
+    setResult(null);
+    setError("");
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  };
+
+  const actionBusy = locating || loading;
+  const actionLabel = locating
+    ? copy.detectingLocation
+    : loading
+      ? copy.checking
+      : result
+        ? copy.changeButton
+        : copy.checkButton;
+
+  if (variant === "compact") {
+    return (
+      <div
+        className="product-delivery product-delivery--compact"
+        aria-labelledby={`${inputId}-compact-label`}
+      >
+        <p id={`${inputId}-compact-label`} className="product-delivery-compact__title">
+          {copy.sidebarTitle ?? copy.title}
+        </p>
+
+        <form className="product-delivery-compact__form" onSubmit={handleSubmit} noValidate>
+          <div
+            className={`product-delivery-compact__field${
+              error ? " product-delivery-compact__field--error" : ""
+            }${locating ? " product-delivery-compact__field--locating" : ""}`}
+          >
+            <Crosshair
+              size={18}
+              strokeWidth={1.75}
+              aria-hidden
+              className="product-delivery-compact__field-icon"
+            />
+            <input
+              ref={inputRef}
+              id={inputId}
+              type="text"
+              inputMode="numeric"
+              autoComplete="postal-code"
+              maxLength={6}
+              value={pincode}
+              onChange={(event) => {
+                setPincode(normalizePincodeInput(event.target.value));
+                setError("");
+                if (result && normalizePincodeInput(event.target.value) !== result.pincode) {
+                  setResult(null);
+                }
+              }}
+              placeholder={copy.pincodePlaceholder}
+              className="product-delivery-compact__input"
+              aria-invalid={Boolean(error)}
+              aria-describedby={
+                [error ? errorId : null, result ? resultId : null]
+                  .filter(Boolean)
+                  .join(" ") || undefined
+              }
+              disabled={actionBusy}
+            />
+            <button
+              type={result ? "button" : "submit"}
+              className="product-delivery-compact__action"
+              onClick={result ? handleChangePincode : undefined}
+              disabled={actionBusy || (!result && pincode.length < 6)}
+            >
+              {actionLabel}
+            </button>
+          </div>
+        </form>
+
+        {!result && !actionBusy && !error ? (
+          <p className="product-delivery-compact__hint">{copy.locationHint}</p>
+        ) : null}
+
+        {error ? (
+          <p id={errorId} className="product-delivery-compact__error" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        {result ? <DeliveryResultCompact result={result} resultId={resultId} /> : null}
+      </div>
+    );
+  }
 
   return (
     <section
@@ -98,18 +287,18 @@ export default function ProductDeliveryEstimate() {
                   .filter(Boolean)
                   .join(" ") || undefined
               }
-              disabled={loading}
+              disabled={actionBusy}
             />
             <button
               type="submit"
               className="product-delivery__submit"
-              disabled={loading || pincode.length < 6}
+              disabled={actionBusy || pincode.length < 6}
             >
-              {loading ? copy.checking : copy.checkButton}
+              {actionLabel}
             </button>
           </div>
           <p id={hintId} className="product-delivery__hint">
-            {copy.pincodeHint}
+            {locating ? copy.detectingLocation : copy.pincodeHint}
           </p>
         </form>
 

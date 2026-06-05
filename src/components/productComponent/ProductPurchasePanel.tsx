@@ -29,6 +29,8 @@ import "@/styles/ProductPurchasePanel.css";
 import { buildPriceBreakdownOptionLines } from "@/utils/priceBreakdownOptions";
 import {
   getCustomizationValidationError,
+  applyCustomizationDefaults,
+  customizationCatalogRevision,
   getDefaultProductCustomization,
   getProductCustomizationPickers,
   buildCustomizationLineAttributes,
@@ -103,9 +105,17 @@ export default function ProductPurchasePanel({
 
   const customSizeInputId = useId();
   const pickers = getProductCustomizationPickers(product);
-
-  const defaultSelection = getDefaultProductCustomization(product);
-  const resolvedInitial: CustomizationSelections = initialSelection ?? defaultSelection;
+  const catalogRevision = customizationCatalogRevision(product);
+  const emptySelection: CustomizationSelections = {
+    metal: "",
+    carat: "",
+    quality: "",
+    size: "",
+  };
+  const resolvedInitial = applyCustomizationDefaults(
+    initialSelection ?? emptySelection,
+    product
+  );
 
   const [selectedMetal, setSelectedMetal] = useState(resolvedInitial.metal);
   const [selectedCarat, setSelectedCarat] = useState(resolvedInitial.carat);
@@ -278,25 +288,59 @@ export default function ProductPurchasePanel({
     setErrorField(null);
   }, []);
 
+  const applySelectionState = useCallback(
+    (selection: CustomizationSelections) => {
+      const merged = applyCustomizationDefaults(selection, product);
+      setSelectedMetal(merged.metal);
+      setSelectedCarat(merged.carat);
+      setSelectedQuality(merged.quality);
+      if (isRingProduct) {
+        const restored = parseStoredRingSize(merged.size);
+        setCustomSizeActive(restored.customActive);
+        setCustomSizeInput(restored.customInput);
+        setCustomSizeInputMode(restored.customInputMode);
+        setSelectedSize(restored.selectedSize || "5");
+      } else {
+        setCustomSizeActive(false);
+        setCustomSizeInput("");
+        setSelectedSize(merged.size);
+      }
+    },
+    [isRingProduct, product]
+  );
+
+  const lastAppliedCatalogRevision = useRef<string | null>(null);
+
   useEffect(() => {
-    if (selectionSyncKey === undefined || !initialSelection) return;
-    setSelectedMetal(initialSelection.metal);
-    setSelectedCarat(initialSelection.carat);
-    setSelectedQuality(initialSelection.quality);
-    const nextSize = initialSelection.size;
-    if (isRingProduct) {
-      const restored = parseStoredRingSize(nextSize);
-      setCustomSizeActive(restored.customActive);
-      setCustomSizeInput(restored.customInput);
-      setCustomSizeInputMode(restored.customInputMode);
-      setSelectedSize(restored.selectedSize);
-    } else {
-      setCustomSizeActive(false);
-      setCustomSizeInput("");
-      setSelectedSize(nextSize);
-    }
+    if (selectionSyncKey === undefined) return;
+    applySelectionState(initialSelection ?? emptySelection);
     clearFeedback();
-  }, [selectionSyncKey, initialSelection, clearFeedback, isRingProduct]);
+  }, [
+    selectionSyncKey,
+    initialSelection,
+    applySelectionState,
+    clearFeedback,
+  ]);
+
+  useEffect(() => {
+    if (lastAppliedCatalogRevision.current === catalogRevision) {
+      return;
+    }
+    lastAppliedCatalogRevision.current = catalogRevision;
+    applySelectionState({
+      metal: selectedMetal,
+      carat: selectedCarat,
+      quality: selectedQuality,
+      size: effectiveSize,
+    });
+  }, [
+    catalogRevision,
+    applySelectionState,
+    selectedMetal,
+    selectedCarat,
+    selectedQuality,
+    effectiveSize,
+  ]);
 
   useEffect(() => {
     clearFeedback();

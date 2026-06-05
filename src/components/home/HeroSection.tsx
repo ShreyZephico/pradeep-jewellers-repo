@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import data from "@/data/contactDatas.json";
 import { useGoldRates } from "@/contexts/GoldRatesContext";
 import { formatInr, formatPercentChange } from "@/lib/goldRates";
+import { buildLiveRateDisplayItems } from "@/lib/liveRatesDisplay";
 import type { MetalRateItem } from "@/types/goldRate";
 
 import "./css/hero.css";
@@ -182,6 +183,9 @@ export default function HeroSection() {
   })();
 
   const compareDays = payload?.compareDays ?? ratesConfig.compareDays ?? 1;
+  const rateItems = buildLiveRateDisplayItems(live, {
+    includeOptionalWithoutRate: loading,
+  });
 
   const trendStyle = useMemo(() => {
     const style: Record<string, string> = {};
@@ -248,22 +252,17 @@ export default function HeroSection() {
 
       <div className="hero-section__rates-wrap">
         <div className="hero-section__rates-grid">
-          <RateMetalCard
-            label={ratesConfig.gold22k.label}
-            rate={live?.gold22k}
-            loading={loading}
-            unitSuffix={ratesConfig.gold22k.unitSuffix}
-            fractionDigits={ratesConfig.gold22k.fractionDigits}
-            compareDays={compareDays}
-          />
-          <RateMetalCard
-            label={ratesConfig.silver1kg.label}
-            rate={live?.silver1kg}
-            loading={loading}
-            unitSuffix={ratesConfig.silver1kg.unitSuffix}
-            fractionDigits={ratesConfig.silver1kg.fractionDigits}
-            compareDays={compareDays}
-          />
+          {rateItems.map((item) => (
+            <RateMetalCard
+              key={item.key}
+              label={item.label}
+              rate={item.rate}
+              loading={loading}
+              unitSuffix={item.unitSuffix}
+              fractionDigits={item.fractionDigits}
+              compareDays={compareDays}
+            />
+          ))}
 
           <LiveRatesPanel
             ratesConfig={ratesConfig}

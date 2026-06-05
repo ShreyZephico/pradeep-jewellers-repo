@@ -10,6 +10,7 @@ import {
 } from "@/lib/productDisplay";
 import productContent from "@/lib/productContent";
 import { formatProductPrice } from "@/utils/formatPrice";
+import { productLinkWarmHandlers } from "@/lib/productDetailNavigation";
 import { getProductHref } from "@/utils/productUrl";
 
 type CollectionProductCardProps = {
@@ -25,13 +26,18 @@ export default function CollectionProductCard({
 }: CollectionProductCardProps) {
   const copy = productContent.list;
   const href = getProductHref(product);
+  const warm = productLinkWarmHandlers(product);
   const cornerBadge = getProductCornerBadge(product);
   const material = getProductMaterialLabel(product);
   const makingLabel = getProductMakingLabel(product);
 
   return (
     <article className="collection-card collection-card--shine group">
-      <Link href={href} className="collection-card-media">
+      <Link
+        href={href}
+        className="collection-card-media"
+        {...warm}
+      >
         {imageSrc !== "/placeholder.jpg" ? (
           <Image
             src={imageSrc}
@@ -39,6 +45,7 @@ export default function CollectionProductCard({
             fill
             className="collection-card-img"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            loading="lazy"
             onError={onImageError}
           />
         ) : (
@@ -58,7 +65,7 @@ export default function CollectionProductCard({
             {material}
           </p>
         ) : null}
-        <Link href={href}>
+        <Link href={href} {...warm}>
           <h3 className="collection-card-name">{product.name}</h3>
         </Link>
         <div className="collection-card-price-row">

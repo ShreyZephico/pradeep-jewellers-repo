@@ -6,6 +6,7 @@ import {
   splitCustomerName,
 } from '@/lib/shopifyCustomer';
 import { attachGuestCartToCustomer } from '@/lib/cartCustomerLink';
+import { applyCustomerSessionCookies } from '@/lib/customerSessionCookies';
 import { normalizeIndianMobile } from '@/utils/indianPhone';
 
 export async function POST(request: Request) {
@@ -97,50 +98,16 @@ export async function POST(request: Request) {
         name: createResult.customer.displayName,
       },
     });
-    const expires = new Date(tokenResult.customerAccessToken.expiresAt);
-
-    response.cookies.set('customerAccessToken', tokenResult.customerAccessToken.accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      expires,
-      path: '/',
-    });
-    response.cookies.set('customerEmail', cleanEmail, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      expires,
-      path: '/',
-    });
     const nationalPhone = normalizeIndianMobile(cleanPhone);
-    if (nationalPhone) {
-      response.cookies.set('customerPhone', nationalPhone, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        expires,
-        path: '/',
-      });
-    }
-    response.cookies.set('loginMethod', 'email', {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      expires,
-      path: '/',
-    });
 
-    const displayName = createResult.customer.displayName?.trim();
-    if (displayName) {
-      response.cookies.set('customerName', displayName, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        expires,
-        path: '/',
-      });
-    }
+    applyCustomerSessionCookies(response, {
+      accessToken: tokenResult.customerAccessToken.accessToken,
+      expiresAt: tokenResult.customerAccessToken.expiresAt,
+      email: cleanEmail,
+      loginMethod: 'email',
+      name: createResult.customer.displayName?.trim() || name.trim(),
+      phone: nationalPhone || undefined,
+    });
 
     await attachGuestCartToCustomer(
       request,
