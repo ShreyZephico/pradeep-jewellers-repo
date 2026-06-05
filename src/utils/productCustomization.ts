@@ -1,7 +1,14 @@
 import productContent from "@/lib/productContent";
 import type { Product } from "@/types/product";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
-import { isKaratLabel, resolveKaratFromSelection } from "@/utils/karat";
+import { isKaratLabel, parseKaratNumber, resolveKaratFromSelection } from "@/utils/karat";
+import {
+  formatRingSizeOrderValue,
+  getRingSizeMm,
+  isStandardRingSize,
+  parseStoredRingSize,
+  resolveRingSizeSelection,
+} from "@/utils/ringSizeChart";
 import { getProductHref } from "@/utils/productUrl";
 import { findBestMatchingVariant } from "@/utils/variantOptionMatch";
 import {
@@ -14,6 +21,7 @@ import {
   getSizeAttributeKey,
   getSizeSpecLabel,
   getSizeValidationMessage,
+  inferJewelryCategory,
 } from "@/utils/productCustomizationLabels";
 
 export type CustomizationSelections = {
@@ -135,7 +143,7 @@ export function buildCustomizationLineAttributes(
   if (selected.size.trim()) {
     attributes.push({
       key: getSizeAttributeKey(product),
-      value: selected.size,
+      value: selected.size.trim(),
     });
   }
   return attributes;
@@ -219,6 +227,119 @@ export function buildSpecRowsFromSelections(
 }
 
 /** True when Shopify/catalog exposes at least one option the customer must choose. */
+export type CustomizationSummarySegmentKey = "size" | "metal" | "diamond";
+
+export type CustomizationSummarySegment = {
+  key: CustomizationSummarySegmentKey;
+  label: string;
+  value: string;
+};
+
+function shortenMetalColorLabel(label: string): string {
+  const trimmed = label.trim();
+  if (!trimmed || isKaratLabel(trimmed)) {
+    return "";
+  }
+  const named = trimmed.match(/^(yellow|white|rose)\s+gold$/i);
+  if (named) {
+    const word = named[1];
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  }
+  const withoutGold = trimmed.replace(/\s*gold\s*/gi, " ").replace(/\s+/g, " ").trim();
+  return withoutGold || trimmed;
+}
+
+export function formatCustomizationMetalSummary(
+  selection: CustomizationSelections
+): string {
+  const karatRaw = resolveKaratFromSelection(selection.metal, selection.carat);
+  const karatPart = karatRaw ? `${parseKaratNumber(karatRaw)} KT` : "";
+
+  const colorPart = shortenMetalColorLabel(
+    isKaratLabel(selection.metal) ? "" : selection.metal
+  );
+
+  const combined = [karatPart, colorPart].filter(Boolean).join(" ");
+  if (combined) {
+    return combined;
+  }
+
+  const fallback = selection.metal.trim() || selection.carat.trim();
+  return fallback || "—";
+}
+
+export function formatCustomizationSizeSummary(
+  product: Product,
+  size: string
+): string {
+  const trimmed = size.trim();
+  if (!trimmed) {
+    return "—";
+  }
+
+  if (/\(\s*[\d.]+\s*mm\s*\)/i.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (inferJewelryCategory(product) === "ring") {
+    const parsed = parseStoredRingSize(trimmed);
+    const resolved = resolveRingSizeSelection({
+      customActive: parsed.customActive,
+      customInput: parsed.customInput,
+      selectedSize: parsed.selectedSize,
+      customInputMode: parsed.customInputMode,
+    });
+    if (resolved.orderValue.trim()) {
+      return resolved.orderValue;
+    }
+    if (isStandardRingSize(trimmed)) {
+      const mm = getRingSizeMm(trimmed);
+      return formatRingSizeOrderValue(trimmed, mm);
+    }
+  }
+
+  return trimmed;
+}
+
+export function getCustomizationSummarySegments(
+  product: Product,
+  selection: CustomizationSelections,
+  labels: {
+    size: string;
+    metal: string;
+    diamond: string;
+  }
+): CustomizationSummarySegment[] {
+  const pickers = getProductCustomizationPickers(product);
+  const segments: CustomizationSummarySegment[] = [];
+
+  if (pickers.showSize) {
+    segments.push({
+      key: "size",
+      label: labels.size,
+      value: formatCustomizationSizeSummary(product, selection.size),
+    });
+  }
+
+  if (pickers.showMetal || pickers.showCarat) {
+    segments.push({
+      key: "metal",
+      label: labels.metal,
+      value: formatCustomizationMetalSummary(selection),
+    });
+  }
+
+  if (pickers.showDiamond) {
+    segments.push({
+      key: "diamond",
+      label: labels.diamond,
+      value: selection.quality.trim() || "—",
+    });
+  }
+
+  return segments;
+}
+
 export function productHasCustomizationOptions(product: Product): boolean {
   const pickers = getProductCustomizationPickers(product);
   return (

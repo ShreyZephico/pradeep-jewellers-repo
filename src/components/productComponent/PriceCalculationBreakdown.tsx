@@ -7,7 +7,6 @@ import productContent from "@/lib/productContent";
 import {
   buildGoldBreakupLabel,
   extractDiamondQualityLabel,
-  getReferenceBreakupAmounts,
   splitBreakupOptionLines,
 } from "@/utils/priceBreakupDisplay";
 
@@ -26,26 +25,6 @@ type PriceCalculationBreakdownProps = {
 };
 
 const copy = productContent.priceBreakdown;
-
-function BreakupPrices({
-  current,
-  original,
-}: {
-  current: number;
-  original?: number;
-}) {
-  const showCompare = original != null && original > current;
-  return (
-    <span className="product-breakup-prices">
-      {showCompare ? (
-        <span className="product-breakup-price product-breakup-price--was">
-          {formatProductPrice(original)}
-        </span>
-      ) : null}
-      <span className="product-breakup-price">{formatProductPrice(current)}</span>
-    </span>
-  );
-}
 
 function formatWeightGrams(weight: number): string {
   const w = Math.round(weight * 1000) / 1000;
@@ -94,11 +73,6 @@ export default function PriceCalculationBreakdown({
     diamondLabel?.trim() ||
     (diamond ? extractDiamondQualityLabel(diamond.label) : "");
 
-  const refs = getReferenceBreakupAmounts(breakdown, {
-    diamondAmount,
-    otherExtras,
-  });
-
   return (
     <section className={rootClass} aria-label={copy.title}>
       {!embedded ? (
@@ -134,18 +108,14 @@ export default function PriceCalculationBreakdown({
 
         <div className="product-breakup-row">
           <span className="product-breakup-label">{copy.makingCharge}</span>
-          <BreakupPrices
-            current={breakdown.makingCharge}
-            original={refs.showMakingCompare ? refs.referenceMaking : undefined}
-          />
+          <span className="product-breakup-amount">
+            {formatProductPrice(breakdown.makingCharge)}
+          </span>
         </div>
 
         <div className="product-breakup-row">
           <span className="product-breakup-label">{copy.gst}</span>
-          <BreakupPrices
-            current={breakdown.gst}
-            original={refs.showGstCompare ? refs.referenceGst : undefined}
-          />
+          <span className="product-breakup-amount">{formatProductPrice(breakdown.gst)}</span>
         </div>
 
         <div className="product-breakup-row product-breakup-row--grand">

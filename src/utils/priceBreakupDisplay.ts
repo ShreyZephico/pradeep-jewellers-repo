@@ -2,9 +2,6 @@ import { isKaratLabel, parseKaratNumber } from "@/utils/karat";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
 import type { PriceBreakdownOptionLine } from "@/utils/priceBreakdownOptions";
 
-/** Reference making % for “was / now” display when live rate is lower. */
-export const REFERENCE_MAKING_PERCENT = 15;
-
 export function buildGoldBreakupLabel(
   karatLabel: string | null,
   metalLabel: string | null,
@@ -56,28 +53,4 @@ export function splitBreakupOptionLines(lines: PriceBreakdownOptionLine[]): {
   }
 
   return { diamond, goldExtras, otherExtras };
-}
-
-export function getReferenceBreakupAmounts(
-  breakdown: VariantPriceBreakdown,
-  extras: { diamondAmount: number; otherExtras: number }
-) {
-  const referenceMaking = Math.round(
-    breakdown.actualGoldPrice * (REFERENCE_MAKING_PERCENT / 100)
-  );
-  const referenceSubtotal = breakdown.actualGoldPrice + referenceMaking;
-  const referenceGst = Math.round(referenceSubtotal * 0.03);
-  const referenceGrand =
-    referenceSubtotal +
-    referenceGst +
-    extras.diamondAmount +
-    extras.otherExtras;
-
-  return {
-    referenceMaking,
-    referenceGst,
-    referenceGrand,
-    showMakingCompare: referenceMaking > breakdown.makingCharge,
-    showGstCompare: referenceGst > breakdown.gst,
-  };
 }

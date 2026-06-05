@@ -8,6 +8,15 @@ import {
 } from "@/lib/productFilters";
 import { getShopifyStorefrontApiVersion } from "@/lib/shopifyApiVersion";
 import type { Product, ProductVariant } from "@/types/product";
+import { fetchSearchTagsFromShopifyAdmin } from "@/lib/shopifySearchTags";
+import {
+  buildSearchTagFilterOptions,
+  buildSearchTagSuggestions,
+  parseSearchTagsMetafield,
+  rankProductsBySearchQuery,
+  significantSearchWords,
+} from "@/utils/searchTags";
+import type { CollectionFilterOption } from "@/lib/shopCollectionFilters";
 import calculateVariantPrice from "@/utils/calculateVariantPrice";
 import getGoldPrice from "@/utils/goldPrice";
 import { parseMakingChargeFromMetafields } from "@/utils/makingCharge";
@@ -35,6 +44,11 @@ import {
   readSizeFromAttributes,
 } from "@/utils/productCustomizationLabels";
 import { productHasCustomizationOptions } from "@/utils/productCustomization";
+import type { CollectionFacetFilters } from "@/lib/shopCollectionFilters";
+import {
+  categoryShowsRingSizeFilter,
+  normalizeRingSizeFilterValue,
+} from "@/utils/ringSizeChart";
 
 function normalizeStoreDomain(raw?: string): string {
   if (!raw?.trim()) {
@@ -127,6 +141,7 @@ type ShopifyProductNode = {
   };
   makingChargeType?: { value: string | null } | null;
   makingChargeValue?: { value: string | null } | null;
+  searchTagsMetafield?: { value: string | null } | null;
 };
 
 const productNodeFields = `
@@ -187,6 +202,9 @@ const productNodeFields = `
           makingChargeValue: metafield(namespace: "custom", key: "making_charge") {
             value
           }
+          searchTagsMetafield: metafield(namespace: "custom", key: "search_tags") {
+            value
+          }
 `;
 
 /** Smaller payload for grids — variant count + sample variants for “from” price only. */
@@ -243,6 +261,9 @@ const productListNodeFields = `
             value
           }
           makingChargeValue: metafield(namespace: "custom", key: "making_charge") {
+            value
+          }
+          searchTagsMetafield: metafield(namespace: "custom", key: "search_tags") {
             value
           }
 `;
@@ -477,6 +498,46 @@ async function resolveShopifyMakingChargePercent(
   return fromAdmin?.percent;
 }
 
+function extractAvailableRingSizesFromNode(node: ShopifyProductNode): string[] {
+  const sizes = new Set<string>();
+
+  for (const option of node.options ?? []) {
+    if (!isSizeLikeOptionName(option.name)) {
+      continue;
+    }
+    for (const value of option.values ?? []) {
+      const normalized = normalizeRingSizeFilterValue(value);
+      if (normalized) {
+        sizes.add(normalized);
+      }
+    }
+  }
+
+  for (const { node: variant } of node.variants.edges) {
+    for (const selected of variant.selectedOptions ?? []) {
+      if (!isSizeLikeOptionName(selected.name)) {
+        continue;
+      }
+      const normalized = normalizeRingSizeFilterValue(selected.value);
+      if (normalized) {
+        sizes.add(normalized);
+      }
+    }
+  }
+
+  return [...sizes].sort((a, b) => Number(a) - Number(b));
+}
+
+async function resolveSearchTagsForNode(node: ShopifyProductNode): Promise<string[]> {
+  const fromStorefront = parseSearchTagsMetafield(node.searchTagsMetafield?.value);
+  if (fromStorefront.length > 0) {
+    return fromStorefront;
+  }
+
+  const fromAdmin = await fetchSearchTagsFromShopifyAdmin(node.id);
+  return fromAdmin ?? [];
+}
+
 /** Listing/card mapping: one gold fetch, min price across sample variants (no full variant list). */
 async function mapShopifyProductListItem(
   node: ShopifyProductNode,
@@ -497,6 +558,7 @@ async function mapShopifyProductListItem(
     node.variantsCount?.count ?? node.variants.edges.length ?? 0;
 
   let price = 0;
+  let listingWeightGrams: number | undefined;
   let variantId = node.variants.edges[0]?.node.id ?? "";
   const makingChargePercent = await resolveShopifyMakingChargePercent(node);
   const goldRate = await getGoldPrice();
@@ -526,6 +588,13 @@ async function mapShopifyProductListItem(
     const weight = resolveVariantWeight(gramsFromApi);
     const carat = extractCaratFromSelectedOptions(variant.selectedOptions);
 
+    if (weight > 0) {
+      listingWeightGrams =
+        listingWeightGrams == null
+          ? weight
+          : Math.min(listingWeightGrams, weight);
+    }
+
     const pricing = await calculateVariantPrice({
       weight,
       carat,
@@ -543,7 +612,9 @@ async function mapShopifyProductListItem(
   }
 
   const tags = node.tags ?? [];
+  const searchTags = await resolveSearchTagsForNode(node);
   const badge = deriveListBadge({ tags, compareAtPrice, price });
+  const availableRingSizes = extractAvailableRingSizesFromNode(node);
 
   return {
     id: node.id,
@@ -554,6 +625,7 @@ async function mapShopifyProductListItem(
     shortDescription: node.description?.slice(0, 120) || fallback.shortDescription,
     productType: node.productType?.trim() || fallback.productType,
     tags,
+    searchTags: searchTags.length ? searchTags : undefined,
     badge,
     price,
     compareAtPrice,
@@ -564,6 +636,8 @@ async function mapShopifyProductListItem(
     variantCount,
     variants: undefined,
     customizable: false,
+    availableRingSizes: availableRingSizes.length ? availableRingSizes : undefined,
+    listingWeightGrams,
   };
 }
 
@@ -703,6 +777,8 @@ async function mapShopifyProduct(
     ? sizeOption.values.map((value) => ({ size: value }))
     : undefined;
 
+  const searchTags = await resolveSearchTagsForNode(node);
+
   const mapped: Product = {
     id: node.id,
     slug: node.handle,
@@ -711,6 +787,7 @@ async function mapShopifyProduct(
     description: node.description || fallback.description,
     productType: node.productType?.trim() || fallback.productType,
     tags: node.tags ?? [],
+    searchTags: searchTags.length ? searchTags : undefined,
     price,
     compareAtPrice,
     makingChargePercent,
@@ -885,6 +962,9 @@ export function mergeShopifyVariantGids(
       storefront.makingChargePercent ?? catalog.makingChargePercent,
     productType: catalog.productType ?? storefront.productType,
     tags: catalog.tags?.length ? catalog.tags : storefront.tags,
+    searchTags: catalog.searchTags?.length
+      ? catalog.searchTags
+      : storefront.searchTags,
     sizeOptionName: catalog.sizeOptionName ?? storefront.sizeOptionName,
     metalOptionName: catalog.metalOptionName ?? storefront.metalOptionName,
     caratOptionName: catalog.caratOptionName ?? storefront.caratOptionName,
@@ -1274,7 +1354,13 @@ function buildShopifyProductsSearchQuery(q: string, category: string): string | 
   const parts: string[] = [];
 
   if (q) {
-    parts.push(`title:*${q}* OR description:*${q}*`);
+    const words = significantSearchWords(q);
+    if (words.length > 0) {
+      const titleAll = words.map((word) => `title:*${word}*`).join(" AND ");
+      parts.push(`(${titleAll})`);
+    } else {
+      parts.push(`title:*${q}*`);
+    }
   }
 
   if (category && category !== "all") {
@@ -1442,6 +1528,8 @@ export type ProductsPageResult = {
   limit: number;
   totalPages: number;
   priceBounds: PriceBounds;
+  searchTagOptions: CollectionFilterOption[];
+  searchTagSuggestions: CollectionFilterOption[];
 };
 
 /** Paginated product list for `/api/products` — data from Shopify Storefront only. */
@@ -1453,6 +1541,8 @@ export async function getProductsPage(options: {
   minPrice?: number;
   maxPrice?: number;
   sort?: ProductSort;
+  ringSizes?: string[];
+  facets?: CollectionFacetFilters;
 }): Promise<ProductsPageResult> {
   const page = Math.max(1, options.page);
   const limit = Math.max(1, options.limit);
@@ -1460,9 +1550,24 @@ export async function getProductsPage(options: {
     minPrice: options.minPrice,
     maxPrice: options.maxPrice,
     sort: options.sort,
+    ringSizes:
+      categoryShowsRingSizeFilter(options.category ?? "all") &&
+      options.ringSizes?.length
+        ? options.ringSizes
+        : undefined,
+    ringSizeMatchStrict: options.category === "all",
+    facets: options.facets,
   };
 
-  const paginate = (allProducts: Product[]): ProductsPageResult => {
+  const clientQ = options.q?.trim() ?? "";
+
+  const paginate = (
+    allProducts: Product[],
+    extras?: {
+      searchTagOptions?: CollectionFilterOption[];
+      searchTagSuggestions?: CollectionFilterOption[];
+    }
+  ): ProductsPageResult => {
     const priceBounds = computePriceBounds(allProducts);
     const filtered = applyProductListFilters(allProducts, listFilters);
     const total = filtered.length;
@@ -1475,6 +1580,8 @@ export async function getProductsPage(options: {
       limit,
       totalPages,
       priceBounds,
+      searchTagOptions: extras?.searchTagOptions ?? [],
+      searchTagSuggestions: extras?.searchTagSuggestions ?? [],
     };
   };
 
@@ -1487,16 +1594,51 @@ export async function getProductsPage(options: {
   }
 
   try {
-    const nodes = await fetchShopifyProductNodes({
-      q: options.q,
-      category: options.category,
-    });
+    let nodes: ShopifyProductNode[];
 
-    const allProducts = await Promise.all(
+    if (clientQ) {
+      const [titleSearchNodes, catalogNodes] = await Promise.all([
+        fetchShopifyProductNodes({
+          q: clientQ,
+          category: options.category,
+          maxProducts: 80,
+        }),
+        fetchShopifyProductNodes({
+          category: options.category,
+          maxProducts: 200,
+        }),
+      ]);
+
+      const byId = new Map<string, ShopifyProductNode>();
+      for (const node of titleSearchNodes) {
+        byId.set(node.id, node);
+      }
+      for (const node of catalogNodes) {
+        byId.set(node.id, node);
+      }
+      nodes = [...byId.values()];
+    } else {
+      nodes = await fetchShopifyProductNodes({
+        q: options.q,
+        category: options.category,
+      });
+    }
+
+    let allProducts = await Promise.all(
       nodes.map((node, index) => mapShopifyProductListItem(node, index))
     );
 
-    return paginate(allProducts);
+    const searchTagOptions = buildSearchTagFilterOptions(allProducts);
+
+    if (clientQ) {
+      allProducts = rankProductsBySearchQuery(allProducts, clientQ);
+    }
+
+    const searchTagSuggestions = clientQ
+      ? buildSearchTagSuggestions(allProducts, clientQ, 8)
+      : [];
+
+    return paginate(allProducts, { searchTagOptions, searchTagSuggestions });
   } catch (error) {
     console.error("Shopify Storefront products fetch failed:", error);
     throw error;
