@@ -1,6 +1,15 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState, Fragment } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  Fragment,
+} from "react";
+import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -151,7 +160,9 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [logoError, setLogoError] = useState(false);
+  const [menuPanelTop, setMenuPanelTop] = useState(0);
 
+  const headerRef = useRef<HTMLElement>(null);
   const lastScrollY = useRef(0);
   const scrollTicking = useRef(false);
 
@@ -213,20 +224,134 @@ export default function Header() {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [isMenuOpen]);
 
+  const updateMenuPanelTop = useCallback(() => {
+    if (!headerRef.current) return;
+    setMenuPanelTop(headerRef.current.getBoundingClientRect().bottom);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!isMenuOpen) return;
+    updateMenuPanelTop();
+    window.addEventListener("resize", updateMenuPanelTop);
+    return () => window.removeEventListener("resize", updateMenuPanelTop);
+  }, [isMenuOpen, updateMenuPanelTop]);
+
+  useEffect(() => {
+    document.body.classList.toggle("site-nav-open", isMenuOpen);
+    if (!isMenuOpen) {
+      return;
+    }
+
+    const scrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.width = "100%";
+    requestAnimationFrame(updateMenuPanelTop);
+
+    return () => {
+      document.body.classList.remove("site-nav-open");
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      window.scrollTo(0, scrollY);
+    };
+  }, [isMenuOpen, updateMenuPanelTop]);
+
   const getInitial = () =>
     userName ? userName.charAt(0).toUpperCase() : "U";
 
   const headerClass = [
     "site-header",
     isScrolled ? "site-header--scrolled" : "",
+    isMenuOpen ? "site-header--menu-open" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
   const cartQty = cart.totalQuantity;
 
+  const closeMenu = () => setIsMenuOpen(false);
+
+  const mobileMenuPanel = (
+    <div
+      className={`site-header__mobile site-header__mobile--portal${
+        isScrolled ? " site-header__mobile--scrolled" : ""
+      }`}
+      style={{ top: menuPanelTop }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Main navigation"
+    >
+      <div className="site-header__mobile-inner">
+        {contactData.navigation.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="site-header__mobile-link"
+            onClick={closeMenu}
+          >
+            {item.label}
+          </Link>
+        ))}
+
+        <Link
+          href={contactData.social.whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="site-header__mobile-link"
+          onClick={closeMenu}
+        >
+          {contactData.contact.phone}
+        </Link>
+
+        <Link
+          href={contactData.header.videoCallUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="site-header__mobile-link"
+          onClick={closeMenu}
+        >
+          {contactData.header.videoCallText}
+        </Link>
+
+        {!authLoading && !isLoggedIn ? (
+          <>
+            <button
+              type="button"
+              className="site-header__mobile-link"
+              onClick={() => {
+                closeMenu();
+                goToLogin();
+              }}
+              suppressHydrationWarning
+            >
+              Login
+            </button>
+
+            <button
+              type="button"
+              className="site-header__mobile-signup"
+              onClick={() => {
+                closeMenu();
+                saveReturnPath();
+                router.push("/signup");
+              }}
+              suppressHydrationWarning
+            >
+              Create Account
+            </button>
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
+
   return (
-    <header className={headerClass}>
+    <header ref={headerRef} className={headerClass}>
       <RatesTicker />
 
       <div className="site-header__main">
@@ -409,80 +534,21 @@ export default function Header() {
         <CategoryNavBar />
       </Suspense>
 
-      {isMenuOpen ? (
-        <>
-          <button
-            type="button"
-            className="site-header__mobile-backdrop"
-            aria-label="Close menu"
-            onClick={() => setIsMenuOpen(false)}
-            suppressHydrationWarning
-          />
-          <div className="site-header__mobile" role="dialog" aria-modal="true">
-            <div className="site-header__mobile-inner">
-            {contactData.navigation.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="site-header__mobile-link"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-
-            <Link
-              href={contactData.social.whatsapp}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="site-header__mobile-link"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {contactData.contact.phone}
-            </Link>
-
-            <Link
-              href={contactData.header.videoCallUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="site-header__mobile-link"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {contactData.header.videoCallText}
-            </Link>
-
-            {!authLoading && !isLoggedIn ? (
-              <>
-                <button
-                  type="button"
-                  className="site-header__mobile-link"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    goToLogin();
-                  }}
-                  suppressHydrationWarning
-                >
-                  Login
-                </button>
-
-                <button
-                  type="button"
-                  className="site-header__mobile-signup"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    saveReturnPath();
-                    router.push("/signup");
-                  }}
-                  suppressHydrationWarning
-                >
-                  Create Account
-                </button>
-              </>
-            ) : null}
-            </div>
-          </div>
-        </>
-      ) : null}
+      {isMenuOpen && typeof document !== "undefined"
+        ? createPortal(
+            <>
+              <button
+                type="button"
+                className="site-header__mobile-backdrop site-header__mobile-backdrop--portal"
+                aria-label="Close menu"
+                onClick={closeMenu}
+                suppressHydrationWarning
+              />
+              {mobileMenuPanel}
+            </>,
+            document.body
+          )
+        : null}
     </header>
   );
 }

@@ -9,6 +9,7 @@ import type { RatesTableRow } from "@/types/goldRate";
 type Props = {
   rows: RatesTableRow[];
   showGold: boolean;
+  showGold18: boolean;
   showGold14: boolean;
   showGold9: boolean;
   showSilver: boolean;
@@ -28,6 +29,7 @@ function ChangeCell({ value }: { value?: number }) {
 export default function RatesComparisonTable({
   rows,
   showGold,
+  showGold18,
   showGold14,
   showGold9,
   showSilver,
@@ -47,6 +49,7 @@ export default function RatesComparisonTable({
               <th className="rates-table__sticky-col">{copy.date}</th>
               {showGold ? <th>{copy.gold24k}</th> : null}
               {showGold ? <th>{copy.gold22k}</th> : null}
+              {showGold18 ? <th>{copy.gold18k}</th> : null}
               {showGold14 ? <th>{copy.gold14k}</th> : null}
               {showGold9 ? <th>{copy.gold9k}</th> : null}
               {showSilver ? <th>{copy.silver}</th> : null}
@@ -55,6 +58,9 @@ export default function RatesComparisonTable({
               ) : null}
               {showGold ? (
                 <th className="rates-table__change-col">{copy.change} 22K</th>
+              ) : null}
+              {showGold18 ? (
+                <th className="rates-table__change-col">{copy.change} 18K</th>
               ) : null}
               {showGold14 ? (
                 <th className="rates-table__change-col">{copy.change} 14K</th>
@@ -87,6 +93,13 @@ export default function RatesComparisonTable({
                       : "—"}
                   </td>
                 ) : null}
+                {showGold18 ? (
+                  <td>
+                    {row.gold18k != null
+                      ? formatInr(row.gold18k, 2)
+                      : "—"}
+                  </td>
+                ) : null}
                 {showGold14 ? (
                   <td>
                     {row.gold14k != null
@@ -116,6 +129,11 @@ export default function RatesComparisonTable({
                 {showGold ? (
                   <td className="rates-table__change-col">
                     <ChangeCell value={row.gold22kChange} />
+                  </td>
+                ) : null}
+                {showGold18 ? (
+                  <td className="rates-table__change-col">
+                    <ChangeCell value={row.gold18kChange} />
                   </td>
                 ) : null}
                 {showGold14 ? (

@@ -3,6 +3,13 @@ import type { Product } from "@/types/product";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
 import { isKaratLabel, parseKaratNumber, resolveKaratFromSelection } from "@/utils/karat";
 import {
+  formatBangleSizeOrderValue,
+  getBangleCircumferenceInches,
+  isStandardBangleSize,
+  parseStoredBangleSize,
+  resolveBangleSizeSelection,
+} from "@/utils/bangleSizeChart";
+import {
   formatRingSizeOrderValue,
   getRingSizeMm,
   isStandardRingSize,
@@ -104,6 +111,7 @@ export const PREFERRED_CUSTOMIZATION_DEFAULTS = {
   metal: "Yellow Gold",
   quality: "IJ-SI",
   ringSize: "5",
+  bangleSize: "2.6",
 } as const;
 
 function pickValidOptionLabel(
@@ -155,7 +163,9 @@ export function customizationCatalogRevision(product: Product): string {
 /** Default customization: Yellow Gold, IJ-SI, ring size 5, 18K carat when available. */
 export function getDefaultProductCustomization(product: Product): CustomizationSelections {
   const pickers = getProductCustomizationPickers(product);
-  const isRing = inferJewelryCategory(product) === "ring";
+  const category = inferJewelryCategory(product);
+  const isRing = category === "ring";
+  const isBracelet = category === "bracelet";
 
   const metal =
     pickers.metal.length > 0
@@ -182,7 +192,9 @@ export function getDefaultProductCustomization(product: Product): CustomizationS
       ? getDefaultSizeSelection(product, pickers.sizes)
       : isRing
         ? PREFERRED_CUSTOMIZATION_DEFAULTS.ringSize
-        : "";
+        : isBracelet
+          ? PREFERRED_CUSTOMIZATION_DEFAULTS.bangleSize
+          : "";
 
   return { metal, carat, quality, size };
 }
@@ -366,7 +378,9 @@ export function formatCustomizationSizeSummary(
     return trimmed;
   }
 
-  if (inferJewelryCategory(product) === "ring") {
+  const category = inferJewelryCategory(product);
+
+  if (category === "ring") {
     const parsed = parseStoredRingSize(trimmed);
     const resolved = resolveRingSizeSelection({
       customActive: parsed.customActive,
@@ -380,6 +394,20 @@ export function formatCustomizationSizeSummary(
     if (isStandardRingSize(trimmed)) {
       const mm = getRingSizeMm(trimmed);
       return formatRingSizeOrderValue(trimmed, mm);
+    }
+  }
+
+  if (category === "bracelet") {
+    const parsed = parseStoredBangleSize(trimmed);
+    const resolved = resolveBangleSizeSelection({
+      selectedSize: parsed.selectedSize,
+    });
+    if (resolved.orderValue.trim()) {
+      return resolved.orderValue;
+    }
+    if (isStandardBangleSize(trimmed)) {
+      const inches = getBangleCircumferenceInches(trimmed);
+      return formatBangleSizeOrderValue(trimmed, inches);
     }
   }
 
@@ -439,10 +467,11 @@ export function productHasCustomizationOptions(product: Product): boolean {
 
   // Single Shopify variant with no real option axes → direct purchase only.
   if (getProductVariantCount(product) <= 1) {
-    const ringWithConfiguredSizes =
-      pickers.showSize && inferJewelryCategory(product) === "ring";
+    const category = inferJewelryCategory(product);
+    const jewelryWithConfiguredSizes =
+      pickers.showSize && (category === "ring" || category === "bracelet");
 
-    if (!productHasMultipleShopifyOptions(product) && !ringWithConfiguredSizes) {
+    if (!productHasMultipleShopifyOptions(product) && !jewelryWithConfiguredSizes) {
       return false;
     }
   }

@@ -12,6 +12,7 @@ export type JewelryCategory =
 /** Legacy cart / checkout keys still read for older line items. */
 export const SIZE_ATTRIBUTE_KEYS = [
   "Ring Size",
+  "Bangle Size",
   "Necklace Length",
   "Chain Length",
   "Size",
@@ -58,6 +59,8 @@ export function getSizeAttributeKey(product: Product): string {
   switch (inferJewelryCategory(product)) {
     case "ring":
       return "Ring Size";
+    case "bracelet":
+      return "Bangle Size";
     case "necklace":
       return "Necklace Length";
     default:
@@ -76,6 +79,8 @@ export function getSizeSpecLabel(product: Product): string {
   switch (inferJewelryCategory(product)) {
     case "ring":
       return copy.sizeOptionRing;
+    case "bracelet":
+      return copy.sizeOptionBangle;
     case "necklace":
       return copy.sizeOptionNecklace;
     default:
@@ -143,6 +148,14 @@ export function getDefaultSizeSelection(
       pickByPattern(sizes, (o) => /^(16|18)(\s*(in|inch|"))?$/i.test(o.size.trim()))
         ?.size ??
       pickByPattern(sizes, (o) => /16|18/.test(o.size))?.size ??
+      pickByPattern(sizes, () => true)?.size ??
+      ""
+    );
+  }
+
+  if (category === "bracelet") {
+    return (
+      pickByPattern(sizes, (o) => o.size === "2.6")?.size ??
       pickByPattern(sizes, () => true)?.size ??
       ""
     );

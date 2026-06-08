@@ -267,7 +267,7 @@ let siteDeliveryLocationPromise: Promise<SiteDeliveryLocationResult> | null =
  * Runs once per page load when the site opens. Shows the native browser
  * location permission dialog (same as lapinozpizza.in store-locator).
  */
-export async function fetchDeliveryPincodeFromIp(): Promise<string | null> {
+async function fetchDeliveryPincodeFromServer(): Promise<string | null> {
   try {
     const response = await fetch("/api/delivery/location-from-ip", {
       cache: "no-store",
@@ -275,19 +275,100 @@ export async function fetchDeliveryPincodeFromIp(): Promise<string | null> {
     const data = (await response.json()) as {
       success?: boolean;
       pincode?: string;
+      postal?: string;
     };
 
     if (!response.ok || !data?.success) {
       return null;
     }
 
-    const pincode = normalizePincodeInput(
+    const fromPincode = normalizePincodeInput(
       typeof data.pincode === "string" ? data.pincode : ""
+    );
+    if (isValidPincodeFormat(fromPincode)) {
+      return fromPincode;
+    }
+
+    const fromPostal = normalizePincodeInput(
+      typeof data.postal === "string" ? data.postal : ""
+    );
+    return isValidPincodeFormat(fromPostal) ? fromPostal : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Browser-side ipinfo.io (works when server only sees localhost). */
+export async function fetchDeliveryPincodeFromClientIpInfo(): Promise<string | null> {
+  try {
+    const response = await fetch("https://ipinfo.io/json", {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+
+    const data = (await response.json()) as {
+      country?: string;
+      postal?: string;
+    };
+
+    if (data.country?.trim().toUpperCase() !== "IN") {
+      return null;
+    }
+
+    const pincode = normalizePincodeInput(
+      typeof data.postal === "string" ? data.postal : ""
     );
     return isValidPincodeFormat(pincode) ? pincode : null;
   } catch {
     return null;
   }
+}
+
+/** IP-based pincode — server headers first, then client ipinfo.io. */
+export async function fetchDeliveryPincodeFromIp(): Promise<string | null> {
+  const fromServer = await fetchDeliveryPincodeFromServer();
+  if (fromServer) {
+    return fromServer;
+  }
+  return fetchDeliveryPincodeFromClientIpInfo();
+}
+
+export type AutoDetectedDeliveryPincode = {
+  pincode: string;
+  source: "saved" | "ip" | "geolocation";
+};
+
+/**
+ * Automatic delivery pincode: saved session → IP (no permission) → browser geolocation.
+ */
+export async function autoDetectDeliveryPincode(): Promise<AutoDetectedDeliveryPincode | null> {
+  const saved = readSavedDeliveryPincode();
+  if (saved) {
+    return { pincode: saved, source: "saved" };
+  }
+
+  const ipPincode = await fetchDeliveryPincodeFromIp();
+  if (ipPincode) {
+    return { pincode: ipPincode, source: "ip" };
+  }
+
+  if (await isDeliveryLocationBlocked()) {
+    return null;
+  }
+
+  if (hasAttemptedDeliveryLocation()) {
+    return null;
+  }
+
+  const geoResult = await requestDeliveryPincodeFromGeolocation();
+  markDeliveryLocationAttempted();
+
+  if ("pincode" in geoResult) {
+    return { pincode: geoResult.pincode, source: "geolocation" };
+  }
+
+  return null;
 }
 
 export function initSiteDeliveryLocationOnce(): Promise<SiteDeliveryLocationResult> {

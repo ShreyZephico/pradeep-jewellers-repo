@@ -147,6 +147,11 @@ export default function CategoryNavBar() {
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const barRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    document.body.classList.toggle("site-category-nav-open", mobileOpen);
+    return () => document.body.classList.remove("site-category-nav-open");
+  }, [mobileOpen]);
+
   const activeItem = CATEGORY_NAV_ITEMS.find((c) => c.id === activeId);
 
   const clearCloseTimer = useCallback(() => {
@@ -198,6 +203,7 @@ export default function CategoryNavBar() {
       className="category-nav"
       ref={barRef}
       onMouseLeave={scheduleClose}
+      suppressHydrationWarning
     >
       <div className="category-nav__bar">
         <div className="category-nav__bar-inner">
@@ -206,6 +212,7 @@ export default function CategoryNavBar() {
             className="category-nav__mobile-toggle"
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((open) => !open)}
+            suppressHydrationWarning
           >
             Shop by category
             <ChevronDown

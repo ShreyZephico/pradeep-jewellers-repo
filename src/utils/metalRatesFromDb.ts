@@ -5,6 +5,10 @@ import {
   type StoreMetalDbQueryConfig,
   type StoreMetalPriceRow,
 } from "@/lib/storeMetalPricesQuery";
+import {
+  computeMetalPercentChange,
+  pickComparableBaselineDay,
+} from "@/utils/metalRatePercent";
 
 import type {
   GoldRateApiResponse,
@@ -17,6 +21,7 @@ export type MetalDbQueryConfig = StoreMetalDbQueryConfig;
 export type FetchMetalRatesConfig = {
   gold22k: MetalDbQueryConfig;
   gold14k: MetalDbQueryConfig;
+  gold18k: MetalDbQueryConfig;
   gold9k: MetalDbQueryConfig;
   silver1kg: MetalDbQueryConfig;
   compareDays: number;
@@ -39,16 +44,17 @@ function buildMetalRate(
   if (!days.length) return null;
 
   const currentDay = days[days.length - 1];
-  const oldDay = days[Math.max(0, days.length - 1 - compareDays)];
+  const oldDay = pickComparableBaselineDay(
+    days,
+    (day) => byDay.get(day)!.price,
+    compareDays
+  );
 
   const current = byDay.get(currentDay)!;
   const old = byDay.get(oldDay)!;
 
   const difference = Number((current.price - old.price).toFixed(2));
-  const percentChange =
-    old.price > 0
-      ? Number((((current.price - old.price) / old.price) * 100).toFixed(2))
-      : 0;
+  const percentChange = computeMetalPercentChange(current.price, old.price);
 
   return {
     current: current.price,
@@ -73,12 +79,14 @@ export async function fetchMetalRatesFromDb(
   const compareDays = Math.max(1, config.compareDays);
   const historyDays = compareDays + 2;
 
-  const [gold22Rows, gold14Rows, gold9Rows, silverRows] = await Promise.all([
-    fetchStoreMetalPriceRows(config.gold22k, historyDays),
-    fetchStoreMetalPriceRows(config.gold14k, historyDays),
-    fetchStoreMetalPriceRows(config.gold9k, historyDays),
-    fetchStoreMetalPriceRows(config.silver1kg, historyDays),
-  ]);
+  const [gold22Rows, gold14Rows, gold18Rows, gold9Rows, silverRows] =
+    await Promise.all([
+      fetchStoreMetalPriceRows(config.gold22k, historyDays),
+      fetchStoreMetalPriceRows(config.gold14k, historyDays),
+      fetchStoreMetalPriceRows(config.gold18k, historyDays),
+      fetchStoreMetalPriceRows(config.gold9k, historyDays),
+      fetchStoreMetalPriceRows(config.silver1kg, historyDays),
+    ]);
 
   const gold22k = buildMetalRate(
     gold22Rows,
@@ -89,6 +97,11 @@ export async function fetchMetalRatesFromDb(
     gold14Rows,
     compareDays,
     config.gold14k.priceMultiplier ?? 1
+  );
+  const gold18k = buildMetalRate(
+    gold18Rows,
+    compareDays,
+    config.gold18k.priceMultiplier ?? 1
   );
   const gold9k = buildMetalRate(
     gold9Rows,
@@ -114,6 +127,7 @@ export async function fetchMetalRatesFromDb(
   const latestFetchedAt = [
     gold22k.fetchedAt,
     gold14k?.fetchedAt,
+    gold18k?.fetchedAt,
     gold9k?.fetchedAt,
     silver1kg.fetchedAt,
   ]
@@ -156,6 +170,19 @@ export async function fetchMetalRatesFromDb(
               status: gold14k.status,
               currentAt: gold14k.currentAt,
               oldAt: gold14k.oldAt,
+            },
+          }
+        : {}),
+      ...(gold18k
+        ? {
+            gold18k: {
+              current: gold18k.current,
+              old: gold18k.old,
+              difference: gold18k.difference,
+              percentChange: gold18k.percentChange,
+              status: gold18k.status,
+              currentAt: gold18k.currentAt,
+              oldAt: gold18k.oldAt,
             },
           }
         : {}),

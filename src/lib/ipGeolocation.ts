@@ -202,6 +202,15 @@ export async function fetchIpInfoGeolocation(
   }
 }
 
+/** Valid 6-digit Indian pincode from ipinfo postal or similar. */
+export function indianPincodeFromGeo(
+  geo: Pick<IpGeolocationResult, "countryCode" | "postal">
+): string | null {
+  if (geo.countryCode !== "IN") return null;
+  const digits = geo.postal?.replace(/\D/g, "") ?? "";
+  return /^\d{6}$/.test(digits) ? digits : null;
+}
+
 export async function resolveIpGeolocation(ip: string): Promise<IpGeolocationResult | null> {
   const normalized = normalizeIpAddress(ip);
   if (!normalized || normalized === "unknown") {

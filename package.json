@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:https": "next dev --experimental-https",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -22,11 +23,13 @@
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
+    "@sentry/nextjs": "^10.56.0",
     "@supabase/supabase-js": "^2.105.4",
     "@types/nodemailer": "^8.0.0",
     "@types/socket.io-client": "^1.4.36",
     "cheerio": "^1.2.0",
     "clsx": "^2.1.1",
+    "docx": "^9.7.1",
     "lucide-react": "^1.8.0",
     "next": "16.2.4",
     "nodemailer": "^8.0.6",

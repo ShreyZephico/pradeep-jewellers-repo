@@ -10,18 +10,12 @@ import "./css/collections.css";
 
 const PRODUCTS_PATH = "/products";
 
-/** Products page with optional search from collection name (e.g. Gold, Diamond). */
-function productsHrefForCollection(title: string): string {
-  const query = title
-    .replace(/\s*jewellery\s*/gi, " ")
-    .replace(/\(.*\)/g, "")
-    .trim();
-
-  if (!query) {
+function productsHrefForCategory(categoryId?: string): string {
+  const id = categoryId?.trim().toLowerCase();
+  if (!id) {
     return PRODUCTS_PATH;
   }
-
-  return `${PRODUCTS_PATH}?q=${encodeURIComponent(query)}`;
+  return `${PRODUCTS_PATH}?category=${encodeURIComponent(id)}`;
 }
 
 export default function CollectionSection() {
@@ -55,7 +49,7 @@ export default function CollectionSection() {
           {collectionData.collections.map((item, index) => (
             <Link
               key={item.id}
-              href={productsHrefForCollection(item.title)}
+              href={item.link || productsHrefForCategory(item.categoryId)}
               className="collections-section__card"
               style={{ "--card-index": index } as CSSProperties}
               aria-label={`${item.title} — ${item.subtitle}, shop on products page`}

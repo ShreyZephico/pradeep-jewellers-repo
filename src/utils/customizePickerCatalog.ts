@@ -4,6 +4,7 @@ import {
   filterSizeOptionsForProduct,
   inferJewelryCategory,
 } from "@/utils/productCustomizationLabels";
+import { getBangleSizePickerOptions } from "@/utils/bangleSizeChart";
 import {
   getRingSizePickerOptions,
   isStandardRingSize,
@@ -126,8 +127,14 @@ export function getDiamondPickerOptions(product: Product): ProductOption[] {
 }
 
 export function getSizePickerOptions(product: Product): ProductSizeOption[] {
-  if (inferJewelryCategory(product) === "ring") {
+  const category = inferJewelryCategory(product);
+
+  if (category === "ring") {
     return getRingSizePickerOptions();
+  }
+
+  if (category === "bracelet") {
+    return getBangleSizePickerOptions();
   }
 
   return filterSizeOptionsForProduct(product, product.sizeOptions ?? []);

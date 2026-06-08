@@ -17,11 +17,7 @@ import {
   type PincodeLookupResult,
 } from "@/lib/pincodeDelivery";
 import {
-  fetchDeliveryPincodeFromIp,
-  hasAttemptedDeliveryLocation,
-  initSiteDeliveryLocationOnce,
-  markDeliveryLocationAttempted,
-  readSavedDeliveryPincode,
+  autoDetectDeliveryPincode,
   writeSavedDeliveryPincode,
   type DeliveryLocationStatus,
 } from "@/lib/deliveryLocation";
@@ -107,51 +103,21 @@ export function DeliveryLocationProvider({
     let cancelled = false;
 
     const bootstrap = async () => {
-      const saved = readSavedDeliveryPincode();
-      if (saved) {
-        if (!cancelled) {
-          setStatus("locating");
-        }
-        const ok = await resolvePincodeLookup(saved);
-        if (!cancelled && !ok) {
-          setStatus("unavailable");
-        }
-        return;
+      if (!cancelled) {
+        setStatus("locating");
       }
 
-      if (hasAttemptedDeliveryLocation()) {
+      const detected = await autoDetectDeliveryPincode();
+      if (!detected) {
         if (!cancelled) {
           setStatus("idle");
         }
         return;
       }
 
-      if (!cancelled) {
-        setStatus("locating");
-      }
-
-      const geoResult = await initSiteDeliveryLocationOnce();
-      markDeliveryLocationAttempted();
-
-      if ("pincode" in geoResult) {
-        const ok = await resolvePincodeLookup(geoResult.pincode);
-        if (!cancelled && !ok) {
-          setStatus("unavailable");
-        }
-        return;
-      }
-
-      const ipPincode = await fetchDeliveryPincodeFromIp();
-      if (ipPincode) {
-        const ok = await resolvePincodeLookup(ipPincode);
-        if (!cancelled && !ok) {
-          setStatus("unavailable");
-        }
-        return;
-      }
-
-      if (!cancelled) {
-        setStatus(geoResult.code === "denied" ? "denied" : "idle");
+      const ok = await resolvePincodeLookup(detected.pincode);
+      if (!cancelled && !ok) {
+        setStatus("unavailable");
       }
     };
 
