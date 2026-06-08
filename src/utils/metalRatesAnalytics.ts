@@ -5,6 +5,10 @@ import {
   type StoreMetalDbQueryConfig,
   type StoreMetalPriceRow,
 } from "@/lib/storeMetalPricesQuery";
+import {
+  computeMetalPercentChange,
+  pricesAreComparable,
+} from "@/utils/metalRatePercent";
 
 import type {
   MetalHistorySeries,
@@ -20,6 +24,7 @@ export type RatesAnalyticsDbConfig = {
   gold24k: MetalDbQueryConfig;
   gold22k: MetalDbQueryConfig;
   gold14k: MetalDbQueryConfig;
+  gold18k: MetalDbQueryConfig;
   gold9k: MetalDbQueryConfig;
   silver1kg: MetalDbQueryConfig;
   city: string;
@@ -28,6 +33,7 @@ export type RatesAnalyticsDbConfig = {
     gold24k: string;
     gold22k: string;
     gold14k: string;
+    gold18k: string;
     gold9k: string;
     silver1kg: string;
   };
@@ -62,10 +68,11 @@ function buildHistoryPoints(
       price: entry.price,
       fetchedAt: entry.createdAt,
     };
-    if (prevPrice != null && prevPrice > 0) {
-      point.percentChange = Number(
-        (((entry.price - prevPrice) / prevPrice) * 100).toFixed(2)
-      );
+    if (
+      prevPrice != null &&
+      pricesAreComparable(entry.price, prevPrice)
+    ) {
+      point.percentChange = computeMetalPercentChange(entry.price, prevPrice);
     }
     points.push(point);
     prevPrice = entry.price;
@@ -121,17 +128,26 @@ function buildSeries(
 function buildComparisonTable(
   gold24: MetalRateHistoryPoint[],
   gold22: MetalRateHistoryPoint[],
+  gold18: MetalRateHistoryPoint[] | null,
   gold14: MetalRateHistoryPoint[] | null,
   gold9: MetalRateHistoryPoint[] | null,
   silver: MetalRateHistoryPoint[]
 ): RatesTableRow[] {
   const dateSet = new Set<string>();
-  for (const p of [...gold24, ...gold22, ...(gold14 ?? []), ...(gold9 ?? []), ...silver]) {
+  for (const p of [
+    ...gold24,
+    ...gold22,
+    ...(gold18 ?? []),
+    ...(gold14 ?? []),
+    ...(gold9 ?? []),
+    ...silver,
+  ]) {
     dateSet.add(p.date);
   }
 
   const map24 = new Map(gold24.map((p) => [p.date, p]));
   const map22 = new Map(gold22.map((p) => [p.date, p]));
+  const map18 = new Map((gold18 ?? []).map((p) => [p.date, p]));
   const map14 = new Map((gold14 ?? []).map((p) => [p.date, p]));
   const map9 = new Map((gold9 ?? []).map((p) => [p.date, p]));
   const mapAg = new Map(silver.map((p) => [p.date, p]));
@@ -143,11 +159,13 @@ function buildComparisonTable(
       dateLabel: formatTableDate(date),
       gold24k: map24.get(date)?.price ?? null,
       gold22k: map22.get(date)?.price ?? null,
+      gold18k: map18.get(date)?.price ?? null,
       gold14k: map14.get(date)?.price ?? null,
       gold9k: map9.get(date)?.price ?? null,
       silver1kg: mapAg.get(date)?.price ?? null,
       gold24kChange: map24.get(date)?.percentChange,
       gold22kChange: map22.get(date)?.percentChange,
+      gold18kChange: map18.get(date)?.percentChange,
       gold14kChange: map14.get(date)?.percentChange,
       gold9kChange: map9.get(date)?.percentChange,
       silver1kgChange: mapAg.get(date)?.percentChange,
@@ -164,13 +182,15 @@ export async function fetchRatesAnalyticsFromDb(
   );
   const historyDays = windowDays + 2;
 
-  const [gold24Rows, gold22Rows, gold14Rows, gold9Rows, silverRows] = await Promise.all([
-    fetchStoreMetalPriceRows(config.gold24k, historyDays),
-    fetchStoreMetalPriceRows(config.gold22k, historyDays),
-    fetchStoreMetalPriceRows(config.gold14k, historyDays),
-    fetchStoreMetalPriceRows(config.gold9k, historyDays),
-    fetchStoreMetalPriceRows(config.silver1kg, historyDays),
-  ]);
+  const [gold24Rows, gold22Rows, gold18Rows, gold14Rows, gold9Rows, silverRows] =
+    await Promise.all([
+      fetchStoreMetalPriceRows(config.gold24k, historyDays),
+      fetchStoreMetalPriceRows(config.gold22k, historyDays),
+      fetchStoreMetalPriceRows(config.gold18k, historyDays),
+      fetchStoreMetalPriceRows(config.gold14k, historyDays),
+      fetchStoreMetalPriceRows(config.gold9k, historyDays),
+      fetchStoreMetalPriceRows(config.silver1kg, historyDays),
+    ]);
 
   const gold24k = buildSeries(
     "gold24k",
@@ -188,6 +208,15 @@ export async function fetchRatesAnalyticsFromDb(
     2,
     gold22Rows,
     config.gold22k.priceMultiplier ?? 1,
+    windowDays
+  );
+  const gold18k = buildSeries(
+    "gold18k",
+    config.labels.gold18k,
+    "/ gram",
+    2,
+    gold18Rows,
+    config.gold18k.priceMultiplier ?? 1,
     windowDays
   );
   const gold14k = buildSeries(
@@ -232,6 +261,7 @@ export async function fetchRatesAnalyticsFromDb(
   const latestFetchedAt = [
     gold24k.points.at(-1)?.fetchedAt,
     gold22k.points.at(-1)?.fetchedAt,
+    gold18k?.points.at(-1)?.fetchedAt,
     gold14k?.points.at(-1)?.fetchedAt,
     gold9k?.points.at(-1)?.fetchedAt,
     silver1kg.points.at(-1)?.fetchedAt,
@@ -253,6 +283,7 @@ export async function fetchRatesAnalyticsFromDb(
     series: {
       gold24k,
       gold22k,
+      ...(gold18k ? { gold18k } : {}),
       ...(gold14k ? { gold14k } : {}),
       ...(gold9k ? { gold9k } : {}),
       silver1kg,
@@ -260,6 +291,7 @@ export async function fetchRatesAnalyticsFromDb(
     table: buildComparisonTable(
       gold24k.points,
       gold22k.points,
+      gold18k?.points ?? null,
       gold14k?.points ?? null,
       gold9k?.points ?? null,
       silver1kg.points

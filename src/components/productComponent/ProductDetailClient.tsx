@@ -37,6 +37,7 @@ import {
   type UseProductConfiguredPriceResult,
 } from "@/hooks/useProductConfiguredPrice";
 import { formatProductPrice } from "@/utils/formatPrice";
+import contactData from "@/data/contactDatas.json";
 import productContent from "@/lib/productContent";
 import {
   buildSpecRowsFromSelections,
@@ -57,6 +58,12 @@ type ProductDetailClientProps = {
 
 const copy = productContent.detail;
 const breadcrumb = productContent.breadcrumb;
+const breakdownCopy = productContent.priceBreakdown;
+
+function formatWeightGrams(weight: number): string {
+  const w = Math.round(weight * 1000) / 1000;
+  return `${w} ${breakdownCopy.weightUnit}`;
+}
 
 function CertifiedIcon({ children }: { children: ReactNode }) {
   return (
@@ -182,7 +189,7 @@ function ProductDetailSummary({
   cartLoading: boolean;
   commerceToast: string;
 }) {
-  const { totalPrice, listPrice, loading } = pricing;
+  const { totalPrice, listPrice, loading, weightGrams } = pricing;
   const priceLabel = showConfiguredPrice
     ? productContent.purchase.yourPrice
     : copy.startingPrice;
@@ -199,6 +206,17 @@ function ProductDetailSummary({
           >
             {loading ? copy.priceLoading : formatProductPrice(totalPrice)}
           </span>
+          {weightGrams > 0 ? (
+            <span
+              className="product-detail-price-weight"
+              aria-label={`${copy.weightLabel}: ${formatWeightGrams(weightGrams)}`}
+            >
+              <span className="product-detail-price-weight-label">{copy.weightLabel}</span>
+              <span className="product-detail-price-weight-value">
+                {formatWeightGrams(weightGrams)}
+              </span>
+            </span>
+          ) : null}
           {listPrice > totalPrice ? (
             <span className="product-detail-price-compare">
               {formatProductPrice(listPrice)}
@@ -256,6 +274,20 @@ function ProductDetailSummary({
             {bullet}
           </li>
         ))}
+        <li className="product-detail-trust-item">
+          <span className="product-detail-trust-icon" aria-hidden>
+            ✓
+          </span>
+          {copy.sizingHelpPrefix}{" "}
+          <a
+            href={contactData.header.videoCallUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="product-detail-trust-link"
+          >
+            {contactData.header.videoCallText}
+          </a>
+        </li>
       </ul>
     </>
   );

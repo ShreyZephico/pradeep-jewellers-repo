@@ -103,6 +103,17 @@
           "priceMultiplier": 1
         }
       },
+      "gold18k": {
+        "label": "18K GOLD",
+        "unitSuffix": "/ gram",
+        "fractionDigits": 2,
+        "db": {
+          "metal": "gold",
+          "purityLabel": "18K",
+          "unit": "gram",
+          "priceMultiplier": 1
+        }
+      },
       "gold9k": {
         "label": "9K GOLD",
         "unitSuffix": "/ gram",
@@ -220,43 +231,49 @@
         "id": "01",
         "title": "Rings",
         "subtitle": "Custom & ready",
+        "categoryId": "ring",
         "image": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=1200&auto=format&fit=crop",
-        "link": "/products"
+        "link": "/products?category=ring"
       },
       {
         "id": "02",
         "title": "Earrings",
         "subtitle": "Studs to jhumkas",
+        "categoryId": "earring",
         "image": "https://images.unsplash.com/photo-1611652022419-a9419f74343d?q=80&w=1200&auto=format&fit=crop",
-        "link": "/products"
+        "link": "/products?category=earring"
       },
       {
         "id": "03",
         "title": "Necklace Sets",
         "subtitle": "Daily & bridal",
+        "categoryId": "necklace-set",
         "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1200&auto=format&fit=crop",
-        "link": "/products"
+        "link": "/products?category=necklace-set"
       },
       {
         "id": "04",
         "title": "Bangles",
         "subtitle": "Gold & kada",
+        "categoryId": "bangle",
         "image": "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=1200&auto=format&fit=crop",
-        "link": "/products"
+        "link": "/products?category=bangle"
       },
       {
         "id": "05",
         "title": "Mangalsutra",
         "subtitle": "Made to order",
+        "categoryId": "mangalsutra",
         "image": "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1200&auto=format&fit=crop",
-        "link": "/products"
+        "link": "/products?category=mangalsutra"
       },
       {
         "id": "06",
         "title": "Bridal Sets",
         "subtitle": "Wedding suites",
+        "categoryId": "necklace-set",
         "image": "https://images.unsplash.com/photo-1635767798638-3e25273a8236?q=80&w=1200&auto=format&fit=crop",
-        "link": "/products"
+        "link": "/products?category=necklace-set"
       }
     ]
   },

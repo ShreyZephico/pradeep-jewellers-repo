@@ -2,11 +2,11 @@ import contactData from "@/data/contactDatas.json";
 
 import type { GoldRateApiResponse, MetalRateItem } from "@/types/goldRate";
 
-/** Homepage ticker / hero display order (22K default + new 14K/9K + silver). */
+/** Homepage ticker / hero display order (22K + 14K + 18K + silver). */
 export const LIVE_RATE_KEYS = [
   "gold22k",
   "gold14k",
-  "gold9k",
+  "gold18k",
   "silver1kg",
 ] as const;
 
@@ -41,7 +41,7 @@ function getRateUiConfig(key: LiveRateKey): RateUiConfig | null {
   };
 }
 
-/** Build ticker/hero items from API payload; optional 14K/9K hide when not saved yet. */
+/** Build ticker/hero items from API payload; optional 14K/18K hide when not saved yet. */
 export function buildLiveRateDisplayItems(
   live: GoldRateApiResponse["data"] | undefined,
   options?: { includeOptionalWithoutRate?: boolean }
@@ -52,7 +52,7 @@ export function buildLiveRateDisplayItems(
     const config = getRateUiConfig(key);
     if (!config) return [];
 
-    const optional = key === "gold14k" || key === "gold9k";
+    const optional = key === "gold14k" || key === "gold18k";
     const rate = live?.[key];
 
     if (optional && !rate && !includeOptionalWithoutRate) {

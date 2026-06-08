@@ -10,6 +10,10 @@
     box-shadow var(--header-transition);
 }
 
+.site-header--menu-open {
+  z-index: 140;
+}
+
 .site-header--scrolled {
   background: var(--header-bg-scrolled);
   box-shadow: var(--header-shadow);
@@ -814,6 +818,11 @@
   animation: site-header-fade-in 0.2s ease;
 }
 
+/* Portaled overlay — above sticky buy bar (z-index 50), below open header (140) */
+.site-header__mobile-backdrop--portal {
+  z-index: 130;
+}
+
 .site-header__mobile {
   display: block;
   position: relative;
@@ -823,7 +832,24 @@
   animation: site-header-slide-down 0.25s ease-out;
 }
 
-.site-header--scrolled .site-header__mobile {
+/* Fixed panel — visible in viewport when opened mid-scroll */
+.site-header__mobile--portal {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 141;
+  margin: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  border-top: 1px solid var(--header-border);
+  background: var(--header-bg);
+  animation: site-header-slide-down 0.25s ease-out;
+}
+
+.site-header--scrolled .site-header__mobile,
+.site-header__mobile--scrolled {
   background: var(--header-bg-scrolled);
 }
 

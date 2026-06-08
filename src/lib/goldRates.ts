@@ -49,14 +49,17 @@ export function formatChartDay(isoDate: string): string {
   }).format(d);
 }
 
+import { clampMetalPercentChange } from "@/utils/metalRatePercent";
+
 export function formatPercentChange(percent: number): string {
-  const abs = Math.abs(percent);
+  const clamped = clampMetalPercentChange(percent);
+  const abs = Math.abs(clamped);
   const decimals = abs > 0 && abs < 10 && !Number.isInteger(abs) ? 2 : 1;
   const formatted = new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: decimals,
     minimumFractionDigits: decimals,
   }).format(abs);
-  if (percent > 0) return `+${formatted}%`;
-  if (percent < 0) return `-${formatted}%`;
+  if (clamped > 0) return `+${formatted}%`;
+  if (clamped < 0) return `-${formatted}%`;
   return "0%";
 }

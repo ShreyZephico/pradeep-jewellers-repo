@@ -15,18 +15,16 @@ import type { Product } from "@/types/product";
 import { formatProductPrice } from "@/utils/formatPrice";
 import { isKaratLabel, resolveKaratFromSelection } from "@/utils/karat";
 import { findBestMatchingVariant } from "@/utils/variantOptionMatch";
-import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
 import ProductCommerceActions from "@/components/productComponent/ProductCommerceActions";
 import PriceCalculationBreakdown from "@/components/productComponent/PriceCalculationBreakdown";
 import { useCart } from "@/contexts/CartContext";
-import { parsePriceCalculateResponse } from "@/lib/priceCalculateResponse";
+import { useProductConfiguredPrice } from "@/hooks/useProductConfiguredPrice";
 import {
   addProductToCart,
   startProductCheckout,
 } from "@/lib/productCheckout";
 import productContent, { formatProductCopy } from "@/lib/productContent";
 import "@/styles/ProductPurchasePanel.css";
-import { buildPriceBreakdownOptionLines } from "@/utils/priceBreakdownOptions";
 import {
   getCustomizationValidationError,
   applyCustomizationDefaults,
@@ -38,6 +36,11 @@ import {
   type CustomizationField,
   type CustomizationSelections,
 } from "@/utils/productCustomization";
+import {
+  DEFAULT_BANGLE_SIZE,
+  parseStoredBangleSize,
+  resolveBangleSizeSelection,
+} from "@/utils/bangleSizeChart";
 import {
   formatRingSizeMm,
   parseRingSizeInput,
@@ -120,15 +123,24 @@ export default function ProductPurchasePanel({
   const [selectedMetal, setSelectedMetal] = useState(resolvedInitial.metal);
   const [selectedCarat, setSelectedCarat] = useState(resolvedInitial.carat);
   const [selectedQuality, setSelectedQuality] = useState(resolvedInitial.quality);
-  const isRingProduct = inferJewelryCategory(product) === "ring";
+  const jewelryCategory = inferJewelryCategory(product);
+  const isRingProduct = jewelryCategory === "ring";
+  const isBangleProduct = jewelryCategory === "bracelet";
   const initialRingSize = isRingProduct
     ? parseStoredRingSize(resolvedInitial.size)
     : null;
-  const [selectedSize, setSelectedSize] = useState(() =>
-    isRingProduct
-      ? initialRingSize?.selectedSize || "5"
-      : resolvedInitial.size
-  );
+  const initialBangleSize = isBangleProduct
+    ? parseStoredBangleSize(resolvedInitial.size)
+    : null;
+  const [selectedSize, setSelectedSize] = useState(() => {
+    if (isRingProduct) {
+      return initialRingSize?.selectedSize || "5";
+    }
+    if (isBangleProduct) {
+      return initialBangleSize?.selectedSize || DEFAULT_BANGLE_SIZE;
+    }
+    return resolvedInitial.size;
+  });
   const [customSizeActive, setCustomSizeActive] = useState(
     () => (isRingProduct && initialRingSize?.customActive) ?? false
   );
@@ -157,14 +169,25 @@ export default function ProductPurchasePanel({
     customSizeInputMode,
   ]);
 
+  const bangleSizeResolution = useMemo(() => {
+    if (!isBangleProduct) {
+      return null;
+    }
+    return resolveBangleSizeSelection({ selectedSize });
+  }, [isBangleProduct, selectedSize]);
+
   const effectiveSize = isRingProduct
     ? (ringSizeResolution?.orderValue ?? "")
-    : customSizeActive
-      ? customSizeInput.trim()
-      : selectedSize;
+    : isBangleProduct
+      ? (bangleSizeResolution?.orderValue ?? "")
+      : customSizeActive
+        ? customSizeInput.trim()
+        : selectedSize;
   const sizeForVariantMatch = isRingProduct
     ? (ringSizeResolution?.matchValue ?? selectedSize)
-    : effectiveSize;
+    : isBangleProduct
+      ? (bangleSizeResolution?.matchValue ?? selectedSize)
+      : effectiveSize;
 
   const customSizeHint = useMemo(() => {
     if (!isRingProduct || !customSizeActive) {
@@ -222,7 +245,9 @@ export default function ProductPurchasePanel({
   const selectedSizeLookup =
     isRingProduct && ringSizeResolution?.standardSize
       ? ringSizeResolution.standardSize
-      : effectiveSize;
+      : isBangleProduct && bangleSizeResolution?.standardSize
+        ? bangleSizeResolution.standardSize
+        : effectiveSize;
   const selectedSizeOption =
     pickers.sizes.find((option) => option.size === selectedSizeLookup) ??
     (effectiveSize ? { size: effectiveSize, priceAdjustment: 0 } : undefined);
@@ -238,31 +263,23 @@ export default function ProductPurchasePanel({
 
   const selectedVariantId = selectedVariant?.id ?? product.variantId ?? "";
 
-  const baseWeight =
-    selectedVariant?.weight ??
-    product.variants?.find((v) => v.weight && v.weight > 0)?.weight ??
-    5;
-
-  const variantPrice = selectedVariant?.price ?? product.price;
-  const [livePrice, setLivePrice] = useState<number | null>(null);
-  const [priceBreakdown, setPriceBreakdown] = useState<VariantPriceBreakdown | null>(
-    null
-  );
-  const [priceLoading, setPriceLoading] = useState(false);
-
-  const optionAdjustments =
-    (selectedMetalOption?.priceAdjustment ?? 0) +
-    (selectedCaratOption?.priceAdjustment ?? 0) +
-    (selectedQualityOption?.priceAdjustment ?? 0) +
-    (selectedSizeOption?.priceAdjustment ?? 0);
-
-  const optionBreakdownLines = buildPriceBreakdownOptionLines({
-    metal: selectedMetalOption ?? null,
-    carat: selectedCaratOption ?? null,
-    quality: selectedQualityOption ?? null,
-    size: selectedSizeOption ?? null,
-    product,
+  const pricing = useProductConfiguredPrice(product, {
+    metal: selectedMetal,
+    carat: selectedCarat,
+    quality: selectedQuality,
+    size: effectiveSize,
   });
+
+  const {
+    totalPrice: estimatedPrice,
+    breakdown: priceBreakdown,
+    loading: priceLoading,
+    weightGrams: baseWeight,
+    karatLabel: pricingKaratLabel,
+    optionAdjustments,
+    optionLines: optionBreakdownLines,
+    listPrice,
+  } = pricing;
 
   const isPage = priceHeaderVariant === "page";
   const isModal = !isPage;
@@ -300,13 +317,18 @@ export default function ProductPurchasePanel({
         setCustomSizeInput(restored.customInput);
         setCustomSizeInputMode(restored.customInputMode);
         setSelectedSize(restored.selectedSize || "5");
+      } else if (isBangleProduct) {
+        const restored = parseStoredBangleSize(merged.size);
+        setCustomSizeActive(false);
+        setCustomSizeInput("");
+        setSelectedSize(restored.selectedSize || DEFAULT_BANGLE_SIZE);
       } else {
         setCustomSizeActive(false);
         setCustomSizeInput("");
         setSelectedSize(merged.size);
       }
     },
-    [isRingProduct, product]
+    [isBangleProduct, isRingProduct, product]
   );
 
   const lastAppliedCatalogRevision = useRef<string | null>(null);
@@ -361,57 +383,7 @@ export default function ProductPurchasePanel({
     onSelectionChange,
   ]);
 
-  useEffect(() => {
-    let cancelled = false;
-    setLivePrice(variantPrice);
-
-    const recalculate = async () => {
-      setPriceLoading(true);
-      try {
-        const response = await fetch("/api/price/calculate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            weight: baseWeight,
-            carat: karatLabel ?? null,
-            makingChargePercent: product.makingChargePercent ?? null,
-          }),
-        });
-        const pricing = await parsePriceCalculateResponse(response);
-        if (!cancelled && pricing) {
-          setLivePrice(pricing.finalPrice);
-          setPriceBreakdown(pricing.breakdown);
-        } else if (!cancelled) {
-          setLivePrice(variantPrice);
-          setPriceBreakdown(null);
-        }
-      } catch {
-        if (!cancelled) {
-          setLivePrice(variantPrice);
-          setPriceBreakdown(null);
-        }
-      } finally {
-        if (!cancelled) {
-          setPriceLoading(false);
-        }
-      }
-    };
-
-    void recalculate();
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    karatLabel,
-    baseWeight,
-    selectedMetal,
-    selectedCarat,
-    selectedQuality,
-    effectiveSize,
-    variantPrice,
-    product.makingChargePercent,
-  ]);
-
+  const priceKaratLabel = pricingKaratLabel ?? karatLabel;
   const catalogVariantIdForCheckout =
     selectedVariantId.startsWith("gid://shopify/ProductVariant/")
       ? undefined
@@ -422,9 +394,7 @@ export default function ProductPurchasePanel({
             v.id === selectedVariantId
         )?.catalogVariantId;
 
-  const estimatedPrice = (livePrice ?? variantPrice) + optionAdjustments;
   const selectedImage = selectedVariant?.image ?? product.image;
-  const listPrice = product.compareAtPrice ?? 0;
 
   const buildLineAttributes = () =>
     buildCustomizationLineAttributes(product, {
@@ -505,7 +475,7 @@ export default function ProductPurchasePanel({
         attributes: buildLineAttributes(),
         priceBreakdown: priceBreakdown ?? undefined,
         weightGrams: baseWeight,
-        karatLabel,
+        karatLabel: priceKaratLabel,
         optionAdjustments,
         redirect: true,
       });
@@ -525,7 +495,7 @@ export default function ProductPurchasePanel({
       attributes: buildLineAttributes(),
       priceBreakdown: priceBreakdown ?? undefined,
       weightGrams: baseWeight,
-      karatLabel,
+      karatLabel: priceKaratLabel,
       optionAdjustments,
     });
 
@@ -576,7 +546,7 @@ export default function ProductPurchasePanel({
       estimatedPrice,
       priceBreakdown,
       weightGrams: baseWeight,
-      karatLabel,
+      karatLabel: priceKaratLabel,
       optionAdjustments,
       variantId: selectedVariantId,
       catalogVariantId: catalogVariantIdForCheckout,
@@ -1011,7 +981,7 @@ export default function ProductPurchasePanel({
           <PriceCalculationBreakdown
             breakdown={priceBreakdown}
             weightGrams={baseWeight}
-            karatLabel={karatLabel}
+            karatLabel={priceKaratLabel}
             metalLabel={selectedMetalOption?.label ?? selectedMetal}
             diamondLabel={selectedQualityOption?.label ?? selectedQuality}
             loading={priceLoading}

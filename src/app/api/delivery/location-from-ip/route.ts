@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { resolvePublicClientIp, resolveIpGeolocation } from "@/lib/ipGeolocation";
+import {
+  indianPincodeFromGeo,
+  resolvePublicClientIp,
+  resolveIpGeolocation,
+} from "@/lib/ipGeolocation";
 import {
   isValidPincodeFormat,
   normalizePincodeInput,
@@ -69,8 +73,10 @@ export async function GET(request: Request) {
     );
   }
 
-  let pincode: string | null = null;
+  let pincode = indianPincodeFromGeo(geo);
+
   if (
+    !pincode &&
     geo.countryCode === "IN" &&
     geo.latitude != null &&
     geo.longitude != null
@@ -89,5 +95,6 @@ export async function GET(request: Request) {
     latitude: geo.latitude,
     longitude: geo.longitude,
     timezone: geo.timezone,
+    postal: geo.postal,
   });
 }

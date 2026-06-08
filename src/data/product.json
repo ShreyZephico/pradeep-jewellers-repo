@@ -20,15 +20,12 @@
     "ratingLabel": "4.8 (studio rated)",
     "gstNote": "Inclusive of GST · Making charges as per design",
     "assurances": [
-      "BIS Hallmarked",
-      "Certified diamonds",
-      "Insured delivery",
-      "Lifetime exchange"
+     
     ],
+    "sizingHelpPrefix": "Need sizing help?",
     "trustBullets": [
       "BIS hallmarked gold where applicable; certified diamonds on request.",
-      "Secure packaging & insured shipping options at checkout.",
-      "Need sizing help? Book a private appointment from the header."
+      "Secure packaging & insured shipping options at checkout."
     ],
     "buyNow": "Buy now",
     "addToCart": "Add to cart",
@@ -42,6 +39,7 @@
     "viewAbout": "About this piece",
     "viewSpecs": "Specifications",
     "startingPrice": "Starting from",
+    "weightLabel": "Gold weight",
     "priceLoading": "…",
     "priceHint": "Final price updates when you customize metal, karat, and size.",
     "closeModal": "Close",
@@ -233,6 +231,7 @@
     "diamondGuide": "Diamond guide",
     "sizeOptionDefault": "Select size",
     "sizeOptionRing": "Ring size",
+    "sizeOptionBangle": "Bangle size",
     "sizeOptionNecklace": "Necklace length",
     "sizeGuide": "Size guide",
     "myCustomSize": "My custom size",

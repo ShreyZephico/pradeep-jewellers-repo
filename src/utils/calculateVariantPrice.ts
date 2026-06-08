@@ -22,18 +22,26 @@ export type VariantPriceBreakdown = {
   finalPrice: number;
 };
 
-type CalculateVariantPriceProps = {
+export type CalculateVariantPriceInput = {
   weight: number;
   carat?: string | null;
-  /** Shopify metafield or catalog % (e.g. 15). Falls back to 15% when omitted. */
+  /** Shopify product metafield % (e.g. 15). Falls back to 15% when omitted. */
   makingChargePercent?: number | null;
+  /** Shopify making_charge_type metafield — validates per-gram percentage mode. */
+  makingChargeType?: string | null;
 };
 
-async function calculateVariantPrice({
+/**
+ * Single authoritative jewellery price calculation.
+ * Gold rate per karat: dev.store_metal_prices (via getGoldPricingForKarat).
+ * Making charge %: from Shopify catalog / metafields (makingChargePercent).
+ */
+export async function calculateVariantPrice({
   weight,
   carat,
   makingChargePercent,
-}: CalculateVariantPriceProps) {
+  makingChargeType,
+}: CalculateVariantPriceInput): Promise<VariantPriceBreakdown> {
   const karat = parseKaratNumber(carat);
   const goldPricing = await getGoldPricingForKarat(karat);
   if (goldPricing == null) {
@@ -49,17 +57,13 @@ async function calculateVariantPrice({
   } = goldPricing;
 
   const actualGoldPrice = weight * perGramRate;
-
-  const makingRate = resolveMakingChargeRate(makingChargePercent);
+  const makingRate = resolveMakingChargeRate(makingChargePercent, makingChargeType);
   const makingCharge = actualGoldPrice * makingRate;
-
   const subtotal = actualGoldPrice + makingCharge;
-
   const gst = subtotal * 0.03;
-
   const finalPrice = subtotal + gst;
 
-  const result: VariantPriceBreakdown = {
+  return {
     purity: purityPercentage,
     karat: resolvedKarat,
     base24KGoldPrice,
@@ -71,8 +75,20 @@ async function calculateVariantPrice({
     gst: Math.round(gst),
     finalPrice: Math.round(finalPrice),
   };
+}
 
-  return result;
+/** Returns null when gold rates are missing instead of throwing. */
+export async function tryCalculateVariantPrice(
+  input: CalculateVariantPriceInput
+): Promise<VariantPriceBreakdown | null> {
+  try {
+    return await calculateVariantPrice(input);
+  } catch (error) {
+    if (error instanceof GoldPriceUnavailableError) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export default calculateVariantPrice;

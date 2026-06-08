@@ -18,11 +18,16 @@ export async function POST(request: Request) {
       Number.isFinite(body.makingChargePercent)
         ? body.makingChargePercent
         : null;
+    const makingChargeType =
+      typeof body.makingChargeType === "string" && body.makingChargeType.trim()
+        ? body.makingChargeType.trim()
+        : null;
 
     const pricing = await calculateVariantPrice({
       weight,
       carat,
       makingChargePercent,
+      makingChargeType,
     });
 
     return NextResponse.json({

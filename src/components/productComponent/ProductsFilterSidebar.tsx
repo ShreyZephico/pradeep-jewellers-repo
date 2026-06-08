@@ -107,7 +107,6 @@ export default function ProductsFilterSidebar({
 
   const [ringSizeOpen, setRingSizeOpen] = useState(true);
   const [priceOpen, setPriceOpen] = useState(true);
-  const [discountOpen, setDiscountOpen] = useState(true);
   const [weightOpen, setWeightOpen] = useState(false);
   const [materialOpen, setMaterialOpen] = useState(false);
   const [metalOpen, setMetalOpen] = useState(false);
@@ -148,6 +147,15 @@ export default function ProductsFilterSidebar({
     }
   }, [showRingSizeFilter]);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileOpen]);
+
   const toggleRingSize = (size: string) => {
     onRingSizesChange(
       selectedRingSizes.includes(size)
@@ -186,25 +194,26 @@ export default function ProductsFilterSidebar({
         </div>
       </div>
 
-      <div className="collection-filter-toolbar">
-        <div className="collection-filter-toolbar-start">
-          <h2 className="collection-filter-toolbar-title">{copy.filtersTitle}</h2>
-          {filterBadgeCount > 0 ? (
-            <span className="collection-filter-toolbar-badge">{filterBadgeCount}</span>
+      <div className="collection-sidebar-scroll">
+        <div className="collection-filter-toolbar">
+          <div className="collection-filter-toolbar-start">
+            <h2 className="collection-filter-toolbar-title">{copy.filtersTitle}</h2>
+            {filterBadgeCount > 0 ? (
+              <span className="collection-filter-toolbar-badge">{filterBadgeCount}</span>
+            ) : null}
+          </div>
+          {hasSidebarFilters ? (
+            <button
+              type="button"
+              className="collection-filter-toolbar-clear"
+              onClick={onClearSidebarFilters}
+            >
+              {copy.filtersClearAll}
+            </button>
           ) : null}
         </div>
-        {hasSidebarFilters ? (
-          <button
-            type="button"
-            className="collection-filter-toolbar-clear"
-            onClick={onClearSidebarFilters}
-          >
-            {copy.filtersClearAll}
-          </button>
-        ) : null}
-      </div>
 
-      {showRingSizeFilter ? (
+        {showRingSizeFilter ? (
         <FilterSection
           id="ring-size"
           title={copy.ringSizeTitle}
@@ -286,23 +295,6 @@ export default function ProductsFilterSidebar({
             );
           })}
         </fieldset>
-      </FilterSection>
-
-      <FilterSection
-        id="discounts"
-        title={filterCopy.discountTitle}
-        open={discountOpen}
-        onToggle={() => setDiscountOpen((prev) => !prev)}
-        activeCount={facets.discounts.length}
-      >
-        <CollectionFilterCheckboxGroup
-          legend={filterCopy.discountTitle}
-          options={filterCopy.discounts}
-          selected={facets.discounts}
-          onToggle={(id) => updateFacet("discounts", id)}
-          inputName="discount-filter"
-          showLessLabel={copy.filterShowLess}
-        />
       </FilterSection>
 
       <FilterSection
@@ -389,6 +381,17 @@ export default function ProductsFilterSidebar({
           showLessLabel={copy.filterShowLess}
         />
       </FilterSection>
+      </div>
+
+      <div className="collection-sidebar-mobile-foot">
+        <button
+          type="button"
+          className="collection-sidebar-done"
+          onClick={() => onMobileOpenChange(false)}
+        >
+          {copy.filtersClose}
+        </button>
+      </div>
     </div>
   );
 

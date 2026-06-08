@@ -1,7 +1,7 @@
 {
   "badge": "RATE ANALYTICS",
   "title": "Gold & silver price chart",
-  "description": "Compare 24K, 22K, 14K, and 9K gold with silver — daily rates from our database, updated throughout the day.",
+  "description": "Compare 24K, 22K, 18K, 14K, and 9K gold with silver — daily rates from our database, updated throughout the day.",
   "backLabel": "Back to home",
   "backHref": "/",
   "filters": {
@@ -29,12 +29,13 @@
   "chartTitle": "Price trend",
   "chartSubtitle": "Daily closing rate per IST calendar day",
   "tableTitle": "Daily rate comparison",
-  "tableSubtitle": "24K, 22K, 14K, 9K gold and silver — day-on-day % change",
+  "tableSubtitle": "24K, 22K, 18K, 14K, 9K gold and silver — day-on-day % change",
   "analysisTitle": "What the numbers mean",
   "tableHeaders": {
     "date": "Date",
     "gold24k": "24K / g",
     "gold22k": "22K / g",
+    "gold18k": "18K / g",
     "gold14k": "14K / g",
     "gold9k": "9K / g",
     "silver": "Silver 1 kg",
