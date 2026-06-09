@@ -2,13 +2,19 @@ import { NextResponse } from "next/server";
 
 import contactData from "@/data/contactDatas.json";
 import { getMailFrom, getMailTransporter, getOwnerEmail } from "@/lib/mail";
+import { clientIpFromRequest, rateLimit } from "@/lib/rateLimit";
+import { getSupabaseServerClient } from "@/lib/supabaseServer";
 
 type SchemeEnquiryBody = {
   fullName?: string;
   contactNumber?: string;
   monthlyAmount?: number;
   plan?: string;
+  consent?: boolean;
 };
+
+const MIN_MONTHLY_INSTALLMENT = 2000;
+const STEP_MONTHLY_INSTALLMENT = 1000;
 
 function normalizeIndianPhone(input: string): string | null {
   const digits = input.replace(/\D/g, "");
@@ -18,7 +24,25 @@ function normalizeIndianPhone(input: string): string | null {
   return null;
 }
 
+function isValidPlan(plan: string): boolean {
+  return plan.length > 0 && plan.toLowerCase() !== "select";
+}
+
 export async function POST(request: Request) {
+  const ip = clientIpFromRequest(request);
+  const limited = rateLimit(`scheme-enquiry:${ip}`, 8, 60_000);
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Too many attempts. Please wait a moment and try again." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil(limited.retryAfterMs / 1000)),
+        },
+      }
+    );
+  }
+
   try {
     const body = (await request.json()) as SchemeEnquiryBody;
 
@@ -26,6 +50,7 @@ export async function POST(request: Request) {
     const phoneRaw = body.contactNumber?.trim() ?? "";
     const monthlyAmount = body.monthlyAmount;
     const plan = body.plan?.trim() ?? "";
+    const consent = body.consent ?? true;
 
     if (!fullName) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -36,21 +61,24 @@ export async function POST(request: Request) {
     }
 
     const phoneDigits = normalizeIndianPhone(phoneRaw);
-    if (!phoneDigits) {
+    if (!phoneDigits || !/^[6-9]\d{9}$/.test(phoneDigits)) {
       return NextResponse.json(
         { error: "Invalid phone number" },
         { status: 400 }
       );
     }
 
-    if (!plan) {
+    if (!isValidPlan(plan)) {
       return NextResponse.json({ error: "Plan is required" }, { status: 400 });
     }
 
     if (
       typeof monthlyAmount !== "number" ||
       !Number.isFinite(monthlyAmount) ||
-      monthlyAmount <= 0
+      monthlyAmount <= 0 ||
+      !Number.isInteger(monthlyAmount) ||
+      monthlyAmount < MIN_MONTHLY_INSTALLMENT ||
+      monthlyAmount % STEP_MONTHLY_INSTALLMENT !== 0
     ) {
       return NextResponse.json(
         { error: "Valid monthly amount is required" },
@@ -58,36 +86,60 @@ export async function POST(request: Request) {
       );
     }
 
-    const transporter = getMailTransporter();
-    const ownerEmail = getOwnerEmail();
-
-    if (!transporter || !ownerEmail) {
-      return NextResponse.json(
-        { error: "Email service is not configured" },
-        { status: 503 }
-      );
+    if (!consent) {
+      return NextResponse.json({ error: "Consent is required" }, { status: 400 });
     }
 
     const phone = `+91 ${phoneDigits}`;
-    const from = getMailFrom();
-    const brand = contactData.brand.name;
+    const supabase = getSupabaseServerClient();
 
-    const text = [
-      `Suvarna Vriddhi enquiry — ${brand}`,
-      "",
-      `Name: ${fullName}`,
-      `Phone: ${phone}`,
-      `Plan: ${plan}`,
-      `Monthly amount: ₹${monthlyAmount.toLocaleString("en-IN")}`,
-    ].join("\n");
+    const { error: insertError } = await supabase
+      .schema("dev")
+      .from("vridhhi_enquiries")
+      .insert({
+        full_name: fullName,
+        contact_number: phone,
+        monthly_installment: monthlyAmount,
+        plan,
+        consent_agreed: consent,
+      });
 
-    await transporter.sendMail({
-      from,
-      to: ownerEmail,
-      replyTo: contactData.contact.email || undefined,
-      subject: `[${brand}] Suvarna Vriddhi scheme enquiry`,
-      text,
-    });
+    if (insertError) {
+      console.error("scheme-enquiry insert:", insertError);
+      return NextResponse.json(
+        { error: "Failed to save enquiry. Please try again." },
+        { status: 500 }
+      );
+    }
+
+    const transporter = getMailTransporter();
+    const ownerEmail = getOwnerEmail();
+
+    if (transporter && ownerEmail) {
+      const from = getMailFrom();
+      const brand = contactData.brand.name;
+
+      const text = [
+        `Suvarna Vriddhi enquiry — ${brand}`,
+        "",
+        `Name: ${fullName}`,
+        `Phone: ${phone}`,
+        `Plan: ${plan}`,
+        `Monthly amount: ₹${monthlyAmount.toLocaleString("en-IN")}`,
+      ].join("\n");
+
+      try {
+        await transporter.sendMail({
+          from,
+          to: ownerEmail,
+          replyTo: contactData.contact.email || undefined,
+          subject: `[${brand}] Suvarna Vriddhi scheme enquiry`,
+          text,
+        });
+      } catch (mailErr) {
+        console.error("scheme-enquiry email:", mailErr);
+      }
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {

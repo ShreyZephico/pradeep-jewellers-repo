@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import SchemeSnackbar, { useSchemeSnackbar } from "@/components/scheme/SchemeSnackbar";
 import type { SchemeEnquiry } from "@/lib/scheme/contentTypes";
 
 type FormFieldName =
@@ -35,6 +36,9 @@ export default function EnquiryForm({ enquiry }: { enquiry: SchemeEnquiry }) {
   const [touched, setTouched] = useState<
     Partial<Record<FormFieldName, boolean>>
   >(() => ({}));
+
+  const [submitting, setSubmitting] = useState(false);
+  const { snackbar, snackbarVisible, showSnackbar } = useSchemeSnackbar();
 
   const setField = <K extends keyof FormValues>(
     name: K,
@@ -138,6 +142,8 @@ export default function EnquiryForm({ enquiry }: { enquiry: SchemeEnquiry }) {
 
     if (!isValid) return
 
+    setSubmitting(true)
+
     try {
       const res = await fetch('/api/scheme-enquiry', {
         method: 'POST',
@@ -149,16 +155,25 @@ export default function EnquiryForm({ enquiry }: { enquiry: SchemeEnquiry }) {
           contactNumber: values.contactNumber.trim(),
           monthlyAmount: Number(values.monthlyAmount),
           plan: values.plan,
+          consent: values.consent,
         }),
       })
 
+      const data = (await res.json().catch(() => ({}))) as { error?: string }
+
       if (!res.ok) {
-        throw new Error('submit failed')
+        showSnackbar(
+          'error',
+          data.error ?? enquiry.submitError ?? 'Something went wrong.'
+        )
+        return
       }
 
-      alert(enquiry.submitSuccess ?? 'Form submitted successfully!')
+      showSnackbar(
+        'success',
+        enquiry.submitSuccess ?? 'Form submitted successfully!'
+      )
 
-      // RESET FORM
       setValues({
         fullName: '',
         contactNumber: '',
@@ -170,7 +185,12 @@ export default function EnquiryForm({ enquiry }: { enquiry: SchemeEnquiry }) {
       setTouched({})
     } catch (error) {
       console.error(error)
-      alert(enquiry.submitError ?? 'Something went wrong.')
+      showSnackbar(
+        'error',
+        enquiry.submitError ?? 'Something went wrong.'
+      )
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -180,6 +200,7 @@ export default function EnquiryForm({ enquiry }: { enquiry: SchemeEnquiry }) {
       id={enquiry.id}
       aria-label={enquiry.sectionAria ?? 'Enquiry form'}
     >
+      <SchemeSnackbar snackbar={snackbar} visible={snackbarVisible} />
       <div className="svy__enquiryInner">
         <div className="svy__sectionHeading">
           <h2 className="svy__h2">
@@ -199,6 +220,7 @@ export default function EnquiryForm({ enquiry }: { enquiry: SchemeEnquiry }) {
           netlify-honeypot="bot-field"
           onSubmit={onSubmit}
           noValidate
+          aria-busy={submitting}
         >
           <input
             type="hidden"
@@ -219,7 +241,7 @@ export default function EnquiryForm({ enquiry }: { enquiry: SchemeEnquiry }) {
             </label>
           </p>
 
-          <>
+          <fieldset className="svy__formFields" disabled={submitting}>
             <div className="svy__formGrid">
               <div className="svy__field">
                 <label className="svy__label" htmlFor="contactNumber">
@@ -468,11 +490,21 @@ export default function EnquiryForm({ enquiry }: { enquiry: SchemeEnquiry }) {
               <button
                 className="svy__submit"
                 type="submit"
-                disabled={!isValid}
+                disabled={!isValid || submitting}
+                aria-busy={submitting}
               >
-                {enquiry.submit.label}
+                {submitting ? (
+                  <>
+                    <span className="svy__submitSpinner" aria-hidden="true" />
+                    <span>
+                      {enquiry.submit.loading ?? "Submitting…"}
+                    </span>
+                  </>
+                ) : (
+                  enquiry.submit.label
+                )}
               </button>
-          </>
+          </fieldset>
         </form>
       </div>
     </section>

@@ -7,7 +7,7 @@ import {
   type ProductSort,
 } from "@/lib/productFilters";
 import { getShopifyStorefrontApiVersion } from "@/lib/shopifyApiVersion";
-import type { Product, ProductVariant } from "@/types/product";
+import type { Product, ProductDiamondDetail, ProductVariant } from "@/types/product";
 import { fetchSearchTagsFromShopifyAdmin } from "@/lib/shopifySearchTags";
 import {
   buildSearchTagFilterOptions,
@@ -43,6 +43,8 @@ import {
   isSizeLikeOptionName,
   readSizeFromAttributes,
 } from "@/utils/productCustomizationLabels";
+import { fetchDiamondDetailsFromShopifyAdmin } from "@/lib/shopifyDiamondDetails";
+import { parseDiamondDetailsMetafield } from "@/utils/diamondDetails";
 import { productHasCustomizationOptions } from "@/utils/productCustomization";
 import type { CollectionFacetFilters } from "@/lib/shopCollectionFilters";
 import {
@@ -142,6 +144,7 @@ type ShopifyProductNode = {
   makingChargeType?: { value: string | null } | null;
   makingChargeValue?: { value: string | null } | null;
   searchTagsMetafield?: { value: string | null } | null;
+  diamondDetailsMetafield?: { value: string | null } | null;
 };
 
 const productNodeFields = `
@@ -205,6 +208,9 @@ const productNodeFields = `
           searchTagsMetafield: metafield(namespace: "custom", key: "search_tags") {
             value
           }
+          diamondDetailsMetafield: metafield(namespace: "custom", key: "diamond_details") {
+            value
+          }
 `;
 
 /** Smaller payload for grids — variant count + sample variants for “from” price only. */
@@ -264,6 +270,9 @@ const productListNodeFields = `
             value
           }
           searchTagsMetafield: metafield(namespace: "custom", key: "search_tags") {
+            value
+          }
+          diamondDetailsMetafield: metafield(namespace: "custom", key: "diamond_details") {
             value
           }
 `;
@@ -459,6 +468,26 @@ function extractCaratFromSelectedOptions(
   return null;
 }
 
+function extractDiamondQualityFromSelectedOptions(
+  options: { name: string; value: string }[]
+): string | null {
+  for (const option of options) {
+    const name = option.name.toLowerCase();
+    if (
+      name.includes("diamond") ||
+      name.includes("clarity") ||
+      name.includes("quality") ||
+      name.includes("stone")
+    ) {
+      const value = option.value?.trim();
+      if (value) {
+        return value;
+      }
+    }
+  }
+  return null;
+}
+
 function deriveListBadge({
   tags,
   compareAtPrice,
@@ -542,6 +571,25 @@ function extractAvailableRingSizesFromNode(node: ShopifyProductNode): string[] {
 
 function resolveSearchTagsFromStorefront(node: ShopifyProductNode): string[] {
   return parseSearchTagsMetafield(node.searchTagsMetafield?.value);
+}
+
+async function resolveDiamondDetailsForNode(
+  node: ShopifyProductNode,
+  options?: { allowAdminFallback?: boolean }
+): Promise<ProductDiamondDetail[]> {
+  const fromStorefront = parseDiamondDetailsMetafield(
+    node.diamondDetailsMetafield?.value
+  );
+  if (fromStorefront.length > 0) {
+    return fromStorefront;
+  }
+
+  if (options?.allowAdminFallback === false) {
+    return [];
+  }
+
+  const fromAdmin = await fetchDiamondDetailsFromShopifyAdmin(node.id);
+  return fromAdmin ?? [];
 }
 
 async function resolveSearchTagsForNode(
@@ -767,12 +815,17 @@ async function mapShopifyProduct(
       const carat = extractCaratFromSelectedOptions(variant.selectedOptions);
       const shopifyVariantPrice = Math.round(Number(variant.price?.amount ?? 0));
 
+      const diamondQuality = extractDiamondQualityFromSelectedOptions(
+        variant.selectedOptions
+      );
+
       if (goldRate == null || weight <= 0) {
         return {
           id: variant.id,
           image: variant.image?.url,
           price: shopifyVariantPrice,
           weight,
+          diamondQuality,
           selectedOptions: variant.selectedOptions,
         };
       }
@@ -789,6 +842,7 @@ async function mapShopifyProduct(
           image: variant.image?.url,
           price: shopifyVariantPrice,
           weight,
+          diamondQuality,
           selectedOptions: variant.selectedOptions,
         };
       }
@@ -798,6 +852,7 @@ async function mapShopifyProduct(
         image: variant.image?.url,
         price: pricing.finalPrice,
         weight,
+        diamondQuality,
         actualGoldPrice: pricing.actualGoldPrice,
         makingCharge: pricing.makingCharge,
         gst: pricing.gst,
@@ -823,7 +878,8 @@ async function mapShopifyProduct(
     ? sizeOption.values.map((value) => ({ size: value }))
     : undefined;
 
-  const searchTags = resolveSearchTagsFromStorefront(node);
+  const searchTags = await resolveSearchTagsForNode(node);
+  const diamondDetails = await resolveDiamondDetailsForNode(node);
 
   const mapped: Product = {
     id: node.id,
@@ -849,6 +905,7 @@ async function mapShopifyProduct(
     metalOptions,
     caratOptions,
     diamondQualities,
+    diamondDetails: diamondDetails.length ? diamondDetails : undefined,
     sizeOptions,
   };
 
@@ -1024,6 +1081,9 @@ export function mergeShopifyVariantGids(
     diamondQualities: catalog.diamondQualities?.length
       ? catalog.diamondQualities
       : storefront.diamondQualities,
+    diamondDetails: catalog.diamondDetails?.length
+      ? catalog.diamondDetails
+      : storefront.diamondDetails,
     sizeOptions: catalog.sizeOptions?.length
       ? catalog.sizeOptions
       : storefront.sizeOptions,
@@ -1041,6 +1101,9 @@ export function mergeShopifyVariantGids(
         diamondQualities: catalog.diamondQualities?.length
           ? catalog.diamondQualities
           : storefront.diamondQualities,
+        diamondDetails: catalog.diamondDetails?.length
+          ? catalog.diamondDetails
+          : storefront.diamondDetails,
         sizeOptions: catalog.sizeOptions?.length
           ? catalog.sizeOptions
           : storefront.sizeOptions,
