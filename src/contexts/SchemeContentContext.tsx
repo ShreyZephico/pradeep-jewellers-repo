@@ -13,10 +13,15 @@ import legalEn from "@/data/scheme/legal.en.json";
 import legalGu from "@/data/scheme/legal.gu.json";
 import siteEn from "@/data/scheme/site.en.json";
 import siteGu from "@/data/scheme/site.gu.json";
+import {
+  parseSchemeLang,
+  schemeLangCookieHeader,
+  SCHEME_LANG_DEFAULT,
+  SCHEME_LANG_STORAGE_KEY,
+  type SchemeLang,
+} from "@/lib/scheme/schemeLang";
 
-const STORAGE_KEY = "svy_lang";
-
-export type SchemeLang = "en" | "gu";
+export type { SchemeLang };
 
 type SchemeContent = typeof siteEn & {
   legal: typeof legalEn;
@@ -33,14 +38,42 @@ const SchemeContentContext = createContext<SchemeContentContextValue | null>(
   null
 );
 
-function getInitialLang(): SchemeLang {
-  if (typeof window === "undefined") return "gu";
-  const saved = window.localStorage.getItem(STORAGE_KEY);
-  return saved === "en" ? "en" : "gu";
+function persistSchemeLang(next: SchemeLang) {
+  try {
+    window.localStorage.setItem(SCHEME_LANG_STORAGE_KEY, next);
+  } catch {
+    /* ignore */
+  }
+  document.cookie = schemeLangCookieHeader(next);
 }
 
-export function SchemeContentProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<SchemeLang>(getInitialLang);
+export function SchemeContentProvider({
+  children,
+  initialLang = SCHEME_LANG_DEFAULT,
+}: {
+  children: ReactNode;
+  initialLang?: SchemeLang;
+}) {
+  const [lang, setLang] = useState<SchemeLang>(initialLang);
+
+  useEffect(() => {
+    try {
+      const fromStorage = parseSchemeLang(
+        window.localStorage.getItem(SCHEME_LANG_STORAGE_KEY)
+      );
+      if (fromStorage) {
+        if (fromStorage !== initialLang) {
+          setLang(fromStorage);
+        }
+        document.cookie = schemeLangCookieHeader(fromStorage);
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
+
+    persistSchemeLang(initialLang);
+  }, [initialLang]);
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -55,11 +88,7 @@ export function SchemeContentProvider({ children }: { children: ReactNode }) {
 
     const setLanguage = (next: SchemeLang) => {
       setLang(next);
-      try {
-        window.localStorage.setItem(STORAGE_KEY, next);
-      } catch {
-        /* ignore */
-      }
+      persistSchemeLang(next);
     };
 
     return {

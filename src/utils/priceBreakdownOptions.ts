@@ -1,6 +1,6 @@
 import productContent, { formatProductCopy } from "@/lib/productContent";
 import type { Product, ProductOption, ProductSizeOption } from "@/types/product";
-import { getDiamondPickerOptions } from "@/utils/customizePickerCatalog";
+import { resolveDiamondQualityOption } from "@/utils/diamondQualityOption";
 import type { ClientCartLine } from "@/types/cart";
 import {
   getSizeBreakdownTemplate,
@@ -79,7 +79,9 @@ export function buildPriceBreakdownOptionLinesFromCartLine(
   return buildPriceBreakdownOptionLines({
     metal: product.metalOptions?.find((option) => option.label === metalLabel) ?? null,
     carat: product.caratOptions?.find((option) => option.label === caratLabel) ?? null,
-    quality: getDiamondPickerOptions(product).find((option) => option.label === qualityLabel) ?? null,
+    quality: qualityLabel
+      ? resolveDiamondQualityOption(product, qualityLabel)
+      : null,
     size: product.sizeOptions?.find((option) => option.size === sizeLabel) ?? null,
     product,
   });

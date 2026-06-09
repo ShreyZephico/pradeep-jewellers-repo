@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 
 import SchemeScrollToHash from "@/components/scheme/SchemeScrollToHash";
 import { SchemeContentProvider } from "@/contexts/SchemeContentContext";
+import {
+  parseSchemeLang,
+  SCHEME_LANG_COOKIE,
+  SCHEME_LANG_DEFAULT,
+} from "@/lib/scheme/schemeLang";
 
 import "@/components/scheme/css/landingPage.css";
 import "@/components/scheme/css/legalPage.css";
@@ -12,13 +18,18 @@ export const metadata: Metadata = {
     "Gold savings scheme at Pradeep Jewellers — 12+1, 18+2, and 24+3 plans with calculator and enquiry.",
 };
 
-export default function SchemeLayout({
+export default async function SchemeLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const initialLang =
+    parseSchemeLang(cookieStore.get(SCHEME_LANG_COOKIE)?.value) ??
+    SCHEME_LANG_DEFAULT;
+
   return (
-    <SchemeContentProvider>
+    <SchemeContentProvider initialLang={initialLang}>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link
         rel="preconnect"

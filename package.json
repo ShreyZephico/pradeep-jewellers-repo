@@ -19,7 +19,8 @@
     "store-metal-prices:migrate": "node scripts/run-store-metal-prices-migration.mjs",
     "store-metal-prices:grant": "node scripts/grant-store-metal-prices.mjs",
     "coupon-leads:migrate": "node scripts/run-coupon-leads-migration.mjs",
-    "visitor-locations:migrate": "node scripts/run-visitor-locations-migration.mjs"
+    "visitor-locations:migrate": "node scripts/run-visitor-locations-migration.mjs",
+    "vridhhi-enquiries:migrate": "node scripts/run-vridhhi-enquiries-migration.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

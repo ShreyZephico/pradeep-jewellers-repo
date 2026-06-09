@@ -4,6 +4,17 @@ export type ProductOption = {
   priceAdjustment?: number;
 };
 
+/** One row from Shopify `custom.diamond_details` metafield JSON. */
+export type ProductDiamondDetail = {
+  carat?: string;
+  color?: string;
+  clarity?: string;
+  price?: string;
+  shape?: string;
+  quantity?: string;
+  diamondType?: string;
+};
+
 export type ProductSizeOption = {
   size: string;
   mm?: string;
@@ -74,6 +85,8 @@ export type Product = {
   metalOptions?: ProductOption[];
   caratOptions?: ProductOption[];
   diamondQualities?: ProductOption[];
+  /** Parsed from Shopify `custom.diamond_details` metafield. */
+  diamondDetails?: ProductDiamondDetail[];
   sizeOptions?: ProductSizeOption[];
   /** Ring sizes available on this listing (from Shopify options / variants). */
   availableRingSizes?: string[];

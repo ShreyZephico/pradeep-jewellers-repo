@@ -211,7 +211,7 @@
       "id": "consent",
       "label": "By checking this, you agree to receive a call from our team regarding your investment journey."
     },
-    "submit": { "label": "Request a Callback" },
+    "submit": { "label": "Request a Callback", "loading": "Submitting…" },
     "validation": {
       "contactRequired": "Contact number is required.",
       "contactTenDigits": "Enter a valid 10-digit mobile number.",

@@ -1,4 +1,5 @@
 import type { Product, ProductOption, ProductSizeOption } from "@/types/product";
+import { diamondDetailsToPickerOptions } from "@/utils/diamondDetails";
 import { isKaratLabel } from "@/utils/karat";
 import {
   filterSizeOptionsForProduct,
@@ -13,23 +14,28 @@ import {
 
 export { isStandardRingSize, STANDARD_RING_SIZES };
 
-/** Always offer three diamond grades when the product has real diamond variation. */
-export const STANDARD_DIAMOND_QUALITIES: ProductOption[] = [
-  { label: "IJ-SI" },
-  { label: "GH-VS" },
-  { label: "EF-VVS" },
-];
-
-function normalizeDiamondLabel(label: string): string {
+function normalizeOptionLabel(label: string): string {
   return label.trim().toUpperCase().replace(/\s+/g, "");
 }
 
-function metalPickerCount(product: Product): number {
-  return product.metalOptions?.filter((option) => !isKaratLabel(option.label)).length ?? 0;
-}
+function mergeUniqueOptions(options: ProductOption[]): ProductOption[] {
+  const merged: ProductOption[] = [];
+  const seen = new Set<string>();
 
-export function getProductVariantCount(product: Product): number {
-  return product.variantCount ?? product.variants?.length ?? 0;
+  for (const option of options) {
+    const label = option.label?.trim();
+    if (!label) {
+      continue;
+    }
+    const key = normalizeOptionLabel(label);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    merged.push({ ...option, label });
+  }
+
+  return merged;
 }
 
 function uniqueVariantDiamondQualities(product: Product): string[] {
@@ -42,90 +48,26 @@ function uniqueVariantDiamondQualities(product: Product): string[] {
   ];
 }
 
-function productMarketingMentionsDiamond(product: Product): boolean {
-  const haystack = [
-    product.name,
-    product.description,
-    product.shortDescription,
-    product.productType,
-    ...(product.tags ?? []),
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-
-  return /diamond|solitaire|gemstone|vvs|stud/i.test(haystack);
+function diamondQualitiesFromVariants(product: Product): ProductOption[] {
+  return uniqueVariantDiamondQualities(product).map((label) => ({ label }));
 }
 
-/** When to show IJ-SI / GH-VS / EF-VVS in the customize modal. */
-export function productShouldOfferDiamondPicker(product: Product): boolean {
-  const shopifyDiamondCount = product.diamondQualities?.length ?? 0;
-  if (shopifyDiamondCount > 1) {
-    return true;
-  }
-
-  const variantDiamonds = uniqueVariantDiamondQualities(product);
-  if (variantDiamonds.length > 1) {
-    return true;
-  }
-
-  const variantCount = getProductVariantCount(product);
-
-  // Single-SKU products: never infer diamond grades from marketing copy alone.
-  if (variantCount <= 1) {
-    return false;
-  }
-
-  if (shopifyDiamondCount > 0 || variantDiamonds.length > 0) {
-    return true;
-  }
-
-  // Multi-variant rings with metal colour choices use standard diamond grades.
-  if (
-    inferJewelryCategory(product) === "ring" &&
-    metalPickerCount(product) > 1
-  ) {
-    return true;
-  }
-
-  if (productMarketingMentionsDiamond(product)) {
-    return true;
-  }
-
-  return false;
+export function getProductVariantCount(product: Product): number {
+  return product.variantCount ?? product.variants?.length ?? 0;
 }
 
+/** Diamond picker values from Shopify options, variant data, or diamond_details metafield only. */
 export function getDiamondPickerOptions(product: Product): ProductOption[] {
-  if (!productShouldOfferDiamondPicker(product)) {
-    return [];
-  }
+  const fromShopifyOption = (product.diamondQualities ?? []).filter((option) =>
+    option.label?.trim()
+  );
+  const fromMetafield = diamondDetailsToPickerOptions(product.diamondDetails ?? []);
+  const fromVariants = diamondQualitiesFromVariants(product);
 
-  const fromProduct = product.diamondQualities ?? [];
-  const fromVariants = uniqueVariantDiamondQualities(product).map((label) => ({
-    label,
-  }));
-
-  const catalogOptions = [...fromProduct];
-  for (const option of fromVariants) {
-    if (
-      !catalogOptions.some(
-        (item) =>
-          normalizeDiamondLabel(item.label) === normalizeDiamondLabel(option.label)
-      )
-    ) {
-      catalogOptions.push(option);
-    }
-  }
-
-  return STANDARD_DIAMOND_QUALITIES.map((standard) => {
-    const match = catalogOptions.find(
-      (option) =>
-        normalizeDiamondLabel(option.label) === normalizeDiamondLabel(standard.label)
-    );
-    return match ? { ...match, label: standard.label } : { ...standard };
-  });
+  return mergeUniqueOptions([...fromShopifyOption, ...fromVariants, ...fromMetafield]);
 }
 
+/** Rings and bangles use the built-in size charts; other types use Shopify/catalog sizes. */
 export function getSizePickerOptions(product: Product): ProductSizeOption[] {
   const category = inferJewelryCategory(product);
 
@@ -142,10 +84,19 @@ export function getSizePickerOptions(product: Product): ProductSizeOption[] {
 
 /** True when Shopify exposes more than one value on any option axis. */
 export function productHasMultipleShopifyOptions(product: Product): boolean {
+  const diamondCount = getDiamondPickerOptions(product).length;
   return [
     product.metalOptions,
     product.caratOptions,
-    product.diamondQualities,
     product.sizeOptions,
-  ].some((options) => (options?.length ?? 0) > 1);
+  ].some((options) => (options?.length ?? 0) > 1) || diamondCount > 1;
+}
+
+export function metalPickerCount(product: Product): number {
+  return product.metalOptions?.filter((option) => !isKaratLabel(option.label)).length ?? 0;
+}
+
+/** @deprecated Kept for callers that checked inferred diamond UI; use getDiamondPickerOptions instead. */
+export function productShouldOfferDiamondPicker(product: Product): boolean {
+  return getDiamondPickerOptions(product).length > 0;
 }

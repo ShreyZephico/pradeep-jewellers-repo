@@ -12,7 +12,9 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/types/product";
+import GoldShineIcon from "@/components/icons/GoldShineIcon";
 import ProductCommerceActions from "@/components/productComponent/ProductCommerceActions";
+import ProductWhatsAppEnquireButton from "@/components/productComponent/ProductWhatsAppEnquireButton";
 import ProductCustomizeSummaryBar from "@/components/productComponent/ProductCustomizeSummaryBar";
 import ProductDeliveryEstimate from "@/components/productComponent/ProductDeliveryEstimate";
 import ProductRecommendedSection from "@/components/productComponent/ProductRecommendedSection";
@@ -211,7 +213,13 @@ function ProductDetailSummary({
               className="product-detail-price-weight"
               aria-label={`${copy.weightLabel}: ${formatWeightGrams(weightGrams)}`}
             >
-              <span className="product-detail-price-weight-label">{copy.weightLabel}</span>
+              <span className="product-detail-price-weight-label-row">
+                <GoldShineIcon
+                  className="product-detail-price-weight-icon"
+                  title={copy.weightLabel}
+                />
+                <span className="product-detail-price-weight-label">{copy.weightLabel}</span>
+              </span>
               <span className="product-detail-price-weight-value">
                 {formatWeightGrams(weightGrams)}
               </span>
@@ -253,6 +261,8 @@ function ProductDetailSummary({
             </p>
           ) : null}
         </div>
+
+        <ProductWhatsAppEnquireButton product={product} />
 
         <button
           type="button"

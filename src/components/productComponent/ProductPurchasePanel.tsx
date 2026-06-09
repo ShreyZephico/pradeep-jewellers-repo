@@ -16,6 +16,7 @@ import { formatProductPrice } from "@/utils/formatPrice";
 import { isKaratLabel, resolveKaratFromSelection } from "@/utils/karat";
 import { findBestMatchingVariant } from "@/utils/variantOptionMatch";
 import ProductCommerceActions from "@/components/productComponent/ProductCommerceActions";
+import ProductDiamondDetailsSection from "@/components/productComponent/ProductDiamondDetailsSection";
 import PriceCalculationBreakdown from "@/components/productComponent/PriceCalculationBreakdown";
 import { useCart } from "@/contexts/CartContext";
 import { useProductConfiguredPrice } from "@/hooks/useProductConfiguredPrice";
@@ -102,7 +103,7 @@ export default function ProductPurchasePanel({
 
   const metalRef = useRef<HTMLElement>(null);
   const caratRef = useRef<HTMLElement>(null);
-  const diamondRef = useRef<HTMLElement>(null);
+  const diamondRef = useRef<HTMLDivElement>(null);
   const sizeRef = useRef<HTMLElement>(null);
   const footerRef = useRef<HTMLElement>(null);
 
@@ -223,7 +224,8 @@ export default function ProductPurchasePanel({
 
   const hasMetalOptions = pickers.showMetal;
   const hasCaratOptions = pickers.showCarat;
-  const hasDiamondOptions = pickers.showDiamond;
+  const hasDiamondDetails = pickers.showDiamondDetails;
+  const hasDiamondVariantPicker = pickers.showDiamond && !hasDiamondDetails;
   const hasSizeOptions = pickers.showSize;
 
   const selectKarat = (label: string) => {
@@ -288,7 +290,7 @@ export default function ProductPurchasePanel({
     const refs: Record<CustomizationField, RefObject<HTMLElement | null>> = {
       metal: metalRef,
       carat: caratRef,
-      diamond: diamondRef,
+      diamond: diamondRef as RefObject<HTMLElement | null>,
       size: sizeRef,
     };
     const target = refs[field].current;
@@ -784,9 +786,21 @@ export default function ProductPurchasePanel({
           </section>
         ) : null}
 
-        {hasDiamondOptions ? (
+        {hasDiamondDetails && product.diamondDetails?.length ? (
+          <div ref={diamondRef}>
+            <ProductDiamondDetailsSection
+              product={product}
+              details={product.diamondDetails}
+              selectedLabel={selectedQuality}
+              onSelect={(label) => setSelectedQuality(label)}
+              invalid={sectionInvalid("diamond")}
+            />
+          </div>
+        ) : null}
+
+        {hasDiamondVariantPicker ? (
+          <div ref={diamondRef}>
           <section
-            ref={diamondRef}
             className={`product-purchase-section${
               sectionInvalid("diamond") ? " product-purchase-section--invalid" : ""
             }`}
@@ -827,6 +841,7 @@ export default function ProductPurchasePanel({
               })}
             </div>
           </section>
+          </div>
         ) : null}
 
         {hasSizeOptions ? (
