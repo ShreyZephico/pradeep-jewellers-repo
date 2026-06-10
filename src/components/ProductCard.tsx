@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/types/product";
+import { productLinkWarmHandlers } from "@/lib/productDetailNavigation";
 import { getProductHref } from "@/utils/productUrl";
 
 type ProductCardProps = {
@@ -17,10 +20,13 @@ const formatPrice = (price: number) => {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const list = product.compareAtPrice ?? 0;
+  const warm = productLinkWarmHandlers(product);
+
   return (
     <Link
       href={getProductHref(product)}
       className="group block overflow-hidden rounded-[2rem] border border-[#e9d7bd] bg-[#fffdf8] shadow-[0_18px_50px_rgba(70,45,21,0.08)] transition duration-300 hover:-translate-y-1.5 hover:border-[#d6a850] hover:shadow-[0_28px_70px_rgba(70,45,21,0.16)]"
+      {...warm}
     >
       <div className="relative flex h-60 items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_50%_30%,#fff7df_0%,#fbf4ea_48%,#f4e7d7_100%)] p-6">
         <Image
@@ -46,9 +52,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             ) : null}
           </div>
 
-          <span
-            className="mt-1 block text-sm font-bold text-[#b47723] transition group-hover:text-[#6e3d18]"
-          >
+          <span className="mt-1 block text-sm font-bold text-[#b47723] transition group-hover:text-[#6e3d18]">
             Check delivery date
           </span>
         </div>
@@ -63,9 +67,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           </p>
         </div>
 
-        <span
-          className="flex w-full items-center justify-center rounded-full border border-[#d8bd8a] bg-[#fffaf2] px-4 py-2 text-sm font-black text-[#3c2415] transition group-hover:border-[#9F2B68] group-hover:bg-[#9F2B68] group-hover:text-[#f7d58b]"
-        >
+        <span className="flex w-full items-center justify-center rounded-full border border-[#d8bd8a] bg-[#fffaf2] px-4 py-2 text-sm font-black text-[#3c2415] transition group-hover:border-[#9F2B68] group-hover:bg-[#9F2B68] group-hover:text-[#f7d58b]">
           {product.customizable ? "Customize" : "View details"}
         </span>
       </div>

@@ -7,7 +7,12 @@ import {
   type ProductSort,
 } from "@/lib/productFilters";
 import { getShopifyStorefrontApiVersion } from "@/lib/shopifyApiVersion";
-import type { Product, ProductDiamondDetail, ProductVariant } from "@/types/product";
+import type {
+  Product,
+  ProductDiamondDetail,
+  ProductImage,
+  ProductVariant,
+} from "@/types/product";
 import { fetchSearchTagsFromShopifyAdmin } from "@/lib/shopifySearchTags";
 import {
   buildSearchTagFilterOptions,
@@ -156,7 +161,7 @@ const productNodeFields = `
             url
             altText
           }
-          images(first: 12) {
+          images(first: 50) {
             edges {
               node {
                 url
@@ -611,6 +616,47 @@ async function resolveSearchTagsForNode(
 
 const LIST_VARIANT_SAMPLE = 4;
 
+type CollectedShopifyImages = {
+  urls: string[];
+  details: ProductImage[];
+  primaryAlt: string | null;
+};
+
+/** Collect unique image URLs and Shopify alt text from a Storefront product node. */
+function collectShopifyProductImages(node: ShopifyProductNode): CollectedShopifyImages {
+  const byUrl = new Map<string, string | null>();
+
+  const add = (url?: string | null, altText?: string | null) => {
+    if (!url?.trim()) return;
+    const existing = byUrl.get(url);
+    if (existing === undefined) {
+      byUrl.set(url, altText?.trim() ? altText.trim() : null);
+      return;
+    }
+    if (!existing && altText?.trim()) {
+      byUrl.set(url, altText.trim());
+    }
+  };
+
+  add(node.featuredImage?.url, node.featuredImage?.altText);
+  for (const edge of node.images?.edges ?? []) {
+    add(edge.node.url, edge.node.altText);
+  }
+  for (const { node: variant } of node.variants.edges) {
+    add(variant.image?.url, variant.image?.altText);
+  }
+
+  const details = Array.from(byUrl.entries()).map(([url, altText]) => ({
+    url,
+    altText,
+  }));
+  const urls = details.map((item) => item.url);
+  const primaryUrl = node.featuredImage?.url ?? urls[0] ?? null;
+  const primaryAlt = primaryUrl ? (byUrl.get(primaryUrl) ?? null) : null;
+
+  return { urls, details, primaryAlt };
+}
+
 /** Listing/card mapping: storefront metafields only, sample variants (fast path). */
 async function mapShopifyProductListItem(
   node: ShopifyProductNode,
@@ -622,10 +668,8 @@ async function mapShopifyProductListItem(
   const compareAtPrice =
     compareRaw > 0 && compareRaw > shopifyListPrice ? compareRaw : null;
 
-  const primaryImage =
-    node.featuredImage?.url ??
-    node.images?.edges[0]?.node.url ??
-    fallback.image;
+  const listImages = collectShopifyProductImages(node);
+  const primaryImage = listImages.urls[0] ?? fallback.image;
 
   const variantCount =
     node.variantsCount?.count ?? node.variants.edges.length ?? 0;
@@ -713,7 +757,9 @@ async function mapShopifyProductListItem(
     compareAtPrice,
     makingChargePercent,
     image: primaryImage,
+    imageAlt: listImages.primaryAlt,
     images: [primaryImage],
+    imageDetails: listImages.details.length > 0 ? listImages.details : undefined,
     variantId,
     variantCount,
     variants: undefined,
@@ -779,22 +825,9 @@ async function mapShopifyProduct(
   const compareAtPrice =
     compareRaw > 0 && compareRaw > shopifyListPrice ? compareRaw : null;
 
-  const imageSet = new Set<string>();
-  if (node.featuredImage?.url) {
-    imageSet.add(node.featuredImage.url);
-  }
-  for (const edge of node.images?.edges ?? []) {
-    if (edge.node.url) {
-      imageSet.add(edge.node.url);
-    }
-  }
-  for (const { node: variant } of node.variants.edges) {
-    if (variant.image?.url) {
-      imageSet.add(variant.image.url);
-    }
-  }
-  const images = Array.from(imageSet);
-  const primaryImage = node.featuredImage?.url ?? images[0] ?? fallback.image;
+  const collectedImages = collectShopifyProductImages(node);
+  const images = collectedImages.urls;
+  const primaryImage = images[0] ?? fallback.image;
 
   const goldRate = await getGoldPrice();
   if (goldRate == null) {
@@ -823,6 +856,7 @@ async function mapShopifyProduct(
         return {
           id: variant.id,
           image: variant.image?.url,
+          imageAlt: variant.image?.altText ?? null,
           price: shopifyVariantPrice,
           weight,
           diamondQuality,
@@ -840,6 +874,7 @@ async function mapShopifyProduct(
         return {
           id: variant.id,
           image: variant.image?.url,
+          imageAlt: variant.image?.altText ?? null,
           price: shopifyVariantPrice,
           weight,
           diamondQuality,
@@ -850,6 +885,7 @@ async function mapShopifyProduct(
       return {
         id: variant.id,
         image: variant.image?.url,
+        imageAlt: variant.image?.altText ?? null,
         price: pricing.finalPrice,
         weight,
         diamondQuality,
@@ -894,7 +930,10 @@ async function mapShopifyProduct(
     compareAtPrice,
     makingChargePercent,
     image: primaryImage,
+    imageAlt: collectedImages.primaryAlt,
     images: images.length > 0 ? images : [primaryImage],
+    imageDetails:
+      collectedImages.details.length > 0 ? collectedImages.details : undefined,
     variantId: defaultVariant?.id ?? node.variants.edges[0]?.node.id,
     variants,
     customizable: false,
@@ -1048,6 +1087,7 @@ export function mergeShopifyVariantGids(
       price: lv.price,
       compareAtPrice: lv.compareAtPrice ?? null,
       image: pick.image ?? lv.image,
+      imageAlt: pick.imageAlt ?? lv.imageAlt ?? null,
       selectedOptions: lv.selectedOptions,
       availableForSale: pick.availableForSale ?? lv.availableForSale,
       quantityAvailable: pick.quantityAvailable ?? lv.quantityAvailable,
@@ -1108,6 +1148,11 @@ export function mergeShopifyVariantGids(
           ? catalog.sizeOptions
           : storefront.sizeOptions,
       }),
+    imageAlt: catalog.imageAlt ?? storefront.imageAlt,
+    imageDetails: catalog.imageDetails?.length
+      ? catalog.imageDetails
+      : storefront.imageDetails,
+    images: catalog.images?.length ? catalog.images : storefront.images,
     variants: mergedVariants,
     variantId: primary?.id ?? catalog.variantId,
     price: primary?.price ?? catalog.price,

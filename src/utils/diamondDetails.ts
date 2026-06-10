@@ -126,7 +126,8 @@ export function buildDiamondDetailDisplayRows(
     quantity: string;
     price: string;
   },
-  formatPrice: (amount: number) => string
+  formatPrice: (amount: number) => string,
+  options?: { excludeColor?: boolean }
 ): DiamondDetailDisplayRow[] {
   const rows: DiamondDetailDisplayRow[] = [];
 
@@ -136,7 +137,7 @@ export function buildDiamondDetailDisplayRows(
       value: `${detail.carat.trim()} ct`,
     });
   }
-  if (detail.color?.trim()) {
+  if (!options?.excludeColor && detail.color?.trim()) {
     rows.push({ label: labels.color, value: detail.color.trim() });
   }
   if (detail.clarity?.trim()) {
@@ -201,4 +202,61 @@ export function productHasDiamondDetails(
   details: ProductDiamondDetail[] | undefined
 ): boolean {
   return (details?.length ?? 0) > 0;
+}
+
+export function resolveDiamondDetailByLabel(
+  details: ProductDiamondDetail[],
+  selectedLabel: string
+): ProductDiamondDetail | null {
+  const trimmed = selectedLabel.trim();
+  if (!trimmed) return null;
+  return (
+    details.find((detail) => formatDiamondDetailLabel(detail) === trimmed) ?? null
+  );
+}
+
+/** Unique diamond colors for the customize modal color picker. */
+export function getUniqueDiamondColors(details: ProductDiamondDetail[]): string[] {
+  const seen = new Set<string>();
+  const colors: string[] = [];
+  for (const detail of details) {
+    const color = detail.color?.trim();
+    if (!color) continue;
+    const key = color.toUpperCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    colors.push(color);
+  }
+  return colors;
+}
+
+export function resolveDiamondLabelForColor(
+  details: ProductDiamondDetail[],
+  color: string,
+  currentLabel?: string
+): string {
+  const key = color.trim().toUpperCase();
+  const matches = details.filter(
+    (detail) => detail.color?.trim().toUpperCase() === key
+  );
+  if (matches.length === 0) {
+    return currentLabel?.trim() ?? "";
+  }
+  if (matches.length === 1) {
+    return formatDiamondDetailLabel(matches[0]);
+  }
+  if (currentLabel?.trim()) {
+    const keep = matches.find(
+      (detail) => formatDiamondDetailLabel(detail) === currentLabel.trim()
+    );
+    if (keep) return currentLabel.trim();
+  }
+  return formatDiamondDetailLabel(matches[0]);
+}
+
+export function getSelectedDiamondColor(
+  details: ProductDiamondDetail[],
+  selectedLabel: string
+): string {
+  return resolveDiamondDetailByLabel(details, selectedLabel)?.color?.trim() ?? "";
 }

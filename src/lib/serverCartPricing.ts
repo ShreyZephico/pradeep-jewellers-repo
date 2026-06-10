@@ -1,14 +1,36 @@
-import { PJ_BREAKDOWN_ATTR } from "@/lib/cartConstants";
-import { parseBreakdownFromLine } from "@/lib/cartBreakdown";
+import {
+  PJ_BREAKDOWN_ATTR,
+  PJ_CUSTOM_PRICE_ATTR,
+  PJ_IMAGE_URL_ATTR,
+} from "@/lib/cartConstants";
 import { fetchSingleCatalogProduct } from "@/lib/fetchSingleCatalogProduct";
 import { resolveMerchandiseId, type ResolveMerchandiseInput } from "@/lib/cartResolve";
 import type { CheckoutAttribute } from "@/lib/shopify";
 import type { CartLine } from "@/lib/shopifyCart";
-import calculateVariantPrice from "@/utils/calculateVariantPrice";
+import calculateVariantPrice, {
+  computeJewelleryPriceFromOptionLines,
+  type VariantPriceBreakdown,
+} from "@/utils/calculateVariantPrice";
+import {
+  resolveCustomizationOptions,
+  type CustomizationSelections,
+} from "@/utils/productCustomization";
+import { readSizeFromAttributes } from "@/utils/productCustomizationLabels";
+import {
+  buildPriceBreakdownOptionLines,
+  sumOptionLineAmounts,
+  type PriceBreakdownOptionLine,
+} from "@/utils/priceBreakdownOptions";
 import { resolveVariantWeight } from "@/utils/resolveVariantWeight";
 
-/** Legacy tolerance — client estimate may drift slightly from live gold; server price wins. */
+/** Client estimate may drift slightly from live gold; server price always wins. */
 export const PRICE_TOLERANCE_INR = 2;
+
+const PJ_CONTROLLED_KEYS = new Set<string>([
+  PJ_CUSTOM_PRICE_ATTR,
+  PJ_IMAGE_URL_ATTR,
+  ...Object.values(PJ_BREAKDOWN_ATTR),
+]);
 
 export class PriceMismatchError extends Error {
   readonly trustedPrice: number;
@@ -22,6 +44,7 @@ export class PriceMismatchError extends Error {
 
 export type ServerCartPriceInput = ResolveMerchandiseInput & {
   customPrice?: number;
+  /** Ignored for pricing — kept for backwards-compatible request bodies only. */
   weightGrams?: number;
   karatLabel?: string | null;
   optionAdjustments?: number;
@@ -29,213 +52,222 @@ export type ServerCartPriceInput = ResolveMerchandiseInput & {
   productSlug?: string;
 };
 
-function attrValue(attributes: CheckoutAttribute[] | undefined, key: string): string | undefined {
+export type AuthoritativeLinePricing = {
+  trustedPrice: number;
+  breakdown: VariantPriceBreakdown;
+  weightGrams: number;
+  karatLabel: string | null;
+  optionLines: PriceBreakdownOptionLine[];
+  optionAdjustments: number;
+};
+
+function attrValue(
+  attributes: CheckoutAttribute[] | undefined,
+  key: string
+): string | undefined {
   return attributes?.find((a) => a.key === key)?.value.trim();
 }
 
-function parseIntAttr(attributes: CheckoutAttribute[] | undefined, key: string): number | null {
-  const raw = attrValue(attributes, key);
-  if (!raw) return null;
-  const parsed = parseInt(raw, 10);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function resolveWeight(input: ServerCartPriceInput): number | null {
-  if (typeof input.weightGrams === "number" && Number.isFinite(input.weightGrams)) {
-    return resolveVariantWeight(input.weightGrams);
-  }
-  const fromAttr = parseIntAttr(input.attributes, PJ_BREAKDOWN_ATTR.weight);
-  return fromAttr != null ? resolveVariantWeight(fromAttr) : null;
-}
-
-function resolveKarat(input: ServerCartPriceInput): string | null {
-  if (typeof input.karatLabel === "string" && input.karatLabel.trim()) {
-    return input.karatLabel.trim();
-  }
-  return (
-    attrValue(input.attributes, PJ_BREAKDOWN_ATTR.karat) ??
-    attrValue(input.attributes, "Carat") ??
-    attrValue(input.attributes, "Karat") ??
-    null
-  );
-}
-
-function resolveOptionAdjustments(input: ServerCartPriceInput): number {
-  if (typeof input.optionAdjustments === "number" && Number.isFinite(input.optionAdjustments)) {
-    return Math.round(input.optionAdjustments);
-  }
-  return parseIntAttr(input.attributes, PJ_BREAKDOWN_ATTR.optionAdj) ?? 0;
-}
-
-async function resolveMakingChargePercentForProduct(
-  productSlug: string | undefined
-): Promise<number | null | undefined> {
-  const slug = typeof productSlug === "string" ? productSlug.trim() : "";
-  if (!slug) return undefined;
-  const product = await fetchSingleCatalogProduct(slug);
-  return product?.makingChargePercent ?? null;
-}
-
-async function resolveWeightFromCatalog(
-  input: ResolveMerchandiseInput & { productSlug?: string }
-): Promise<number | null> {
-  const slug =
-    typeof input.productSlug === "string" ? input.productSlug.trim() : "";
-  if (!slug) return null;
-
-  const product = await fetchSingleCatalogProduct(slug);
-  if (!product) return null;
-
-  const catalogId =
-    typeof input.catalogVariantId === "string"
-      ? input.catalogVariantId.trim()
-      : "";
-  const variant = product.variants?.find(
-    (v) =>
-      v.catalogVariantId === catalogId ||
-      v.id === catalogId ||
-      (input.variantId &&
-        (v.id === input.variantId || v.catalogVariantId === input.variantId))
-  );
-
-  const grams =
-    variant?.weight ??
-    product.variants?.find((v) => v.weight && v.weight > 0)?.weight;
-  if (typeof grams !== "number" || !Number.isFinite(grams)) return null;
-  return resolveVariantWeight(grams);
-}
-
-async function catalogVariantUnitPrice(
-  input: ResolveMerchandiseInput & { productSlug?: string }
-): Promise<number | null> {
-  const slug =
-    typeof input.productSlug === "string" ? input.productSlug.trim() : "";
-  if (!slug) return null;
-
-  const product = await fetchSingleCatalogProduct(slug);
-  if (!product) return null;
-
-  const catalogId =
-    typeof input.catalogVariantId === "string"
-      ? input.catalogVariantId.trim()
-      : "";
-  const variant = product.variants?.find(
-    (v) =>
-      v.catalogVariantId === catalogId ||
-      v.id === catalogId ||
-      (input.variantId && (v.id === input.variantId || v.catalogVariantId === input.variantId))
-  );
-
-  const price = variant?.price ?? product.price;
-  if (typeof price === "number" && Number.isFinite(price) && price > 0) {
-    return Math.round(price);
-  }
-  return null;
-}
-
-/** Authoritative INR unit price for cart / checkout (never trust client `customPrice` alone). */
-/** Use breakdown snapshot stored on the cart line (avoids live gold drift at checkout). */
-function trustedPriceFromStoredBreakdown(
+/** Strip hidden pricing keys — clients must not influence checkout totals. */
+export function sanitizePublicCartAttributes(
   attributes: CheckoutAttribute[] | undefined
-): number | null {
-  const weight = parseIntAttr(attributes, PJ_BREAKDOWN_ATTR.weight);
-  const subtotal = parseIntAttr(attributes, PJ_BREAKDOWN_ATTR.subtotal);
-  const gst = parseIntAttr(attributes, PJ_BREAKDOWN_ATTR.gst);
-  if (weight == null || subtotal == null || gst == null) return null;
-
-  const optionAdj = parseIntAttr(attributes, PJ_BREAKDOWN_ATTR.optionAdj) ?? 0;
-  return Math.max(0, Math.round(subtotal + gst + optionAdj));
+): CheckoutAttribute[] {
+  if (!attributes?.length) return [];
+  return attributes.filter((attribute) => {
+    const key = attribute.key.trim();
+    if (!key || !attribute.value.trim()) return false;
+    if (PJ_CONTROLLED_KEYS.has(key)) return false;
+    if (key.startsWith("_pj_")) return false;
+    return true;
+  });
 }
 
-export async function resolveTrustedCartUnitPrice(
-  input: ServerCartPriceInput
-): Promise<number> {
-  const stored = trustedPriceFromStoredBreakdown(input.attributes);
-  if (stored != null) {
-    return stored;
-  }
+function parseCustomizationSelections(
+  attributes: CheckoutAttribute[],
+  product: Awaited<ReturnType<typeof fetchSingleCatalogProduct>>
+): CustomizationSelections {
+  const safeProduct = product ?? undefined;
+  return {
+    metal: attrValue(attributes, "Metal") ?? "",
+    carat:
+      attrValue(attributes, "Carat") ??
+      attrValue(attributes, "Karat") ??
+      "",
+    quality: attrValue(attributes, "Diamond Quality") ?? "",
+    size: readSizeFromAttributes(attributes, safeProduct) ?? "",
+  };
+}
 
-  let weight = resolveWeight(input);
-  if (weight == null) {
-    weight = await resolveWeightFromCatalog(input);
-  }
-  const karat = resolveKarat(input);
-  const optionAdj = resolveOptionAdjustments(input);
-
-  if (weight != null && weight > 0) {
-    const makingChargePercent = await resolveMakingChargePercentForProduct(
-      input.productSlug
-    );
-    const pricing = await calculateVariantPrice({
-      weight,
-      carat: karat,
-      makingChargePercent,
-    });
-    return Math.max(0, Math.round(pricing.finalPrice + optionAdj));
-  }
-
-  const catalogPrice = await catalogVariantUnitPrice(input);
-  if (catalogPrice != null) {
-    return Math.max(0, Math.round(catalogPrice + optionAdj));
-  }
-
-  throw new Error("Unable to calculate price for this item.");
+function findVariantForMerchandise(
+  product: NonNullable<Awaited<ReturnType<typeof fetchSingleCatalogProduct>>>,
+  merchandiseId: string,
+  catalogVariantId?: string
+) {
+  const catalogId =
+    typeof catalogVariantId === "string" ? catalogVariantId.trim() : "";
+  return product.variants?.find(
+    (variant) =>
+      variant.id === merchandiseId ||
+      variant.catalogVariantId === merchandiseId ||
+      (catalogId &&
+        (variant.catalogVariantId === catalogId || variant.id === catalogId))
+  );
 }
 
 /**
- * Server `trustedPrice` is always used for cart/checkout.
- * Do not block purchases when the UI estimate is slightly stale (live gold rates).
+ * Authoritative INR price from Shopify catalog + public customization attributes only.
+ * Never reads client `customPrice`, `priceBreakdown`, `weightGrams`, or `_pj_*` attrs.
  */
-export function assertClientPriceMatches(
-  _clientPrice: number | undefined,
-  _trustedPrice: number
-): void {
-  /* no-op */
+export async function resolveAuthoritativeLinePricing(
+  input: ServerCartPriceInput & { variantId: string }
+): Promise<AuthoritativeLinePricing> {
+  const slug =
+    typeof input.productSlug === "string" ? input.productSlug.trim() : "";
+  if (!slug) {
+    throw new Error("Unable to calculate price for this item.");
+  }
+
+  const product = await fetchSingleCatalogProduct(slug);
+  if (!product) {
+    throw new Error("Product not found.");
+  }
+
+  const publicAttributes = sanitizePublicCartAttributes(input.attributes);
+  const selections = parseCustomizationSelections(publicAttributes, product);
+  const resolved = resolveCustomizationOptions(product, selections);
+
+  const merchandiseId = input.variantId.trim();
+  const gidVariant = findVariantForMerchandise(
+    product,
+    merchandiseId,
+    input.catalogVariantId
+  );
+
+  const weight = resolveVariantWeight(
+    gidVariant?.weight ?? resolved.variant?.weight ?? resolved.baseWeight
+  );
+  const karatLabel = resolved.karatLabel;
+
+  const optionLines = buildPriceBreakdownOptionLines({
+    metal: resolved.metalOption,
+    carat: resolved.caratOption,
+    quality: resolved.qualityOption,
+    size: resolved.sizeOption,
+    product,
+  });
+  const optionAdjustments = sumOptionLineAmounts(optionLines);
+
+  if (weight > 0) {
+    const pricing = await calculateVariantPrice({
+      weight,
+      carat: karatLabel,
+      makingChargePercent: product.makingChargePercent ?? null,
+    });
+    const totals = computeJewelleryPriceFromOptionLines(pricing, optionLines);
+
+    return {
+      trustedPrice: Math.max(0, totals.grandTotal),
+      breakdown: pricing,
+      weightGrams: weight,
+      karatLabel,
+      optionLines,
+      optionAdjustments,
+    };
+  }
+
+  const fallbackPrice = Math.round(
+    gidVariant?.price ?? resolved.variant?.price ?? product.price
+  );
+  if (!Number.isFinite(fallbackPrice) || fallbackPrice <= 0) {
+    throw new Error("Unable to calculate price for this item.");
+  }
+
+  const pricing = await calculateVariantPrice({
+    weight: 1,
+    carat: karatLabel,
+    makingChargePercent: product.makingChargePercent ?? null,
+  }).catch(() => null);
+
+  if (pricing) {
+    const totals = computeJewelleryPriceFromOptionLines(pricing, optionLines);
+    return {
+      trustedPrice: Math.max(0, totals.grandTotal),
+      breakdown: pricing,
+      weightGrams: weight,
+      karatLabel,
+      optionLines,
+      optionAdjustments,
+    };
+  }
+
+  return {
+    trustedPrice: Math.max(0, fallbackPrice + optionAdjustments),
+    breakdown: {
+      purity: 0,
+      karat: 18,
+      base24KGoldPrice: 0,
+      adjustedGoldPrice: 0,
+      perGramRate: 0,
+      actualGoldPrice: fallbackPrice,
+      makingCharge: 0,
+      subtotal: fallbackPrice,
+      gst: 0,
+      finalPrice: fallbackPrice + optionAdjustments,
+    },
+    weightGrams: weight,
+    karatLabel,
+    optionLines,
+    optionAdjustments,
+  };
 }
 
-/** Resolve merchandise GID + trusted unit price for add-to-cart / buy-now. */
+export async function resolveTrustedCartUnitPrice(
+  input: ServerCartPriceInput & { variantId: string }
+): Promise<number> {
+  const pricing = await resolveAuthoritativeLinePricing(input);
+  return pricing.trustedPrice;
+}
+
+/** Reject checkout attempts where the browser sends a lower price than the server total. */
+export function assertClientPriceMatches(
+  clientPrice: number | undefined,
+  trustedPrice: number
+): void {
+  if (typeof clientPrice !== "number" || !Number.isFinite(clientPrice)) {
+    return;
+  }
+  if (Math.round(clientPrice) + PRICE_TOLERANCE_INR < trustedPrice) {
+    throw new PriceMismatchError(trustedPrice);
+  }
+}
+
 export async function resolveCartLinePricing(input: ServerCartPriceInput): Promise<{
   merchandiseId: string;
   trustedPrice: number;
+  pricing: AuthoritativeLinePricing;
 }> {
   const merchandiseId = await resolveMerchandiseId(input);
-  const trustedPrice = await resolveTrustedCartUnitPrice({
+  const pricing = await resolveAuthoritativeLinePricing({
     ...input,
     variantId: merchandiseId,
   });
-  assertClientPriceMatches(input.customPrice, trustedPrice);
-  return { merchandiseId, trustedPrice };
+  assertClientPriceMatches(input.customPrice, pricing.trustedPrice);
+  return {
+    merchandiseId,
+    trustedPrice: pricing.trustedPrice,
+    pricing,
+  };
 }
 
 /** Re-validate an existing Shopify cart line before draft checkout. */
 export async function revalidateCartLineUnitPrice(line: CartLine): Promise<number> {
-  const parsed = parseBreakdownFromLine({
-    id: line.id,
-    quantity: line.quantity,
-    merchandiseId: line.merchandiseId,
-    title: line.title,
-    productHandle: line.productHandle,
-    imageUrl: line.imageUrl,
-    customPriceInr: line.customPriceInr,
-    lineTotalInr: line.customPriceInr * line.quantity,
-    attributes: line.attributes,
-  });
-  if (parsed) {
-    const trusted = Math.max(
-      0,
-      Math.round(parsed.breakdown.finalPrice + parsed.optionAdjustments)
-    );
-    assertClientPriceMatches(line.customPriceInr, trusted);
-    return trusted;
-  }
-
-  const trusted = await resolveTrustedCartUnitPrice({
+  const pricing = await resolveAuthoritativeLinePricing({
     variantId: line.merchandiseId,
     productSlug: line.productHandle,
     catalogVariantId: line.merchandiseId,
     attributes: line.attributes,
     customPrice: line.customPriceInr,
   });
-  assertClientPriceMatches(line.customPriceInr, trusted);
-  return trusted;
+  assertClientPriceMatches(line.customPriceInr, pricing.trustedPrice);
+  return pricing.trustedPrice;
 }

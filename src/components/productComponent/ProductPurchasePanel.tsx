@@ -16,7 +16,7 @@ import { formatProductPrice } from "@/utils/formatPrice";
 import { isKaratLabel, resolveKaratFromSelection } from "@/utils/karat";
 import { findBestMatchingVariant } from "@/utils/variantOptionMatch";
 import ProductCommerceActions from "@/components/productComponent/ProductCommerceActions";
-import ProductDiamondDetailsSection from "@/components/productComponent/ProductDiamondDetailsSection";
+import ProductDiamondColorPicker from "@/components/productComponent/ProductDiamondColorPicker";
 import PriceCalculationBreakdown from "@/components/productComponent/PriceCalculationBreakdown";
 import { useCart } from "@/contexts/CartContext";
 import { useProductConfiguredPrice } from "@/hooks/useProductConfiguredPrice";
@@ -479,6 +479,7 @@ export default function ProductPurchasePanel({
         weightGrams: baseWeight,
         karatLabel: priceKaratLabel,
         optionAdjustments,
+        optionLines: optionBreakdownLines,
         redirect: true,
       });
       setLoading(false);
@@ -499,6 +500,7 @@ export default function ProductPurchasePanel({
       weightGrams: baseWeight,
       karatLabel: priceKaratLabel,
       optionAdjustments,
+      optionLines: optionBreakdownLines,
     });
 
     setLoading(false);
@@ -788,8 +790,7 @@ export default function ProductPurchasePanel({
 
         {hasDiamondDetails && product.diamondDetails?.length ? (
           <div ref={diamondRef}>
-            <ProductDiamondDetailsSection
-              product={product}
+            <ProductDiamondColorPicker
               details={product.diamondDetails}
               selectedLabel={selectedQuality}
               onSelect={(label) => setSelectedQuality(label)}

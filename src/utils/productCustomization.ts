@@ -45,6 +45,18 @@ export type CustomizationSelections = {
   size: string;
 };
 
+export function areCustomizationSelectionsEqual(
+  a: CustomizationSelections,
+  b: CustomizationSelections
+): boolean {
+  return (
+    a.metal === b.metal &&
+    a.carat === b.carat &&
+    a.quality === b.quality &&
+    a.size === b.size
+  );
+}
+
 export type CustomizationField = "metal" | "carat" | "diamond" | "size";
 
 export type CustomizationValidationResult = {

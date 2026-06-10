@@ -16,6 +16,7 @@ import {
   getProductCustomizeHref,
   productHasCustomizationOptions,
 } from "@/utils/productCustomization";
+import { productLinkWarmHandlers } from "@/lib/productDetailNavigation";
 import { getProductHref } from "@/utils/productUrl";
 
 type ProductListCardProps = {
@@ -48,6 +49,7 @@ export default function ProductListCard({
 
   const list = product.compareAtPrice ?? 0;
   const href = getProductHref(product);
+  const warm = productLinkWarmHandlers(product);
   const delayStyle = { animationDelay: `${Math.min(animationIndex, 8) * 60}ms` };
 
   const runCheckout = async (redirect: boolean) => {
@@ -104,7 +106,7 @@ export default function ProductListCard({
 
   return (
     <article className="product-card product-card--animated" style={delayStyle}>
-      <Link href={href} className="product-card-media">
+      <Link href={href} className="product-card-media" {...warm}>
         {imageSrc !== "/placeholder.jpg" ? (
           <Image
             src={imageSrc}
@@ -134,7 +136,7 @@ export default function ProductListCard({
       </Link>
 
       <div className="product-card-body">
-        <Link href={href} className="product-card-title-link">
+        <Link href={href} className="product-card-title-link" {...warm}>
           <h3 className="product-item-title product-item-title--card">{product.name}</h3>
         </Link>
 
@@ -161,7 +163,7 @@ export default function ProductListCard({
               <span className="product-card-compare">{formatPrice(list)}</span>
             ) : null}
           </div>
-          <Link href={href} className="product-card-cta">
+          <Link href={href} className="product-card-cta" {...warm}>
             {copy.viewProduct}
           </Link>
         </div>

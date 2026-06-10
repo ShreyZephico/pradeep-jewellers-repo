@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
 import productContent from "@/lib/productContent";
 import type { Product } from "@/types/product";
+import type { CustomizationSelections } from "@/utils/productCustomization";
 import { buildProductWhatsAppEnquireUrl } from "@/utils/productWhatsAppEnquire";
 
 const copy = productContent.detail;
@@ -25,16 +26,30 @@ function WhatsAppIcon() {
 
 type ProductWhatsAppEnquireButtonProps = {
   product: Product;
+  selection?: CustomizationSelections;
+  totalPrice?: number;
 };
 
 export default function ProductWhatsAppEnquireButton({
   product,
+  selection,
+  totalPrice,
 }: ProductWhatsAppEnquireButtonProps) {
-  const [href, setHref] = useState("");
-
-  useEffect(() => {
-    setHref(buildProductWhatsAppEnquireUrl(product, window.location.origin));
-  }, [product]);
+  const href = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    return buildProductWhatsAppEnquireUrl(product, {
+      origin: window.location.origin,
+      selection,
+      totalPrice,
+    });
+  }, [
+    product,
+    selection?.metal,
+    selection?.carat,
+    selection?.quality,
+    selection?.size,
+    totalPrice,
+  ]);
 
   if (!href) {
     return null;

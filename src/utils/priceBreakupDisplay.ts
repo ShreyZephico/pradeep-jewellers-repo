@@ -1,5 +1,5 @@
 import { isKaratLabel, parseKaratNumber } from "@/utils/karat";
-import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
+import { splitJewelleryOptionAmounts } from "@/utils/calculateVariantPrice";
 import type { PriceBreakdownOptionLine } from "@/utils/priceBreakdownOptions";
 
 export function buildGoldBreakupLabel(
@@ -34,23 +34,20 @@ export function splitBreakupOptionLines(lines: PriceBreakdownOptionLine[]): {
   goldExtras: number;
   otherExtras: number;
 } {
+  const amounts = splitJewelleryOptionAmounts(lines);
   let diamond: PriceBreakdownOptionLine | null = null;
-  let goldExtras = 0;
-  let otherExtras = 0;
 
   for (const line of lines) {
     if (!line.amount) continue;
-    const lower = line.label.toLowerCase();
-    if (lower.startsWith("diamond")) {
+    if (line.label.toLowerCase().startsWith("diamond")) {
       if (!diamond) diamond = line;
-      continue;
+      break;
     }
-    if (lower.startsWith("metal") || lower.startsWith("carat")) {
-      goldExtras += line.amount;
-      continue;
-    }
-    otherExtras += line.amount;
   }
 
-  return { diamond, goldExtras, otherExtras };
+  return {
+    diamond,
+    goldExtras: amounts.goldExtras,
+    otherExtras: amounts.otherExtras,
+  };
 }

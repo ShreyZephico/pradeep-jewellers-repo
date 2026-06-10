@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { rememberListProducts } from "@/lib/productListSnapshot";
+import { productLinkWarmHandlers } from "@/lib/productDetailNavigation";
 import type { Product } from "@/types/product";
 import { getProductHref } from "@/utils/productUrl";
 import styles from "./css/BestSellerSection.module.css";
@@ -41,7 +43,9 @@ export default function BestSellerSection() {
         }
 
         if (!cancelled) {
-          setFeaturedProducts((data.products as Product[]) ?? []);
+          const products = (data.products as Product[]) ?? [];
+          rememberListProducts(products);
+          setFeaturedProducts(products);
         }
       } catch (e) {
         if (!cancelled) {
@@ -157,6 +161,7 @@ export default function BestSellerSection() {
             : featuredProducts.map((product, index) => {
                 const delay = (index * 0.1).toFixed(1);
                 const list = product.compareAtPrice ?? 0;
+                const warm = productLinkWarmHandlers(product);
 
                 return (
                   <Link
@@ -164,6 +169,7 @@ export default function BestSellerSection() {
                     href={getProductHref(product)}
                     className={styles.card}
                     style={{ animationDelay: `${delay}s` }}
+                    {...warm}
                   >
                     <div className={styles.imageWrap}>
                       <Image

@@ -2,6 +2,9 @@ import { getGoldPricingForKarat } from "./goldPrice";
 import { parseKaratNumber } from "./karat";
 import { resolveMakingChargeRate } from "./makingCharge";
 
+/** GST on gold + making (+ diamond when present). */
+export const JEWELLERY_GST_RATE = 0.03;
+
 export class GoldPriceUnavailableError extends Error {
   constructor() {
     super("No manual gold price in database");
@@ -31,10 +34,104 @@ export type CalculateVariantPriceInput = {
   makingChargeType?: string | null;
 };
 
+export type JewelleryOptionAmounts = {
+  diamondAmount: number;
+  goldExtras: number;
+  otherExtras: number;
+};
+
+export type JewelleryPriceTotals = {
+  goldTotal: number;
+  diamondAmount: number;
+  makingCharge: number;
+  otherExtras: number;
+  /** Gold + making + diamond (before GST). */
+  taxableSubtotal: number;
+  gst: number;
+  grandTotal: number;
+};
+
+type OptionLineLike = {
+  label: string;
+  amount: number;
+};
+
+function roundInr(value: number): number {
+  return Math.round(value);
+}
+
+/** Split customize option lines into diamond / metal-carat / other amounts. */
+export function splitJewelleryOptionAmounts(
+  lines: OptionLineLike[]
+): JewelleryOptionAmounts {
+  let diamondAmount = 0;
+  let goldExtras = 0;
+  let otherExtras = 0;
+
+  for (const line of lines) {
+    if (!line.amount) continue;
+    const lower = line.label.toLowerCase();
+    if (lower.startsWith("diamond")) {
+      diamondAmount += line.amount;
+      continue;
+    }
+    if (lower.startsWith("metal") || lower.startsWith("carat")) {
+      goldExtras += line.amount;
+      continue;
+    }
+    otherExtras += line.amount;
+  }
+
+  return {
+    diamondAmount: roundInr(diamondAmount),
+    goldExtras: roundInr(goldExtras),
+    otherExtras: roundInr(otherExtras),
+  };
+}
+
 /**
- * Single authoritative jewellery price calculation.
- * Gold rate per karat: dev.store_metal_prices (via getGoldPricingForKarat).
- * Making charge %: from Shopify catalog / metafields (makingChargePercent).
+ * Authoritative jewellery total: sum gold (+ metal/carat extras), diamond, and making;
+ * apply 3% GST on that sum; add non-taxable extras (e.g. size) after tax.
+ * When diamond is 0, GST is on gold + making only.
+ */
+export function computeJewelleryPriceTotals(
+  breakdown: Pick<VariantPriceBreakdown, "actualGoldPrice" | "makingCharge">,
+  options: Partial<JewelleryOptionAmounts> = {}
+): JewelleryPriceTotals {
+  const diamondAmount = roundInr(options.diamondAmount ?? 0);
+  const goldExtras = roundInr(options.goldExtras ?? 0);
+  const otherExtras = roundInr(options.otherExtras ?? 0);
+  const goldTotal = roundInr(breakdown.actualGoldPrice + goldExtras);
+  const makingCharge = roundInr(breakdown.makingCharge);
+
+  const taxableSubtotal = goldTotal + makingCharge + diamondAmount;
+  const gst = roundInr(taxableSubtotal * JEWELLERY_GST_RATE);
+  const grandTotal = taxableSubtotal + otherExtras + gst;
+
+  return {
+    goldTotal,
+    diamondAmount,
+    makingCharge,
+    otherExtras,
+    taxableSubtotal,
+    gst,
+    grandTotal,
+  };
+}
+
+export function computeJewelleryPriceFromOptionLines(
+  breakdown: Pick<VariantPriceBreakdown, "actualGoldPrice" | "makingCharge">,
+  optionLines: OptionLineLike[]
+): JewelleryPriceTotals {
+  return computeJewelleryPriceTotals(
+    breakdown,
+    splitJewelleryOptionAmounts(optionLines)
+  );
+}
+
+/**
+ * Single authoritative jewellery price calculation (gold + making from live rates).
+ * GST fields reflect gold + making only; use computeJewelleryPriceTotals for diamond.
  */
 export async function calculateVariantPrice({
   weight,
@@ -56,12 +153,13 @@ export async function calculateVariantPrice({
     perGramRate,
   } = goldPricing;
 
-  const actualGoldPrice = weight * perGramRate;
+  const actualGoldPrice = roundInr(weight * perGramRate);
   const makingRate = resolveMakingChargeRate(makingChargePercent, makingChargeType);
-  const makingCharge = actualGoldPrice * makingRate;
-  const subtotal = actualGoldPrice + makingCharge;
-  const gst = subtotal * 0.03;
-  const finalPrice = subtotal + gst;
+  const makingCharge = roundInr(actualGoldPrice * makingRate);
+  const totals = computeJewelleryPriceTotals(
+    { actualGoldPrice, makingCharge },
+    { diamondAmount: 0, goldExtras: 0, otherExtras: 0 }
+  );
 
   return {
     purity: purityPercentage,
@@ -69,11 +167,11 @@ export async function calculateVariantPrice({
     base24KGoldPrice,
     adjustedGoldPrice,
     perGramRate,
-    actualGoldPrice: Math.round(actualGoldPrice),
-    makingCharge: Math.round(makingCharge),
-    subtotal: Math.round(subtotal),
-    gst: Math.round(gst),
-    finalPrice: Math.round(finalPrice),
+    actualGoldPrice,
+    makingCharge,
+    subtotal: totals.taxableSubtotal,
+    gst: totals.gst,
+    finalPrice: totals.grandTotal,
   };
 }
 

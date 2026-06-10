@@ -15,6 +15,7 @@ import {
 import {
   PriceMismatchError,
   resolveCartLinePricing,
+  sanitizePublicCartAttributes,
 } from "@/lib/serverCartPricing";
 import {
   InsufficientStockError,
@@ -95,12 +96,23 @@ export async function POST(request: Request) {
         ? Math.floor(body.quantity)
         : 1;
 
-    const { merchandiseId, trustedPrice } = await resolveCartLinePricing(body);
+    const { merchandiseId, trustedPrice, pricing } =
+      await resolveCartLinePricing(body);
     await assertVariantCanBePurchased(merchandiseId, quantity);
 
     const attributes = buildLineAttributesForCart({
-      ...body,
+      variantId: merchandiseId,
+      productSlug: body.productSlug,
+      productName: body.productName,
+      productImage: body.productImage,
+      quantity,
       customPrice: trustedPrice,
+      attributes: sanitizePublicCartAttributes(body.attributes),
+      priceBreakdown: pricing.breakdown,
+      weightGrams: pricing.weightGrams,
+      karatLabel: pricing.karatLabel,
+      optionAdjustments: pricing.optionAdjustments,
+      optionLines: pricing.optionLines,
     });
 
     const existingCartId = getCartIdFromRequest(request);
