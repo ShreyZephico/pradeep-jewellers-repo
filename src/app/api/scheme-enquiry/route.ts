@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 
-import contactData from "@/data/contactDatas.json";
-import { getMailFrom, getMailTransporter, getOwnerEmail } from "@/lib/mail";
 import { clientIpFromRequest, rateLimit } from "@/lib/rateLimit";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 
@@ -110,35 +108,6 @@ export async function POST(request: Request) {
         { error: "Failed to save enquiry. Please try again." },
         { status: 500 }
       );
-    }
-
-    const transporter = getMailTransporter();
-    const ownerEmail = getOwnerEmail();
-
-    if (transporter && ownerEmail) {
-      const from = getMailFrom();
-      const brand = contactData.brand.name;
-
-      const text = [
-        `Suvarna Vriddhi enquiry — ${brand}`,
-        "",
-        `Name: ${fullName}`,
-        `Phone: ${phone}`,
-        `Plan: ${plan}`,
-        `Monthly amount: ₹${monthlyAmount.toLocaleString("en-IN")}`,
-      ].join("\n");
-
-      try {
-        await transporter.sendMail({
-          from,
-          to: ownerEmail,
-          replyTo: contactData.contact.email || undefined,
-          subject: `[${brand}] Suvarna Vriddhi scheme enquiry`,
-          text,
-        });
-      } catch (mailErr) {
-        console.error("scheme-enquiry email:", mailErr);
-      }
     }
 
     return NextResponse.json({ ok: true });

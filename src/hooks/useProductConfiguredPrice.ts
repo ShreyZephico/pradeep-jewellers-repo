@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { Product } from "@/types/product";
-import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
+import {
+  computeJewelleryPriceFromOptionLines,
+  type VariantPriceBreakdown,
+} from "@/utils/calculateVariantPrice";
 import { parsePriceCalculateResponse } from "@/lib/priceCalculateResponse";
 import {
   resolveCustomizationOptions,
@@ -113,8 +116,13 @@ export function useProductConfiguredPrice(
     selections.size,
   ]);
 
-  const estimatedPrice = livePrice ?? variantPrice;
-  const totalPrice = estimatedPrice + optionAdjustments;
+  const priceTotals = useMemo(() => {
+    if (!breakdown) return null;
+    return computeJewelleryPriceFromOptionLines(breakdown, optionLines);
+  }, [breakdown, optionLines]);
+
+  const estimatedPrice = priceTotals?.grandTotal ?? livePrice ?? variantPrice;
+  const totalPrice = priceTotals?.grandTotal ?? estimatedPrice + optionAdjustments;
 
   return {
     estimatedPrice,

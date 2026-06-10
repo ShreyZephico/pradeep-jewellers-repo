@@ -1,7 +1,10 @@
 "use client";
 
 import { formatProductPrice } from "@/utils/formatPrice";
-import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
+import {
+  computeJewelleryPriceFromOptionLines,
+  type VariantPriceBreakdown,
+} from "@/utils/calculateVariantPrice";
 import type { PriceBreakdownOptionLine } from "@/utils/priceBreakdownOptions";
 import productContent from "@/lib/productContent";
 import {
@@ -61,9 +64,10 @@ export default function PriceCalculationBreakdown({
     return null;
   }
 
-  const { diamond, goldExtras, otherExtras } = splitBreakupOptionLines(optionLines);
-  const diamondAmount = diamond?.amount ?? 0;
-  const goldTotal = breakdown.actualGoldPrice + goldExtras;
+  const { diamond, otherExtras } = splitBreakupOptionLines(optionLines);
+  const totals = computeJewelleryPriceFromOptionLines(breakdown, optionLines);
+  const diamondAmount = totals.diamondAmount;
+  const goldTotal = totals.goldTotal;
   const goldLineLabel = buildGoldBreakupLabel(
     karatLabel,
     metalLabel,
@@ -109,19 +113,26 @@ export default function PriceCalculationBreakdown({
         <div className="product-breakup-row">
           <span className="product-breakup-label">{copy.makingCharge}</span>
           <span className="product-breakup-amount">
-            {formatProductPrice(breakdown.makingCharge)}
+            {formatProductPrice(totals.makingCharge)}
           </span>
         </div>
 
+        {otherExtras > 0 ? (
+          <div className="product-breakup-row">
+            <span className="product-breakup-label">{copy.otherAdjustments}</span>
+            <span className="product-breakup-amount">{formatProductPrice(otherExtras)}</span>
+          </div>
+        ) : null}
+
         <div className="product-breakup-row">
           <span className="product-breakup-label">{copy.gst}</span>
-          <span className="product-breakup-amount">{formatProductPrice(breakdown.gst)}</span>
+          <span className="product-breakup-amount">{formatProductPrice(totals.gst)}</span>
         </div>
 
         <div className="product-breakup-row product-breakup-row--grand">
           <span className="product-breakup-label">{copy.grandTotal}</span>
           <span className="product-breakup-price product-breakup-price--grand">
-            {formatProductPrice(displayTotal)}
+            {formatProductPrice(totals.grandTotal || displayTotal)}
           </span>
         </div>
       </div>

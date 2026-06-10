@@ -1,7 +1,11 @@
 import { PJ_BREAKDOWN_ATTR } from "@/lib/cartConstants";
 import type { CheckoutAttribute } from "@/lib/shopify";
 import type { ClientCartLine } from "@/types/cart";
-import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
+import {
+  computeJewelleryPriceTotals,
+  splitJewelleryOptionAmounts,
+  type VariantPriceBreakdown,
+} from "@/utils/calculateVariantPrice";
 import type { PriceBreakdownOptionLine } from "@/utils/priceBreakdownOptions";
 
 export type CartLineBreakdownData = {
@@ -43,21 +47,34 @@ export function breakdownAttributesFromPricing(input: {
   weightGrams: number;
   karatLabel?: string | null;
   optionAdjustments?: number;
+  optionLines?: PriceBreakdownOptionLine[];
 }): CheckoutAttribute[] {
-  const { breakdown, weightGrams, karatLabel, optionAdjustments = 0 } = input;
+  const { breakdown, weightGrams, karatLabel, optionAdjustments = 0, optionLines } =
+    input;
+
+  const amounts = optionLines?.length
+    ? splitJewelleryOptionAmounts(optionLines)
+    : {
+        diamondAmount: Math.round(optionAdjustments),
+        goldExtras: 0,
+        otherExtras: 0,
+      };
+
+  const totals = computeJewelleryPriceTotals(breakdown, amounts);
+
   const attrs: CheckoutAttribute[] = [
     { key: PJ_BREAKDOWN_ATTR.weight, value: String(weightGrams) },
     { key: PJ_BREAKDOWN_ATTR.karat, value: (karatLabel ?? `${breakdown.karat}K`).trim() },
     { key: PJ_BREAKDOWN_ATTR.perGramRate, value: String(breakdown.perGramRate) },
     { key: PJ_BREAKDOWN_ATTR.actualGold, value: String(breakdown.actualGoldPrice) },
     { key: PJ_BREAKDOWN_ATTR.makingCharge, value: String(breakdown.makingCharge) },
-    { key: PJ_BREAKDOWN_ATTR.subtotal, value: String(breakdown.subtotal) },
-    { key: PJ_BREAKDOWN_ATTR.gst, value: String(breakdown.gst) },
+    { key: PJ_BREAKDOWN_ATTR.subtotal, value: String(totals.taxableSubtotal) },
+    { key: PJ_BREAKDOWN_ATTR.gst, value: String(totals.gst) },
   ];
-  if (optionAdjustments !== 0) {
+  if (totals.otherExtras !== 0) {
     attrs.push({
       key: PJ_BREAKDOWN_ATTR.optionAdj,
-      value: String(Math.round(optionAdjustments)),
+      value: String(totals.otherExtras),
     });
   }
   return attrs;
@@ -91,7 +108,8 @@ export function parseBreakdownFromLine(
   const optionAdj =
     parseIntAttr(line.attributes, PJ_BREAKDOWN_ATTR.optionAdj) ?? 0;
 
-  const unitFromPrice = line.customPriceInr > 0 ? line.customPriceInr : subtotal + gst + optionAdj;
+  const unitFromPrice =
+    line.customPriceInr > 0 ? line.customPriceInr : subtotal + gst + optionAdj;
 
   return {
     weightGrams: weight,
@@ -108,7 +126,7 @@ export function parseBreakdownFromLine(
       makingCharge,
       subtotal,
       gst,
-      finalPrice: subtotal + gst,
+      finalPrice: subtotal + gst + optionAdj,
     },
   };
 }

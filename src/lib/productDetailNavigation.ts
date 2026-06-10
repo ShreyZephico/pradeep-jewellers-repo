@@ -37,6 +37,7 @@ export function productLinkWarmHandlers(product: Product) {
   return {
     prefetch: true as const,
     onPointerDown: seed,
+    onClick: seed,
     onMouseEnter: seed,
     onFocus: seed,
   };

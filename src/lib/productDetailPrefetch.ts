@@ -1,5 +1,4 @@
 import {
-  readProductDetailCache,
   writeProductDetailCache,
 } from "@/lib/productDetailCache";
 import { parseJsonResponse } from "@/lib/parseJsonResponse";
@@ -22,11 +21,16 @@ async function fetchAndCacheProduct(slug: string): Promise<Product | null> {
   return data.product;
 }
 
-/** Warm product detail API + session cache before navigation (hover / focus). */
+export function getInflightProductDetail(
+  slug: string
+): Promise<Product | null> | undefined {
+  return inflight.get(slug.trim());
+}
+
+/** Warm full product detail API in background (hover / focus / seed). */
 export function prefetchProductDetail(slug: string): void {
   const key = slug.trim();
   if (!key || typeof window === "undefined") return;
-  if (readProductDetailCache(key)) return;
 
   if (!inflight.has(key)) {
     inflight.set(

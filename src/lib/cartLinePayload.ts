@@ -4,6 +4,7 @@ import { normalizeCartImageUrl } from "@/lib/cartImageUrl";
 import { buildCartLineAttributes } from "@/lib/shopifyCart";
 import type { CheckoutAttribute } from "@/lib/shopify";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
+import type { PriceBreakdownOptionLine } from "@/utils/priceBreakdownOptions";
 import { formatProductPrice } from "@/utils/formatPrice";
 
 const PJ_BREAKDOWN_KEYS = new Set<string>(Object.values(PJ_BREAKDOWN_ATTR));
@@ -21,6 +22,7 @@ export type CartItemBody = {
   weightGrams?: number;
   karatLabel?: string | null;
   optionAdjustments?: number;
+  optionLines?: PriceBreakdownOptionLine[];
 };
 
 export function buildLineAttributesForCart(
@@ -52,6 +54,7 @@ export function buildLineAttributesForCart(
           weightGrams: body.weightGrams,
           karatLabel: body.karatLabel,
           optionAdjustments: body.optionAdjustments ?? 0,
+          optionLines: body.optionLines,
         })
       : [];
 

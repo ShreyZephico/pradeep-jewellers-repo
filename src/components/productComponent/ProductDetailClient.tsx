@@ -3,7 +3,6 @@
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -15,17 +14,21 @@ import type { Product } from "@/types/product";
 import GoldShineIcon from "@/components/icons/GoldShineIcon";
 import ProductCommerceActions from "@/components/productComponent/ProductCommerceActions";
 import ProductWhatsAppEnquireButton from "@/components/productComponent/ProductWhatsAppEnquireButton";
+import ProductDiamondDetailsAccordion from "@/components/productComponent/ProductDiamondDetailsAccordion";
 import ProductCustomizeSummaryBar from "@/components/productComponent/ProductCustomizeSummaryBar";
 import ProductDeliveryEstimate from "@/components/productComponent/ProductDeliveryEstimate";
 import ProductRecommendedSection from "@/components/productComponent/ProductRecommendedSection";
 import ProductContentModal from "@/components/productComponent/ProductContentModal";
 import ProductModal from "@/components/productComponent/ProductModal";
 import { useCart } from "@/contexts/CartContext";
-import { resolveProductDetailSeed } from "@/lib/productDetailNavigation";
 import {
   readProductDetailCache,
   writeProductDetailCache,
 } from "@/lib/productDetailCache";
+import { getInflightProductDetail } from "@/lib/productDetailPrefetch";
+import { readListProductSnapshot } from "@/lib/productListSnapshot";
+import { useProductDetailSeed } from "@/hooks/useProductDetailSeed";
+import ProductDetailSkeleton from "@/components/productComponent/ProductDetailSkeleton";
 import { parseJsonResponse } from "@/lib/parseJsonResponse";
 import "@/styles/product-details.css";
 import {
@@ -45,12 +48,14 @@ import {
   buildSpecRowsFromSelections,
   buildCustomizationLineAttributes,
   applyCustomizationDefaults,
+  areCustomizationSelectionsEqual,
   customizationCatalogRevision,
   getDefaultProductCustomization,
   productHasCustomizationOptions,
   resolveCustomizationOptions,
   type CustomizationSelections,
 } from "@/utils/productCustomization";
+import { productHasDiamondDetails } from "@/utils/diamondDetails";
 import { getGalleryImagesForMetalSelection } from "@/utils/productGalleryByMetal";
 
 type ProductDetailClientProps = {
@@ -246,6 +251,13 @@ function ProductDetailSummary({
           />
         ) : null}
 
+        {productHasDiamondDetails(product.diamondDetails) ? (
+          <ProductDiamondDetailsAccordion
+            product={product}
+            selectedLabel={selection.quality}
+          />
+        ) : null}
+
         <div className="product-detail-commerce-inline">
           <ProductCommerceActions
             layout="row"
@@ -262,7 +274,11 @@ function ProductDetailSummary({
           ) : null}
         </div>
 
-        <ProductWhatsAppEnquireButton product={product} />
+        <ProductWhatsAppEnquireButton
+          product={product}
+          selection={selection}
+          totalPrice={totalPrice}
+        />
 
         <button
           type="button"
@@ -340,24 +356,29 @@ function ProductDetailLoaded({
 
   useEffect(() => {
     if (!hasGallery) {
-      setActiveImage("");
+      setActiveImage((prev) => (prev === "" ? prev : ""));
       return;
     }
-    if (!activeImage || !gallery.includes(activeImage)) {
-      setActiveImage(gallery[0] ?? "");
-    }
-  }, [gallery, hasGallery, activeImage]);
+    setActiveImage((prev) => {
+      if (prev && gallery.includes(prev)) return prev;
+      return gallery[0] ?? "";
+    });
+  }, [gallery, hasGallery]);
 
   const catalogRevision = customizationCatalogRevision(product);
   const pricing = useProductConfiguredPrice(product, confirmedSelection);
+  const lastAppliedCatalogRevision = useRef<string | null>(null);
 
   useEffect(() => {
-    setConfirmedSelection((prev) => applyCustomizationDefaults(prev, product));
+    if (lastAppliedCatalogRevision.current === catalogRevision) {
+      return;
+    }
+    lastAppliedCatalogRevision.current = catalogRevision;
+    setConfirmedSelection((prev) => {
+      const merged = applyCustomizationDefaults(prev, product);
+      return areCustomizationSelectionsEqual(prev, merged) ? prev : merged;
+    });
   }, [catalogRevision, product]);
-
-  useEffect(() => {
-    writeProductDetailCache(slug, product);
-  }, [product, slug]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -416,6 +437,7 @@ function ProductDetailLoaded({
           weightGrams: pricing.weightGrams,
           karatLabel: pricing.karatLabel,
           optionAdjustments: pricing.optionAdjustments,
+          optionLines: pricing.optionLines,
           redirect: true,
         });
         setLoading(false);
@@ -433,6 +455,7 @@ function ProductDetailLoaded({
         weightGrams: pricing.weightGrams,
         karatLabel: pricing.karatLabel,
         optionAdjustments: pricing.optionAdjustments,
+        optionLines: pricing.optionLines,
       });
 
       setLoading(false);
@@ -469,6 +492,7 @@ function ProductDetailLoaded({
         weightGrams: pricing.weightGrams,
         karatLabel: pricing.karatLabel,
         optionAdjustments: pricing.optionAdjustments,
+        optionLines: pricing.optionLines,
         redirect: true,
       });
       setLoading(false);
@@ -485,6 +509,7 @@ function ProductDetailLoaded({
       weightGrams: pricing.weightGrams,
       karatLabel: pricing.karatLabel,
       optionAdjustments: pricing.optionAdjustments,
+      optionLines: pricing.optionLines,
     });
 
     setLoading(false);
@@ -841,38 +866,57 @@ export default function ProductDetailClient({
   slug,
   initialProduct = null,
 }: ProductDetailClientProps) {
-  // SSR-safe: only use props for the first render so server HTML matches the client.
-  const [product, setProduct] = useState<Product | null>(initialProduct);
-  const [loading, setLoading] = useState(!initialProduct);
+  const seed = useProductDetailSeed(slug, initialProduct);
+  const [apiProduct, setApiProduct] = useState<Product | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
-  const productRef = useRef<Product | null>(initialProduct);
+  const productRef = useRef<Product | null>(initialProduct ?? seed);
   const mountFetchDone = useRef(false);
 
-  // Apply list/cache seed after hydration, before paint (client navigation stays instant).
-  useLayoutEffect(() => {
-    const seed = resolveProductDetailSeed(slug, initialProduct);
-    if (!seed) return;
-    setProduct(seed);
-    productRef.current = seed;
+  const product = useMemo(
+    () => apiProduct ?? seed ?? initialProduct,
+    [apiProduct, seed, initialProduct]
+  );
+
+  useEffect(() => {
+    productRef.current = product;
+  }, [product]);
+
+  useEffect(() => {
+    setApiProduct(null);
     setError("");
-    setLoading(false);
-    writeProductDetailCache(slug, seed);
-  }, [slug, initialProduct]);
+    setRefreshing(false);
+  }, [slug]);
 
   const refreshProduct = useCallback(
     async (options?: { silent?: boolean; signal?: AbortSignal }) => {
       const silent = options?.silent === true;
       const hasProduct = Boolean(productRef.current);
 
-      if (!hasProduct) {
-        setLoading(true);
-        setError("");
-      } else if (silent) {
+      if (hasProduct && silent) {
         setRefreshing(true);
+      } else if (!hasProduct) {
+        setError("");
       }
 
+      const applyProduct = (next: Product) => {
+        writeProductDetailCache(slug, next);
+        setApiProduct(next);
+        productRef.current = next;
+        setError("");
+      };
+
       try {
+        const inflight = getInflightProductDetail(slug);
+        if (inflight) {
+          const prefetched = await inflight;
+          if (options?.signal?.aborted) return;
+          if (prefetched) {
+            applyProduct(prefetched);
+            return;
+          }
+        }
+
         const response = await fetch(`/api/product/${encodeURIComponent(slug)}`, {
           signal: options?.signal,
         });
@@ -888,21 +932,16 @@ export default function ProductDetailClient({
           );
         }
 
-        const next = data.product;
-        writeProductDetailCache(slug, next);
-        setProduct(next);
-        productRef.current = next;
-        setError("");
+        applyProduct(data.product);
       } catch (e: unknown) {
         if (options?.signal?.aborted) return;
         const message = e instanceof Error ? e.message : "Something went wrong";
         if (!silent && !productRef.current) {
           setError(message);
-          setProduct(null);
+          setApiProduct(null);
         }
       } finally {
         setRefreshing(false);
-        setLoading(false);
       }
     },
     [slug]
@@ -911,10 +950,9 @@ export default function ProductDetailClient({
   const handleHistoryReturn = useCallback(() => {
     const cached = readProductDetailCache(slug);
     if (cached) {
-      setProduct(cached);
+      setApiProduct(cached);
       productRef.current = cached;
       setError("");
-      setLoading(false);
     }
     void refreshProduct({ silent: true });
   }, [slug, refreshProduct]);
@@ -924,10 +962,10 @@ export default function ProductDetailClient({
     const controller = new AbortController();
     mountFetchDone.current = false;
 
-    const hasSeed = Boolean(productRef.current ?? initialProduct);
-
+    const hasSeed = Boolean(
+      initialProduct ?? readProductDetailCache(slug) ?? readListProductSnapshot(slug)
+    );
     if (!hasSeed) {
-      setLoading(true);
       setError("");
     }
 
@@ -960,27 +998,22 @@ export default function ProductDetailClient({
     };
   }, [handleHistoryReturn]);
 
-  if (loading) {
-    return (
-      <div className="product-detail-page product-state-center">
-        <div className="product-spinner" aria-hidden />
-        <p>{copy.loading}</p>
-      </div>
-    );
-  }
-
-  if (error || !product) {
-    return (
-      <div className="product-detail-page product-state-center">
-        <div className="product-state-card">
-          <h1>{copy.unavailableTitle}</h1>
-          <p>{error || copy.unavailableFallback}</p>
-          <Link href="/products" className="product-btn-primary">
-            {copy.backToShop}
-          </Link>
+  if (!product) {
+    if (error) {
+      return (
+        <div className="product-detail-page product-state-center">
+          <div className="product-state-card">
+            <h1>{copy.unavailableTitle}</h1>
+            <p>{error}</p>
+            <Link href="/products" className="product-btn-primary">
+              {copy.backToShop}
+            </Link>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+
+    return <ProductDetailSkeleton />;
   }
 
   return (
@@ -1001,7 +1034,7 @@ export default function ProductDetailClient({
       </div>
 
       <div className="product-container product-detail-main">
-        <ProductDetailLoaded product={product} slug={slug} />
+        <ProductDetailLoaded key={slug} product={product} slug={slug} />
       </div>
     </div>
   );

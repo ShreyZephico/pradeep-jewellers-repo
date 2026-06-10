@@ -3,6 +3,7 @@ import { markProductsListStale } from "@/lib/productsListRefresh";
 import type { Product } from "@/types/product";
 import productContent from "@/lib/productContent";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
+import type { PriceBreakdownOptionLine } from "@/utils/priceBreakdownOptions";
 
 const copy = productContent.purchase;
 
@@ -13,6 +14,7 @@ export type CartPricingMeta = {
   weightGrams?: number;
   karatLabel?: string | null;
   optionAdjustments?: number;
+  optionLines?: PriceBreakdownOptionLine[];
 };
 
 export type StartProductCheckoutOptions = CartPricingMeta & {
@@ -95,6 +97,7 @@ function buildPayload(options: AddToCartOptions | StartProductCheckoutOptions) {
             weightGrams: options.weightGrams,
             karatLabel: options.karatLabel ?? null,
             optionAdjustments: options.optionAdjustments ?? 0,
+            optionLines: options.optionLines,
           }
         : {}),
     },

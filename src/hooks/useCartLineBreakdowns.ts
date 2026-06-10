@@ -11,8 +11,10 @@ import type { ClientCartLine } from "@/types/cart";
 import type { Product } from "@/types/product";
 import { parsePriceCalculateResponse } from "@/lib/priceCalculateResponse";
 import type { VariantPriceBreakdown } from "@/utils/calculateVariantPrice";
+import { computeJewelleryPriceFromOptionLines } from "@/utils/calculateVariantPrice";
 import {
   buildPriceBreakdownOptionLinesFromCartLine,
+  sumOptionLineAmounts,
   type PriceBreakdownOptionLine,
 } from "@/utils/priceBreakdownOptions";
 import { resolveVariantWeight } from "@/utils/resolveVariantWeight";
@@ -87,15 +89,18 @@ async function resolveLineBreakdown(
   );
   if (!breakdown) return null;
 
+  const optionAdjustments = sumOptionLineAmounts(optionLines);
   const unitPrice =
-    line.customPriceInr > 0 ? line.customPriceInr : breakdown.finalPrice;
+    line.customPriceInr > 0
+      ? line.customPriceInr
+      : computeJewelleryPriceFromOptionLines(breakdown, optionLines).grandTotal;
 
   return {
     weightGrams,
     karatLabel: caratLabel,
     breakdown,
     optionLines,
-    optionAdjustments: Math.max(0, unitPrice - breakdown.finalPrice),
+    optionAdjustments,
     unitPrice,
   };
 }

@@ -22,12 +22,20 @@ export type ProductSizeOption = {
   priceAdjustment?: number;
 };
 
+/** Shopify media URL with optional alt text from the admin. */
+export type ProductImage = {
+  url: string;
+  altText: string | null;
+};
+
 export type ProductVariant = {
   id: string;
   /** Original Supabase variant UUID (stable) when `id` is overlayed with a Shopify GID. */
   catalogVariantId?: string;
   title?: string;
   image?: string;
+  /** Shopify alt text for `image`, when set in the admin. */
+  imageAlt?: string | null;
   price: number;
   compareAtPrice?: number | null;
   availableForSale?: boolean;
@@ -64,7 +72,11 @@ export type Product = {
   price: number;
   compareAtPrice: number | null;
   image: string;
+  /** Shopify alt text for the primary `image`. */
+  imageAlt?: string | null;
   images?: string[];
+  /** Gallery images with Shopify alt text (same URLs as `images`, plus metadata). */
+  imageDetails?: ProductImage[];
   variantId?: string;
   /** Total Shopify variants (listing pages may omit full variant payloads). */
   variantCount?: number;
