@@ -6,11 +6,6 @@ import {
   ensureLoggingTables,
   logSyncEvent,
 } from "./lib/catalog-sync-logger.mjs";
-import {
-  getShopifyAdminToken,
-  getShopifyStoreDomain,
-  getShopifyStorefrontApiVersion,
-} from "./lib/shopify-env.mjs";
 
 function loadEnv() {
   for (const file of [".env.local", ".env"]) {
@@ -46,10 +41,9 @@ const shouldResetStore = args.includes("--reset-store");
 const productFilter = args
   .find((argument) => argument.startsWith("--product="))
   ?.split("=")[1];
-
-const domain = getShopifyStoreDomain();
-const adminToken = getShopifyAdminToken();
-const apiVersion = getShopifyStorefrontApiVersion();
+const domain = process.env.SHOPIFY_STORE_DOMAIN;
+const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
+const apiVersion = process.env.SHOPIFY_STOREFRONT_API_VERSION ?? "2026-04";
 const databaseUrl =
   process.env.DATABASE_URL ??
   "postgresql://zephico:zephico_password@localhost:5435/zephico_jewels";

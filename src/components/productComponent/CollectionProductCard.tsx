@@ -11,7 +11,6 @@ import {
 import productContent from "@/lib/productContent";
 import { formatProductPrice } from "@/utils/formatPrice";
 import { productLinkWarmHandlers } from "@/lib/productDetailNavigation";
-import { PRODUCT_CARD_PLACEHOLDER } from "@/lib/productImage";
 import { getProductHref } from "@/utils/productUrl";
 
 type CollectionProductCardProps = {
@@ -39,7 +38,7 @@ export default function CollectionProductCard({
         className="collection-card-media"
         {...warm}
       >
-        {imageSrc !== PRODUCT_CARD_PLACEHOLDER ? (
+        {imageSrc !== "/placeholder.jpg" ? (
           <Image
             src={imageSrc}
             alt={product.name}

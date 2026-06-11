@@ -4,13 +4,7 @@ import {
   applyCustomerAccessTokenCookie,
   clearCustomerSessionCookies,
 } from "@/lib/customerSessionCookies";
-import {
-  getShopifyStoreDomain,
-  getShopifyStorefrontToken,
-} from "@/lib/shopifyEnv";
 import { getShopifyStorefrontApiVersion } from "@/lib/shopifyApiVersion";
-
-export { getShopifyStoreDomain, getShopifyStorefrontToken } from "@/lib/shopifyEnv";
 
 export type CheckoutAuth = {
   customerAccessToken: string;
@@ -62,6 +56,24 @@ function isMerchantOAuthToken(token: string): boolean {
   } catch {
     return false;
   }
+}
+
+export function getShopifyStoreDomain(): string | null {
+  const raw =
+    process.env.SHOPIFY_STORE_DOMAIN?.trim() ||
+    process.env.NEXT_SHOPIFY_STORE?.trim() ||
+    process.env.SHOPIFY_STORE?.trim();
+  if (!raw) return null;
+  return raw.replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+}
+
+export function getShopifyStorefrontToken(): string | null {
+  const token =
+    process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN?.trim() ||
+    process.env.NEXT_SHOPIFY_STOREFRONT_TOKEN?.trim() ||
+    process.env.SHOPIFY_STOREFRONT_TOKEN?.trim();
+  if (!token || token.startsWith("shpat_")) return null;
+  return token;
 }
 
 function storefrontGraphqlUrl(): string | null {

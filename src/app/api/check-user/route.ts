@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server';
 
-import {
-  getShopifyAdminToken,
-  getShopifyStoreDomain,
-} from '@/lib/shopifyEnv';
-
 export async function POST(request: Request) {
   try {
     const { email, phone } = await request.json();
@@ -45,22 +40,13 @@ export async function POST(request: Request) {
     `;
 
     // ✅ Using ADMIN API (not Storefront API)
-    const storeDomain = getShopifyStoreDomain();
-    const adminToken = getShopifyAdminToken();
-    if (!storeDomain || !adminToken) {
-      return NextResponse.json(
-        { error: 'Shopify Admin API is not configured.' },
-        { status: 503 }
-      );
-    }
-
     const response = await fetch(
-      `https://${storeDomain}/admin/api/2024-01/graphql.json`,
+      `https://${process.env.SHOPIFY_STORE_DOMAIN}/admin/api/2024-01/graphql.json`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Shopify-Access-Token': adminToken,
+          'X-Shopify-Access-Token': process.env.SHOPIFY_ADMIN_ACCESS_TOKEN!,
         },
         body: JSON.stringify({ query: checkQuery }),
       }

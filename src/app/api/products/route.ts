@@ -10,8 +10,8 @@ import {
 } from "@/lib/productsApiCache";
 import { getProductsPage } from "@/lib/shopify";
 
-const DEFAULT_LIMIT = 24;
-const MAX_LIMIT = 100;
+const DEFAULT_LIMIT = 10;
+const MAX_LIMIT = 50;
 
 /** Commas break Shopify search parsing; normalize for search. */
 function sanitizeSearchInput(value: string): string {
@@ -95,7 +95,6 @@ export async function GET(request: NextRequest) {
         "Cache-Control":
           "public, s-maxage=120, stale-while-revalidate=300",
         "X-Cache": "MISS",
-        "X-Shopify-Products-Total": String(total),
       },
     });
   } catch (error: unknown) {

@@ -1,7 +1,30 @@
 import { PJ_CUSTOM_PRICE_ATTR, PJ_IMAGE_URL_ATTR } from "@/lib/cartConstants";
 import { normalizeCartImageUrl } from "@/lib/cartImageUrl";
-import { getStorefrontCredentials } from "@/lib/shopifyEnv";
+import { getShopifyStorefrontApiVersion } from "@/lib/shopifyApiVersion";
 import type { CheckoutAttribute } from "@/lib/shopify";
+
+function normalizeStoreDomain(raw?: string): string {
+  if (!raw?.trim()) return "";
+  return raw
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/+$/, "");
+}
+
+function getStorefrontCredentials() {
+  const domain = normalizeStoreDomain(
+    process.env.NEXT_SHOPIFY_STORE ?? process.env.SHOPIFY_STORE_DOMAIN
+  );
+  const apiVersion = getShopifyStorefrontApiVersion();
+  const publicToken = process.env.NEXT_SHOPIFY_STOREFRONT_TOKEN?.trim();
+  const serverToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN?.trim();
+  const token =
+    (publicToken && !publicToken.startsWith("shpat_") ? publicToken : undefined) ??
+    serverToken ??
+    publicToken ??
+    "";
+  return { domain, token, apiVersion };
+}
 
 async function storefrontFetch<T>(
   query: string,

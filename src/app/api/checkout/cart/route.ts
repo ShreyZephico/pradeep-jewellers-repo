@@ -10,7 +10,6 @@ import {
   createStorefrontCartCheckout,
   type CheckoutAttribute,
 } from "@/lib/shopify";
-import { getShopifyAdminToken } from "@/lib/shopifyEnv";
 
 type Body = {
   variantId?: string;
@@ -94,7 +93,7 @@ export async function POST(request: Request) {
     const customerAccessToken = auth.customerAccessToken;
     const customerEmail = customer.email ?? auth.email ?? undefined;
 
-    const adminToken = getShopifyAdminToken();
+    const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
     if (customPrice > 0 && adminToken) {
       const productName =
         typeof body.productName === "string" && body.productName.trim()

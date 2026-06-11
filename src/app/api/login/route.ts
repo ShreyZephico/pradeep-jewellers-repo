@@ -6,10 +6,8 @@ import {
 import { attachGuestCartToCustomer } from '@/lib/cartCustomerLink';
 import { applyCustomerSessionCookies } from '@/lib/customerSessionCookies';
 import {
-  getShopifyStoreDomain,
-  getShopifyStorefrontToken,
-} from '@/lib/checkoutAuth';
-import { getShopifyStorefrontGraphqlUrl } from '@/lib/shopifyApiVersion';
+  getShopifyStorefrontGraphqlUrl,
+} from '@/lib/shopifyApiVersion';
 
 export async function POST(request: Request) {
   try {
@@ -53,22 +51,14 @@ export async function POST(request: Request) {
       }
     `;
 
-    const storeDomain = getShopifyStoreDomain() ?? '';
-    const storefrontToken = getShopifyStorefrontToken();
-    if (!storeDomain || !storefrontToken) {
-      return NextResponse.json(
-        { error: 'Shopify login is not configured.' },
-        { status: 503 }
-      );
-    }
-
+    const storeDomain = process.env.SHOPIFY_STORE_DOMAIN?.trim() ?? '';
     const response = await fetch(
       getShopifyStorefrontGraphqlUrl(storeDomain),
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Shopify-Storefront-Access-Token': storefrontToken,
+          'X-Shopify-Storefront-Access-Token': process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN!,
         },
         body: JSON.stringify({
           query: mutation,

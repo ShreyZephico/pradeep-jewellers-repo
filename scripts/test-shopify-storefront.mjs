@@ -1,10 +1,5 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import {
-  getShopifyStoreDomain,
-  getShopifyStorefrontApiVersion,
-  getShopifyStorefrontToken,
-} from "./lib/shopify-env.mjs";
 
 function loadEnv() {
   try {
@@ -31,10 +26,23 @@ function loadEnv() {
 
 loadEnv();
 
-const domain = getShopifyStoreDomain();
-const apiVersion = getShopifyStorefrontApiVersion();
-const token = getShopifyStorefrontToken() ?? "";
-const publicToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_TOKEN?.trim() ?? "";
+function normalizeStoreDomain(raw) {
+  if (!raw?.trim()) return "";
+  return raw.trim().replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+}
+
+const domain = normalizeStoreDomain(
+  process.env.NEXT_SHOPIFY_STORE ?? process.env.SHOPIFY_STORE_DOMAIN
+);
+const apiVersion = process.env.SHOPIFY_STOREFRONT_API_VERSION ?? "2025-04";
+const publicToken = process.env.NEXT_SHOPIFY_STOREFRONT_TOKEN?.trim() ?? "";
+const serverToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN?.trim() ?? "";
+const token =
+  (publicToken && !publicToken.startsWith("shpat_") ? publicToken : undefined) ??
+  serverToken ??
+  publicToken ??
+  "";
+
 
 if (publicToken.startsWith("shpat_")) {
   console.log(

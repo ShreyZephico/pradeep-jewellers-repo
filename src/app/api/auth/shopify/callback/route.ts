@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
 
-import { getShopifyApiKey, getShopifyApiSecret } from '@/lib/shopifyEnv';
-
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
@@ -28,8 +26,8 @@ export async function GET(request: Request) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        client_id: getShopifyApiKey(),
-        client_secret: getShopifyApiSecret(),
+        client_id: process.env.SHOPIFY_API_KEY,
+        client_secret: process.env.SHOPIFY_API_SECRET,
         code: code,
       }),
     });

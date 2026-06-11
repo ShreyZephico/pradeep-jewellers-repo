@@ -1,15 +1,20 @@
-import {
-  getShopifyAdminToken,
-  getShopifyStoreDomain,
-  normalizeShopifyStoreDomain,
-} from "@/lib/shopifyEnv";
 import { getShopifyStorefrontApiVersion } from "@/lib/shopifyApiVersion";
 import type { ProductDiamondDetail } from "@/types/product";
 import { parseDiamondDetailsMetafield } from "@/utils/diamondDetails";
 
+function normalizeStoreDomain(raw?: string): string {
+  if (!raw?.trim()) return "";
+  return raw
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/+$/, "");
+}
+
 function getAdminCredentials() {
-  const domain = normalizeShopifyStoreDomain(getShopifyStoreDomain() ?? "");
-  const token = getShopifyAdminToken();
+  const domain = normalizeStoreDomain(
+    process.env.NEXT_SHOPIFY_STORE ?? process.env.SHOPIFY_STORE_DOMAIN
+  );
+  const token = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN?.trim();
   const apiVersion = getShopifyStorefrontApiVersion();
   return { domain, token, apiVersion };
 }

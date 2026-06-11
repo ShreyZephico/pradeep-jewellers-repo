@@ -5,7 +5,7 @@ import type { Product } from "@/types/product";
 
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 20;
-const CATALOG_MAX = 500;
+const CATALOG_MAX = 250;
 
 export type RecommendedProductsResult = {
   products: Product[];

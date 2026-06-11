@@ -23,7 +23,6 @@ import {
   toggleFacetSelection,
   type CollectionFacetFilters,
 } from '@/lib/shopCollectionFilters';
-import { resolveProductCardImage } from '@/lib/productImage';
 import {
   categoryShowsRingSizeFilter,
   parseRingSizesQueryParam,
@@ -80,8 +79,7 @@ function applyListStateToUrlParams(
   }
 }
 
-/** Matches API MAX_LIMIT — fewer round-trips while loading the full catalog. */
-const PAGE_SIZE = 48;
+const PAGE_SIZE = 12;
 const FETCH_TIMEOUT_MS = 25_000;
 const SKELETON_COUNT = PAGE_SIZE;
 const copy = productContent.list;
@@ -461,20 +459,6 @@ export default function ProductsPageClient({
     void fetchProducts(1, false, generation);
   }, [listQueryKey, retryCount, refreshToken, fetchProducts]);
 
-  /** Load every page automatically so all API products appear without manual scrolling. */
-  useEffect(() => {
-    if (loading || loadingMore || !hasMore || total <= 0) {
-      return;
-    }
-    if (products.length >= total) {
-      return;
-    }
-
-    const nextPage = pageRef.current + 1;
-    const generation = fetchGenRef.current;
-    void fetchProducts(nextPage, true, generation);
-  }, [loading, loadingMore, hasMore, products.length, total, fetchProducts]);
-
   useEffect(() => {
     const sentinel = loadMoreRef.current;
     if (!sentinel) return;
@@ -502,8 +486,12 @@ export default function ProductsPageClient({
     setImageErrors((prev) => ({ ...prev, [productId]: true }));
   };
 
-  const getProductImage = (product: Product) =>
-    resolveProductCardImage(product, Boolean(imageErrors[product.id]));
+  const getProductImage = (product: Product) => {
+    if (imageErrors[product.id]) {
+      return '/placeholder.jpg';
+    }
+    return product.image || '/placeholder.jpg';
+  };
 
   const resetList = () => {
     pageRef.current = 1;
