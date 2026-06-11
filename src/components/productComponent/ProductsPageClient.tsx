@@ -79,7 +79,8 @@ function applyListStateToUrlParams(
   }
 }
 
-const PAGE_SIZE = 12;
+/** Fewer round-trips; API allows up to MAX_LIMIT per page. */
+const PAGE_SIZE = 48;
 const FETCH_TIMEOUT_MS = 25_000;
 const SKELETON_COUNT = PAGE_SIZE;
 const copy = productContent.list;
@@ -127,13 +128,19 @@ function normalizePriceTierId(raw: string): string {
   return priceTiers.some((tier) => tier.id === id) ? id : 'any';
 }
 
+function productListKey(product: Product): string {
+  const slug = product.slug ?? product.handle ?? "";
+  return slug ? `${product.id}|${slug}` : product.id;
+}
+
 function mergeProducts(prev: Product[], incoming: Product[]): Product[] {
   if (incoming.length === 0) return prev;
-  const ids = new Set(prev.map((p) => p.id));
+  const keys = new Set(prev.map((p) => productListKey(p)));
   const next = [...prev];
   for (const product of incoming) {
-    if (!ids.has(product.id)) {
-      ids.add(product.id);
+    const key = productListKey(product);
+    if (!keys.has(key)) {
+      keys.add(key);
       next.push(product);
     }
   }
@@ -186,6 +193,9 @@ export default function ProductsPageClient({
   const pageRef = useRef(1);
   const fetchGenRef = useRef(0);
   const loadingMoreRef = useRef(false);
+  const fetchProductsRef = useRef<
+    (page: number, append: boolean, generation: number) => Promise<void>
+  >(async () => {});
 
   const categoryHero = useMemo(() => {
     if (selectedCategory === 'all') {
@@ -429,6 +439,8 @@ export default function ProductsPageClient({
     ]
   );
 
+  fetchProductsRef.current = fetchProducts;
+
   const listQueryKey = useMemo(
     () =>
       JSON.stringify({
@@ -456,8 +468,22 @@ export default function ProductsPageClient({
     pageRef.current = 1;
     setProducts([]);
     setHasMore(false);
-    void fetchProducts(1, false, generation);
-  }, [listQueryKey, retryCount, refreshToken, fetchProducts]);
+    void fetchProductsRef.current(1, false, generation);
+  }, [listQueryKey, retryCount, refreshToken]);
+
+  /** Load remaining pages without relying on scroll — fixes hosted grid stuck at PAGE_SIZE. */
+  useEffect(() => {
+    if (loading || loadingMore || !hasMore || total <= 0) {
+      return;
+    }
+    if (products.length >= total) {
+      return;
+    }
+
+    const nextPage = pageRef.current + 1;
+    const generation = fetchGenRef.current;
+    void fetchProductsRef.current(nextPage, true, generation);
+  }, [loading, loadingMore, hasMore, products.length, total]);
 
   useEffect(() => {
     const sentinel = loadMoreRef.current;
@@ -473,14 +499,14 @@ export default function ProductsPageClient({
 
         const nextPage = pageRef.current + 1;
         const generation = fetchGenRef.current;
-        void fetchProducts(nextPage, true, generation);
+        void fetchProductsRef.current(nextPage, true, generation);
       },
       { root: null, rootMargin: '280px 0px', threshold: 0 }
     );
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [fetchProducts, hasMore, loading, loadingMore, products.length]);
+  }, [hasMore, loading, loadingMore, products.length]);
 
   const handleImageError = (productId: string) => {
     setImageErrors((prev) => ({ ...prev, [productId]: true }));
@@ -900,7 +926,7 @@ export default function ProductsPageClient({
                 <ul className="collection-grid" aria-busy={loading || loadingMore}>
                   {products.map((product, index) => (
                     <li
-                      key={product.id}
+                      key={productListKey(product)}
                       className="collection-grid-item"
                       style={{ animationDelay: `${(index % 8) * 0.06}s` }}
                     >

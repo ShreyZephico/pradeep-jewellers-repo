@@ -10,8 +10,8 @@ import {
 } from "@/lib/productsApiCache";
 import { getProductsPage } from "@/lib/shopify";
 
-const DEFAULT_LIMIT = 10;
-const MAX_LIMIT = 50;
+const DEFAULT_LIMIT = 24;
+const MAX_LIMIT = 200;
 
 /** Commas break Shopify search parsing; normalize for search. */
 function sanitizeSearchInput(value: string): string {
