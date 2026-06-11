@@ -79,9 +79,11 @@ function applyListStateToUrlParams(
   }
 }
 
-/** Fewer round-trips; API allows up to MAX_LIMIT per page. */
+/** Grid “load more” chunk size when filters/search are active. */
 const PAGE_SIZE = 48;
-const FETCH_TIMEOUT_MS = 25_000;
+/** Full-catalog fetch — one request covers ~145 products (API MAX_LIMIT 200). */
+const CATALOG_FETCH_LIMIT = 200;
+const FETCH_TIMEOUT_MS = 60_000;
 const SKELETON_COUNT = PAGE_SIZE;
 const copy = productContent.list;
 const priceTiers = productContent.priceTiers;
@@ -333,6 +335,46 @@ export default function ProductsPageClient({
     }
   }, [selectedCategory]);
 
+  const buildListParams = useCallback(
+    (page: number, limit: number) => {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: String(limit),
+        category: selectedCategory,
+        sort,
+      });
+      if (debouncedQ) {
+        params.set('q', debouncedQ);
+      }
+      if (priceRange.min != null) {
+        params.set('minPrice', String(priceRange.min));
+      }
+      if (priceRange.max != null) {
+        params.set('maxPrice', String(priceRange.max));
+      }
+      if (
+        categoryShowsRingSizeFilter(selectedCategory) &&
+        selectedRingSizes.length > 0
+      ) {
+        params.set('sizes', serializeRingSizesQueryParam(selectedRingSizes));
+      }
+      const facetParams = serializeCollectionFacetFilters(facets);
+      for (const [key, value] of Object.entries(facetParams)) {
+        params.set(key, value);
+      }
+      return params;
+    },
+    [
+      debouncedQ,
+      selectedCategory,
+      selectedRingSizes,
+      facets,
+      sort,
+      priceRange.min,
+      priceRange.max,
+    ]
+  );
+
   const fetchProducts = useCallback(
     async (page: number, append: boolean, generation: number) => {
       if (append) {
@@ -348,43 +390,72 @@ export default function ProductsPageClient({
       const timeoutId = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
       try {
-        const params = new URLSearchParams({
-          page: String(page),
-          limit: String(PAGE_SIZE),
-          category: selectedCategory,
-          sort,
-        });
-        if (debouncedQ) {
-          params.set('q', debouncedQ);
-        }
-        if (priceRange.min != null) {
-          params.set('minPrice', String(priceRange.min));
-        }
-        if (priceRange.max != null) {
-          params.set('maxPrice', String(priceRange.max));
-        }
-        if (
-          categoryShowsRingSizeFilter(selectedCategory) &&
-          selectedRingSizes.length > 0
-        ) {
-          params.set('sizes', serializeRingSizesQueryParam(selectedRingSizes));
-        }
-        const facetParams = serializeCollectionFacetFilters(facets);
-        for (const [key, value] of Object.entries(facetParams)) {
-          params.set(key, value);
-        }
+        const hasListFilters =
+          debouncedQ.length > 0 ||
+          countActiveCollectionFacets(facets) > 0 ||
+          selectedPriceTier !== 'any' ||
+          selectedRingSizes.length > 0;
+        const useFullCatalogFetch = !append && !hasListFilters;
+        const requestLimit = useFullCatalogFetch ? CATALOG_FETCH_LIMIT : PAGE_SIZE;
 
-        const response = await fetch(`/api/products?${params.toString()}`, {
-          signal: controller.signal,
-        });
-        const data = await response.json();
+        const fetchPage = async (pageNumber: number, limit: number) => {
+          const response = await fetch(
+            `/api/products?${buildListParams(pageNumber, limit).toString()}`,
+            { signal: controller.signal }
+          );
+          const data = await response.json();
+          if (!response.ok || !data.success) {
+            throw new Error(data.error || 'Failed to load products');
+          }
+          return data as {
+            products?: Product[];
+            total?: number;
+            totalPages?: number;
+          };
+        };
 
-        if (generation !== fetchGenRef.current) {
+        if (useFullCatalogFetch) {
+          let merged: Product[] = [];
+          let catalogTotal = 0;
+          let currentPage = 1;
+          let totalPages = 1;
+
+          while (currentPage <= totalPages) {
+            if (generation !== fetchGenRef.current) {
+              return;
+            }
+
+            const data = await fetchPage(currentPage, requestLimit);
+            const incoming = (data.products ?? []) as Product[];
+            catalogTotal = typeof data.total === 'number' ? data.total : 0;
+            totalPages =
+              typeof data.totalPages === 'number'
+                ? data.totalPages
+                : Math.ceil(catalogTotal / requestLimit);
+
+            merged = mergeProducts(merged, incoming);
+            rememberListProducts(incoming);
+
+            if (merged.length >= catalogTotal || incoming.length === 0) {
+              break;
+            }
+            currentPage += 1;
+          }
+
+          if (generation !== fetchGenRef.current) {
+            return;
+          }
+
+          setTotal(catalogTotal);
+          setProducts(merged);
+          setHasMore(false);
+          pageRef.current = currentPage;
           return;
         }
 
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || 'Failed to load products');
+        const data = await fetchPage(page, requestLimit);
+        if (generation !== fetchGenRef.current) {
+          return;
         }
 
         const incoming = (data.products ?? []) as Product[];
@@ -392,7 +463,7 @@ export default function ProductsPageClient({
         const totalPages =
           typeof data.totalPages === 'number'
             ? data.totalPages
-            : Math.ceil(nextTotal / PAGE_SIZE);
+            : Math.ceil(nextTotal / requestLimit);
 
         setTotal(nextTotal);
         setProducts((prev) => (append ? mergeProducts(prev, incoming) : incoming));
@@ -429,13 +500,11 @@ export default function ProductsPageClient({
       }
     },
     [
+      buildListParams,
       debouncedQ,
-      selectedCategory,
-      selectedRingSizes,
       facets,
-      sort,
-      priceRange.min,
-      priceRange.max,
+      selectedPriceTier,
+      selectedRingSizes,
     ]
   );
 
@@ -470,20 +539,6 @@ export default function ProductsPageClient({
     setHasMore(false);
     void fetchProductsRef.current(1, false, generation);
   }, [listQueryKey, retryCount, refreshToken]);
-
-  /** Load remaining pages without relying on scroll — fixes hosted grid stuck at PAGE_SIZE. */
-  useEffect(() => {
-    if (loading || loadingMore || !hasMore || total <= 0) {
-      return;
-    }
-    if (products.length >= total) {
-      return;
-    }
-
-    const nextPage = pageRef.current + 1;
-    const generation = fetchGenRef.current;
-    void fetchProductsRef.current(nextPage, true, generation);
-  }, [loading, loadingMore, hasMore, products.length, total]);
 
   useEffect(() => {
     const sentinel = loadMoreRef.current;
