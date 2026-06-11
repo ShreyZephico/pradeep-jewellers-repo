@@ -32,6 +32,10 @@ import {
   getStorefrontCredentials,
   SHOPIFY_STOREFRONT_CREDENTIALS_HELP,
 } from "@/lib/shopifyEnv";
+import {
+  isBrokenLocalProductImage,
+  PRODUCT_CARD_PLACEHOLDER,
+} from "@/lib/productImage";
 import { getSiteOrigin } from "@/lib/siteUrl";
 
 let missingGoldPriceLogged = false;
@@ -205,7 +209,7 @@ const productListNodeFields = `
             url
             altText
           }
-          images(first: 4) {
+          images(first: 20) {
             edges {
               node {
                 url
@@ -234,6 +238,10 @@ const productListNodeFields = `
             edges {
               node {
                 id
+                image {
+                  url
+                  altText
+                }
                 weight
                 weightUnit
                 selectedOptions {
@@ -273,6 +281,35 @@ ${productListNodeFields}
   }
 `;
 
+/** Storefront batch fetch for products omitted from the catalog \`products\` connection (e.g. unlisted). */
+const PRODUCTS_BY_IDS_LIST_QUERY = `
+  query ProductsByIds($ids: [ID!]!) {
+    nodes(ids: $ids) {
+      ... on Product {
+${productListNodeFields}
+      }
+    }
+  }
+`;
+
+const ADMIN_PRODUCT_INDEX_QUERY = `
+  query AdminProductIndex($first: Int!, $after: String) {
+    products(first: $first, after: $after) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      edges {
+        node {
+          id
+          handle
+          status
+        }
+      }
+    }
+  }
+`;
+
 const PRODUCT_BY_HANDLE_QUERY = `
   query ProductByHandle($handle: String!) {
     product(handle: $handle) {
@@ -304,6 +341,29 @@ type ShopifyProductsListResponse = {
     }[];
   };
 };
+
+type ShopifyProductsByIdsResponse = {
+  nodes: (ShopifyProductNode | null)[];
+};
+
+type AdminProductIndexResponse = {
+  products: {
+    pageInfo: {
+      hasNextPage: boolean;
+      endCursor: string | null;
+    };
+    edges: {
+      node: {
+        id: string;
+        handle: string;
+        status: string;
+      };
+    }[];
+  };
+};
+
+const PRODUCT_IDS_BATCH = 50;
+const MAX_ADMIN_PRODUCT_INDEX = 2000;
 
 type ShopifyPolicy = {
   id: string;
@@ -644,7 +704,11 @@ async function mapShopifyProductListItem(
     compareRaw > 0 && compareRaw > shopifyListPrice ? compareRaw : null;
 
   const listImages = collectShopifyProductImages(node);
-  const primaryImage = listImages.urls[0] ?? fallback.image;
+  const rawPrimary = listImages.urls[0];
+  const primaryImage =
+    rawPrimary && !isBrokenLocalProductImage(rawPrimary)
+      ? rawPrimary
+      : PRODUCT_CARD_PLACEHOLDER;
 
   const variantCount =
     node.variantsCount?.count ?? node.variants.edges.length ?? 0;
@@ -1585,8 +1649,116 @@ type NodesCacheEntry = {
 let shopifyNodesCache: NodesCacheEntry | null = null;
 const NODES_CACHE_MS = 120_000;
 
+type MappedCatalogCacheEntry = {
+  key: string;
+  products: Product[];
+  searchTagOptions: CollectionFilterOption[];
+  at: number;
+};
+
+let mappedCatalogCache: MappedCatalogCacheEntry | null = null;
+
 export function clearShopifyNodesCache(): void {
   shopifyNodesCache = null;
+  mappedCatalogCache = null;
+}
+
+function isListableAdminProductStatus(status: string): boolean {
+  const normalized = status.toUpperCase();
+  return normalized === "ACTIVE" || normalized === "UNLISTED";
+}
+
+/** Admin index of all sellable products — used to find items missing from the Storefront catalog list. */
+async function fetchAdminProductIndex(): Promise<{ id: string; handle: string }[]> {
+  if (!adminToken) {
+    return [];
+  }
+
+  const index: { id: string; handle: string }[] = [];
+  let after: string | null = null;
+  let hasNext = true;
+
+  while (hasNext && index.length < MAX_ADMIN_PRODUCT_INDEX) {
+    const data: AdminProductIndexResponse = await shopifyAdminFetch(
+      ADMIN_PRODUCT_INDEX_QUERY,
+      {
+        first: Math.min(100, MAX_ADMIN_PRODUCT_INDEX - index.length),
+        after,
+      }
+    );
+
+    for (const edge of data.products.edges) {
+      const { id, handle, status } = edge.node;
+      if (!id || !handle || !isListableAdminProductStatus(status)) {
+        continue;
+      }
+      index.push({ id, handle });
+    }
+
+    hasNext = data.products.pageInfo.hasNextPage;
+    after = data.products.pageInfo.endCursor;
+    if (!data.products.edges.length) {
+      break;
+    }
+  }
+
+  return index;
+}
+
+/**
+ * Unlisted / hidden products are reachable by handle but omitted from Storefront
+ * `products { ... }`. Merge them in via Admin index + Storefront `nodes(ids)`.
+ */
+async function supplementCatalogNodes(
+  nodes: ShopifyProductNode[]
+): Promise<ShopifyProductNode[]> {
+  if (!adminToken) {
+    return nodes;
+  }
+
+  try {
+    const adminIndex = await fetchAdminProductIndex();
+    if (adminIndex.length === 0) {
+      return nodes;
+    }
+
+    const knownIds = new Set(nodes.map((node) => node.id));
+    const missingIds = adminIndex
+      .map((entry) => entry.id)
+      .filter((id) => !knownIds.has(id));
+
+    if (missingIds.length === 0) {
+      return nodes;
+    }
+
+    const supplemented = [...nodes];
+
+    for (let offset = 0; offset < missingIds.length; offset += PRODUCT_IDS_BATCH) {
+      const batch = missingIds.slice(offset, offset + PRODUCT_IDS_BATCH);
+      const data = await shopifyFetch<ShopifyProductsByIdsResponse>(
+        PRODUCTS_BY_IDS_LIST_QUERY,
+        { ids: batch }
+      );
+
+      for (const node of data.nodes) {
+        if (node?.id && node.handle) {
+          supplemented.push(node);
+          knownIds.add(node.id);
+        }
+      }
+    }
+
+    if (supplemented.length > nodes.length) {
+      console.info(
+        `[shopify] Supplemented catalog with ${supplemented.length - nodes.length} product(s) missing from Storefront products list.`
+      );
+    }
+
+    return supplemented;
+  } catch (error) {
+    console.warn("[shopify] Catalog supplement skipped:", error);
+    return nodes;
+  }
 }
 
 /** Raw Shopify product nodes (list query — lighter GraphQL). */
@@ -1594,12 +1766,17 @@ export async function fetchShopifyProductNodes(options?: {
   q?: string;
   category?: string;
   maxProducts?: number;
+  /** When false, skip Admin supplement (use for title/category Shopify search queries). */
+  supplementMissing?: boolean;
 }): Promise<ShopifyProductNode[]> {
   const shopifyQuery = buildShopifyProductsSearchQuery(
     options?.q?.trim() ?? "",
     options?.category ?? "all"
   );
-  const cacheKey = `${shopifyQuery ?? ""}|${options?.category ?? "all"}`;
+  const shouldSupplement =
+    options?.supplementMissing ??
+    (shopifyQuery == null || shopifyQuery === "");
+  const cacheKey = `${shopifyQuery ?? ""}|${options?.category ?? "all"}|sup=${shouldSupplement}`;
   const now = Date.now();
   if (
     shopifyNodesCache &&
@@ -1609,7 +1786,7 @@ export async function fetchShopifyProductNodes(options?: {
     return shopifyNodesCache.nodes;
   }
 
-  const maxProducts = options?.maxProducts ?? 250;
+  const maxProducts = options?.maxProducts ?? 500;
   const nodes: ShopifyProductNode[] = [];
   let after: string | null = null;
   let hasNext = true;
@@ -1636,8 +1813,96 @@ export async function fetchShopifyProductNodes(options?: {
     }
   }
 
-  shopifyNodesCache = { key: cacheKey, nodes, at: now };
-  return nodes;
+  const completeNodes = shouldSupplement
+    ? await supplementCatalogNodes(nodes)
+    : nodes;
+  shopifyNodesCache = { key: cacheKey, nodes: completeNodes, at: now };
+  return completeNodes;
+}
+
+async function loadMappedCatalogProducts(options: {
+  q?: string;
+  category?: string;
+}): Promise<{
+  products: Product[];
+  searchTagOptions: CollectionFilterOption[];
+  searchTagSuggestions: CollectionFilterOption[];
+}> {
+  const clientQ = options.q?.trim() ?? "";
+  const category = options.category ?? "all";
+  const cacheKey = `${category}|${clientQ}`;
+  const now = Date.now();
+
+  if (
+    mappedCatalogCache &&
+    mappedCatalogCache.key === cacheKey &&
+    now - mappedCatalogCache.at < NODES_CACHE_MS
+  ) {
+    return {
+      products: mappedCatalogCache.products,
+      searchTagOptions: mappedCatalogCache.searchTagOptions,
+      searchTagSuggestions: clientQ
+        ? buildSearchTagSuggestions(mappedCatalogCache.products, clientQ, 8)
+        : [],
+    };
+  }
+
+  let nodes: ShopifyProductNode[];
+
+  if (clientQ) {
+    const [titleSearchNodes, catalogNodes] = await Promise.all([
+      fetchShopifyProductNodes({
+        q: clientQ,
+        category,
+        maxProducts: 80,
+        supplementMissing: false,
+      }),
+      fetchShopifyProductNodes({
+        category,
+        maxProducts: 500,
+        supplementMissing: true,
+      }),
+    ]);
+
+    const byId = new Map<string, ShopifyProductNode>();
+    for (const node of titleSearchNodes) {
+      byId.set(node.id, node);
+    }
+    for (const node of catalogNodes) {
+      byId.set(node.id, node);
+    }
+    nodes = [...byId.values()];
+  } else {
+    nodes = await fetchShopifyProductNodes({
+      q: options.q,
+      category,
+    });
+  }
+
+  let products = await Promise.all(
+    nodes.map((node, index) => mapShopifyProductListItem(node, index))
+  );
+
+  const searchTagOptions = buildSearchTagFilterOptions(products);
+
+  if (clientQ) {
+    products = rankProductsBySearchQuery(products, clientQ);
+  }
+
+  mappedCatalogCache = {
+    key: cacheKey,
+    products,
+    searchTagOptions,
+    at: now,
+  };
+
+  return {
+    products,
+    searchTagOptions,
+    searchTagSuggestions: clientQ
+      ? buildSearchTagSuggestions(products, clientQ, 8)
+      : [],
+  };
 }
 
 /** Fetch all products matching filters from Storefront API (cursor pagination). */
@@ -1725,49 +1990,11 @@ export async function getProductsPage(options: {
   }
 
   try {
-    let nodes: ShopifyProductNode[];
-
-    if (clientQ) {
-      const [titleSearchNodes, catalogNodes] = await Promise.all([
-        fetchShopifyProductNodes({
-          q: clientQ,
-          category: options.category,
-          maxProducts: 80,
-        }),
-        fetchShopifyProductNodes({
-          category: options.category,
-          maxProducts: 200,
-        }),
-      ]);
-
-      const byId = new Map<string, ShopifyProductNode>();
-      for (const node of titleSearchNodes) {
-        byId.set(node.id, node);
-      }
-      for (const node of catalogNodes) {
-        byId.set(node.id, node);
-      }
-      nodes = [...byId.values()];
-    } else {
-      nodes = await fetchShopifyProductNodes({
+    const { products: allProducts, searchTagOptions, searchTagSuggestions } =
+      await loadMappedCatalogProducts({
         q: options.q,
         category: options.category,
       });
-    }
-
-    let allProducts = await Promise.all(
-      nodes.map((node, index) => mapShopifyProductListItem(node, index))
-    );
-
-    const searchTagOptions = buildSearchTagFilterOptions(allProducts);
-
-    if (clientQ) {
-      allProducts = rankProductsBySearchQuery(allProducts, clientQ);
-    }
-
-    const searchTagSuggestions = clientQ
-      ? buildSearchTagSuggestions(allProducts, clientQ, 8)
-      : [];
 
     return paginate(allProducts, { searchTagOptions, searchTagSuggestions });
   } catch (error) {
