@@ -6,3 +6,11 @@
 
 [build.environment]
   NODE_VERSION = "20"
+
+# Paginated /api/products must not be edge-cached without varying on page/limit.
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "private, no-store, must-revalidate"
+    CDN-Cache-Control = "no-store"
+    Netlify-CDN-Cache-Control = "no-store"

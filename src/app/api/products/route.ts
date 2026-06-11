@@ -10,8 +10,19 @@ import {
 } from "@/lib/productsApiCache";
 import { getProductsPage } from "@/lib/shopify";
 
+/** Paginated catalog must run per request — Netlify Edge must not cache by path only. */
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const DEFAULT_LIMIT = 12;
 const MAX_LIMIT = 50;
+
+const PRODUCTS_JSON_HEADERS: Record<string, string> = {
+  "Content-Type": "application/json",
+  "Cache-Control": "private, no-store, must-revalidate",
+  "CDN-Cache-Control": "no-store",
+  "Netlify-CDN-Cache-Control": "no-store",
+};
 
 /** Commas break Shopify search parsing; normalize for search. */
 function sanitizeSearchInput(value: string): string {
@@ -20,16 +31,14 @@ function sanitizeSearchInput(value: string): string {
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
     const cacheKey = searchParams.toString();
     const cachedBody = readProductsApiCache(cacheKey);
     if (cachedBody) {
       return new NextResponse(cachedBody, {
         status: 200,
         headers: {
-          "Content-Type": "application/json",
-          "Cache-Control":
-            "public, s-maxage=120, stale-while-revalidate=300",
+          ...PRODUCTS_JSON_HEADERS,
           "X-Cache": "HIT",
         },
       });
@@ -91,9 +100,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse(body, {
       status: 200,
       headers: {
-        "Content-Type": "application/json",
-        "Cache-Control":
-          "public, s-maxage=120, stale-while-revalidate=300",
+        ...PRODUCTS_JSON_HEADERS,
         "X-Cache": "MISS",
         "X-Shopify-Products-Total": String(total),
         "X-Products-Page": String(page),

@@ -200,10 +200,10 @@ export default function ProductsPageClient({
   const loadingMoreRef = useRef(false);
   const loadingRef = useRef(false);
   const hasMoreRef = useRef(false);
-  const loadMoreWasInViewRef = useRef(false);
   const fetchProductsRef = useRef<
     (page: number, append: boolean, generation: number) => Promise<void>
   >(async () => {});
+  const inFlightPagesRef = useRef<Set<number>>(new Set());
 
   const categoryHero = useMemo(() => {
     if (selectedCategory === 'all') {
@@ -383,6 +383,9 @@ export default function ProductsPageClient({
 
   const fetchProducts = useCallback(
     async (page: number, append: boolean, generation: number) => {
+      if (inFlightPagesRef.current.has(page)) {
+        return;
+      }
       if (append) {
         if (loadingMoreRef.current) {
           return;
@@ -395,13 +398,14 @@ export default function ProductsPageClient({
         setError('');
       }
 
+      inFlightPagesRef.current.add(page);
       const controller = new AbortController();
       const timeoutId = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
       try {
         const response = await fetch(
           `/api/products?${buildListParams(page, PAGE_SIZE).toString()}`,
-          { signal: controller.signal }
+          { signal: controller.signal, cache: 'no-store' }
         );
         const data = await response.json();
 
@@ -411,6 +415,14 @@ export default function ProductsPageClient({
 
         if (!response.ok || !data.success) {
           throw new Error(data.error || 'Failed to load products');
+        }
+
+        const responsePage =
+          typeof data.page === 'number' ? data.page : Number(data.page) || 0;
+        if (responsePage !== page) {
+          throw new Error(
+            `Catalog page mismatch (requested ${page}, got ${responsePage}). Refresh and try again.`
+          );
         }
 
         const incoming = (data.products ?? []) as Product[];
@@ -423,7 +435,15 @@ export default function ProductsPageClient({
         const nextHasMore = page < totalPages && incoming.length > 0;
 
         setTotal(nextTotal);
-        setProducts((prev) => (append ? mergeProducts(prev, incoming) : incoming));
+        setProducts((prev) => {
+          const merged = append ? mergeProducts(prev, incoming) : incoming;
+          if (append && incoming.length > 0 && merged.length === prev.length) {
+            console.warn(
+              `[products] Page ${page} returned only duplicates — check API pagination.`
+            );
+          }
+          return merged;
+        });
         rememberListProducts(incoming);
         setHasMore(nextHasMore);
         hasMoreRef.current = nextHasMore;
@@ -451,6 +471,7 @@ export default function ProductsPageClient({
         }
       } finally {
         window.clearTimeout(timeoutId);
+        inFlightPagesRef.current.delete(page);
         if (generation !== fetchGenRef.current) {
           return;
         }
@@ -476,13 +497,18 @@ export default function ProductsPageClient({
     void fetchProductsRef.current(nextPage, true, fetchGenRef.current);
   }, []);
 
+  const facetsQueryKey = useMemo(
+    () => JSON.stringify(serializeCollectionFacetFilters(facets)),
+    [facets]
+  );
+
   const listQueryKey = useMemo(
     () =>
       JSON.stringify({
         debouncedQ,
         selectedCategory,
-        selectedRingSizes,
-        facets,
+        ringSizes: selectedRingSizes.join(','),
+        facets: facetsQueryKey,
         sort,
         min: priceRange.min,
         max: priceRange.max,
@@ -491,7 +517,7 @@ export default function ProductsPageClient({
       debouncedQ,
       selectedCategory,
       selectedRingSizes,
-      facets,
+      facetsQueryKey,
       sort,
       priceRange.min,
       priceRange.max,
@@ -510,24 +536,18 @@ export default function ProductsPageClient({
     const generation = ++fetchGenRef.current;
     pageRef.current = 1;
     hasMoreRef.current = false;
-    loadMoreWasInViewRef.current = false;
+    inFlightPagesRef.current.clear();
     setProducts([]);
     setHasMore(false);
     void fetchProductsRef.current(1, false, generation);
   }, [listQueryKey, retryCount, refreshToken]);
 
-  /** Load next page when the sentinel enters view (scroll) or after page 1 finishes. */
+  /** Load next page when the sentinel is visible and the previous batch finished. */
   useEffect(() => {
-    if (loading || loadingMore || !hasMoreRef.current) {
+    if (!loadMoreInView || loading || loadingMore || !hasMoreRef.current) {
       return;
     }
-
-    const enteredView = loadMoreInView && !loadMoreWasInViewRef.current;
-    loadMoreWasInViewRef.current = loadMoreInView;
-
-    if (enteredView) {
-      requestNextPage();
-    }
+    requestNextPage();
   }, [loadMoreInView, loading, loadingMore, requestNextPage]);
 
   const handleImageError = (productId: string) => {
