@@ -79,11 +79,10 @@ function applyListStateToUrlParams(
   }
 }
 
-/** Grid “load more” chunk size when filters/search are active. */
-const PAGE_SIZE = 48;
-/** Full-catalog fetch — one request covers ~145 products (API MAX_LIMIT 200). */
-const CATALOG_FETCH_LIMIT = 200;
-const FETCH_TIMEOUT_MS = 60_000;
+/** Products shown per “page” — next batch loads when user scrolls near the bottom. */
+const PAGE_SIZE = 12;
+const FETCH_TIMEOUT_MS = 45_000;
+const SCROLL_LOAD_ROOT_MARGIN = '400px 0px';
 const SKELETON_COUNT = PAGE_SIZE;
 const copy = productContent.list;
 const priceTiers = productContent.priceTiers;
@@ -195,6 +194,8 @@ export default function ProductsPageClient({
   const pageRef = useRef(1);
   const fetchGenRef = useRef(0);
   const loadingMoreRef = useRef(false);
+  const loadingRef = useRef(false);
+  const hasMoreRef = useRef(false);
   const fetchProductsRef = useRef<
     (page: number, append: boolean, generation: number) => Promise<void>
   >(async () => {});
@@ -378,10 +379,13 @@ export default function ProductsPageClient({
   const fetchProducts = useCallback(
     async (page: number, append: boolean, generation: number) => {
       if (append) {
-        if (loadingMoreRef.current) return;
+        if (loadingMoreRef.current) {
+          return;
+        }
         loadingMoreRef.current = true;
         setLoadingMore(true);
       } else {
+        loadingRef.current = true;
         setLoading(true);
         setError('');
       }
@@ -390,72 +394,18 @@ export default function ProductsPageClient({
       const timeoutId = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
       try {
-        const hasListFilters =
-          debouncedQ.length > 0 ||
-          countActiveCollectionFacets(facets) > 0 ||
-          selectedPriceTier !== 'any' ||
-          selectedRingSizes.length > 0;
-        const useFullCatalogFetch = !append && !hasListFilters;
-        const requestLimit = useFullCatalogFetch ? CATALOG_FETCH_LIMIT : PAGE_SIZE;
+        const response = await fetch(
+          `/api/products?${buildListParams(page, PAGE_SIZE).toString()}`,
+          { signal: controller.signal }
+        );
+        const data = await response.json();
 
-        const fetchPage = async (pageNumber: number, limit: number) => {
-          const response = await fetch(
-            `/api/products?${buildListParams(pageNumber, limit).toString()}`,
-            { signal: controller.signal }
-          );
-          const data = await response.json();
-          if (!response.ok || !data.success) {
-            throw new Error(data.error || 'Failed to load products');
-          }
-          return data as {
-            products?: Product[];
-            total?: number;
-            totalPages?: number;
-          };
-        };
-
-        if (useFullCatalogFetch) {
-          let merged: Product[] = [];
-          let catalogTotal = 0;
-          let currentPage = 1;
-          let totalPages = 1;
-
-          while (currentPage <= totalPages) {
-            if (generation !== fetchGenRef.current) {
-              return;
-            }
-
-            const data = await fetchPage(currentPage, requestLimit);
-            const incoming = (data.products ?? []) as Product[];
-            catalogTotal = typeof data.total === 'number' ? data.total : 0;
-            totalPages =
-              typeof data.totalPages === 'number'
-                ? data.totalPages
-                : Math.ceil(catalogTotal / requestLimit);
-
-            merged = mergeProducts(merged, incoming);
-            rememberListProducts(incoming);
-
-            if (merged.length >= catalogTotal || incoming.length === 0) {
-              break;
-            }
-            currentPage += 1;
-          }
-
-          if (generation !== fetchGenRef.current) {
-            return;
-          }
-
-          setTotal(catalogTotal);
-          setProducts(merged);
-          setHasMore(false);
-          pageRef.current = currentPage;
+        if (generation !== fetchGenRef.current) {
           return;
         }
 
-        const data = await fetchPage(page, requestLimit);
-        if (generation !== fetchGenRef.current) {
-          return;
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Failed to load products');
         }
 
         const incoming = (data.products ?? []) as Product[];
@@ -463,19 +413,26 @@ export default function ProductsPageClient({
         const totalPages =
           typeof data.totalPages === 'number'
             ? data.totalPages
-            : Math.ceil(nextTotal / requestLimit);
+            : Math.ceil(nextTotal / PAGE_SIZE);
+
+        const nextHasMore = page < totalPages && incoming.length > 0;
 
         setTotal(nextTotal);
         setProducts((prev) => (append ? mergeProducts(prev, incoming) : incoming));
         rememberListProducts(incoming);
-        setHasMore(page < totalPages && incoming.length > 0);
+        setHasMore(nextHasMore);
+        hasMoreRef.current = nextHasMore;
         pageRef.current = page;
       } catch (e) {
         if (generation !== fetchGenRef.current) {
           return;
         }
         if (e instanceof Error && e.name === 'AbortError') {
-          setError('Request timed out. Please try again.');
+          if (append) {
+            console.warn('[products] Load more timed out — scroll again to retry.');
+          } else {
+            setError('Request timed out. Please try again.');
+          }
         } else {
           setError(
             e instanceof Error ? e.message : 'Network error. Please try again.'
@@ -485,6 +442,7 @@ export default function ProductsPageClient({
           setProducts([]);
           setTotal(0);
           setHasMore(false);
+          hasMoreRef.current = false;
         }
       } finally {
         window.clearTimeout(timeoutId);
@@ -495,17 +453,12 @@ export default function ProductsPageClient({
           loadingMoreRef.current = false;
           setLoadingMore(false);
         } else {
+          loadingRef.current = false;
           setLoading(false);
         }
       }
     },
-    [
-      buildListParams,
-      debouncedQ,
-      facets,
-      selectedPriceTier,
-      selectedRingSizes,
-    ]
+    [buildListParams]
   );
 
   fetchProductsRef.current = fetchProducts;
@@ -533,8 +486,17 @@ export default function ProductsPageClient({
   );
 
   useEffect(() => {
+    hasMoreRef.current = hasMore;
+  }, [hasMore]);
+
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
+
+  useEffect(() => {
     const generation = ++fetchGenRef.current;
     pageRef.current = 1;
+    hasMoreRef.current = false;
     setProducts([]);
     setHasMore(false);
     void fetchProductsRef.current(1, false, generation);
@@ -542,26 +504,32 @@ export default function ProductsPageClient({
 
   useEffect(() => {
     const sentinel = loadMoreRef.current;
-    if (!sentinel) return;
+    if (!sentinel) {
+      return;
+    }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry?.isIntersecting) return;
-        if (loading || loadingMore || !hasMore || loadingMoreRef.current) {
-          return;
-        }
+    const onIntersect = (entries: IntersectionObserverEntry[]) => {
+      const entry = entries[0];
+      if (!entry?.isIntersecting) {
+        return;
+      }
+      if (!hasMoreRef.current || loadingRef.current || loadingMoreRef.current) {
+        return;
+      }
 
-        const nextPage = pageRef.current + 1;
-        const generation = fetchGenRef.current;
-        void fetchProductsRef.current(nextPage, true, generation);
-      },
-      { root: null, rootMargin: '280px 0px', threshold: 0 }
-    );
+      const nextPage = pageRef.current + 1;
+      void fetchProductsRef.current(nextPage, true, fetchGenRef.current);
+    };
+
+    const observer = new IntersectionObserver(onIntersect, {
+      root: null,
+      rootMargin: SCROLL_LOAD_ROOT_MARGIN,
+      threshold: 0,
+    });
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, loading, loadingMore, products.length]);
+  }, [products.length, hasMore]);
 
   const handleImageError = (productId: string) => {
     setImageErrors((prev) => ({ ...prev, [productId]: true }));
