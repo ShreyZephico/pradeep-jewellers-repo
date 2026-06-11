@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server';
 
+import {
+  getShopifyApiKey,
+  getShopifyOAuthScopes,
+  getShopifyStoreDomain,
+} from '@/lib/shopifyEnv';
+import { getShopifyOAuthRedirectUri } from '@/lib/siteUrl';
+
 export async function GET() {
-  const shopDomain = process.env.SHOPIFY_STORE_DOMAIN;
-  const clientId = process.env.SHOPIFY_API_KEY;
-  const redirectUri =
-    process.env.SHOPIFY_OAUTH_REDIRECT_URI ||
-    'http://localhost:3000/api/auth/shopify/callback';
-  const scopes = 'write_customers,read_customers';
+  const shopDomain = getShopifyStoreDomain();
+  const clientId = getShopifyApiKey();
+  const redirectUri = getShopifyOAuthRedirectUri();
+  const scopes = getShopifyOAuthScopes();
   const state = Math.random().toString(36).substring(2, 15);
 
   if (!shopDomain || !clientId) {

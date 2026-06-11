@@ -26,6 +26,12 @@ import { tryCalculateVariantPrice } from "@/utils/calculateVariantPrice";
 import getGoldPrice from "@/utils/goldPrice";
 import { parseMakingChargeFromMetafields } from "@/utils/makingCharge";
 import { fetchMakingChargeFromShopifyAdmin } from "@/lib/shopifyMakingCharge";
+import {
+  getShopifyAdminToken,
+  getShopifyStoreDomain,
+  getStorefrontCredentials,
+  SHOPIFY_STOREFRONT_CREDENTIALS_HELP,
+} from "@/lib/shopifyEnv";
 import { getSiteOrigin } from "@/lib/siteUrl";
 
 let missingGoldPriceLogged = false;
@@ -57,38 +63,7 @@ import {
   normalizeRingSizeFilterValue,
 } from "@/utils/ringSizeChart";
 
-function normalizeStoreDomain(raw?: string): string {
-  if (!raw?.trim()) {
-    return "";
-  }
-  return raw
-    .trim()
-    .replace(/^https?:\/\//i, "")
-    .replace(/\/+$/, "");
-}
-
-/** Store + Storefront token from `.env` (NEXT_* preferred, server fallback). */
-function getStorefrontCredentials() {
-  const domain = normalizeStoreDomain(
-    process.env.NEXT_SHOPIFY_STORE ?? process.env.SHOPIFY_STORE_DOMAIN
-  );
-
-  const apiVersion = getShopifyStorefrontApiVersion();
-
-  const publicToken = process.env.NEXT_SHOPIFY_STOREFRONT_TOKEN?.trim();
-  const serverToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN?.trim();
-
-  // `shpat_*` is an Admin API token — Storefront GraphQL needs a Storefront access token.
-  const token =
-    (publicToken && !publicToken.startsWith("shpat_") ? publicToken : undefined) ??
-    serverToken ??
-    publicToken ??
-    "";
-
-  return { domain, token, apiVersion };
-}
-
-const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
+const adminToken = getShopifyAdminToken();
 
 type ShopifyProductNode = {
   id: string;
@@ -353,7 +328,7 @@ async function shopifyFetch<T>(
 
   if (!domain || !token) {
     throw new Error(
-      "Missing Shopify Storefront credentials. Set NEXT_SHOPIFY_STORE and a Storefront access token (not Admin shpat_) in .env."
+      `Missing Shopify Storefront credentials. ${SHOPIFY_STOREFRONT_CREDENTIALS_HELP}`
     );
   }
 
@@ -1739,10 +1714,12 @@ export async function getProductsPage(options: {
     };
   };
 
-  const { domain, token } = getStorefrontCredentials();
+  const domain = getShopifyStoreDomain();
+  const token = getStorefrontCredentials().token;
   if (!domain || !token) {
     console.warn(
-      "Shopify Storefront credentials missing — using static catalog fallback."
+      "Shopify Storefront credentials missing — using static catalog fallback.",
+      SHOPIFY_STOREFRONT_CREDENTIALS_HELP
     );
     return paginate(fallbackProducts);
   }

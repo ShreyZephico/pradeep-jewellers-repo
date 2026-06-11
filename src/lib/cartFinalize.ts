@@ -3,6 +3,7 @@ import {
   clearPendingDraftOrderCookie,
 } from "@/lib/cartCookies";
 import { isDraftOrderPaid } from "@/lib/shopify";
+import { getShopifyAdminToken } from "@/lib/shopifyEnv";
 import { emptyShopifyCart } from "@/lib/shopifyCart";
 import { NextResponse } from "next/server";
 
@@ -16,7 +17,7 @@ export class CheckoutAdminUnavailableError extends Error {
 export type FinalizeStatus = "idle" | "pending" | "cleared";
 
 function adminConfigured(): boolean {
-  return Boolean(process.env.SHOPIFY_ADMIN_ACCESS_TOKEN?.trim());
+  return Boolean(getShopifyAdminToken());
 }
 
 export async function finalizePendingCheckout(input: {

@@ -2,8 +2,11 @@ import { NextResponse } from 'next/server';
 
 import {
   getCheckoutAuthFromRequest,
+  getShopifyStoreDomain,
+  getShopifyStorefrontToken,
   verifyCheckoutCustomer,
 } from '@/lib/checkoutAuth';
+import { getShopifyStorefrontApiVersion } from '@/lib/shopifyApiVersion';
 
 export async function POST(request: Request) {
   try {
@@ -35,11 +38,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const apiVersion = process.env.SHOPIFY_STOREFRONT_API_VERSION ?? '2026-04';
-    const storefrontUrl = `https://${process.env.SHOPIFY_STORE_DOMAIN}/api/${apiVersion}/graphql.json`;
+    const storeDomain = getShopifyStoreDomain();
+    const storefrontToken = getShopifyStorefrontToken();
+    if (!storeDomain || !storefrontToken) {
+      return NextResponse.json(
+        { error: 'Shopify Storefront is not configured.' },
+        { status: 503 }
+      );
+    }
+
+    const apiVersion = getShopifyStorefrontApiVersion();
+    const storefrontUrl = `https://${storeDomain}/api/${apiVersion}/graphql.json`;
     const shopifyHeaders = {
       'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN!,
+      'X-Shopify-Storefront-Access-Token': storefrontToken,
     };
 
     const cartMutation = `

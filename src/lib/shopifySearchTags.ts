@@ -1,19 +1,14 @@
+import {
+  getShopifyAdminToken,
+  getShopifyStoreDomain,
+  normalizeShopifyStoreDomain,
+} from "@/lib/shopifyEnv";
 import { getShopifyStorefrontApiVersion } from "@/lib/shopifyApiVersion";
 import { parseSearchTagsMetafield } from "@/utils/searchTags";
 
-function normalizeStoreDomain(raw?: string): string {
-  if (!raw?.trim()) return "";
-  return raw
-    .trim()
-    .replace(/^https?:\/\//i, "")
-    .replace(/\/+$/, "");
-}
-
 function getAdminCredentials() {
-  const domain = normalizeStoreDomain(
-    process.env.NEXT_SHOPIFY_STORE ?? process.env.SHOPIFY_STORE_DOMAIN
-  );
-  const token = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN?.trim();
+  const domain = normalizeShopifyStoreDomain(getShopifyStoreDomain() ?? "");
+  const token = getShopifyAdminToken();
   const apiVersion = getShopifyStorefrontApiVersion();
   return { domain, token, apiVersion };
 }

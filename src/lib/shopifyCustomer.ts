@@ -2,6 +2,7 @@ import {
   getShopifyStoreDomain,
   getShopifyStorefrontToken,
 } from "@/lib/checkoutAuth";
+import { getShopifyAdminToken } from "@/lib/shopifyEnv";
 
 const storefrontApiVersion = process.env.SHOPIFY_STOREFRONT_API_VERSION ?? '2026-04';
 const adminApiVersion = process.env.SHOPIFY_ADMIN_API_VERSION ?? '2024-01';
@@ -105,7 +106,19 @@ function storefrontUrl() {
 }
 
 function adminUrl() {
-  return `https://${requireEnv('SHOPIFY_STORE_DOMAIN')}/admin/api/${adminApiVersion}/graphql.json`;
+  const domain = getShopifyStoreDomain();
+  if (!domain) {
+    throw new Error("Missing SHOPIFY_STORE_DOMAIN (or NEXT_PUBLIC_SHOPIFY_STORE).");
+  }
+  return `https://${domain}/admin/api/${adminApiVersion}/graphql.json`;
+}
+
+function requireAdminToken(): string {
+  const token = getShopifyAdminToken();
+  if (!token) {
+    throw new Error("Missing SHOPIFY_ADMIN_ACCESS_TOKEN.");
+  }
+  return token;
 }
 
 async function shopifyStorefrontFetch<T>(
@@ -138,7 +151,7 @@ async function shopifyAdminFetch<T>(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Shopify-Access-Token': requireEnv('SHOPIFY_ADMIN_ACCESS_TOKEN'),
+      'X-Shopify-Access-Token': requireAdminToken(),
     },
     body: JSON.stringify({ query, variables }),
     cache: 'no-store',
@@ -339,12 +352,12 @@ export async function updateCustomerPassword(customerId: string, password: strin
   }
 
   const response = await fetch(
-    `https://${requireEnv('SHOPIFY_STORE_DOMAIN')}/admin/api/${adminApiVersion}/customers/${numericId}.json`,
+    `https://${getShopifyStoreDomain()}/admin/api/${adminApiVersion}/customers/${numericId}.json`,
     {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': requireEnv('SHOPIFY_ADMIN_ACCESS_TOKEN'),
+        'X-Shopify-Access-Token': requireAdminToken(),
       },
       body: JSON.stringify({
         customer: {
