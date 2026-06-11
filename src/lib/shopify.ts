@@ -1610,8 +1610,102 @@ type NodesCacheEntry = {
 let shopifyNodesCache: NodesCacheEntry | null = null;
 const NODES_CACHE_MS = 120_000;
 
+type MappedCatalogCacheEntry = {
+  key: string;
+  products: Product[];
+  searchTagOptions: CollectionFilterOption[];
+  at: number;
+};
+
+let mappedCatalogCache: MappedCatalogCacheEntry | null = null;
+
 export function clearShopifyNodesCache(): void {
   shopifyNodesCache = null;
+  mappedCatalogCache = null;
+}
+
+async function loadMappedCatalogProducts(options: {
+  q?: string;
+  category?: string;
+}): Promise<{
+  products: Product[];
+  searchTagOptions: CollectionFilterOption[];
+  searchTagSuggestions: CollectionFilterOption[];
+}> {
+  const clientQ = options.q?.trim() ?? "";
+  const category = options.category ?? "all";
+  const cacheKey = `${category}|${clientQ}`;
+  const now = Date.now();
+
+  if (
+    mappedCatalogCache &&
+    mappedCatalogCache.key === cacheKey &&
+    now - mappedCatalogCache.at < NODES_CACHE_MS
+  ) {
+    return {
+      products: mappedCatalogCache.products,
+      searchTagOptions: mappedCatalogCache.searchTagOptions,
+      searchTagSuggestions: clientQ
+        ? buildSearchTagSuggestions(mappedCatalogCache.products, clientQ, 8)
+        : [],
+    };
+  }
+
+  let nodes: ShopifyProductNode[];
+
+  if (clientQ) {
+    const [titleSearchNodes, catalogNodes] = await Promise.all([
+      fetchShopifyProductNodes({
+        q: clientQ,
+        category,
+        maxProducts: 80,
+      }),
+      fetchShopifyProductNodes({
+        category,
+        maxProducts: 500,
+      }),
+    ]);
+
+    const byId = new Map<string, ShopifyProductNode>();
+    for (const node of titleSearchNodes) {
+      byId.set(node.id, node);
+    }
+    for (const node of catalogNodes) {
+      byId.set(node.id, node);
+    }
+    nodes = [...byId.values()];
+  } else {
+    nodes = await fetchShopifyProductNodes({
+      q: options.q,
+      category,
+      maxProducts: 500,
+    });
+  }
+
+  let products = await Promise.all(
+    nodes.map((node, index) => mapShopifyProductListItem(node, index))
+  );
+
+  const searchTagOptions = buildSearchTagFilterOptions(products);
+
+  if (clientQ) {
+    products = rankProductsBySearchQuery(products, clientQ);
+  }
+
+  mappedCatalogCache = {
+    key: cacheKey,
+    products,
+    searchTagOptions,
+    at: now,
+  };
+
+  return {
+    products,
+    searchTagOptions,
+    searchTagSuggestions: clientQ
+      ? buildSearchTagSuggestions(products, clientQ, 8)
+      : [],
+  };
 }
 
 /** Raw Shopify product nodes (list query — lighter GraphQL). */
@@ -1634,7 +1728,7 @@ export async function fetchShopifyProductNodes(options?: {
     return shopifyNodesCache.nodes;
   }
 
-  const maxProducts = options?.maxProducts ?? 250;
+  const maxProducts = options?.maxProducts ?? 500;
   const nodes: ShopifyProductNode[] = [];
   let after: string | null = null;
   let hasNext = true;
@@ -1748,49 +1842,11 @@ export async function getProductsPage(options: {
   }
 
   try {
-    let nodes: ShopifyProductNode[];
-
-    if (clientQ) {
-      const [titleSearchNodes, catalogNodes] = await Promise.all([
-        fetchShopifyProductNodes({
-          q: clientQ,
-          category: options.category,
-          maxProducts: 80,
-        }),
-        fetchShopifyProductNodes({
-          category: options.category,
-          maxProducts: 200,
-        }),
-      ]);
-
-      const byId = new Map<string, ShopifyProductNode>();
-      for (const node of titleSearchNodes) {
-        byId.set(node.id, node);
-      }
-      for (const node of catalogNodes) {
-        byId.set(node.id, node);
-      }
-      nodes = [...byId.values()];
-    } else {
-      nodes = await fetchShopifyProductNodes({
+    const { products: allProducts, searchTagOptions, searchTagSuggestions } =
+      await loadMappedCatalogProducts({
         q: options.q,
         category: options.category,
       });
-    }
-
-    let allProducts = await Promise.all(
-      nodes.map((node, index) => mapShopifyProductListItem(node, index))
-    );
-
-    const searchTagOptions = buildSearchTagFilterOptions(allProducts);
-
-    if (clientQ) {
-      allProducts = rankProductsBySearchQuery(allProducts, clientQ);
-    }
-
-    const searchTagSuggestions = clientQ
-      ? buildSearchTagSuggestions(allProducts, clientQ, 8)
-      : [];
 
     return paginate(allProducts, { searchTagOptions, searchTagSuggestions });
   } catch (error) {

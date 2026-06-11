@@ -1045,7 +1045,8 @@
   }
 }
 
-.collection-grid-item {
+.collection-grid-item,
+.collection-grid-skeleton {
   animation: shop-card-in 0.55s var(--shop-ease) backwards;
 }
 

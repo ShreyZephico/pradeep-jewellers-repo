@@ -95,6 +95,9 @@ export async function GET(request: NextRequest) {
         "Cache-Control":
           "public, s-maxage=120, stale-while-revalidate=300",
         "X-Cache": "MISS",
+        "X-Shopify-Products-Total": String(total),
+        "X-Products-Page": String(page),
+        "X-Products-Limit": String(limit),
       },
     });
   } catch (error: unknown) {

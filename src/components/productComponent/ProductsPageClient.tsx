@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react';
+import { useInView } from 'react-intersection-observer';
 
 import { rememberListProducts } from '@/lib/productListSnapshot';
 import type { Product } from '@/types/product';
@@ -190,8 +191,11 @@ export default function ProductsPageClient({
 
   const [retryCount, setRetryCount] = useState(0);
   const gridTopRef = useRef<HTMLDivElement>(null);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef(1);
+  const { ref: loadMoreRef, inView: loadMoreInView } = useInView({
+    rootMargin: SCROLL_LOAD_ROOT_MARGIN,
+    threshold: 0,
+  });
   const fetchGenRef = useRef(0);
   const loadingMoreRef = useRef(false);
   const loadingRef = useRef(false);
@@ -503,33 +507,16 @@ export default function ProductsPageClient({
   }, [listQueryKey, retryCount, refreshToken]);
 
   useEffect(() => {
-    const sentinel = loadMoreRef.current;
-    if (!sentinel) {
+    if (!loadMoreInView) {
+      return;
+    }
+    if (!hasMoreRef.current || loadingRef.current || loadingMoreRef.current) {
       return;
     }
 
-    const onIntersect = (entries: IntersectionObserverEntry[]) => {
-      const entry = entries[0];
-      if (!entry?.isIntersecting) {
-        return;
-      }
-      if (!hasMoreRef.current || loadingRef.current || loadingMoreRef.current) {
-        return;
-      }
-
-      const nextPage = pageRef.current + 1;
-      void fetchProductsRef.current(nextPage, true, fetchGenRef.current);
-    };
-
-    const observer = new IntersectionObserver(onIntersect, {
-      root: null,
-      rootMargin: SCROLL_LOAD_ROOT_MARGIN,
-      threshold: 0,
-    });
-
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [products.length, hasMore]);
+    const nextPage = pageRef.current + 1;
+    void fetchProductsRef.current(nextPage, true, fetchGenRef.current);
+  }, [loadMoreInView]);
 
   const handleImageError = (productId: string) => {
     setImageErrors((prev) => ({ ...prev, [productId]: true }));
@@ -951,6 +938,7 @@ export default function ProductsPageClient({
                     <li
                       key={productListKey(product)}
                       className="collection-grid-item"
+                      data-product-card
                       style={{ animationDelay: `${(index % 8) * 0.06}s` }}
                     >
                       <CollectionProductCard
@@ -963,7 +951,7 @@ export default function ProductsPageClient({
 
                   {showInitialSkeleton
                     ? Array.from({ length: SKELETON_COUNT }, (_, i) => (
-                        <li key={`skeleton-initial-${i}`} className="collection-grid-item">
+                        <li key={`skeleton-initial-${i}`} className="collection-grid-skeleton">
                           <CollectionProductCardSkeleton index={i} />
                         </li>
                       ))
@@ -971,7 +959,7 @@ export default function ProductsPageClient({
 
                   {loadingMore
                     ? Array.from({ length: SKELETON_COUNT }, (_, i) => (
-                        <li key={`skeleton-more-${i}`} className="collection-grid-item">
+                        <li key={`skeleton-more-${i}`} className="collection-grid-skeleton">
                           <CollectionProductCardSkeleton index={i} />
                         </li>
                       ))
