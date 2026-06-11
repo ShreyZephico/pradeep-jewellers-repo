@@ -200,6 +200,7 @@ export default function ProductsPageClient({
   const loadingMoreRef = useRef(false);
   const loadingRef = useRef(false);
   const hasMoreRef = useRef(false);
+  const loadMoreWasInViewRef = useRef(false);
   const fetchProductsRef = useRef<
     (page: number, append: boolean, generation: number) => Promise<void>
   >(async () => {});
@@ -467,6 +468,14 @@ export default function ProductsPageClient({
 
   fetchProductsRef.current = fetchProducts;
 
+  const requestNextPage = useCallback(() => {
+    if (!hasMoreRef.current || loadingRef.current || loadingMoreRef.current) {
+      return;
+    }
+    const nextPage = pageRef.current + 1;
+    void fetchProductsRef.current(nextPage, true, fetchGenRef.current);
+  }, []);
+
   const listQueryKey = useMemo(
     () =>
       JSON.stringify({
@@ -501,22 +510,25 @@ export default function ProductsPageClient({
     const generation = ++fetchGenRef.current;
     pageRef.current = 1;
     hasMoreRef.current = false;
+    loadMoreWasInViewRef.current = false;
     setProducts([]);
     setHasMore(false);
     void fetchProductsRef.current(1, false, generation);
   }, [listQueryKey, retryCount, refreshToken]);
 
+  /** Load next page when the sentinel enters view (scroll) or after page 1 finishes. */
   useEffect(() => {
-    if (!loadMoreInView) {
-      return;
-    }
-    if (!hasMoreRef.current || loadingRef.current || loadingMoreRef.current) {
+    if (loading || loadingMore || !hasMoreRef.current) {
       return;
     }
 
-    const nextPage = pageRef.current + 1;
-    void fetchProductsRef.current(nextPage, true, fetchGenRef.current);
-  }, [loadMoreInView]);
+    const enteredView = loadMoreInView && !loadMoreWasInViewRef.current;
+    loadMoreWasInViewRef.current = loadMoreInView;
+
+    if (enteredView) {
+      requestNextPage();
+    }
+  }, [loadMoreInView, loading, loadingMore, requestNextPage]);
 
   const handleImageError = (productId: string) => {
     setImageErrors((prev) => ({ ...prev, [productId]: true }));
@@ -967,6 +979,30 @@ export default function ProductsPageClient({
                 </ul>
 
                 <div ref={loadMoreRef} className="collection-scroll-sentinel" aria-hidden />
+
+                {hasMore && !loading && products.length > 0 ? (
+                  <div className="collection-load-more-wrap">
+                    <button
+                      type="button"
+                      className="collection-load-more-btn"
+                      onClick={requestNextPage}
+                      disabled={loadingMore}
+                      aria-busy={loadingMore}
+                    >
+                      {loadingMore
+                        ? copy.loadingMore
+                        : (copy.loadMoreButton ?? 'Load more products')}
+                    </button>
+                    <p className="collection-load-more-hint" aria-live="polite">
+                      {formatProductCopy(copy.countShort ?? '{total} pieces', {
+                        total,
+                      })}
+                      {products.length < total
+                        ? ` · ${products.length} ${copy.loadedSoFar}`
+                        : ''}
+                    </p>
+                  </div>
+                ) : null}
 
                 {!hasMore && !loading && !loadingMore && products.length > 0 ? (
                   <p className="collection-end-note collection-end-note--desktop">

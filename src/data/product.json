@@ -103,6 +103,7 @@
   "list": {
     "loading": "Loading collection…",
     "loadingMore": "Loading more pieces…",
+    "loadMoreButton": "Load more products",
     "loadedSoFar": "loaded",
     "endOfCollection": "End of list",
     "errorTitle": "Unable to load products",
