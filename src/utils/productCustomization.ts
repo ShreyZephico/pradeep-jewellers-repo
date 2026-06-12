@@ -17,6 +17,7 @@ import {
   resolveRingSizeSelection,
 } from "@/utils/ringSizeChart";
 import { getProductHref } from "@/utils/productUrl";
+import { resolveVariantWeight } from "@/utils/resolveVariantWeight";
 import { findBestMatchingVariant } from "@/utils/variantOptionMatch";
 import {
   getDiamondPickerOptions,
@@ -252,22 +253,51 @@ export function buildCustomizationLineAttributes(
 ): { key: string; value: string }[] {
   const pickers = getProductCustomizationPickers(product);
   const attributes: { key: string; value: string }[] = [];
-  if (pickers.showMetal && selected.metal.trim()) {
+  // Include option values whenever they exist in catalog (even when UI hides single-option pickers).
+  if (pickers.metal.length > 0 && selected.metal.trim()) {
     attributes.push({ key: "Metal", value: selected.metal });
   }
-  if (pickers.showCarat && selected.carat.trim()) {
+  if (pickers.carat.length > 0 && selected.carat.trim()) {
     attributes.push({ key: "Carat", value: selected.carat });
   }
   if (selected.quality.trim()) {
     attributes.push({ key: "Diamond Quality", value: selected.quality });
   }
-  if (pickers.showSize && selected.size.trim()) {
+  if (pickers.sizes.length > 0 && selected.size.trim()) {
     attributes.push({
       key: getSizeAttributeKey(product),
       value: selected.size.trim(),
     });
   }
   return attributes;
+}
+
+/** Shopify variant + catalog id for cart/checkout — matches pricing selections. */
+export function resolveCheckoutVariant(
+  product: Product,
+  selection: CustomizationSelections
+): {
+  variantId: string;
+  catalogVariantId: string | undefined;
+} {
+  const resolved = resolveCustomizationOptions(product, selection);
+  const variantId =
+    resolved.variant?.id ?? product.variantId ?? product.variants?.[0]?.id ?? "";
+
+  if (!variantId) {
+    return { variantId: "", catalogVariantId: undefined };
+  }
+
+  let catalogVariantId: string | undefined;
+  if (!variantId.startsWith("gid://shopify/ProductVariant/")) {
+    catalogVariantId =
+      resolved.variant?.catalogVariantId ??
+      product.variants?.find(
+        (v) => v.catalogVariantId === variantId || v.id === variantId
+      )?.catalogVariantId;
+  }
+
+  return { variantId, catalogVariantId };
 }
 
 export function resolveCustomizationOptions(
@@ -288,10 +318,10 @@ export function resolveCustomizationOptions(
     size: selected.size,
     karatLabel,
   });
-  const baseWeight =
+  const baseWeight = resolveVariantWeight(
     variant?.weight ??
-    product.variants?.find((v) => v.weight && v.weight > 0)?.weight ??
-    5;
+      product.variants?.find((v) => v.weight && v.weight > 0)?.weight
+  );
 
   return {
     metalOption: metalOption ?? null,

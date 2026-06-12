@@ -33,7 +33,6 @@ import { parseJsonResponse } from "@/lib/parseJsonResponse";
 import "@/styles/product-details.css";
 import {
   addProductToCart,
-  resolveDefaultVariant,
   startProductCheckout,
 } from "@/lib/productCheckout";
 import PriceCalculationBreakdown from "@/components/productComponent/PriceCalculationBreakdown";
@@ -52,7 +51,7 @@ import {
   customizationCatalogRevision,
   getDefaultProductCustomization,
   productHasCustomizationOptions,
-  resolveCustomizationOptions,
+  resolveCheckoutVariant,
   type CustomizationSelections,
 } from "@/utils/productCustomization";
 import { productHasDiamondDetails } from "@/utils/diamondDetails";
@@ -181,6 +180,7 @@ function ProductDetailSummary({
   showCustomizeBar,
   buyLoading,
   cartLoading,
+  commerceDisabled,
   commerceToast,
 }: {
   product: Product;
@@ -194,6 +194,7 @@ function ProductDetailSummary({
   showCustomizeBar: boolean;
   buyLoading: boolean;
   cartLoading: boolean;
+  commerceDisabled?: boolean;
   commerceToast: string;
 }) {
   const { totalPrice, listPrice, loading, weightGrams } = pricing;
@@ -263,6 +264,8 @@ function ProductDetailSummary({
             layout="row"
             buyLoading={buyLoading}
             cartLoading={cartLoading}
+            buyDisabled={commerceDisabled}
+            cartDisabled={commerceDisabled}
             onBuyNow={onBuyNow}
             onAddToCart={onAddToCart}
           />
@@ -403,96 +406,44 @@ function ProductDetailLoaded({
   }, [customizeOpen]);
 
   const runQuickCheckout = async (redirect: boolean) => {
-    if (hasCustomization) {
-      const resolved = resolveCustomizationOptions(product, confirmedSelection);
-      const variantId = resolved.variant?.id ?? product.variantId;
-      if (!variantId) {
-        setCustomizeOpen(true);
-        return;
-      }
-
-      const catalogVariantId =
-        variantId.startsWith("gid://shopify/ProductVariant/")
-          ? undefined
-          : resolved.variant?.catalogVariantId ??
-            product.variants?.find(
-              (v) =>
-                v.catalogVariantId === variantId || v.id === variantId
-            )?.catalogVariantId;
-
-      const attributes = buildCustomizationLineAttributes(product, confirmedSelection);
-
-      const setLoading = redirect ? setBuyLoading : setCartLoading;
-      setLoading(true);
-      setCommerceToast("");
-
-      if (redirect) {
-        const result = await startProductCheckout({
-          product,
-          variantId,
-          catalogVariantId,
-          customPrice: pricing.totalPrice,
-          attributes,
-          priceBreakdown: pricing.breakdown ?? undefined,
-          weightGrams: pricing.weightGrams,
-          karatLabel: pricing.karatLabel,
-          optionAdjustments: pricing.optionAdjustments,
-          optionLines: pricing.optionLines,
-          redirect: true,
-        });
-        setLoading(false);
-        if (!result.ok) setCommerceToast(result.error);
-        return;
-      }
-
-      const result = await addProductToCart({
-        product,
-        variantId,
-        catalogVariantId,
-        customPrice: pricing.totalPrice,
-        attributes,
-        priceBreakdown: pricing.breakdown ?? undefined,
-        weightGrams: pricing.weightGrams,
-        karatLabel: pricing.karatLabel,
-        optionAdjustments: pricing.optionAdjustments,
-        optionLines: pricing.optionLines,
-      });
-
-      setLoading(false);
-
-      if (!result.ok) {
-        setCommerceToast(result.error);
-        return;
-      }
-
-      await refreshCart();
-      goToCart();
-      setCommerceToast(productContent.commerce.addedToCart);
-      window.setTimeout(() => setCommerceToast(""), 3200);
+    if (pricing.loading) {
       return;
     }
 
-    const { variantId, catalogVariantId } = resolveDefaultVariant(product);
+    const { variantId, catalogVariantId } = resolveCheckoutVariant(
+      product,
+      confirmedSelection
+    );
     if (!variantId) {
       setCustomizeOpen(true);
       return;
     }
 
+    const attributes = buildCustomizationLineAttributes(
+      product,
+      confirmedSelection
+    );
+
     const setLoading = redirect ? setBuyLoading : setCartLoading;
     setLoading(true);
     setCommerceToast("");
 
+    const cartPayload = {
+      product,
+      variantId,
+      catalogVariantId,
+      customPrice: pricing.totalPrice,
+      attributes,
+      priceBreakdown: pricing.breakdown ?? undefined,
+      weightGrams: pricing.weightGrams,
+      karatLabel: pricing.karatLabel,
+      optionAdjustments: pricing.optionAdjustments,
+      optionLines: pricing.optionLines,
+    };
+
     if (redirect) {
       const result = await startProductCheckout({
-        product,
-        variantId,
-        catalogVariantId,
-        customPrice: pricing.totalPrice,
-        priceBreakdown: pricing.breakdown ?? undefined,
-        weightGrams: pricing.weightGrams,
-        karatLabel: pricing.karatLabel,
-        optionAdjustments: pricing.optionAdjustments,
-        optionLines: pricing.optionLines,
+        ...cartPayload,
         redirect: true,
       });
       setLoading(false);
@@ -500,17 +451,7 @@ function ProductDetailLoaded({
       return;
     }
 
-    const result = await addProductToCart({
-      product,
-      variantId,
-      catalogVariantId,
-      customPrice: pricing.totalPrice,
-      priceBreakdown: pricing.breakdown ?? undefined,
-      weightGrams: pricing.weightGrams,
-      karatLabel: pricing.karatLabel,
-      optionAdjustments: pricing.optionAdjustments,
-      optionLines: pricing.optionLines,
-    });
+    const result = await addProductToCart(cartPayload);
 
     setLoading(false);
 
@@ -739,6 +680,7 @@ function ProductDetailLoaded({
                   showCustomizeBar={hasCustomization}
                   buyLoading={buyLoading}
                   cartLoading={cartLoading}
+                  commerceDisabled={pricing.loading}
                   commerceToast={commerceToast}
                   onCustomize={() => setCustomizeOpen(true)}
                   onPriceBreakdown={() => setBreakdownOpen(true)}
@@ -791,6 +733,8 @@ function ProductDetailLoaded({
           layout="row"
           buyLoading={buyLoading}
           cartLoading={cartLoading}
+          buyDisabled={pricing.loading}
+          cartDisabled={pricing.loading}
           onBuyNow={() => void runQuickCheckout(true)}
           onAddToCart={() => void runQuickCheckout(false)}
         />

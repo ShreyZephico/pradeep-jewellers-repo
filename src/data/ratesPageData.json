@@ -9,20 +9,22 @@
     "metalLabel": "Show",
     "viewLabel": "View",
     "daysOptions": [
-      { "value": 7, "label": "7 days" },
-      { "value": 14, "label": "14 days" },
-      { "value": 30, "label": "30 days" }
+      { "value": 7, "label": "7 days", "shortLabel": "7d" },
+      { "value": 14, "label": "14 days", "shortLabel": "14d" },
+      { "value": 30, "label": "30 days", "shortLabel": "30d" }
     ],
     "metalOptions": [
-      { "value": "all", "label": "Gold + silver" },
-      { "value": "gold", "label": "Gold only" },
-      { "value": "silver", "label": "Silver only" }
+      { "value": "all", "label": "Gold + silver", "shortLabel": "Both" },
+      { "value": "gold", "label": "Gold only", "shortLabel": "Gold" },
+      { "value": "silver", "label": "Silver only", "shortLabel": "Silver" }
     ],
     "viewOptions": [
-      { "value": "overview", "label": "Overview" },
-      { "value": "table", "label": "Table" },
-      { "value": "charts", "label": "Charts" }
-    ]
+      { "value": "overview", "label": "Overview", "shortLabel": "Overview" },
+      { "value": "table", "label": "Table", "shortLabel": "Table" },
+      { "value": "charts", "label": "Charts", "shortLabel": "Charts" }
+    ],
+    "toggleLabel": "Filters",
+    "toggleAriaLabel": "Show or hide chart filters"
   },
   "updatedPrefix": "Last updated",
   "summaryTitle": "At a glance",

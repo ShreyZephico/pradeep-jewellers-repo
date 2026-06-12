@@ -14,6 +14,16 @@
     "phone": "+91 88668 73390",
     "email": "hello@pradeepjewellers.in"
   },
+  "legal": {
+    "tradingName": "Pradeep Jewellers",
+    "email": "hello@pradeepjewellers.in",
+    "address": "Santh Bazzar, Amdavadi Bazar Road, Nadiad, Gujarat 387001",
+    "phone": "+91 88668 73390",
+    "registrationNumber": "Proprietorship — Nadiad, Gujarat",
+    "vatNumber": "GST registered",
+    "websiteUrl": "https://www.pradeepjewellers.in",
+    "legacyEmails": ["vishal.sharma@zephico.com"]
+  },
   "social": {
     "instagram": "https://instagram.com/pradeepjewellers_nadiad",
     "facebook": "https://facebook.com/pradeepjewellers",

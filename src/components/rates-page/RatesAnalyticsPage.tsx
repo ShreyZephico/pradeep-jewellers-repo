@@ -34,6 +34,25 @@ function trendColor(
   return colors.neutral;
 }
 
+type FilterOption = {
+  value: string | number;
+  label: string;
+  shortLabel?: string;
+};
+
+function FilterPillLabel({ option }: { option: FilterOption }) {
+  return (
+    <>
+      <span className="rates-page__pill-label rates-page__pill-label--full">
+        {option.label}
+      </span>
+      <span className="rates-page__pill-label rates-page__pill-label--short">
+        {option.shortLabel ?? option.label}
+      </span>
+    </>
+  );
+}
+
 export default function RatesAnalyticsPage({
   initialPayload,
   trendColors,
@@ -47,6 +66,7 @@ export default function RatesAnalyticsPage({
   const [payload, setPayload] = useState(initialPayload);
   const [loading, setLoading] = useState(false);
   const [visible] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const loadedDaysRef = useRef(initialPayload.days ?? defaultDays);
 
   const days = Number(searchParams.get("days") ?? defaultDays) || defaultDays;
@@ -68,6 +88,31 @@ export default function RatesAnalyticsPage({
     },
     [router, searchParams]
   );
+
+  const applyFilter = useCallback(
+    (patch: Record<string, string>) => {
+      updateParams(patch);
+      if (window.matchMedia("(max-width: 767px)").matches) {
+        setFiltersOpen(false);
+      }
+    },
+    [updateParams]
+  );
+
+  const activeDaysLabel =
+    copy.filters.daysOptions.find((opt) => opt.value === days)?.shortLabel ??
+    copy.filters.daysOptions.find((opt) => opt.value === days)?.label ??
+    `${days}d`;
+
+  const activeMetalLabel =
+    copy.filters.metalOptions.find((opt) => opt.value === metal)?.shortLabel ??
+    copy.filters.metalOptions.find((opt) => opt.value === metal)?.label ??
+    metal;
+
+  const activeViewLabel =
+    copy.filters.viewOptions.find((opt) => opt.value === view)?.shortLabel ??
+    copy.filters.viewOptions.find((opt) => opt.value === view)?.label ??
+    view;
 
   useEffect(() => {
     if (days === loadedDaysRef.current) return;
@@ -208,64 +253,115 @@ export default function RatesAnalyticsPage({
       </header>
 
       <div className="rates-page__inner">
-        <div className="rates-page__filters" role="group" aria-label="Chart filters">
-          <div className="rates-page__filter-group">
-            <span className="rates-page__filter-label">
-              {copy.filters.periodLabel}
+        <div
+          className={`rates-page__filters${
+            filtersOpen ? " rates-page__filters--open" : ""
+          }`}
+        >
+          <button
+            type="button"
+            className="rates-page__filters-toggle"
+            aria-expanded={filtersOpen}
+            aria-controls="rates-page-filters-body"
+            aria-label={copy.filters.toggleAriaLabel}
+            onClick={() => setFiltersOpen((open) => !open)}
+          >
+            <span className="rates-page__filters-toggle-icon" aria-hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                <path
+                  d="M4 7h16M7 12h10M10 17h4"
+                  strokeLinecap="round"
+                />
+              </svg>
             </span>
-            <div className="rates-page__filter-pills">
-              {copy.filters.daysOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  className={`rates-page__pill${
-                    days === opt.value ? " rates-page__pill--active" : ""
-                  }`}
-                  onClick={() => updateParams({ days: String(opt.value) })}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
+            <span className="rates-page__filters-toggle-text">
+              <span className="rates-page__filters-toggle-title">
+                {copy.filters.toggleLabel}
+              </span>
+              <span className="rates-page__filters-summary">
+                {activeDaysLabel}
+                <span className="rates-page__filters-summary-sep" aria-hidden>
+                  ·
+                </span>
+                {activeMetalLabel}
+                <span className="rates-page__filters-summary-sep" aria-hidden>
+                  ·
+                </span>
+                {activeViewLabel}
+              </span>
+            </span>
+            <span
+              className={`rates-page__filters-chevron${
+                filtersOpen ? " rates-page__filters-chevron--open" : ""
+              }`}
+              aria-hidden
+            />
+          </button>
 
-          <div className="rates-page__filter-group">
-            <span className="rates-page__filter-label">
-              {copy.filters.metalLabel}
-            </span>
-            <div className="rates-page__filter-pills">
-              {copy.filters.metalOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  className={`rates-page__pill${
-                    metal === opt.value ? " rates-page__pill--active" : ""
-                  }`}
-                  onClick={() => updateParams({ metal: opt.value })}
-                >
-                  {opt.label}
-                </button>
-              ))}
+          <div
+            id="rates-page-filters-body"
+            className="rates-page__filters-body"
+            role="group"
+            aria-label="Chart filters"
+          >
+            <div className="rates-page__filter-group">
+              <span className="rates-page__filter-label">
+                {copy.filters.periodLabel}
+              </span>
+              <div className="rates-page__filter-pills">
+                {copy.filters.daysOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`rates-page__pill${
+                      days === opt.value ? " rates-page__pill--active" : ""
+                    }`}
+                    onClick={() => applyFilter({ days: String(opt.value) })}
+                  >
+                    <FilterPillLabel option={opt} />
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="rates-page__filter-group">
-            <span className="rates-page__filter-label">
-              {copy.filters.viewLabel}
-            </span>
-            <div className="rates-page__filter-pills">
-              {copy.filters.viewOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  className={`rates-page__pill${
-                    view === opt.value ? " rates-page__pill--active" : ""
-                  }`}
-                  onClick={() => updateParams({ view: opt.value })}
-                >
-                  {opt.label}
-                </button>
-              ))}
+            <div className="rates-page__filter-group">
+              <span className="rates-page__filter-label">
+                {copy.filters.metalLabel}
+              </span>
+              <div className="rates-page__filter-pills">
+                {copy.filters.metalOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`rates-page__pill${
+                      metal === opt.value ? " rates-page__pill--active" : ""
+                    }`}
+                    onClick={() => applyFilter({ metal: opt.value })}
+                  >
+                    <FilterPillLabel option={opt} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="rates-page__filter-group">
+              <span className="rates-page__filter-label">
+                {copy.filters.viewLabel}
+              </span>
+              <div className="rates-page__filter-pills">
+                {copy.filters.viewOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`rates-page__pill${
+                      view === opt.value ? " rates-page__pill--active" : ""
+                    }`}
+                    onClick={() => applyFilter({ view: opt.value })}
+                  >
+                    <FilterPillLabel option={opt} />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>

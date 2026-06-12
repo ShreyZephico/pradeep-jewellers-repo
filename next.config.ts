@@ -21,16 +21,16 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
-      {
-        source: "/landing",
-        destination: "/",
-        permanent: true,
-      },
-      {
-        source: "/landing/:path*",
-        destination: "/",
-        permanent: true,
-      },
+      // {
+      //   source: "/landing",
+      //   destination: "/",
+      //   permanent: true,
+      // },
+      // {
+      //   source: "/landing/:path*",
+      //   destination: "/",
+      //   permanent: true,
+      // },
     ];
   },
 

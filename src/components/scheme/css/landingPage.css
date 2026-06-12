@@ -30,6 +30,9 @@
   position: relative;
   overflow-x: clip;
   width: 100%;
+  --svy-section-x: clamp(1rem, 3vw, 2rem);
+  --svy-section-y: clamp(2.25rem, 4.5vw, 3.25rem);
+  --svy-section-y-tight: clamp(1.5rem, 3vw, 2rem);
 }
 
 /* Premium ambient background (subtle, non-distracting). */
@@ -75,9 +78,29 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  max-width: 1120px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 1rem 1.25rem 0;
+  padding: 0.5rem var(--svy-section-x) 0;
+}
+
+/* Landing page: float language toggle over hero instead of a separate empty row. */
+.svy__main:has(.svy__hero) {
+  position: relative;
+}
+
+.svy__main:has(.svy__hero) .svy__pageToolbar {
+  position: absolute;
+  top: 0.65rem;
+  right: var(--svy-section-x);
+  left: var(--svy-section-x);
+  z-index: 3;
+  padding: 0;
+  pointer-events: none;
+}
+
+.svy__main:has(.svy__hero) .svy__pageToolbar > * {
+  pointer-events: auto;
+  margin-left: auto;
 }
 
 .svy__nav {
@@ -253,14 +276,22 @@
 .svy__hero {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 64px 32px 64px;
+  padding: var(--svy-section-y-tight) var(--svy-section-x) var(--svy-section-y);
+}
+
+.svy__main:has(.svy__hero) .svy__hero {
+  padding-top: calc(var(--svy-section-y-tight) + 2.75rem);
 }
 
 .svy__heroInner {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 46px;
-  align-items: center;
+  gap: clamp(1.5rem, 4vw, 2rem);
+  align-items: start;
+}
+
+.svy__heroCopy {
+  min-width: 0;
 }
 
 .svy__kicker {
@@ -365,9 +396,12 @@
 }
 
 .svy__heroMedia--video .svy__heroVideoFrame {
-  /* Portrait WhatsApp video: prioritize height and avoid letterbox dominance. */
+  /* Portrait WhatsApp video — capped so hero does not dominate the page. */
   aspect-ratio: 9 / 16;
-  max-height: min(72svh, 720px);
+  max-height: min(52svh, 480px);
+  width: 100%;
+  max-width: 320px;
+  margin-inline: auto;
 }
 
 .svy__heroMedia--video .svy__heroVideo {
@@ -627,12 +661,21 @@
 .svy__bento {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 90px 32px;
+  padding: var(--svy-section-y) var(--svy-section-x);
+}
+
+/* Avoid doubled vertical gap when sections stack (was 90px + 90px). */
+.svy__bento + .svy__bento {
+  padding-top: var(--svy-section-y-tight);
+}
+
+.svy__bento:last-child {
+  padding-bottom: clamp(2.5rem, 5vw, 3.5rem);
 }
 
 .svy__sectionHeading {
   text-align: center;
-  margin-bottom: 44px;
+  margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
 }
 
 .svy__h2 {
@@ -790,7 +833,7 @@
 .svy__security {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 32px 90px;
+  padding: 0 var(--svy-section-x) var(--svy-section-y);
 }
 
 .svy__securityInner {
@@ -886,7 +929,7 @@
 .svy__enquiry {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 32px 90px;
+  padding: 0 var(--svy-section-x) var(--svy-section-y);
 }
 
 .svy__enquiryInner {
@@ -1187,13 +1230,40 @@ select.svy__input {
     display: flex;
   }
 
+  .svy__main:has(.svy__hero) .svy__hero {
+    padding-top: calc(var(--svy-section-y) + 2.5rem);
+  }
+
   .svy__heroInner {
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 64px;
+    /* Center copy + video as one block — avoids a wide empty band on large screens. */
+    grid-template-columns: minmax(0, 34rem) minmax(240px, 18.75rem);
+    justify-content: center;
+    gap: clamp(1.75rem, 3vw, 2.75rem);
+    align-items: start;
+  }
+
+  .svy__heroCopy {
+    max-width: 34rem;
+  }
+
+  .svy__heroSubtitle {
+    max-width: 32rem;
+  }
+
+  .svy__heroMedia--video {
+    justify-self: stretch;
+    width: 100%;
+    max-width: 18.75rem;
+  }
+
+  .svy__heroMedia--video .svy__heroVideoFrame {
+    max-height: min(520px, 58vh);
+    max-width: 100%;
+    margin-inline: 0;
   }
 
   .svy__heroTitle {
-    font-size: 48px;
+    font-size: clamp(2.25rem, 3.2vw, 2.75rem);
   }
 
   .svy__metricsInner {
@@ -1496,5 +1566,78 @@ select.svy__input {
   .svy__visitGrid {
     grid-template-columns: 0.8fr 1.2fr;
     align-items: start;
+  }
+}
+
+@media (min-width: 1100px) {
+  .svy__heroInner {
+    grid-template-columns: minmax(0, 36rem) minmax(260px, 20rem);
+    gap: clamp(2rem, 3.5vw, 3rem);
+  }
+
+  .svy__heroCopy {
+    max-width: 36rem;
+  }
+
+  .svy__heroMedia--video {
+    max-width: 20rem;
+  }
+
+  .svy__heroMedia--video .svy__heroVideoFrame {
+    max-height: min(540px, 60vh);
+  }
+}
+
+@media (max-width: 767px) {
+  .svy {
+    --svy-section-y: clamp(1.75rem, 5vw, 2.25rem);
+    --svy-section-y-tight: clamp(1.15rem, 3.5vw, 1.5rem);
+  }
+
+  .svy__main:has(.svy__hero) .svy__pageToolbar {
+    top: 0.45rem;
+  }
+
+  .svy__main:has(.svy__hero) .svy__hero {
+    padding-top: calc(var(--svy-section-y-tight) + 2.35rem);
+  }
+
+  .svy__langSwitchHint {
+    display: none;
+  }
+
+  .svy__langSwitchBtn {
+    min-height: 36px;
+    padding: 6px 11px;
+    font-size: 13px;
+  }
+
+  .svy__heroTitle {
+    font-size: clamp(1.85rem, 8vw, 2.35rem);
+    margin-top: 0.75rem;
+  }
+
+  .svy__heroSubtitle {
+    margin-top: 0.75rem;
+    font-size: 0.9375rem;
+  }
+
+  .svy__heroButtons {
+    margin-top: 1.15rem;
+  }
+
+  .svy__heroMedia--video .svy__heroVideoFrame {
+    max-height: min(46svh, 400px);
+    max-width: 280px;
+  }
+
+  .svy__h2 {
+    font-size: clamp(1.35rem, 5.5vw, 1.65rem);
+  }
+
+  .svy__bentoGrid,
+  .svy__calcGrid,
+  .svy__visitGrid {
+    gap: 0.85rem;
   }
 }

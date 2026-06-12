@@ -12,6 +12,8 @@ import calculateVariantPrice, {
   type VariantPriceBreakdown,
 } from "@/utils/calculateVariantPrice";
 import {
+  applyCustomizationDefaults,
+  getDefaultProductCustomization,
   resolveCustomizationOptions,
   type CustomizationSelections,
 } from "@/utils/productCustomization";
@@ -84,10 +86,10 @@ export function sanitizePublicCartAttributes(
 
 function parseCustomizationSelections(
   attributes: CheckoutAttribute[],
-  product: Awaited<ReturnType<typeof fetchSingleCatalogProduct>>
+  product: NonNullable<Awaited<ReturnType<typeof fetchSingleCatalogProduct>>>
 ): CustomizationSelections {
-  const safeProduct = product ?? undefined;
-  return {
+  const safeProduct = product;
+  const fromAttributes: CustomizationSelections = {
     metal: attrValue(attributes, "Metal") ?? "",
     carat:
       attrValue(attributes, "Carat") ??
@@ -96,6 +98,22 @@ function parseCustomizationSelections(
     quality: attrValue(attributes, "Diamond Quality") ?? "",
     size: readSizeFromAttributes(attributes, safeProduct) ?? "",
   };
+
+  const hasPricingAttribute = [
+    fromAttributes.metal,
+    fromAttributes.carat,
+    fromAttributes.quality,
+    fromAttributes.size,
+  ].some((value) => value.trim().length > 0);
+
+  if (!hasPricingAttribute) {
+    return applyCustomizationDefaults(
+      getDefaultProductCustomization(product),
+      product
+    );
+  }
+
+  return applyCustomizationDefaults(fromAttributes, product);
 }
 
 function findVariantForMerchandise(

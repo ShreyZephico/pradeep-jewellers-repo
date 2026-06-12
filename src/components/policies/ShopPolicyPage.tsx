@@ -1,4 +1,5 @@
 import type { ShopifyShopPolicies } from "@/lib/shopify";
+import { enrichPolicyHtml } from "@/lib/policyHtml";
 
 import "@/styles/policy.css";
 
@@ -24,7 +25,7 @@ function PolicyBlock({ heading, policy }: { heading: string; policy: ShopifyPoli
   return (
     <div className="policy-body">
       <h2>{heading}</h2>
-      <div dangerouslySetInnerHTML={{ __html: policy.body }} />
+      <div dangerouslySetInnerHTML={{ __html: enrichPolicyHtml(policy.body) }} />
     </div>
   );
 }
